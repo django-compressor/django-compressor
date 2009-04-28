@@ -10,17 +10,23 @@ JS_ARGUMENTS = getattr(settings, 'COMPRESS_YUI_JS_ARGUMENTS', '')
 
 class YUICompressorFilter(FilterBase):
 
-    def filter_common(self, content, type_, arguments):
+    def output(self, **kwargs):
+        arguments = ''
+        if self.type == 'js':
+            arguments = JS_ARGUMENTS
+        if self.type == 'css':
+            arguments = CSS_ARGUMENTS
+            
         command = '%s --type=%s %s' % (BINARY, type_, arguments)
 
         if self.verbose:
             command += ' --verbose'
 
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-        p.stdin.write(content)
+        p.stdin.write(self.content)
         p.stdin.close()
 
-        filtered_css = p.stdout.read()
+        filtered = p.stdout.read()
         p.stdout.close()
 
         err = p.stderr.read()
@@ -35,10 +41,4 @@ class YUICompressorFilter(FilterBase):
         if self.verbose:
             print err
 
-        return filtered_css
-
-    def filter_js(self, js):
-        return self.filter_common(js, 'js', JS_ARGUMENTS)
-
-    def filter_css(self, css):
-        return self.filter_common(css, 'css', CSS_ARGUMENTS)
+        return filtered

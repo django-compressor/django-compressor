@@ -1,10 +1,12 @@
 class FilterBase:
-    def __init__(self, verbose=0):
+    def __init__(self, content, filter_type=None, verbose=0):
+        self.type = filter_type
+        self.content = content
         self.verbose = verbose
 
-    def filter_css(self, css):
+    def input(self, **kwargs):
         raise NotImplementedError
-    def filter_js(self, js):
+    def output(self, **kwargs):
         raise NotImplementedError
         
 class FilterError(Exception):

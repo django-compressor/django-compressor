@@ -12,7 +12,7 @@ ARGUMENTS = getattr(settings, 'CSSTIDY_ARGUMENTS', '--template=highest')
 warnings.simplefilter('ignore', RuntimeWarning)
 
 class CSSTidyFilter(FilterBase):
-    def filter_css(self, css):
+    def output(self, **kwargs):
         tmp_file = tempfile.NamedTemporaryFile(mode='w+b')
         tmp_file.write(css)
         tmp_file.flush()

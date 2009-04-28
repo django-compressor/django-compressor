@@ -46,7 +46,7 @@ class CompressedNodeTestCase(TestCase):
         self.assertEqual('f7c661b7a124', self.cssNode.hash)
 
     def test_css_return_if_on(self):
-        output = u'<link rel="stylesheet" href="/media/COMPRESSOR_CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">'
+        output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">'
         self.assertEqual(output, self.cssNode.render())
 
 
@@ -74,7 +74,7 @@ class CompressedNodeTestCase(TestCase):
         self.assertEqual(self.js, self.jsNode.render())
 
     def test_js_return_if_on(self):
-        output = u'<script type="text/javascript" src="/media/COMPRESSOR_CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
+        output = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
         self.assertEqual(output, self.jsNode.render())
         
 

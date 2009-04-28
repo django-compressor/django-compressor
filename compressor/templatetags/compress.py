@@ -15,6 +15,7 @@ class CompressedNode(template.Node):
 
     def __init__(self, content, ouput_prefix="compressed"):
         self.content = content
+        self.type = None
         self.ouput_prefix = ouput_prefix
         self.split_content = []
         self.soup = BeautifulSoup(self.content)
@@ -41,10 +42,16 @@ class CompressedNode(template.Node):
         self._hunks = []
         for k, v in self.split_contents():
             if k == 'hunk':
-                self._hunks.append(v)
+                input = v
+                if self.filters:
+                    input = self.filter(input, 'input')
+                self._hunks.append(input)
             if k == 'file':
                 fd = open(v, 'rb')
-                self._hunks.append(fd.read())
+                input = fd.read()
+                if self.filters:
+                    input = self.filter(input, 'input', filename=v)
+                self._hunks.append(input)
                 fd.close()
         return self._hunks
     hunks = property(get_hunks)
@@ -52,16 +59,24 @@ class CompressedNode(template.Node):
     def concat(self):
         return "\n".join(self.get_hunks())
         
+    def filter(self, content, method, **kwargs):
+        content = content
+        for f in self.filters:
+            filter = getattr(filters.get_class(f)(content, filter_type=self.type), method)
+            try:
+                if callable(filter):
+                    content = filter(**kwargs)
+            except NotImplementedError:
+                pass
+        return content
+
     def get_output(self):
         if getattr(self, '_output', ''):
             return self._output
         output = self.concat()
         filter_method = getattr(self, 'filter_method', None) 
-        if filter_method and self.filters:
-            for f in self.filters:
-                filter = getattr(filters.get_class(f)(), filter_method)
-                if callable(filter):
-                    output = filter(output)
+        if self.filters:
+            output = self.filter(output, 'output')
         self._output = output
         return self._output
     output = property(get_output)
@@ -105,7 +120,7 @@ class CompressedCssNode(CompressedNode):
         self.extension = ".css"
         self.template_name = "compressor/css.html"
         self.filters = settings.COMPRESS_CSS_FILTERS
-        self.filter_method = 'filter_css'
+        self.type = 'css'
         super(CompressedCssNode, self).__init__(content, ouput_prefix)
 
     def split_contents(self):
@@ -126,7 +141,7 @@ class CompressedJsNode(CompressedNode):
         self.extension = ".js"
         self.template_name = "compressor/js.html"
         self.filters = settings.COMPRESS_JS_FILTERS
-        self.filter_method = 'filter_js'
+        self.type = 'js'
         super(CompressedJsNode, self).__init__(content, ouput_prefix)
 
     def split_contents(self):
