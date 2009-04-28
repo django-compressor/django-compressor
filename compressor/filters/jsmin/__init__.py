@@ -1,4 +1,4 @@
-from compress.filters.jsmin.jsmin import jsmin
+from compressor.filters.jsmin.jsmin import jsmin
 from compressor.filters import FilterBase
 
 class JSMinFilter(FilterBase):

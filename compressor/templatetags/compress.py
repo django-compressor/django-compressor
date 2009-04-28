@@ -1,8 +1,12 @@
 import os
+from hashlib import sha1 as hash
 from BeautifulSoup import BeautifulSoup
 
 from django import template
+from django.template.loader import render_to_string
+    
 from compressor.conf import settings
+from compressor import filters
 
 register = template.Library()
 
@@ -12,7 +16,6 @@ class CompressedNode(template.Node):
     def __init__(self, content, ouput_prefix="compressed"):
         self.content = content
         self.ouput_prefix = ouput_prefix
-        self.hunks = []
         self.split_content = []
         self.soup = BeautifulSoup(self.content)
 
@@ -33,30 +36,76 @@ class CompressedNode(template.Node):
         return filename
 
     def get_hunks(self):
-        if self.hunks:
-            return self.hunks
+        if getattr(self, '_hunks', ''):
+            return self._hunks
+        self._hunks = []
         for k, v in self.split_contents():
             if k == 'hunk':
-                self.hunks.append(v)
+                self._hunks.append(v)
             if k == 'file':
                 fd = open(v, 'rb')
-                self.hunks.append(fd.read())
+                self._hunks.append(fd.read())
                 fd.close()
-        return self.hunks
+        return self._hunks
+    hunks = property(get_hunks)
 
     def concat(self):
         return "\n".join(self.get_hunks())
+        
+    def get_output(self):
+        if getattr(self, '_output', ''):
+            return self._output
+        output = self.concat()
+        filter_method = getattr(self, 'filter_method', None) 
+        if filter_method and self.filters:
+            for f in self.filters:
+                filter = getattr(filters.get_class(f)(), filter_method)
+                if callable(filter):
+                    output = filter(output)
+        self._output = output
+        return self._output
+    output = property(get_output)
+
+    def get_hash(self):
+        return hash(self.output).hexdigest()[:12]
+    hash = property(get_hash)
+
+    def get_new_filepath(self):
+        filename = "".join([self.hash, self.extension])
+        filepath = "%s/%s/%s" % (settings.OUTPUT_DIR.strip('/'), self.ouput_prefix, filename)
+        return filepath
+    new_filepath = property(get_new_filepath)
+    
+    def save_file(self):
+        filename = "%s/%s" % (settings.MEDIA_ROOT.rstrip('/'), self.new_filepath)
+        if os.path.exists(filename):
+            return False
+        dirname = os.path.dirname(filename)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        fd = open(filename, 'wb+')
+        fd.write(self.output)
+        fd.close()
+        return True
 
     def render(self):
         if not settings.COMPRESS:
             return self.content
-        return "fail"
+        url = "%s/%s" % (settings.MEDIA_URL.rstrip('/'), self.new_filepath)
+        self.save_file()
+        context = getattr(self, 'extra_context', {})
+        context['url'] = url
+        return render_to_string(self.template_name, context)
 
 
 class CompressedCssNode(CompressedNode):
 
     def __init__(self, content, ouput_prefix="css", media="all"):
-        self.media = media
+        self.extra_context = { 'media': media }
+        self.extension = ".css"
+        self.template_name = "compressor/css.html"
+        self.filters = settings.COMPRESS_CSS_FILTERS
+        self.filter_method = 'filter_css'
         super(CompressedCssNode, self).__init__(content, ouput_prefix)
 
     def split_contents(self):
@@ -74,6 +123,10 @@ class CompressedCssNode(CompressedNode):
 class CompressedJsNode(CompressedNode):
 
     def __init__(self, content, ouput_prefix="js"):
+        self.extension = ".js"
+        self.template_name = "compressor/js.html"
+        self.filters = settings.COMPRESS_JS_FILTERS
+        self.filter_method = 'filter_js'
         super(CompressedJsNode, self).__init__(content, ouput_prefix)
 
     def split_contents(self):

@@ -3,7 +3,6 @@ from os.path import dirname, abspath, join
 TEST_DIR = dirname(abspath(__file__))
 
 DEBUG = True
-XDADD = ""
 
 ROOT_URLCONF = 'urls'
 
@@ -11,7 +10,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = join(TEST_DIR, 'media')
 
 DATABASE_ENGINE = 'sqlite3'
-DATABASE_NAME = 'django_inlines_tests.db'
+DATABASE_NAME = 'django_compressor_tests.db'
  
 INSTALLED_APPS = [
     'core',
