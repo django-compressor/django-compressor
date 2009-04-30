@@ -1,6 +1,8 @@
 from django import template
 from django.core.cache import cache
 from compressor import CssCompressor, JsCompressor
+from compressor.conf import settings
+
 
 register = template.Library()
 
