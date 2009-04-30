@@ -122,7 +122,7 @@ class Compressor(object):
         if not os.path.exists(dirname):
             os.makedirs(dirname)
         fd = open(filename, 'wb+')
-        fd.write(self.output)
+        fd.write(self.combined)
         fd.close()
         return True
 
