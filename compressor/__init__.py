@@ -43,7 +43,7 @@ class Compressor(object):
 
     def get_filename(self, url):
         if not url.startswith(settings.MEDIA_URL):
-            raise UncompressableFileError('"%s" is not in COMPRESS_MEDIA_URL ("%s") and can not be compressed' % (url, settings.COMPRESS_MEDIA_URL))
+            raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, settings.COMPRESS_URL))
         basename = url[len(settings.MEDIA_URL):]
         filename = os.path.join(settings.MEDIA_ROOT, basename)
         return filename
