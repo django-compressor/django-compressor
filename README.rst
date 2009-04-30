@@ -81,6 +81,9 @@ Long version:
 **Automatic regeneration and cache-foreverable generated output**
   Statics are never stale and browsers can be told to cache the output forever.
 
+**Full test suite**
+  I has one.
+
 
 Settings
 ********
