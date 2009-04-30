@@ -105,7 +105,7 @@ class CssAbsolutizingTestCase(TestCase):
         self.cssNode = CssCompressor(self.css)
 
     def test_css_absolute_filter(self):
-        from compressor.filters.css_absolute import CssAbsoluteFilter
+        from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
         output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
