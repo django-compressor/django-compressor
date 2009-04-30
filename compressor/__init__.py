@@ -1,5 +1,4 @@
 import os
-from hashlib import sha1 as hash
 from BeautifulSoup import BeautifulSoup
 
 from django import template
@@ -15,6 +14,16 @@ register = template.Library()
 
 class UncompressableFileError(Exception):
     pass
+
+
+def get_hexdigest(plaintext):
+    try:
+        import hashlib
+        return hashlib.sha1(plaintext).hexdigest()
+    except ImportError:
+        import sha
+        return sha.new(plaintext).hexdigest()
+
 
 class Compressor(object):
 
@@ -48,7 +57,7 @@ class Compressor(object):
         cachebits = [self.content]
         cachebits.extend([str(m) for m in self.mtimes])
         cachestr = "".join(cachebits)
-        return "django_compressor.%s" % hash(cachestr).hexdigest()[:12]
+        return "django_compressor.%s" % get_hexdigest(cachestr)[:12]
 
     @property
     def hunks(self):
@@ -97,7 +106,7 @@ class Compressor(object):
 
     @property
     def hash(self):
-        return hash(self.combined).hexdigest()[:12]
+        return get_hexdigest(self.combined)[:12]
 
     @property
     def new_filepath(self):
