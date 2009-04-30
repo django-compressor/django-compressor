@@ -59,6 +59,29 @@ the combined CSS will be wrapped in @media blocks as necessary.
 * Avoid @import! Simply list all your CSS files in the HTML, they'll be combined anyway.
 
 
+Why another static file combiner for django?
+********************************************
+
+Short version: None of them did exactly what I needed.
+
+Long version:
+
+**JS/CSS belong in the templates**
+  Every static combiner for django I've seen makes you configure
+  your static files in your settings.py. While that works, it doesn't make
+  sense. Static files are for display. And it's not even an option if your
+  settings are in completely different repositories and use different deploy
+  processes from the templates that depend on them.
+
+**Flexibility**
+  django_compressor doesn't care if different pages use different combinations
+  of statics. It doesn't care if you use inline scripts or styles. It doesn't
+  get in the way.
+
+**Automatic regeneration and cache-foreverable generated output**
+  Statics are never stale and browsers can be told to cache the output forever.
+
+
 Settings
 ********
 
