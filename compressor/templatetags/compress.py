@@ -9,7 +9,9 @@ from django.template.loader import render_to_string
 from compressor.conf import settings
 from compressor import filters
 
+
 register = template.Library()
+
 
 class UncompressableFileError(Exception):
     pass
@@ -37,7 +39,19 @@ class CompressedNode(template.Node):
         filename = os.path.join(settings.MEDIA_ROOT, basename)
         return filename
 
-    def get_hunks(self):
+    @property
+    def mtimes(self):
+        return [os.path.getmtime(h[1]) for h in self.split_contents() if h[0] == 'file']
+
+    @property
+    def cachekey(self):
+        cachebits = [self.content]
+        cachebits.extend([str(m) for m in self.mtimes])
+        cachestr = "".join(cachebits)
+        return "django_compressor.%s" % hash(cachestr).hexdigest()[:12]
+
+    @property
+    def hunks(self):
         if getattr(self, '_hunks', ''):
             return self._hunks
         self._hunks = []
@@ -55,10 +69,9 @@ class CompressedNode(template.Node):
                 self._hunks.append(input)
                 fd.close()
         return self._hunks
-    hunks = property(get_hunks)
 
     def concat(self):
-        return "\n".join(self.get_hunks())
+        return "\n".join(self.hunks)
 
     def filter(self, content, method, **kwargs):
         content = content
@@ -71,7 +84,8 @@ class CompressedNode(template.Node):
                 pass
         return content
 
-    def get_output(self):
+    @property
+    def output(self):
         if getattr(self, '_output', ''):
             return self._output
         output = self.concat()
@@ -80,17 +94,16 @@ class CompressedNode(template.Node):
             output = self.filter(output, 'output')
         self._output = output
         return self._output
-    output = property(get_output)
 
-    def get_hash(self):
+    @property
+    def hash(self):
         return hash(self.output).hexdigest()[:12]
-    hash = property(get_hash)
 
-    def get_new_filepath(self):
+    @property
+    def new_filepath(self):
         filename = "".join([self.hash, self.extension])
         filepath = "%s/%s/%s" % (settings.OUTPUT_DIR.strip('/'), self.ouput_prefix, filename)
         return filepath
-    new_filepath = property(get_new_filepath)
 
     def save_file(self):
         filename = "%s/%s" % (settings.MEDIA_ROOT.rstrip('/'), self.new_filepath)

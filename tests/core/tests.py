@@ -1,4 +1,4 @@
-import os
+import os, re
 
 from django.test import TestCase
 from compressor.templatetags.compress import CompressedCssNode, CompressedJsNode
@@ -43,9 +43,18 @@ class CompressedNodeTestCase(TestCase):
         out = u'body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }'
         self.assertEqual(out, self.cssNode.output)
 
+    def test_css_mtimes(self):
+        is_date = re.compile(r'^\d{10}\.\d$')
+        for date in self.cssNode.mtimes:
+            self.assert_(is_date.match(str(date)), "mtimes is returning something that doesn't look like a date")
+
     def test_css_return_if_off(self):
         settings.COMPRESS = False
         self.assertEqual(self.css, self.cssNode.render())
+
+    def test_cachekey(self):
+        is_cachekey = re.compile(r'django_compressor\.\w{12}')
+        self.assert_(is_cachekey.match(self.cssNode.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.\w{12}'")
 
     def test_css_hash(self):
         self.assertEqual('f7c661b7a124', self.cssNode.hash)
@@ -114,7 +123,6 @@ class CssAbsolutizingTestCase(TestCase):
 
 class CssMediaTestCase(TestCase):
     def setUp(self):
-        settings.COMPRESS = True
         self.css = """
         <link rel="stylesheet" href="/media/css/one.css" type="text/css" media="screen" charset="utf-8">
         <style type="text/css" media="print">p { border:5px solid green;}</style>
