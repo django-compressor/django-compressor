@@ -116,11 +116,11 @@ class CompressedNode(template.Node):
 
 class CompressedCssNode(CompressedNode):
 
-    def __init__(self, content, ouput_prefix="css", media="all"):
-        self.extra_context = { 'media': media }
+    def __init__(self, content, ouput_prefix="css"):
         self.extension = ".css"
         self.template_name = "compressor/css.html"
-        self.filters = settings.COMPRESS_CSS_FILTERS
+        self.filters = ['compressor.filters.css_default.CssAbsoluteFilter', 'compressor.filters.css_default.CssMediaFilter']
+        self.filters.extend(settings.COMPRESS_CSS_FILTERS)
         self.type = 'css'
         super(CompressedCssNode, self).__init__(content, ouput_prefix)
 

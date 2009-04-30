@@ -30,3 +30,12 @@ class CssAbsoluteFilter(FilterBase):
         if self.has_http:
             full_url = "http://%s" % full_url
         return "url('%s')" % full_url
+
+
+class CssMediaFilter(FilterBase):
+    def input(self, elem=None, **kwargs):
+        try:
+            self.media = elem['media']
+        except (TypeError, KeyError):
+            return self.content
+        return "@media %s {%s}" % (self.media, self.content)

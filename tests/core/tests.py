@@ -87,11 +87,10 @@ class CompressedNodeTestCase(TestCase):
 class CssAbsolutizingTestCase(TestCase):
     def setUp(self):
         settings.COMPRESS = True
-        django_settings.DEBUG = True
         settings.MEDIA_URL = '/media/'
         self.css = """
-        <link rel="stylesheet" href="/media/css/url/url1.css" type="text/css" media="screen" charset="utf-8">
-        <link rel="stylesheet" href="/media/css/url/2/url2.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/url/url1.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/url/2/url2.css" type="text/css" charset="utf-8">
         """
         self.cssNode = CompressedCssNode(self.css)
 
@@ -112,3 +111,17 @@ class CssAbsolutizingTestCase(TestCase):
                u"p { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\n",
                ]
         self.assertEqual(out, self.cssNode.hunks)
+
+class CssMediaTestCase(TestCase):
+    def setUp(self):
+        settings.COMPRESS = True
+        self.css = """
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css" media="screen" charset="utf-8">
+        <style type="text/css" media="print">p { border:5px solid green;}</style>
+        <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" media="all">
+        """
+        self.cssNode = CompressedCssNode(self.css)
+
+    def test_css_output(self):
+        out = u'@media screen {body { background:#990; }}\n@media print {p { border:5px solid green;}}\n@media all {body { color:#fff; }}'
+        self.assertEqual(out, self.cssNode.output)
