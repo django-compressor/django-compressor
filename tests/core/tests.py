@@ -5,15 +5,17 @@ from compressor.templatetags.compress import CompressedCssNode, CompressedJsNode
 from compressor.conf import settings
 from django.conf import settings as django_settings
 
+from BeautifulSoup import BeautifulSoup
+
 
 class CompressedNodeTestCase(TestCase):
 
     def setUp(self):
         settings.COMPRESS = True
         self.css = """
-        <link rel="stylesheet" href="/media/css/one.css" type="text/css" media="screen" charset="utf-8">
-        <style type="text/css" media="screen">p { border:5px solid green;}</style>
-        <link rel="stylesheet" href="/media/css/two.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
+        <style type="text/css">p { border:5px solid green;}</style>
+        <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
         """
         self.cssNode = CompressedCssNode(self.css)
 
@@ -25,11 +27,13 @@ class CompressedNodeTestCase(TestCase):
 
     def test_css_split(self):
         out = [
-            ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css')),
-            ('hunk', u'p { border:5px solid green;}'),
-            ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css')),
+            ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css'), '<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />'),
+            ('hunk', u'p { border:5px solid green;}', '<style type="text/css">p { border:5px solid green;}</style>'),
+            ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css'), '<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
         ]
-        self.assertEqual(out, self.cssNode.split_contents())
+        split = self.cssNode.split_contents()
+        split = [(x[0], x[1], str(x[2])) for x in split]
+        self.assertEqual(out, split)
 
     def test_css_hunks(self):
         out = ['body { background:#990; }', u'p { border:5px solid green;}', 'body { color:#fff; }']
@@ -52,11 +56,12 @@ class CompressedNodeTestCase(TestCase):
 
 
     def test_js_split(self):
-        out = [
-            ('file', os.path.join(settings.MEDIA_ROOT, u'js/one.js')),
-            ('hunk', u'obj.value = "value";'),
-        ]
-        self.assertEqual(out, self.jsNode.split_contents())
+        out = [('file', os.path.join(settings.MEDIA_ROOT, u'js/one.js'), '<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>'),
+         ('hunk', u'obj.value = "value";', '<script type="text/javascript" charset="utf-8">obj.value = "value";</script>')
+         ]
+        split = self.jsNode.split_contents()
+        split = [(x[0], x[1], str(x[2])) for x in split]
+        self.assertEqual(out, split)
 
     def test_js_hunks(self):
         out = ['obj = {};', u'obj.value = "value";']

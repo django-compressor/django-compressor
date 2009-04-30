@@ -41,17 +41,17 @@ class CompressedNode(template.Node):
         if getattr(self, '_hunks', ''):
             return self._hunks
         self._hunks = []
-        for k, v in self.split_contents():
-            if k == 'hunk':
+        for kind, v, elem in self.split_contents():
+            if kind == 'hunk':
                 input = v
                 if self.filters:
-                    input = self.filter(input, 'input')
+                    input = self.filter(input, 'input', elem=elem)
                 self._hunks.append(input)
-            if k == 'file':
+            if kind == 'file':
                 fd = open(v, 'rb')
                 input = fd.read()
                 if self.filters:
-                    input = self.filter(input, 'input', filename=v)
+                    input = self.filter(input, 'input', filename=v, elem=elem)
                 self._hunks.append(input)
                 fd.close()
         return self._hunks
@@ -131,12 +131,12 @@ class CompressedCssNode(CompressedNode):
         for elem in split:
             if elem.name == 'link' and elem['rel'] == 'stylesheet':
                 try:
-                    self.split_content.append(('file', self.get_filename(elem['href'])))
+                    self.split_content.append(('file', self.get_filename(elem['href']), elem))
                 except UncompressableFileError:
                     if django_settings.DEBUG:
                         raise
             if elem.name == 'style':
-                self.split_content.append(('hunk', elem.string))
+                self.split_content.append(('hunk', elem.string, elem))
         return self.split_content
 
 
@@ -156,11 +156,11 @@ class CompressedJsNode(CompressedNode):
         for elem in split:
             if elem.has_key('src'):
                 try:
-                    self.split_content.append(('file', self.get_filename(elem['src'])))
+                    self.split_content.append(('file', self.get_filename(elem['src']), elem))
                 except UncompressableFileError:
                     if django_settings.DEBUG:
                         raise
             else:
-                self.split_content.append(('hunk', elem.string))
+                self.split_content.append(('hunk', elem.string, elem))
         return self.split_content
 
