@@ -1,14 +1,15 @@
 import os, re
 
+from django.template import Template, Context
 from django.test import TestCase
-from compressor.templatetags.compress import CompressedCssNode, CompressedJsNode
+from compressor import CssCompressor, JsCompressor
 from compressor.conf import settings
 from django.conf import settings as django_settings
 
 from BeautifulSoup import BeautifulSoup
 
 
-class CompressedNodeTestCase(TestCase):
+class CompressorTestCase(TestCase):
 
     def setUp(self):
         settings.COMPRESS = True
@@ -17,13 +18,13 @@ class CompressedNodeTestCase(TestCase):
         <style type="text/css">p { border:5px solid green;}</style>
         <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
         """
-        self.cssNode = CompressedCssNode(self.css)
+        self.cssNode = CssCompressor(self.css)
 
         self.js = """
         <script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         """
-        self.jsNode = CompressedJsNode(self.js)
+        self.jsNode = JsCompressor(self.js)
 
     def test_css_split(self):
         out = [
@@ -41,7 +42,7 @@ class CompressedNodeTestCase(TestCase):
 
     def test_css_output(self):
         out = u'body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }'
-        self.assertEqual(out, self.cssNode.output)
+        self.assertEqual(out, self.cssNode.combined)
 
     def test_css_mtimes(self):
         is_date = re.compile(r'^\d{10}\.\d$')
@@ -50,7 +51,7 @@ class CompressedNodeTestCase(TestCase):
 
     def test_css_return_if_off(self):
         settings.COMPRESS = False
-        self.assertEqual(self.css, self.cssNode.render())
+        self.assertEqual(self.css, self.cssNode.output())
 
     def test_cachekey(self):
         is_cachekey = re.compile(r'django_compressor\.\w{12}')
@@ -61,7 +62,7 @@ class CompressedNodeTestCase(TestCase):
 
     def test_css_return_if_on(self):
         output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">'
-        self.assertEqual(output, self.cssNode.render())
+        self.assertEqual(output, self.cssNode.output())
 
 
     def test_js_split(self):
@@ -82,15 +83,15 @@ class CompressedNodeTestCase(TestCase):
 
     def test_js_output(self):
         out = u'obj={};obj.value="value";'
-        self.assertEqual(out, self.jsNode.output)
+        self.assertEqual(out, self.jsNode.combined)
 
     def test_js_return_if_off(self):
         settings.COMPRESS = False
-        self.assertEqual(self.js, self.jsNode.render())
+        self.assertEqual(self.js, self.jsNode.output())
 
     def test_js_return_if_on(self):
         output = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
-        self.assertEqual(output, self.jsNode.render())
+        self.assertEqual(output, self.jsNode.output())
 
 
 class CssAbsolutizingTestCase(TestCase):
@@ -101,7 +102,7 @@ class CssAbsolutizingTestCase(TestCase):
         <link rel="stylesheet" href="/media/css/url/url1.css" type="text/css" charset="utf-8">
         <link rel="stylesheet" href="/media/css/url/2/url2.css" type="text/css" charset="utf-8">
         """
-        self.cssNode = CompressedCssNode(self.css)
+        self.cssNode = CssCompressor(self.css)
 
     def test_css_absolute_filter(self):
         from compressor.filters.css_absolute import CssAbsoluteFilter
@@ -121,6 +122,7 @@ class CssAbsolutizingTestCase(TestCase):
                ]
         self.assertEqual(out, self.cssNode.hunks)
 
+
 class CssMediaTestCase(TestCase):
     def setUp(self):
         self.css = """
@@ -128,8 +130,41 @@ class CssMediaTestCase(TestCase):
         <style type="text/css" media="print">p { border:5px solid green;}</style>
         <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" media="all">
         """
-        self.cssNode = CompressedCssNode(self.css)
+        self.cssNode = CssCompressor(self.css)
 
     def test_css_output(self):
         out = u'@media screen {body { background:#990; }}\n@media print {p { border:5px solid green;}}\n@media all {body { color:#fff; }}'
-        self.assertEqual(out, self.cssNode.output)
+        self.assertEqual(out, self.cssNode.combined)
+
+
+class TemplatetagTestCase(TestCase):
+    def render(self, template_string, context_dict=None):
+        """A shortcut for testing template output."""
+        if context_dict is None:
+            context_dict = {}
+
+        c = Context(context_dict)
+        t = Template(template_string)
+        return t.render(c).strip()
+
+    def test_css_tag(self):
+        template = u"""{% load compress %}{% compress css %}
+        <link rel="stylesheet" href="{{ MEDIA_URL }}css/one.css" type="text/css" charset="utf-8">
+        <style type="text/css">p { border:5px solid green;}</style>
+        <link rel="stylesheet" href="{{ MEDIA_URL }}css/two.css" type="text/css" charset="utf-8">
+        {% endcompress %}
+        """
+        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">'
+        self.assertEqual(out, self.render(template, context))
+
+    def test_js_tag(self):
+        template = u"""{% load compress %}{% compress js %}
+        <script src="{{ MEDIA_URL }}js/one.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+        {% endcompress %}
+        """
+        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        out = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
+        self.assertEqual(out, self.render(template, context))
+

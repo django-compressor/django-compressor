@@ -1,179 +1,79 @@
-import os
-from hashlib import sha1 as hash
-from BeautifulSoup import BeautifulSoup
-
 from django import template
-from django.conf import settings as django_settings
-from django.template.loader import render_to_string
-
-from compressor.conf import settings
-from compressor import filters
-
+from django.core.cache import cache
+from compressor import CssCompressor, JsCompressor
 
 register = template.Library()
 
+class CompressorNode(template.Node):
+    def __init__(self, nodelist, kind=None):
+        self.nodelist = nodelist
+        self.kind = kind
 
-class UncompressableFileError(Exception):
-    pass
-
-class CompressedNode(template.Node):
-
-    def __init__(self, content, ouput_prefix="compressed"):
-        self.content = content
-        self.type = None
-        self.ouput_prefix = ouput_prefix
-        self.split_content = []
-        self.soup = BeautifulSoup(self.content)
-
-    def content_hash(self):
-        """docstring for content_hash"""
-        pass
-
-    def split_contents(self):
-        raise NotImplementedError('split_contents must be defined in a subclass')
-
-    def get_filename(self, url):
-        if not url.startswith(settings.MEDIA_URL):
-            raise UncompressableFileError('"%s" is not in COMPRESS_MEDIA_URL ("%s") and can not be compressed' % (url, settings.COMPRESS_MEDIA_URL))
-        basename = url[len(settings.MEDIA_URL):]
-        filename = os.path.join(settings.MEDIA_ROOT, basename)
-        return filename
-
-    @property
-    def mtimes(self):
-        return [os.path.getmtime(h[1]) for h in self.split_contents() if h[0] == 'file']
-
-    @property
-    def cachekey(self):
-        cachebits = [self.content]
-        cachebits.extend([str(m) for m in self.mtimes])
-        cachestr = "".join(cachebits)
-        return "django_compressor.%s" % hash(cachestr).hexdigest()[:12]
-
-    @property
-    def hunks(self):
-        if getattr(self, '_hunks', ''):
-            return self._hunks
-        self._hunks = []
-        for kind, v, elem in self.split_contents():
-            if kind == 'hunk':
-                input = v
-                if self.filters:
-                    input = self.filter(input, 'input', elem=elem)
-                self._hunks.append(input)
-            if kind == 'file':
-                fd = open(v, 'rb')
-                input = fd.read()
-                if self.filters:
-                    input = self.filter(input, 'input', filename=v, elem=elem)
-                self._hunks.append(input)
-                fd.close()
-        return self._hunks
-
-    def concat(self):
-        return "\n".join(self.hunks)
-
-    def filter(self, content, method, **kwargs):
-        content = content
-        for f in self.filters:
-            filter = getattr(filters.get_class(f)(content, filter_type=self.type), method)
-            try:
-                if callable(filter):
-                    content = filter(**kwargs)
-            except NotImplementedError:
-                pass
-        return content
-
-    @property
-    def output(self):
-        if getattr(self, '_output', ''):
-            return self._output
-        output = self.concat()
-        filter_method = getattr(self, 'filter_method', None)
-        if self.filters:
-            output = self.filter(output, 'output')
-        self._output = output
-        return self._output
-
-    @property
-    def hash(self):
-        return hash(self.output).hexdigest()[:12]
-
-    @property
-    def new_filepath(self):
-        filename = "".join([self.hash, self.extension])
-        filepath = "%s/%s/%s" % (settings.OUTPUT_DIR.strip('/'), self.ouput_prefix, filename)
-        return filepath
-
-    def save_file(self):
-        filename = "%s/%s" % (settings.MEDIA_ROOT.rstrip('/'), self.new_filepath)
-        if os.path.exists(filename):
-            return False
-        dirname = os.path.dirname(filename)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-        fd = open(filename, 'wb+')
-        fd.write(self.output)
-        fd.close()
-        return True
-
-    def render(self):
+    def render(self, context):
+        content = self.nodelist.render(context)
         if not settings.COMPRESS:
-            return self.content
-        url = "%s/%s" % (settings.MEDIA_URL.rstrip('/'), self.new_filepath)
-        self.save_file()
-        context = getattr(self, 'extra_context', {})
-        context['url'] = url
-        return render_to_string(self.template_name, context)
+            return content
+        if self.kind == 'css':
+            compressor = CssCompressor(content)
+        if self.kind == 'js':
+            compressor = JsCompressor(content)
+        in_cache = cache.get(compressor.cachekey)
+        if in_cache:
+            return in_cache
+        else:
+            output = compressor.output()
+            cache.set(compressor.cachekey, output, 86400) # rebuilds the cache once a day if nothign has changed.
+            return output
 
+@register.tag
+def compress(parser, token):
+    """
+    Compresses linked and inline javascript or CSS into a single cached file.
 
-class CompressedCssNode(CompressedNode):
+    Syntax::
 
-    def __init__(self, content, ouput_prefix="css"):
-        self.extension = ".css"
-        self.template_name = "compressor/css.html"
-        self.filters = ['compressor.filters.css_default.CssAbsoluteFilter', 'compressor.filters.css_default.CssMediaFilter']
-        self.filters.extend(settings.COMPRESS_CSS_FILTERS)
-        self.type = 'css'
-        super(CompressedCssNode, self).__init__(content, ouput_prefix)
+        {% compress <js/css> %}
+        <html of inline or linked JS/CSS>
+        {% endcompress %}
 
-    def split_contents(self):
-        if self.split_content:
-            return self.split_content
-        split = self.soup.findAll({'link' : True, 'style' : True})
-        for elem in split:
-            if elem.name == 'link' and elem['rel'] == 'stylesheet':
-                try:
-                    self.split_content.append(('file', self.get_filename(elem['href']), elem))
-                except UncompressableFileError:
-                    if django_settings.DEBUG:
-                        raise
-            if elem.name == 'style':
-                self.split_content.append(('hunk', elem.string, elem))
-        return self.split_content
+    Examples::
 
+        {% compress css %}
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
+        <style type="text/css">p { border:5px solid green;}</style>
+        <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
+        {% endcompress %}
 
-class CompressedJsNode(CompressedNode):
+    Which would be rendered something like::
 
-    def __init__(self, content, ouput_prefix="js"):
-        self.extension = ".js"
-        self.template_name = "compressor/js.html"
-        self.filters = settings.COMPRESS_JS_FILTERS
-        self.type = 'js'
-        super(CompressedJsNode, self).__init__(content, ouput_prefix)
+        <link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">
 
-    def split_contents(self):
-        if self.split_content:
-            return self.split_content
-        split = self.soup.findAll('script')
-        for elem in split:
-            if elem.has_key('src'):
-                try:
-                    self.split_content.append(('file', self.get_filename(elem['src']), elem))
-                except UncompressableFileError:
-                    if django_settings.DEBUG:
-                        raise
-            else:
-                self.split_content.append(('hunk', elem.string, elem))
-        return self.split_content
+    or::
 
+        {% compress js %}
+        <script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+        {% endcompress %}
+
+    Which would be rendered something like::
+
+        <script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
+
+    Linked files must be on your COMPRESS_URL (which defaults to MEDIA_URL).
+    If DEBUG is true off-site files will throw exceptions. If DEBUG is false
+    they will be silently stripped.
+    """
+
+    nodelist = parser.parse(('endcompress',))
+    parser.delete_first_token()
+
+    args = token.split_contents()
+
+    if not len(args) == 2:
+        raise template.TemplateSyntaxError("%r tag requires either 1, 3 or 5 arguments." % args[0])
+
+    kind = args[1]
+    if not kind in ['css', 'js']:
+        raise template.TemplateSyntaxError("%r's argument must be 'js' or 'css'." % (args[0], ', '.join(ALLOWED_ARGS)))
+
+    return CompressorNode(nodelist, kind)
