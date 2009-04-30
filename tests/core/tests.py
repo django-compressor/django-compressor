@@ -3,10 +3,11 @@ import os
 from django.test import TestCase
 from compressor.templatetags.compress import CompressedCssNode, CompressedJsNode
 from compressor.conf import settings
+from django.conf import settings as django_settings
 
 
 class CompressedNodeTestCase(TestCase):
-    
+
     def setUp(self):
         settings.COMPRESS = True
         self.css = """
@@ -21,7 +22,7 @@ class CompressedNodeTestCase(TestCase):
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         """
         self.jsNode = CompressedJsNode(self.js)
-        
+
     def test_css_split(self):
         out = [
             ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css')),
@@ -76,16 +77,33 @@ class CompressedNodeTestCase(TestCase):
     def test_js_return_if_on(self):
         output = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
         self.assertEqual(output, self.jsNode.render())
-        
+
 
 class CssAbsolutizingTestCase(TestCase):
     def setUp(self):
         settings.COMPRESS = True
+        django_settings.DEBUG = True
+        settings.MEDIA_URL = '/media/'
         self.css = """
-        <link rel="stylesheet" href="/media/css/backgrounded.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/url/url1.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/url/2/url2.css" type="text/css" media="screen" charset="utf-8">
         """
         self.cssNode = CompressedCssNode(self.css)
 
-    def test_fail(self):
-        settings.COMPRESS = False
-        self.assertEqual(self.js, self.jsNode.render())
+    def test_css_absolute_filter(self):
+        from compressor.filters.css_absolute import CssAbsoluteFilter
+        filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
+        content = "p { background: url('../../images/image.gif') }"
+        output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
+        filter = CssAbsoluteFilter(content)
+        self.assertEqual(output, filter.input(filename=filename))
+        settings.MEDIA_URL = 'http://media.example.com/'
+        filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
+        output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
+        self.assertEqual(output, filter.input(filename=filename))
+
+    def test_css_hunks(self):
+        out = [u"p { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\n",
+               u"p { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\n",
+               ]
+        self.assertEqual(out, self.cssNode.hunks)

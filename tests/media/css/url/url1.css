@@ -1,0 +1,4 @@
+p { background: url('../../images/test.png'); }
+p { background: url(../../images/test.png); }
+p { background: url( ../../images/test.png ); }
+p { background: url( '../../images/test.png' ); }

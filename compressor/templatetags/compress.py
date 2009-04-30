@@ -3,13 +3,16 @@ from hashlib import sha1 as hash
 from BeautifulSoup import BeautifulSoup
 
 from django import template
+from django.conf import settings as django_settings
 from django.template.loader import render_to_string
-    
+
 from compressor.conf import settings
 from compressor import filters
 
 register = template.Library()
 
+class UncompressableFileError(Exception):
+    pass
 
 class CompressedNode(template.Node):
 
@@ -23,15 +26,13 @@ class CompressedNode(template.Node):
     def content_hash(self):
         """docstring for content_hash"""
         pass
-        
+
     def split_contents(self):
         raise NotImplementedError('split_contents must be defined in a subclass')
 
     def get_filename(self, url):
         if not url.startswith(settings.MEDIA_URL):
-            # TODO: Put a proper exception here. Maybe one that only shows up
-            # if debug is on.
-            raise Exception('FIX THIS EXCPETIONS@!@')
+            raise UncompressableFileError('"%s" is not in COMPRESS_MEDIA_URL ("%s") and can not be compressed' % (url, settings.COMPRESS_MEDIA_URL))
         basename = url[len(settings.MEDIA_URL):]
         filename = os.path.join(settings.MEDIA_ROOT, basename)
         return filename
@@ -58,7 +59,7 @@ class CompressedNode(template.Node):
 
     def concat(self):
         return "\n".join(self.get_hunks())
-        
+
     def filter(self, content, method, **kwargs):
         content = content
         for f in self.filters:
@@ -74,7 +75,7 @@ class CompressedNode(template.Node):
         if getattr(self, '_output', ''):
             return self._output
         output = self.concat()
-        filter_method = getattr(self, 'filter_method', None) 
+        filter_method = getattr(self, 'filter_method', None)
         if self.filters:
             output = self.filter(output, 'output')
         self._output = output
@@ -90,7 +91,7 @@ class CompressedNode(template.Node):
         filepath = "%s/%s/%s" % (settings.OUTPUT_DIR.strip('/'), self.ouput_prefix, filename)
         return filepath
     new_filepath = property(get_new_filepath)
-    
+
     def save_file(self):
         filename = "%s/%s" % (settings.MEDIA_ROOT.rstrip('/'), self.new_filepath)
         if os.path.exists(filename):
@@ -129,7 +130,11 @@ class CompressedCssNode(CompressedNode):
         split = self.soup.findAll({'link' : True, 'style' : True})
         for elem in split:
             if elem.name == 'link' and elem['rel'] == 'stylesheet':
-                self.split_content.append(('file', self.get_filename(elem['href'])))
+                try:
+                    self.split_content.append(('file', self.get_filename(elem['href'])))
+                except UncompressableFileError:
+                    if django_settings.DEBUG:
+                        raise
             if elem.name == 'style':
                 self.split_content.append(('hunk', elem.string))
         return self.split_content
@@ -150,7 +155,11 @@ class CompressedJsNode(CompressedNode):
         split = self.soup.findAll('script')
         for elem in split:
             if elem.has_key('src'):
-                self.split_content.append(('file', self.get_filename(elem['src'])))
+                try:
+                    self.split_content.append(('file', self.get_filename(elem['src'])))
+                except UncompressableFileError:
+                    if django_settings.DEBUG:
+                        raise
             else:
                 self.split_content.append(('hunk', elem.string))
         return self.split_content
