@@ -99,7 +99,7 @@ They've been given sensible defaults.
   Controls the absolute file path that linked media will be read from and
   compressed media will be written to.
 
-`COMPRESS_OUTPUT_DIR` default: `CACHE`
+`COMPRESS_OUTPUT_DIR` default: `"CACHE"`
   Conttrols the directory inside `COMPRESS_ROOT` that compressed files will
   be written to.
 
