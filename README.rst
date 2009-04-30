@@ -40,25 +40,44 @@ If COMPRESS is False (defaults to the opposite of DEBUG) the compress tag
 simply returns exactly what it was given, to ease development.
 
 
+CSS Notes:
+**********
+
+All relative url() bits specified in linked CSS files are automatically
+converted to absolute URLs while being processed. Any local absolute urls (those
+starting with a '/') are left alone.
+
+Stylesheets that are @import'd are not compressed into the main file. They are
+left alone.
+
+Set the media attribute as normal on your <style> and <link> elements and
+the combined CSS will be wrapped in @media blocks as necessary.
+
+**Recomendations:**
+
+* Use only relative or full domain absolute urls in your CSS files.
+* Avoid @import! Simply list all your CSS files in the HTML, they'll be combined anyway.
+
+
 Settings
 ********
 
-Django compressor has a number of settings that control it's behavior. 
+Django compressor has a number of settings that control it's behavior.
 They've been given sensible defaults.
 
 `COMPRESS` default: the opposite of `DEBUG`
-  Boolean that decides if compression will happen. 
+  Boolean that decides if compression will happen.
 
 `COMPRESS_URL` default: `MEDIA_URL`
   Controls the URL that linked media will be read from and compressed media
   will be written to.
-  
+
 `COMPRESS_ROOT` default: `MEDIA_ROOT`
-  Controls the absolute file path that linked media will be read from and 
+  Controls the absolute file path that linked media will be read from and
   compressed media will be written to.
 
 `COMPRESS_OUTPUT_DIR` default: `CACHE`
-  Conttrols the directory inside `COMPRESS_ROOT` that compressed files will 
+  Conttrols the directory inside `COMPRESS_ROOT` that compressed files will
   be written to.
 
 `COMPRESS_CSS_FILTERS` default: []
@@ -66,3 +85,9 @@ They've been given sensible defaults.
 
 `COMPRESS_JS_FILTERS` default: ['compressor.filters.jsmin.JSMinFilter'])
   A list of filters that will be applied to javascript.
+
+
+Dependecies
+***********
+
+* BeautifulSoup

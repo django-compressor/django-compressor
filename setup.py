@@ -22,6 +22,9 @@ setup(
         'compressor.filters.jsmin',
         'compressor.templatetags',
     ],
+    requires = [
+        'BeautifulSoup',
+    ],
     classifiers = [
         'Development Status :: 4 - Beta',
         'Framework :: Django',
