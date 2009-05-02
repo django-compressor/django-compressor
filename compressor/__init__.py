@@ -71,6 +71,7 @@ class Compressor(object):
                     input = self.filter(input, 'input', elem=elem)
                 self._hunks.append(input)
             if kind == 'file':
+                # TODO: wrap this in a try/except for IoErrors(?)
                 fd = open(v, 'rb')
                 input = fd.read()
                 if self.filters:
@@ -152,6 +153,7 @@ class CssCompressor(Compressor):
         split = self.soup.findAll({'link' : True, 'style' : True})
         for elem in split:
             if elem.name == 'link' and elem['rel'] == 'stylesheet':
+                # TODO: Make sure this doesn't break when debug is off. I was thinking it would just skip over but it 500's :(
                 try:
                     self.split_content.append(('file', self.get_filename(elem['href']), elem))
                 except UncompressableFileError:
