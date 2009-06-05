@@ -17,7 +17,7 @@ class YUICompressorFilter(FilterBase):
         if self.type == 'css':
             arguments = CSS_ARGUMENTS
             
-        command = '%s --type=%s %s' % (BINARY, type_, arguments)
+        command = '%s --type=%s %s' % (BINARY, self.type, arguments)
 
         if self.verbose:
             command += ' --verbose'
@@ -42,3 +42,13 @@ class YUICompressorFilter(FilterBase):
             print err
 
         return filtered
+
+class YUICSSFilter(YUICompressorFilter):
+    def __init__(self, *args, **kwargs):
+        super(YUICSSFilter, self).__init__(*args, **kwargs)
+        self.type = 'css'
+
+class YUIJSFilter(YUICompressorFilter):
+    def __init__(self, *args, **kwargs):
+        super(YUIJSFilter, self).__init__(*args, **kwargs)
+        self.type = 'js'
