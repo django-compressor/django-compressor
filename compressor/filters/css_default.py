@@ -25,7 +25,7 @@ class CssAbsoluteFilter(FilterBase):
         url = url.strip(' \'"')
         if url.startswith('http://') or url.startswith('/'):
             return "url('%s')" % url
-        full_url = '/'.join([self.directory_name, url])
+        full_url = '/'.join([str(self.directory_name), url])
         full_url = os.path.normpath(full_url)
         if self.has_http:
             full_url = "http://%s" % full_url

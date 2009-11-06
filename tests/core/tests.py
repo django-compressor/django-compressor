@@ -138,6 +138,9 @@ class CssMediaTestCase(TestCase):
 
 
 class TemplatetagTestCase(TestCase):
+    def setUp(self):
+        settings.COMPRESS = True
+    
     def render(self, template_string, context_dict=None):
         """A shortcut for testing template output."""
         if context_dict is None:
@@ -156,6 +159,15 @@ class TemplatetagTestCase(TestCase):
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
         out = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">'
+        self.assertEqual(out, self.render(template, context))
+
+    def test_nonascii_css_tag(self):
+        template = u"""{% load compress %}{% compress css %}
+        <link rel="stylesheet" href="{{ MEDIA_URL }}css/nonasc.css" type="text/css" charset="utf-8">
+        {% endcompress %}
+        """
+        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        out = '<link rel="stylesheet" href="/media/CACHE/css/fc35bb10bce9.css" type="text/css" media="all" charset="utf-8">'
         self.assertEqual(out, self.render(template, context))
 
     def test_js_tag(self):
