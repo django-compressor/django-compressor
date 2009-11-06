@@ -136,7 +136,6 @@ class CssMediaTestCase(TestCase):
         out = u'@media screen {body { background:#990; }}\n@media print {p { border:5px solid green;}}\n@media all {body { color:#fff; }}'
         self.assertEqual(out, self.cssNode.combined)
 
-
 class TemplatetagTestCase(TestCase):
     def setUp(self):
         settings.COMPRESS = True
@@ -163,11 +162,12 @@ class TemplatetagTestCase(TestCase):
 
     def test_nonascii_css_tag(self):
         template = u"""{% load compress %}{% compress css %}
-        <link rel="stylesheet" href="{{ MEDIA_URL }}css/nonasc.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}css/nonasc.css" type="text/css" media="print" charset="utf-8">
+        <style type="text/css">p { border:5px solid green;}</style>
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
-        out = '<link rel="stylesheet" href="/media/CACHE/css/fc35bb10bce9.css" type="text/css" media="all" charset="utf-8">'
+        out = '<link rel="stylesheet" href="/media/CACHE/css/68da639dbb24.css" type="text/css" media="all" charset="utf-8">'
         self.assertEqual(out, self.render(template, context))
 
     def test_js_tag(self):

@@ -80,7 +80,9 @@ class Compressor(object):
         return self._hunks
 
     def concat(self):
-        return "\n".join(self.hunks)
+        # if any of the hunks are unicode, all of them will be coerced
+        # this breaks any hunks with non-ASCII data in them
+        return "\n".join([str(hunk) for hunk in self.hunks])
 
     def filter(self, content, method, **kwargs):
         content = content

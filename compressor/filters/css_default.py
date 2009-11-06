@@ -38,4 +38,4 @@ class CssMediaFilter(FilterBase):
             self.media = elem['media']
         except (TypeError, KeyError):
             return self.content
-        return "@media %s {%s}" % (self.media, self.content)
+        return "@media %s {%s}" % (str(self.media), self.content)
