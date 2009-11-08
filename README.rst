@@ -117,3 +117,15 @@ Dependecies
 ***********
 
 * BeautifulSoup
+
+
+Known fails
+***********
+
+* Non ASCII characters in linked CSS files cause breakage. See `issue 3`_ for details.
+  And `carljm's branch`_ for a work around if you're running into this problem. 
+  The goal is to get it standardized on unicode all the way through.
+
+
+.. _issue 3: http://github.com/mintchaos/django_compressor/issues/#issue/3
+.. _carljm's branch: http://github.com/carljm/django_compressor
