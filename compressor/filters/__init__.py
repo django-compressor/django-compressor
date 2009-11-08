@@ -1,4 +1,4 @@
-class FilterBase:
+class FilterBase(object):
     def __init__(self, content, filter_type=None, verbose=0):
         self.type = filter_type
         self.content = content
