@@ -44,7 +44,10 @@ class Compressor(object):
     def get_filename(self, url):
         if not url.startswith(settings.MEDIA_URL):
             raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, settings.MEDIA_URL))
-        basename = url[len(settings.MEDIA_URL):]
+        # .lstrip used to remove leading slashes because os.path.join
+        # counterintuitively takes "/foo/bar" and "/baaz" to produce "/baaz",
+        # not the "/foo/bar/baaz" which you might expect:
+        basename = url.replace(settings.MEDIA_URL, "", 1).lstrip("/")
         filename = os.path.join(settings.MEDIA_ROOT, basename)
         return filename
 
