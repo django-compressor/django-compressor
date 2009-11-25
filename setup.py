@@ -23,6 +23,11 @@ setup(
         'compressor.filters.jsmin',
         'compressor.templatetags',
     ],
+    package_data = {
+        'compressor': [
+                'templates/compressor/*.html',
+            ],
+    },
     requires = [
         'BeautifulSoup',
     ],
