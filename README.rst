@@ -44,7 +44,7 @@ CSS Notes:
 **********
 
 All relative url() bits specified in linked CSS files are automatically
-converted to absolute URLs while being processed. Any local absolute urls (those
+converted to absolute URLs while being processed. Any local absolute URLs (those
 starting with a '/') are left alone.
 
 Stylesheets that are @import'd are not compressed into the main file. They are
@@ -53,9 +53,9 @@ left alone.
 Set the media attribute as normal on your <style> and <link> elements and
 the combined CSS will be wrapped in @media blocks as necessary.
 
-**Recomendations:**
+**Recommendations:**
 
-* Use only relative or full domain absolute urls in your CSS files.
+* Use only relative or full domain absolute URLs in your CSS files.
 * Avoid @import! Simply list all your CSS files in the HTML, they'll be combined anyway.
 
 

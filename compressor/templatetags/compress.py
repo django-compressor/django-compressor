@@ -24,7 +24,7 @@ class CompressorNode(template.Node):
             return in_cache
         else:
             output = compressor.output()
-            cache.set(compressor.cachekey, output, 86400) # rebuilds the cache once a day if nothign has changed.
+            cache.set(compressor.cachekey, output, 86400) # Rebuilds the cache once a day if nothing has changed.
             return output
 
 @register.tag
