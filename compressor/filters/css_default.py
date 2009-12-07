@@ -23,7 +23,9 @@ class CssAbsoluteFilter(FilterBase):
     def url_converter(self, matchobj):
         url = matchobj.group(1)
         url = url.strip(' \'"')
-        if url.startswith('http://') or url.startswith('/'):
+        if (url.startswith('http://') or 
+            url.startswith('/') or 
+            url.startswith('data:')):
             return "url('%s')" % url
         full_url = '/'.join([str(self.directory_name), url])
         full_url = os.path.normpath(full_url)
