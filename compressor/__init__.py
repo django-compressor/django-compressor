@@ -46,6 +46,8 @@ class Compressor(object):
             raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, settings.MEDIA_URL))
         basename = url[len(settings.MEDIA_URL):]
         filename = os.path.join(settings.MEDIA_ROOT, basename)
+        if not os.path.exists(filename):
+            raise UncompressableFileError('"%s" does not exist' % (filename,))
         return filename
 
     @property
