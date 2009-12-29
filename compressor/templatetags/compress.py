@@ -23,8 +23,22 @@ class CompressorNode(template.Node):
         if in_cache:
             return in_cache
         else:
-            output = compressor.output()
-            cache.set(compressor.cachekey, output, 86400) # Rebuilds the cache once a day if nothing has changed.
+            # do this to prevent dog piling
+            in_progress_key = 'django_compressor.in_progress.%s' % compressor.cachekey
+            in_progress = cache.get(in_progress_key)
+            if in_progress:
+                while cache.get(in_progress_key):
+                    sleep(0.1)
+                output = cache.get(compressor.cachekey)
+            else:
+                cache.set(in_progress_key, True, 300)
+                try:
+                    output = compressor.output()
+                    cache.set(compressor.cachekey, output, 2591000) # rebuilds the cache every 30 days if nothign has changed.
+                except:
+                    from traceback import format_exc
+                    raise Exception(format_exc())
+                cache.set(in_progress_key, False, 300)
             return output
 
 @register.tag
