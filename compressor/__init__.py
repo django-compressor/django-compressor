@@ -46,6 +46,8 @@ class Compressor(object):
             raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and cannot be compressed' % (url, settings.MEDIA_URL))
         basename = url[len(settings.MEDIA_URL):]
         filename = os.path.join(settings.MEDIA_ROOT, basename)
+        if not os.path.exists(filename):
+            raise UncompressableFileError('"%s" does not exist' % (filename,))
         return filename
 
     @property
@@ -81,7 +83,9 @@ class Compressor(object):
         return self._hunks
 
     def concat(self):
-        return "\n".join(self.hunks)
+        # if any of the hunks are unicode, all of them will be coerced
+        # this breaks any hunks with non-ASCII data in them
+        return "\n".join([str(hunk) for hunk in self.hunks])
 
     def filter(self, content, method, **kwargs):
         content = content
