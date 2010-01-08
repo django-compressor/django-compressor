@@ -129,7 +129,7 @@ be written to.
 ``COMPRESS_CSS_FILTERS``
 ------------------------
 
-:Default: ``[]``
+:Default: ``['compressor.filters.css_default.CssAbsoluteFilter]``
 
 A list of filters that will be applied to CSS.
 

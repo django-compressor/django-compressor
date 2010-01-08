@@ -9,8 +9,7 @@ class CssCompressor(Compressor):
         self.extension = ".css"
         self.template_name = "compressor/css.html"
         self.template_name_inline = "compressor/css_inline.html"
-        self.filters = ['compressor.filters.css_default.CssAbsoluteFilter']
-        self.filters.extend(settings.COMPRESS_CSS_FILTERS)
+        self.filters = list(settings.COMPRESS_CSS_FILTERS)
         self.type = 'css'
         super(CssCompressor, self).__init__(content, output_prefix)
 
