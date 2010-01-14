@@ -26,6 +26,7 @@ class CssAbsoluteFilter(FilterBase):
         url = matchobj.group(1)
         url = url.strip(' \'"')
         if (url.startswith('http://') or 
+            url.startswith('https://') or 
             url.startswith('/') or 
             url.startswith('data:')):
             return "url('%s')" % url
