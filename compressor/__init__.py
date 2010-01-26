@@ -102,7 +102,6 @@ class Compressor(object):
         if getattr(self, '_output', ''):
             return self._output
         output = self.concat()
-        filter_method = getattr(self, 'filter_method', None)
         if self.filters:
             output = self.filter(output, 'output')
         self._output = output
