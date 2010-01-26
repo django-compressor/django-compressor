@@ -34,10 +34,6 @@ class Compressor(object):
         self.split_content = []
         self.soup = BeautifulSoup(self.content)
 
-    def content_hash(self):
-        """docstring for content_hash"""
-        pass
-
     def split_contents(self):
         raise NotImplementedError('split_contents must be defined in a subclass')
 
