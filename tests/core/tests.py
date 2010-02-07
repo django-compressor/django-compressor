@@ -208,7 +208,6 @@ class TemplatetagTestCase(TestCase):
         out = u'<script type="text/javascript" src="/media/CACHE/js/5d5c0e1cb25f.js" charset="utf-8"></script>'
         self.assertEqual(out, render(template, context))
 
-
 class TestStorage(CompressorFileStorage):
     """
     Test compressor storage that gzips storage files
