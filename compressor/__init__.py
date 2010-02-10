@@ -5,6 +5,9 @@ from django import template
 from django.conf import settings as django_settings
 from django.template.loader import render_to_string
 
+from django.core.files.base import ContentFile
+from django.core.files.storage import get_storage_class
+
 from compressor.conf import settings
 from compressor import filters
 
@@ -42,16 +45,12 @@ class Compressor(object):
         raise NotImplementedError('split_contents must be defined in a subclass')
 
     def get_filename(self, url):
-        if not url.startswith(settings.MEDIA_URL):
-            raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, settings.MEDIA_URL))
-        # .lstrip used to remove leading slashes because os.path.join
-        # counterintuitively takes "/foo/bar" and "/baaz" to produce "/baaz",
-        # not the "/foo/bar/baaz" which you might expect:
-        basename = url.replace(settings.MEDIA_URL, "", 1).lstrip("/")
-        filename = os.path.join(settings.MEDIA_ROOT, basename)
-        if not os.path.exists(filename):
-            raise UncompressableFileError('"%s" does not exist' % (filename,))
-        return filename
+        if not url.startswith(self.storage.base_url):
+            raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, self.storage.base_url))
+        basename = url.replace(self.storage.base_url, "", 1)
+        if not self.storage.exists(basename):
+            raise UncompressableFileError('"%s" does not exist' % self.storage.path(basename))
+        return self.storage.path(basename)
 
     @property
     def mtimes(self):
@@ -63,6 +62,10 @@ class Compressor(object):
         cachebits.extend([str(m) for m in self.mtimes])
         cachestr = "".join(cachebits)
         return "django_compressor.%s" % get_hexdigest(cachestr)[:12]
+
+    @property
+    def storage(self):
+        return get_storage_class(settings.STORAGE)()
 
     @property
     def hunks(self):
@@ -119,28 +122,20 @@ class Compressor(object):
     @property
     def new_filepath(self):
         filename = "".join([self.hash, self.extension])
-        filepath = "%s/%s/%s" % (settings.OUTPUT_DIR.strip('/'), self.ouput_prefix, filename)
-        return filepath
+        return "/".join((settings.OUTPUT_DIR.strip('/'), self.ouput_prefix, filename))
 
     def save_file(self):
-        filename = "%s/%s" % (settings.MEDIA_ROOT.rstrip('/'), self.new_filepath)
-        if os.path.exists(filename):
+        if self.storage.exists(self.new_filepath):
             return False
-        dirname = os.path.dirname(filename)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-        fd = open(filename, 'wb+')
-        fd.write(self.combined)
-        fd.close()
+        self.storage.save(self.new_filepath, ContentFile(self.combined))
         return True
 
     def output(self):
         if not settings.COMPRESS:
             return self.content
-        url = "%s/%s" % (settings.MEDIA_URL.rstrip('/'), self.new_filepath)
         self.save_file()
         context = getattr(self, 'extra_context', {})
-        context['url'] = url
+        context['url'] = self.storage.url(self.new_filepath)
         return render_to_string(self.template_name, context)
 
 
@@ -149,7 +144,10 @@ class CssCompressor(Compressor):
     def __init__(self, content, ouput_prefix="css"):
         self.extension = ".css"
         self.template_name = "compressor/css.html"
-        self.filters = ['compressor.filters.css_default.CssAbsoluteFilter', 'compressor.filters.css_default.CssMediaFilter']
+        self.filters = [
+            'compressor.filters.css_default.CssAbsoluteFilter',
+            'compressor.filters.css_default.CssMediaFilter',
+        ]
         self.filters.extend(settings.COMPRESS_CSS_FILTERS)
         self.type = 'css'
         super(CssCompressor, self).__init__(content, ouput_prefix)
