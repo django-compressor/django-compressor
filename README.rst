@@ -91,27 +91,58 @@ Settings
 Django compressor has a number of settings that control it's behavior.
 They've been given sensible defaults.
 
-`COMPRESS` default: the opposite of `DEBUG`
-  Boolean that decides if compression will happen.
+``COMPRESS``
+------------
 
-`COMPRESS_URL` default: `MEDIA_URL`
-  Controls the URL that linked media will be read from and compressed media
-  will be written to.
+:Default: the opposite of ``DEBUG``
 
-`COMPRESS_ROOT` default: `MEDIA_ROOT`
-  Controls the absolute file path that linked media will be read from and
-  compressed media will be written to.
+Boolean that decides if compression will happen.
 
-`COMPRESS_OUTPUT_DIR` default: `"CACHE"`
-  Conttrols the directory inside `COMPRESS_ROOT` that compressed files will
-  be written to.
+``COMPRESS_URL``
+----------------
 
-`COMPRESS_CSS_FILTERS` default: []
-  A list of filters that will be applied to CSS.
+:Default: ``MEDIA_URL``
 
-`COMPRESS_JS_FILTERS` default: ['compressor.filters.jsmin.JSMinFilter'])
-  A list of filters that will be applied to javascript.
+Controls the URL that linked media will be read from and compressed media
+will be written to.
 
+``COMPRESS_ROOT``
+-----------------
+
+:Default: ``MEDIA_ROOT``
+
+Controls the absolute file path that linked media will be read from and
+compressed media will be written to.
+
+``COMPRESS_OUTPUT_DIR``
+-----------------------
+
+:Default: ``'CACHE'``
+
+Conttrols the directory inside `COMPRESS_ROOT` that compressed files will
+be written to.
+
+``COMPRESS_CSS_FILTERS``
+------------------------
+
+:Default: ``[]``
+
+A list of filters that will be applied to CSS.
+
+``COMPRESS_JS_FILTERS``
+-----------------------
+
+:Default: ``['compressor.filters.jsmin.JSMinFilter']``
+
+A list of filters that will be applied to javascript.
+
+``COMPRESS_STORAGE``
+--------------------
+
+:Default: ``'compressor.storage.CompressorFileStorage'``
+
+The dotted path to a Django Storage backend to be used to save the
+compressed files.
 
 Dependecies
 ***********
