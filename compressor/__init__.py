@@ -1,5 +1,4 @@
 import os
-from collections import defaultdict
 from BeautifulSoup import BeautifulSoup
 
 from django import template
@@ -153,7 +152,7 @@ class CssCompressor(Compressor):
         if self.split_content:
             return self.split_content
         split = self.soup.findAll({'link' : True, 'style' : True})
-        self.by_media = defaultdict(curry(CssCompressor, content=''))
+        self.by_media = {}
         for elem in split:
             data = None
             if elem.name == 'link' and elem['rel'] == 'stylesheet':
@@ -166,7 +165,8 @@ class CssCompressor(Compressor):
                 data = ('hunk', elem.string, elem)
             if data:
                 self.split_content.append(data)
-                self.by_media[elem.get('media', None)].split_content.append(data)
+                self.by_media.setdefault(elem.get('media', None),
+                    CssCompressor(content='')).split_content.append(data)
         return self.split_content
 
     def output(self):
