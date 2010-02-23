@@ -1,5 +1,6 @@
 import os
 import re
+import posixpath
 
 from compressor.filters import FilterBase, FilterError
 from compressor.conf import settings
@@ -31,7 +32,7 @@ class CssAbsoluteFilter(FilterBase):
             url.startswith('data:')):
             return "url('%s')" % url
         full_url = '/'.join([str(self.directory_name), url])
-        full_url = os.path.normpath(full_url)
+        full_url = posixpath.normpath(full_url)
         if self.has_http:
             full_url = "%s%s" % (self.protocol,full_url)
         return "url('%s')" % full_url
