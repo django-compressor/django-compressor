@@ -64,8 +64,8 @@ class CompressorTestCase(TestCase):
         self.assertEqual('f7c661b7a124', self.cssNode.hash)
 
     def test_css_return_if_on(self):
-        output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">'
-        self.assertEqual(output, self.cssNode.output())
+        output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" charset="utf-8" />'
+        self.assertEqual(output, self.cssNode.output().strip())
 
 
     def test_js_split(self):
@@ -144,12 +144,15 @@ class CssMediaTestCase(TestCase):
         <link rel="stylesheet" href="/media/css/one.css" type="text/css" media="screen" charset="utf-8">
         <style type="text/css" media="print">p { border:5px solid green;}</style>
         <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" media="all">
+        <style type="text/css">h1 { border:5px solid green;}</style>
         """
         self.cssNode = CssCompressor(self.css)
 
     def test_css_output(self):
-        out = u'@media screen {body { background:#990; }}\n@media print {p { border:5px solid green;}}\n@media all {body { color:#fff; }}'
-        self.assertEqual(out, self.cssNode.combined)
+        links = BeautifulSoup(self.cssNode.output()).findAll('link')
+        media = set([u'screen', u'print', u'all', None])
+        self.assertEqual(len(links), 4)
+        self.assertEqual(media, set([l.get('media', None) for l in links]))
 
 def render(template_string, context_dict=None):
     """A shortcut for testing template output."""
@@ -163,7 +166,7 @@ def render(template_string, context_dict=None):
 class TemplatetagTestCase(TestCase):
     def setUp(self):
         settings.COMPRESS = True
-    
+
     def test_css_tag(self):
         template = u"""{% load compress %}{% compress css %}
         <link rel="stylesheet" href="{{ MEDIA_URL }}css/one.css" type="text/css" charset="utf-8">
@@ -172,17 +175,17 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">'
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" charset="utf-8" />'
         self.assertEqual(out, render(template, context))
 
     def test_nonascii_css_tag(self):
         template = u"""{% load compress %}{% compress css %}
-        <link rel="stylesheet" href="{{ MEDIA_URL }}css/nonasc.css" type="text/css" media="print" charset="utf-8">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}css/nonasc.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
-        out = '<link rel="stylesheet" href="/media/CACHE/css/68da639dbb24.css" type="text/css" media="all" charset="utf-8">'
+        out = '<link rel="stylesheet" href="/media/CACHE/css/1c1c0855907b.css" type="text/css" charset="utf-8" />'
         self.assertEqual(out, render(template, context))
 
     def test_js_tag(self):
@@ -194,6 +197,17 @@ class TemplatetagTestCase(TestCase):
         context = { 'MEDIA_URL': settings.MEDIA_URL }
         out = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
         self.assertEqual(out, render(template, context))
+
+    def test_nonascii_js_tag(self):
+        template = u"""{% load compress %}{% compress js %}
+        <script src="{{ MEDIA_URL }}js/nonasc.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">var test_value = "\u2014";</script>
+        {% endcompress %}
+        """
+        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        out = u'<script type="text/javascript" src="/media/CACHE/js/5d5c0e1cb25f.js" charset="utf-8"></script>'
+        self.assertEqual(out, render(template, context))
+
 
 class TestStorage(CompressorFileStorage):
     """
@@ -225,5 +239,5 @@ class StorageTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/5b231a62e9a6.css.gz" type="text/css" media="all" charset="utf-8">'
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/5b231a62e9a6.css.gz" type="text/css" charset="utf-8" />'
         self.assertEqual(out, render(template, context))

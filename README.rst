@@ -19,7 +19,7 @@ Examples::
 
 Which would be rendered something like::
 
-    <link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">
+    <link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" charset="utf-8">
 
 or::
 
@@ -50,8 +50,12 @@ starting with a '/') are left alone.
 Stylesheets that are @import'd are not compressed into the main file. They are
 left alone.
 
-Set the media attribute as normal on your <style> and <link> elements and
-the combined CSS will be wrapped in @media blocks as necessary.
+If the media attribute is set on <style> and <link> elements, a separate
+compressed file is created and linked for each media value you specified.
+This allows the media attribute to remain on the generated link element,
+instead of wrapping your CSS with @media blocks (which can break your own
+@media queries or @font-face declarations). It also allows browsers to avoid
+downloading CSS for irrelevant media types.
 
 **Recommendations:**
 

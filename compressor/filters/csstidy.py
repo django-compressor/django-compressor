@@ -14,7 +14,7 @@ warnings.simplefilter('ignore', RuntimeWarning)
 class CSSTidyFilter(FilterBase):
     def output(self, **kwargs):
         tmp_file = tempfile.NamedTemporaryFile(mode='w+b')
-        tmp_file.write(css)
+        tmp_file.write(self.content)
         tmp_file.flush()
 
         output_file = tempfile.NamedTemporaryFile(mode='w+b')

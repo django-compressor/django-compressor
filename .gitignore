@@ -2,3 +2,5 @@ build
 *CACHE*
 dist
 MANIFEST
+*.pyc
+*.egg-info
