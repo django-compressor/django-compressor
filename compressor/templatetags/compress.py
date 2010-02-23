@@ -15,7 +15,7 @@ class CompressorNode(template.Node):
 
     def render(self, context):
         content = self.nodelist.render(context)
-        if not settings.COMPRESS:
+        if not settings.COMPRESS or not len(content.strip()):
             return content
         if self.kind == 'css':
             compressor = CssCompressor(content)

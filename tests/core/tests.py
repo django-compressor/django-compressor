@@ -67,7 +67,6 @@ class CompressorTestCase(TestCase):
         output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" charset="utf-8" />'
         self.assertEqual(output, self.cssNode.output().strip())
 
-
     def test_js_split(self):
         out = [('file', os.path.join(settings.MEDIA_ROOT, u'js/one.js'), '<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>'),
          ('hunk', u'obj.value = "value";', '<script type="text/javascript" charset="utf-8">obj.value = "value";</script>')
@@ -166,6 +165,12 @@ def render(template_string, context_dict=None):
 class TemplatetagTestCase(TestCase):
     def setUp(self):
         settings.COMPRESS = True
+
+    def test_empty_tag(self):
+        template = u"""{% load compress %}{% compress js %}{% block js %}
+        {% endblock %}{% endcompress %}"""
+        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        self.assertEqual(u'', render(template, context))
 
     def test_css_tag(self):
         template = u"""{% load compress %}{% compress css %}
