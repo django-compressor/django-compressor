@@ -213,6 +213,16 @@ class TemplatetagTestCase(TestCase):
         out = u'<script type="text/javascript" src="/media/CACHE/js/5d5c0e1cb25f.js" charset="utf-8"></script>'
         self.assertEqual(out, render(template, context))
 
+    def test_nonascii_latin1_js_tag(self):
+        template = u"""{% load compress %}{% compress js %}
+        <script src="{{ MEDIA_URL }}js/nonasc_latin1.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">var test_value = "\u2014";</script>
+        {% endcompress %}
+        """
+        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        out = u'<script type="text/javascript" src="/media/CACHE/js/40a8e9ffb476.js" charset="utf-8"></script>'
+        self.assertEqual(out, render(template, context))
+
 class TestStorage(CompressorFileStorage):
     """
     Test compressor storage that gzips storage files

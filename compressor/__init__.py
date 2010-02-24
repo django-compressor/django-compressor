@@ -83,7 +83,8 @@ class Compressor(object):
                 input = fd.read()
                 if self.filters:
                     input = self.filter(input, 'input', filename=v, elem=elem)
-                self._hunks.append(unicode(input, elem.get('charset', django_settings.DEFAULT_CHARSET)))
+                charset = elem.get('charset', django_settings.DEFAULT_CHARSET)
+                self._hunks.append(unicode(input, charset))
                 fd.close()
         return self._hunks
 
@@ -94,7 +95,6 @@ class Compressor(object):
         return "\n".join([hunk.encode(django_settings.DEFAULT_CHARSET) for hunk in self.hunks])
 
     def filter(self, content, method, **kwargs):
-        content = content
         for f in self.filters:
             filter = getattr(filters.get_class(f)(content, filter_type=self.type), method)
             try:
