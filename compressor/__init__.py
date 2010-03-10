@@ -4,7 +4,6 @@ from BeautifulSoup import BeautifulSoup
 from django import template
 from django.conf import settings as django_settings
 from django.template.loader import render_to_string
-from django.utils.functional import curry
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import get_storage_class
@@ -152,7 +151,7 @@ class CssCompressor(Compressor):
         if self.split_content:
             return self.split_content
         split = self.soup.findAll({'link' : True, 'style' : True})
-        self.by_media = {}
+        self.media_nodes = []
         for elem in split:
             data = None
             if elem.name == 'link' and elem['rel'] == 'stylesheet':
@@ -165,18 +164,25 @@ class CssCompressor(Compressor):
                 data = ('hunk', elem.string, elem)
             if data:
                 self.split_content.append(data)
-                self.by_media.setdefault(elem.get('media', None),
-                    CssCompressor(content='')).split_content.append(data)
+                media = elem.get('media', None)
+                # Append to the previous node if it had the same media type,
+                # otherwise create a new node.
+                if self.media_nodes and self.media_nodes[-1][0] == media:
+                    self.media_nodes[-1][1].split_content.append(data)
+                else:
+                    node = CssCompressor(content='')
+                    node.split_content.append(data)
+                    self.media_nodes.append((media, node))
         return self.split_content
 
     def output(self):
         self.split_contents()
-        if not hasattr(self, 'by_media'):
+        if not hasattr(self, 'media_nodes'):
             return super(CssCompressor, self).output()
         if not settings.COMPRESS:
             return self.content
         ret = []
-        for media, subnode in self.by_media.items():
+        for media, subnode in self.media_nodes:
             subnode.extra_context = {'media': media}
             ret.append(subnode.output())
         return ''.join(ret)

@@ -149,9 +149,17 @@ class CssMediaTestCase(TestCase):
 
     def test_css_output(self):
         links = BeautifulSoup(self.cssNode.output()).findAll('link')
-        media = set([u'screen', u'print', u'all', None])
+        media = [u'screen', u'print', u'all', None]
         self.assertEqual(len(links), 4)
-        self.assertEqual(media, set([l.get('media', None) for l in links]))
+        self.assertEqual(media, [l.get('media', None) for l in links])
+
+    def test_avoid_reordering_css(self):
+        css = self.css + '<style type="text/css" media="print">p { border:10px solid red;}</style>'
+        node = CssCompressor(css)
+        media = [u'screen', u'print', u'all', None, u'print']
+        links = BeautifulSoup(node.output()).findAll('link')
+        self.assertEqual(media, [l.get('media', None) for l in links])
+        
 
 def render(template_string, context_dict=None):
     """A shortcut for testing template output."""
