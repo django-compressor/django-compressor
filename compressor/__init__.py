@@ -151,12 +151,15 @@ class Compressor(object):
         context['url'] = self.storage.url(self.new_filepath)
         return render_to_string(self.template_name, context)
 
+    def output_inline(self):
+        return render_to_string(self.template_name_inline, {'content': settings.COMPRESS and self.combined or self.concat()})
 
 class CssCompressor(Compressor):
 
     def __init__(self, content, output_prefix="css"):
         self.extension = ".css"
         self.template_name = "compressor/css.html"
+        self.template_name_inline = "compressor/css_inline.html"
         self.filters = ['compressor.filters.css_default.CssAbsoluteFilter']
         self.filters.extend(settings.COMPRESS_CSS_FILTERS)
         self.type = 'css'
@@ -208,6 +211,7 @@ class JsCompressor(Compressor):
     def __init__(self, content, output_prefix="js"):
         self.extension = ".js"
         self.template_name = "compressor/js.html"
+        self.template_name_inline = "compressor/js_inline.html"
         self.filters = settings.COMPRESS_JS_FILTERS
         self.type = 'js'
         super(JsCompressor, self).__init__(content, output_prefix)
