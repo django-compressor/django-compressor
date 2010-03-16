@@ -1,1 +1,1 @@
-<style type="text/css">{{ content }}</style>
+<style type="text/css"{% if media %} media="{{ media }}"{% endif %}>{{ content|safe }}</style>
