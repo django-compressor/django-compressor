@@ -1,7 +1,7 @@
 import os, re
 import gzip
 
-from django.template import Template, Context
+from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
 from compressor import CssCompressor, JsCompressor
 from compressor.conf import settings
@@ -230,6 +230,12 @@ class TemplatetagTestCase(TestCase):
         context = { 'MEDIA_URL': settings.MEDIA_URL }
         out = u'<script type="text/javascript" src="/media/CACHE/js/40a8e9ffb476.js" charset="utf-8"></script>'
         self.assertEqual(out, render(template, context))
+
+    def test_compress_tag_with_illegal_arguments(self):
+        template = u"""{% load compress %}{% compress pony %}
+        <script type="pony/application">unicorn</script>
+        {% endcompress %}"""
+        self.assertRaises(TemplateSyntaxError, render, template, {})
 
 class TestStorage(CompressorFileStorage):
     """
