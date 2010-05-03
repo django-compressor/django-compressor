@@ -120,7 +120,8 @@ class Compressor(object):
     @property
     def new_filepath(self):
         filename = "".join([self.hash, self.extension])
-        return "/".join((settings.OUTPUT_DIR.strip('/'), self.output_prefix, filename))
+        return os.path.join(
+            settings.OUTPUT_DIR.strip(os.sep), self.output_prefix, filename)
 
     def save_file(self):
         if self.storage.exists(self.new_filepath):
