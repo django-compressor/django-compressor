@@ -7,9 +7,12 @@ from compressor.conf import settings
 
 class CssAbsoluteFilter(FilterBase):
     def input(self, filename=None, **kwargs):
-        if not filename or not filename.startswith(settings.MEDIA_ROOT):
+        media_root = os.path.abspath(settings.MEDIA_ROOT)
+        if filename is not None:
+            filename = os.path.abspath(filename)
+        if not filename or not filename.startswith(media_root):
             return self.content
-        self.media_path = filename[len(settings.MEDIA_ROOT):]
+        self.media_path = filename[len(media_root):]
         self.media_path = self.media_path.lstrip('/')
         self.media_url = settings.MEDIA_URL.rstrip('/')
         self.has_http = False

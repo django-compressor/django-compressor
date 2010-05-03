@@ -130,6 +130,18 @@ class CssAbsolutizingTestCase(TestCase):
         output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
         self.assertEqual(output, filter.input(filename=filename))
 
+    def test_css_absolute_filter_relative_path(self):
+        from compressor.filters.css_default import CssAbsoluteFilter
+        filename = os.path.join(django_settings.TEST_DIR, 'whatever', '..', 'media', 'whatever/../css/url/test.css')
+        content = "p { background: url('../../images/image.gif') }"
+        output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
+        filter = CssAbsoluteFilter(content)
+        self.assertEqual(output, filter.input(filename=filename))
+        settings.MEDIA_URL = 'https://media.example.com/'
+        output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
+        self.assertEqual(output, filter.input(filename=filename))
+
+
     def test_css_hunks(self):
         out = [u"p { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\n",
                u"p { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\n",
