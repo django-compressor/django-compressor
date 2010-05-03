@@ -1,10 +1,14 @@
-from time import sleep
+import time
 
 from django import template
 from django.core.cache import cache
 from compressor import CssCompressor, JsCompressor
 from compressor.conf import settings
 
+# MINT_DELAY is an upper bound on how long any
+# value should take to be generated (in seconds)
+MINT_DELAY = 30
+DEFAULT_TIMEOUT = 300
 
 register = template.Library()
 
@@ -12,6 +16,24 @@ class CompressorNode(template.Node):
     def __init__(self, nodelist, kind=None):
         self.nodelist = nodelist
         self.kind = kind
+
+    def cache_get(self, key):
+        packed_val = cache.get(key)
+        if packed_val is None:
+            return None
+        val, refresh_time, refreshed = packed_val
+        if (time.time() > refresh_time) and not refreshed:
+            # Store the stale value while the cache
+            # revalidates for another MINT_DELAY seconds.
+            self.cache_set(key, val, timeout=MINT_DELAY, refreshed=True)
+            return None
+        return val
+
+    def cache_set(self, key, val, timeout=DEFAULT_TIMEOUT, refreshed=False):
+        refresh_time = timeout + time.time()
+        real_timeout = timeout + MINT_DELAY
+        packed_val = (val, refresh_time, refreshed)
+        return cache.set(key, packed_val, real_timeout)
 
     def render(self, context):
         content = self.nodelist.render(context)
@@ -21,27 +43,16 @@ class CompressorNode(template.Node):
             compressor = CssCompressor(content)
         if self.kind == 'js':
             compressor = JsCompressor(content)
-        in_cache = cache.get(compressor.cachekey)
-        if in_cache:
-            return in_cache
-        else:
-            # do this to prevent dog piling
-            in_progress_key = 'django_compressor.in_progress.%s' % compressor.cachekey
-            in_progress = cache.get(in_progress_key)
-            if in_progress:
-                while cache.get(in_progress_key):
-                    sleep(0.1)
-                output = cache.get(compressor.cachekey)
-            else:
-                cache.set(in_progress_key, True, 300)
-                try:
-                    output = compressor.output()
-                    cache.set(compressor.cachekey, output, 2591000) # rebuilds the cache every 30 days if nothign has changed.
-                except:
-                    from traceback import format_exc
-                    raise Exception(format_exc())
-                cache.set(in_progress_key, False, 300)
-            return output
+        output = self.cache_get(compressor.cachekey)
+        if output is None:
+            try:
+                output = compressor.output()
+                # rebuilds the cache every 30 days if nothing has changed.
+                self.cache_set(compressor.cachekey, output, 2591000)
+            except:
+                from traceback import format_exc
+                raise Exception(format_exc())
+        return output
 
 @register.tag
 def compress(parser, token):
