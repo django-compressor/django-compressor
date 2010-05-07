@@ -19,7 +19,7 @@ if COMPRESS_CSS_FILTERS is None:
 if COMPRESS_JS_FILTERS is None:
     COMPRESS_JS_FILTERS = []
 
-COMPRESS_DATA_URI_MIN_SIZE = getattr(settings, 'COMPRESS_DATA_URI_MIN_SIZE', 1024)
+DATA_URI_MIN_SIZE = getattr(settings, 'COMPRESS_DATA_URI_MIN_SIZE', 1024)
 
 # rebuilds the cache every 30 days if nothing has changed.
 REBUILD_TIMEOUT = getattr(settings, 'COMPRESS_REBUILD_TIMEOUT', 2592000) # 30 days
