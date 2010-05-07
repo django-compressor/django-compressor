@@ -5,11 +5,6 @@ from django.core.cache import cache
 from compressor import CssCompressor, JsCompressor
 from compressor.conf import settings
 
-# MINT_DELAY is an upper bound on how long any
-# value should take to be generated (in seconds)
-MINT_DELAY = 30
-DEFAULT_TIMEOUT = 300
-
 register = template.Library()
 
 class CompressorNode(template.Node):
@@ -25,13 +20,13 @@ class CompressorNode(template.Node):
         if (time.time() > refresh_time) and not refreshed:
             # Store the stale value while the cache
             # revalidates for another MINT_DELAY seconds.
-            self.cache_set(key, val, timeout=MINT_DELAY, refreshed=True)
+            self.cache_set(key, val, timeout=settings.MINT_DELAY, refreshed=True)
             return None
         return val
 
-    def cache_set(self, key, val, timeout=DEFAULT_TIMEOUT, refreshed=False):
+    def cache_set(self, key, val, timeout=settings.REBUILD_TIMEOUT, refreshed=False):
         refresh_time = timeout + time.time()
-        real_timeout = timeout + MINT_DELAY
+        real_timeout = timeout + settings.MINT_DELAY
         packed_val = (val, refresh_time, refreshed)
         return cache.set(key, packed_val, real_timeout)
 
@@ -47,8 +42,7 @@ class CompressorNode(template.Node):
         if output is None:
             try:
                 output = compressor.output()
-                # rebuilds the cache every 30 days if nothing has changed.
-                self.cache_set(compressor.cachekey, output, 2591000)
+                self.cache_set(compressor.cachekey, output)
             except:
                 from traceback import format_exc
                 raise Exception(format_exc())
