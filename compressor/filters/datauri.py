@@ -1,7 +1,8 @@
-import os, re
+import os
+import re
+import mimetypes
 from base64 import b64encode
-from mimetypes import guess_type
-from compressor.filters import FilterBase, FilterError
+from compressor.filters import FilterBase
 from compressor.conf import settings
 
 
@@ -32,7 +33,7 @@ class DataUriFilter(FilterBase):
             path = self.get_file_path(url)
             if os.stat(path).st_size <= settings.COMPRESS_DATA_URI_MIN_SIZE:
                 data = b64encode(open(path, 'rb').read())
-                return 'url("data:%s;base64,%s")' % (guess_type(path)[0], data)
+                return 'url("data:%s;base64,%s")' % (mimetypes.guess_type(path)[0], data)
         return 'url("%s")' % url
 
 
