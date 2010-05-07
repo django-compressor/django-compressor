@@ -1,6 +1,7 @@
 import os
 import re
 import mimetypes
+import urlparse
 from base64 import b64encode
 from compressor.filters import FilterBase
 from compressor.conf import settings
@@ -25,6 +26,9 @@ class DataUriFilter(FilterBase):
         return output
 
     def get_file_path(self, url):
+        # strip query string of file paths
+        if "?" in url:
+            url = url.split("?")[0]
         return os.path.join(settings.MEDIA_ROOT, url[len(settings.MEDIA_URL):])
 
     def data_uri_converter(self, matchobj):

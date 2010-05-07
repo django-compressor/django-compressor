@@ -122,41 +122,41 @@ class CssAbsolutizingTestCase(TestCase):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
         settings.MEDIA_URL = 'http://media.example.com/'
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
-        output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
         self.assertEqual(output, filter.input(filename=filename))
 
     def test_css_absolute_filter_https(self):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
         settings.MEDIA_URL = 'https://media.example.com/'
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
-        output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
         self.assertEqual(output, filter.input(filename=filename))
 
     def test_css_absolute_filter_relative_path(self):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(django_settings.TEST_DIR, 'whatever', '..', 'media', 'whatever/../css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
         settings.MEDIA_URL = 'https://media.example.com/'
-        output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
         self.assertEqual(output, filter.input(filename=filename))
 
 
     def test_css_hunks(self):
-        out = [u"p { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\n",
-               u"p { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\n",
+        out = [u"p { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\n",
+               u"p { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\n",
                ]
         self.assertEqual(out, self.cssNode.hunks)
 
@@ -172,7 +172,7 @@ class CssDataUriTestCase(TestCase):
         self.cssNode = CssCompressor(self.css)
 
     def test_data_uris(self):
-        out = [u'.add { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJvSURBVDjLpZPrS5NhGIf9W7YvBYOkhlkoqCklWChv2WyKik7blnNris72bi6dus0DLZ0TDxW1odtopDs4D8MDZuLU0kXq61CijSIIasOvv94VTUfLiB74fXngup7nvrnvJABJ/5PfLnTTdcwOj4RsdYmo5glBWP6iOtzwvIKSWstI0Wgx80SBblpKtE9KQs/We7EaWoT/8wbWP61gMmCH0lMDvokT4j25TiQU/ITFkek9Ow6+7WH2gwsmahCPdwyw75uw9HEO2gUZSkfyI9zBPCJOoJ2SMmg46N61YO/rNoa39Xi41oFuXysMfh36/Fp0b7bAfWAH6RGi0HglWNCbzYgJaFjRv6zGuy+b9It96N3SQvNKiV9HvSaDfFEIxXItnPs23BzJQd6DDEVM0OKsoVwBG/1VMzpXVWhbkUM2K4oJBDYuGmbKIJ0qxsAbHfRLzbjcnUbFBIpx/qH3vQv9b3U03IQ/HfFkERTzfFj8w8jSpR7GBE123uFEYAzaDRIqX/2JAtJbDat/COkd7CNBva2cMvq0MGxp0PRSCPF8BXjWG3FgNHc9XPT71Ojy3sMFdfJRCeKxEsVtKwFHwALZfCUk3tIfNR8XiJwc1LmL4dg141JPKtj3WUdNFJqLGFVPC4OkR4BxajTWsChY64wmCnMxsWPCHcutKBxMVp5mxA1S+aMComToaqTRUQknLTH62kHOVEE+VQnjahscNCy0cMBWsSI0TCQcZc5ALkEYckL5A5noWSBhfm2AecMAjbcRWV0pUTh0HE64TNf0mczcnnQyu/MilaFJCae1nw2fbz1DnVOxyGTlKeZft/Ff8x1BRssfACjTwQAAAABJRU5ErkJggg=="); }\n.python { background-image: url("/media/img/python.png"); }\n.datauri { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9YGARc5KB0XV+IAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAF1JREFUGNO9zL0NglAAxPEfdLTs4BZM4DIO4C7OwQg2JoQ9LE1exdlYvBBeZ7jqch9//q1uH4TLzw4d6+ErXMMcXuHWxId3KOETnnXXV6MJpcq2MLaI97CER3N0 vr4MkhoXe0rZigAAAABJRU5ErkJggg=="); }\n']
+        out = [u'.add { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJvSURBVDjLpZPrS5NhGIf9W7YvBYOkhlkoqCklWChv2WyKik7blnNris72bi6dus0DLZ0TDxW1odtopDs4D8MDZuLU0kXq61CijSIIasOvv94VTUfLiB74fXngup7nvrnvJABJ/5PfLnTTdcwOj4RsdYmo5glBWP6iOtzwvIKSWstI0Wgx80SBblpKtE9KQs/We7EaWoT/8wbWP61gMmCH0lMDvokT4j25TiQU/ITFkek9Ow6+7WH2gwsmahCPdwyw75uw9HEO2gUZSkfyI9zBPCJOoJ2SMmg46N61YO/rNoa39Xi41oFuXysMfh36/Fp0b7bAfWAH6RGi0HglWNCbzYgJaFjRv6zGuy+b9It96N3SQvNKiV9HvSaDfFEIxXItnPs23BzJQd6DDEVM0OKsoVwBG/1VMzpXVWhbkUM2K4oJBDYuGmbKIJ0qxsAbHfRLzbjcnUbFBIpx/qH3vQv9b3U03IQ/HfFkERTzfFj8w8jSpR7GBE123uFEYAzaDRIqX/2JAtJbDat/COkd7CNBva2cMvq0MGxp0PRSCPF8BXjWG3FgNHc9XPT71Ojy3sMFdfJRCeKxEsVtKwFHwALZfCUk3tIfNR8XiJwc1LmL4dg141JPKtj3WUdNFJqLGFVPC4OkR4BxajTWsChY64wmCnMxsWPCHcutKBxMVp5mxA1S+aMComToaqTRUQknLTH62kHOVEE+VQnjahscNCy0cMBWsSI0TCQcZc5ALkEYckL5A5noWSBhfm2AecMAjbcRWV0pUTh0HE64TNf0mczcnnQyu/MilaFJCae1nw2fbz1DnVOxyGTlKeZft/Ff8x1BRssfACjTwQAAAABJRU5ErkJggg=="); }\n.python { background-image: url("/media/img/python.png?f59031cef54b"); }\n.datauri { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9YGARc5KB0XV+IAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAF1JREFUGNO9zL0NglAAxPEfdLTs4BZM4DIO4C7OwQg2JoQ9LE1exdlYvBBeZ7jqch9//q1uH4TLzw4d6+ErXMMcXuHWxId3KOETnnXXV6MJpcq2MLaI97CER3N0 vr4MkhoXe0rZigAAAABJRU5ErkJggg=="); }\n']
         self.assertEqual(out, self.cssNode.hunks)
 
 
