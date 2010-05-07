@@ -14,20 +14,22 @@ class ClosureCompilerFilter(FilterBase):
 
         command = '%s %s' % (BINARY, arguments)
 
-        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-        p.stdin.write(self.content)
-        p.stdin.close()
+        try:
+            p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+            p.stdin.write(self.content)
+            p.stdin.close()
 
-        filtered = p.stdout.read()
-        p.stdout.close()
+            filtered = p.stdout.read()
+            p.stdout.close()
 
-        err = p.stderr.read()
-        p.stderr.close()
+            err = p.stderr.read()
+            p.stderr.close()
+        except IOError, e:
+            raise FilterError(e)
 
         if p.wait() != 0:
             if not err:
                 err = 'Unable to apply Closure Compiler filter'
-
             raise FilterError(err)
 
         if self.verbose:
