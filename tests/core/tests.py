@@ -200,6 +200,20 @@ class CssMediaTestCase(TestCase):
         self.assertEqual(media, [l.get('media', None) for l in links])
         
 
+class CssMinTestCase(TestCase):
+    def test_cssmin_filter(self):
+        from compressor.filters.cssmin import CSSMinFilter
+        content = """p {
+
+
+        background: rgb(51,102,153) url('../../images/image.gif');
+
+
+        }
+"""
+        output =  "p{background:#369 url('../../images/image.gif')}"
+        self.assertEqual(output, CSSMinFilter(content).output())
+
 def render(template_string, context_dict=None):
     """A shortcut for testing template output."""
     if context_dict is None:
