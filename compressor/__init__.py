@@ -35,7 +35,6 @@ class Compressor(object):
         self.type = None
         self.output_prefix = output_prefix
         self.split_content = []
-        self.soup = BeautifulSoup(self.content)
 
     def split_contents(self):
         raise NotImplementedError('split_contents must be defined in a subclass')
@@ -47,6 +46,10 @@ class Compressor(object):
         if not self.storage.exists(basename):
             raise UncompressableFileError('"%s" does not exist' % self.storage.path(basename))
         return self.storage.path(basename)
+
+    @property
+    def soup(self):
+        return BeautifulSoup(self.content)
 
     @property
     def mtimes(self):
