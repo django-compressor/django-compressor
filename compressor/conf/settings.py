@@ -27,3 +27,6 @@ REBUILD_TIMEOUT = getattr(settings, 'COMPRESS_REBUILD_TIMEOUT', 2592000) # 30 da
 # the upper bound on how long any compression should take to be generated
 # (used against dog piling, should be a lot smaller than REBUILD_TIMEOUT
 MINT_DELAY = getattr(settings, 'COMPRESS_MINT_DELAY', 30) # 30 seconds
+
+# check for file changes only after a delay (in seconds, disabled by default)
+MTIME_DELAY = getattr(settings, 'COMPRESS_MTIME_DELAY', None)

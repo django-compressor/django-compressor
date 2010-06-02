@@ -4,7 +4,7 @@ import posixpath
 
 from compressor.filters import FilterBase, FilterError
 from compressor.conf import settings
-from compressor import get_hexdigest
+from compressor import get_hexdigest, get_mtime
 
 class CssAbsoluteFilter(FilterBase):
     def input(self, filename=None, **kwargs):
@@ -17,7 +17,7 @@ class CssAbsoluteFilter(FilterBase):
         self.media_path = self.media_path.lstrip('/')
         self.media_url = settings.MEDIA_URL.rstrip('/')
         try:
-            mtime = os.path.getmtime(filename)
+            mtime = get_mtime(filename)
             self.mtime = get_hexdigest(str(int(mtime)))[:12]
         except OSError:
             self.mtime = None

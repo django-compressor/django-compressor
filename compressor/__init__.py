@@ -5,6 +5,7 @@ from django import template
 from django.conf import settings as django_settings
 from django.template.loader import render_to_string
 
+from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.core.files.storage import get_storage_class
 
@@ -27,6 +28,16 @@ def get_hexdigest(plaintext):
         import sha
         return sha.new(plaintext).hexdigest()
 
+
+def get_mtime(filename):
+    if settings.MTIME_DELAY:
+        key = "django_compressor.mtime.%s" % filename
+        mtime = cache.get(key)
+        if mtime is None:
+            mtime = os.path.getmtime(filename)
+            cache.set(key, mtime, settings.MTIME_DELAY)
+        return mtime
+    return os.path.getmtime(filename)
 
 class Compressor(object):
 
@@ -53,7 +64,7 @@ class Compressor(object):
 
     @property
     def mtimes(self):
-        return [os.path.getmtime(h[1]) for h in self.split_contents() if h[0] == 'file']
+        return [get_mtime(h[1]) for h in self.split_contents() if h[0] == 'file']
 
     @property
     def cachekey(self):
