@@ -148,6 +148,33 @@ A list of filters that will be applied to javascript.
 The dotted path to a Django Storage backend to be used to save the
 compressed files.
 
+``COMPRESS_REBUILD_TIMEOUT``
+----------------------------
+
+:Default: ``2592000`` (30 days in seconds)
+
+The period of time after which the the compressed files are rebuilt even if
+no file changes are detected.
+
+``COMPRESS_MINT_DELAY``
+------------------------
+
+:Default: ``30`` (seconds)
+
+The upper bound on how long any compression should take to run. Prevents
+dog piling, should be a lot smaller than ``COMPRESS_REBUILD_TIMEOUT``.
+
+
+``COMPRESS_MTIME_DELAY``
+------------------------
+
+:Default: ``None``
+
+The amount of time (in seconds) to cache the result of the check of the
+modification timestamp of a file. Disabled by default. Should be smaller
+than ``COMPRESS_REBUILD_TIMEOUT`` and ``COMPRESS_MINT_DELAY``.
+
+
 Dependecies
 ***********
 
