@@ -21,6 +21,7 @@ setup(
         'compressor.conf',
         'compressor.filters',
         'compressor.filters.jsmin',
+        'compressor.filters.cssmin',
         'compressor.templatetags',
     ],
     package_data = {
