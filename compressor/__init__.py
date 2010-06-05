@@ -154,7 +154,7 @@ class Compressor(object):
     def output_inline(self):
         context = {'content': settings.COMPRESS and self.combined or self.concat()}
         if hasattr(self, 'extra_context'):
-            context.extend(self.extra_context)
+            context.update(self.extra_context)
         return render_to_string(self.template_name_inline, context)
 
 class CssCompressor(Compressor):
