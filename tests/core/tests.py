@@ -31,12 +31,12 @@ class CompressorTestCase(TestCase):
 
     def test_css_split(self):
         out = [
-            ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css'), '<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />'),
-            ('hunk', u'p { border:5px solid green;}', '<style type="text/css">p { border:5px solid green;}</style>'),
-            ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css'), '<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
+            ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css'), u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />'),
+            ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
+            ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
         ]
         split = self.cssNode.split_contents()
-        split = [(x[0], x[1], str(x[2])) for x in split]
+        split = [(x[0], x[1], self.cssNode.parser.elem_str(x[2])) for x in split]
         self.assertEqual(out, split)
 
     def test_css_hunks(self):
@@ -72,7 +72,7 @@ class CompressorTestCase(TestCase):
          ('hunk', u'obj.value = "value";', '<script type="text/javascript" charset="utf-8">obj.value = "value";</script>')
          ]
         split = self.jsNode.split_contents()
-        split = [(x[0], x[1], str(x[2])) for x in split]
+        split = [(x[0], x[1], self.jsNode.parser.elem_str(x[2])) for x in split]
         self.assertEqual(out, split)
 
     def test_js_hunks(self):
@@ -107,6 +107,26 @@ class CompressorTestCase(TestCase):
         output = u'<script type="text/javascript" src="/media/custom/nested/js/3f33b9146e12.js" charset="utf-8"></script>'
         self.assertEqual(output, JsCompressor(self.js).output())
         settings.OUTPUT_DIR = old_output_dir
+
+class LxmlCompressorTestCase(CompressorTestCase):
+
+    def test_css_split(self):
+        out = [
+            ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css'), u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">'),
+            ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
+            ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">'),
+        ]
+        split = self.cssNode.split_contents()
+        split = [(x[0], x[1], self.cssNode.parser.elem_str(x[2])) for x in split]
+        self.assertEqual(out, split)
+
+    def setUp(self):
+        self.old_parser = settings.PARSER
+        settings.PARSER = 'compressor.parser.LxmlParser'
+        super(LxmlCompressorTestCase, self).setUp()
+
+    def tearDown(self):
+        settings.PARSER = self.old_parser
 
 class CssAbsolutizingTestCase(TestCase):
     def setUp(self):

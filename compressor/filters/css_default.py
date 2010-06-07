@@ -4,7 +4,7 @@ import posixpath
 
 from compressor.filters import FilterBase, FilterError
 from compressor.conf import settings
-from compressor import get_hexdigest, get_mtime
+from compressor.utils import get_hexdigest, get_mtime
 
 class CssAbsoluteFilter(FilterBase):
     def input(self, filename=None, **kwargs):

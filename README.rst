@@ -148,6 +148,19 @@ A list of filters that will be applied to javascript.
 The dotted path to a Django Storage backend to be used to save the
 compressed files.
 
+``COMPRESS_PARSER``
+--------------------
+
+:Default: ``'compressor.parser.BeautifulSoupParser'``
+
+The backend to use when parsing the JavaScript or Stylesheet files.
+The backends included in ``compressor``:
+
+  - ``compressor.parser.BeautifulSoupParser``
+  - ``compressor.parser.LxmlParser``
+
+See `Dependencies`_ for more info about the packages you need for each parser.
+
 ``COMPRESS_REBUILD_TIMEOUT``
 ----------------------------
 
@@ -175,8 +188,21 @@ modification timestamp of a file. Disabled by default. Should be smaller
 than ``COMPRESS_REBUILD_TIMEOUT`` and ``COMPRESS_MINT_DELAY``.
 
 
-Dependecies
-***********
+Dependencies
+************
 
-* BeautifulSoup
+* BeautifulSoup_ (for the default ``compressor.parser.BeautifulSoupParser``)
 
+::
+
+    pip install BeautifulSoup
+
+* lxml_ (for the optional ``compressor.parser.LxmlParser``, requires libxml2_)
+
+::
+
+    STATIC_DEPS=true pip install lxml
+
+.. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
+.. _lxml: http://codespeak.net/lxml/
+.. _libxml2: http://xmlsoft.org/

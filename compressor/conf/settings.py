@@ -30,3 +30,6 @@ MINT_DELAY = getattr(settings, 'COMPRESS_MINT_DELAY', 30) # 30 seconds
 
 # check for file changes only after a delay (in seconds, disabled by default)
 MTIME_DELAY = getattr(settings, 'COMPRESS_MTIME_DELAY', None)
+
+# the backend to use when parsing the JavaScript or Stylesheet files
+PARSER = getattr(settings, 'COMPRESS_PARSER', 'compressor.parser.BeautifulSoupParser')
