@@ -6,6 +6,7 @@ from django.test import TestCase
 from compressor import CssCompressor, JsCompressor
 from compressor.conf import settings
 from compressor.storage import CompressorFileStorage
+from compressor.utils import get_hexdigest, get_mtime
 
 from django.conf import settings as django_settings
 
@@ -138,39 +139,44 @@ class CssAbsolutizingTestCase(TestCase):
         """
         self.cssNode = CssCompressor(self.css)
 
+    def get_hashed_mtime(self, filename, length=12):
+        filename = os.path.realpath(filename)
+        mtime = str(int(get_mtime(filename)))
+        return get_hexdigest(mtime)[:length]
+
     def test_css_absolute_filter(self):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
         settings.MEDIA_URL = 'http://media.example.com/'
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
-        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename))
 
     def test_css_absolute_filter_https(self):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
         settings.MEDIA_URL = 'https://media.example.com/'
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
-        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename))
 
     def test_css_absolute_filter_relative_path(self):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(django_settings.TEST_DIR, 'whatever', '..', 'media', 'whatever/../css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
         settings.MEDIA_URL = 'https://media.example.com/'
-        output = "p { background: url('%simages/image.gif?275088b9bcf0') }" % settings.MEDIA_URL
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename))
 
 
@@ -218,7 +224,7 @@ class CssMediaTestCase(TestCase):
         media = [u'screen', u'print', u'all', None, u'print']
         links = BeautifulSoup(node.output()).findAll('link')
         self.assertEqual(media, [l.get('media', None) for l in links])
-        
+
 
 class CssMinTestCase(TestCase):
     def test_cssmin_filter(self):
