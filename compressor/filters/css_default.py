@@ -6,6 +6,9 @@ from compressor.filters import FilterBase, FilterError
 from compressor.conf import settings
 from compressor.utils import get_hexdigest, get_mtime
 
+URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
+
+
 class CssAbsoluteFilter(FilterBase):
     def input(self, filename=None, **kwargs):
         media_root = os.path.abspath(settings.MEDIA_ROOT)
@@ -28,8 +31,7 @@ class CssAbsoluteFilter(FilterBase):
             self.media_url = '/'.join(parts[2:])
             self.protocol = '%s/' % '/'.join(parts[:2])
         self.directory_name = '/'.join([self.media_url, os.path.dirname(self.media_path)])
-        url_pattern = re.compile(r'url\(([^\)]+)\)')
-        output = url_pattern.sub(self.url_converter, self.content)
+        output = URL_PATTERN.sub(self.url_converter, self.content)
         return output
 
     def add_mtime(self, url):
