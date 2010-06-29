@@ -11,6 +11,8 @@ from compressor import filters
 from compressor.exceptions import UncompressableFileError
 from compressor.utils import get_hexdigest, get_mtime, get_class
 
+STORAGE = get_storage_class(settings.STORAGE)()
+
 class Compressor(object):
 
     def __init__(self, content, output_prefix="compressed"):
@@ -55,7 +57,7 @@ class Compressor(object):
 
     @property
     def storage(self):
-        return get_storage_class(settings.STORAGE)()
+        return STORAGE
 
     @property
     def hunks(self):
