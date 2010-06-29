@@ -123,7 +123,7 @@ compressed media will be written to.
 
 :Default: ``'CACHE'``
 
-Conttrols the directory inside `COMPRESS_ROOT` that compressed files will
+Controls the directory inside `COMPRESS_ROOT` that compressed files will
 be written to.
 
 ``COMPRESS_CSS_FILTERS``
