@@ -191,7 +191,10 @@ class CssAbsolutizingTestCase(TestCase):
 class CssDataUriTestCase(TestCase):
     def setUp(self):
         settings.COMPRESS = True
-        settings.COMPRESS_CSS_FILTERS = ['compressor.filters.datauri.CssDataUriFilter']
+        settings.COMPRESS_CSS_FILTERS = [
+            'compressor.filters.css_default.CssAbsoluteFilter',
+            'compressor.filters.datauri.CssDataUriFilter',
+        ]
         settings.MEDIA_URL = '/media/'
         self.css = """
         <link rel="stylesheet" href="/media/css/datauri.css" type="text/css" charset="utf-8">
