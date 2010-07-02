@@ -130,6 +130,11 @@ class LxmlCompressorTestCase(CompressorTestCase):
     def tearDown(self):
         settings.PARSER = self.old_parser
 
+def get_hashed_mtime(filename, length=12):
+    filename = os.path.realpath(filename)
+    mtime = str(int(get_mtime(filename)))
+    return get_hexdigest(mtime)[:length]
+
 class CssAbsolutizingTestCase(TestCase):
     def setUp(self):
         settings.COMPRESS = True
@@ -140,51 +145,46 @@ class CssAbsolutizingTestCase(TestCase):
         """
         self.cssNode = CssCompressor(self.css)
 
-    def get_hashed_mtime(self, filename, length=12):
-        filename = os.path.realpath(filename)
-        mtime = str(int(get_mtime(filename)))
-        return get_hexdigest(mtime)[:length]
-
     def test_css_absolute_filter(self):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
         settings.MEDIA_URL = 'http://media.example.com/'
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename))
 
     def test_css_absolute_filter_https(self):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
         settings.MEDIA_URL = 'https://media.example.com/'
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename))
 
     def test_css_absolute_filter_relative_path(self):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(django_settings.TEST_DIR, 'whatever', '..', 'media', 'whatever/../css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
         settings.MEDIA_URL = 'https://media.example.com/'
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, self.get_hashed_mtime(filename))
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename))
 
 
     def test_css_hunks(self):
         hash_dict = {
-            'hash1': self.get_hashed_mtime(os.path.join(settings.MEDIA_ROOT, 'css/url/url1.css')),
-            'hash2': self.get_hashed_mtime(os.path.join(settings.MEDIA_ROOT, 'css/url/2/url2.css')),
+            'hash1': get_hashed_mtime(os.path.join(settings.MEDIA_ROOT, 'css/url/url1.css')),
+            'hash2': get_hashed_mtime(os.path.join(settings.MEDIA_ROOT, 'css/url/2/url2.css')),
         }
         out = [u"p { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\n" % hash_dict,
                u"p { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\n" % hash_dict]
