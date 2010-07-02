@@ -1,5 +1,6 @@
 from django.core.files.storage import FileSystemStorage
 from django.core.files.storage import get_storage_class
+from django.utils.functional import LazyObject
 
 from compressor.conf import settings
 
@@ -18,3 +19,9 @@ class CompressorFileStorage(FileSystemStorage):
             base_url = settings.MEDIA_URL
         super(CompressorFileStorage, self).__init__(location, base_url,
                                                     *args, **kwargs)
+
+class DefaultStorage(LazyObject):
+    def _setup(self):
+        self._wrapped = get_storage_class(settings.STORAGE)()
+
+default_storage = DefaultStorage()

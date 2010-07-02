@@ -1,17 +1,13 @@
 import os
 
-
 from django.conf import settings as django_settings
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
-from django.core.files.storage import get_storage_class
 
 from compressor.conf import settings
 from compressor import filters
 from compressor.exceptions import UncompressableFileError
 from compressor.utils import get_hexdigest, get_mtime, get_class
-
-STORAGE = get_storage_class(settings.STORAGE)()
 
 class Compressor(object):
 
@@ -57,7 +53,8 @@ class Compressor(object):
 
     @property
     def storage(self):
-        return STORAGE
+        from compressor.storage import default_storage
+        return default_storage
 
     @property
     def hunks(self):

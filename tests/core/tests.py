@@ -1,16 +1,17 @@
-import os, re
+import os
+import re
 import gzip
+from BeautifulSoup import BeautifulSoup
 
 from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
-from compressor import CssCompressor, JsCompressor
+from django.core.files.storage import get_storage_class
+from django.conf import settings as django_settings
+
+from compressor import CssCompressor, JsCompressor, storage
 from compressor.conf import settings
 from compressor.storage import CompressorFileStorage
 from compressor.utils import get_hexdigest, get_mtime
-
-from django.conf import settings as django_settings
-
-from BeautifulSoup import BeautifulSoup
 
 
 class CompressorTestCase(TestCase):
@@ -332,12 +333,12 @@ class TestStorage(CompressorFileStorage):
 
 class StorageTestCase(TestCase):
     def setUp(self):
-        self._storage = settings.STORAGE
-        settings.STORAGE = 'core.tests.TestStorage'
+        self._storage = storage.default_storage
+        storage.default_storage = get_storage_class('core.tests.TestStorage')()
         settings.COMPRESS = True
 
     def tearDown(self):
-        settings.STORAGE = self._storage
+        storage.default_storage = self._storage
 
     def test_css_tag_with_storage(self):
         template = u"""{% load compress %}{% compress css %}
