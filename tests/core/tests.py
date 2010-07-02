@@ -182,9 +182,12 @@ class CssAbsolutizingTestCase(TestCase):
 
 
     def test_css_hunks(self):
-        out = [u"p { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\n",
-               u"p { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\np { background: url('/media/images/test.png?86ea855a37ed'); }\n",
-               ]
+        hash_dict = {
+            'hash1': self.get_hashed_mtime(os.path.join(settings.MEDIA_ROOT, 'css/url/url1.css')),
+            'hash2': self.get_hashed_mtime(os.path.join(settings.MEDIA_ROOT, 'css/url/2/url2.css')),
+        }
+        out = [u"p { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\n" % hash_dict,
+               u"p { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\n" % hash_dict]
         self.assertEqual(out, self.cssNode.hunks)
 
 
