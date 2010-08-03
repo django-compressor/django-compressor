@@ -33,3 +33,6 @@ MTIME_DELAY = getattr(settings, 'COMPRESS_MTIME_DELAY', None)
 
 # the backend to use when parsing the JavaScript or Stylesheet files
 PARSER = getattr(settings, 'COMPRESS_PARSER', 'compressor.parser.BeautifulSoupParser')
+
+# Allows changing verbosity from the settings.
+VERBOSE = getattr(settings, "COMPRESS_VERBOSE", False)

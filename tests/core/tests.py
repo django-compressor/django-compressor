@@ -357,3 +357,10 @@ class StorageTestCase(TestCase):
         context = { 'MEDIA_URL': settings.MEDIA_URL }
         out = u'<link rel="stylesheet" href="/media/CACHE/css/5b231a62e9a6.css.gz" type="text/css" charset="utf-8" />'
         self.assertEqual(out, render(template, context))
+
+
+class VerboseTestCase(CompressorTestCase):
+
+    def setUp(self):
+        super(VerboseTestCase, self).setUp()
+        setattr(settings, "COMPRESS_VERBOSE", True)
