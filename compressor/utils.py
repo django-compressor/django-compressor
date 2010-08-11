@@ -11,10 +11,12 @@ def get_hexdigest(plaintext):
         import sha
         return sha.new(plaintext).hexdigest()
 
+def get_mtime_cachekey(filename):
+    return "django_compressor.mtime.%s" % filename
 
 def get_mtime(filename):
     if settings.MTIME_DELAY:
-        key = "django_compressor.mtime.%s" % filename
+        key = get_mtime_cachekey(filename)
         mtime = cache.get(key)
         if mtime is None:
             mtime = os.path.getmtime(filename)
