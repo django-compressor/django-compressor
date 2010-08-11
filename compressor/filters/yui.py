@@ -1,23 +1,19 @@
 import subprocess
 
-from django.conf import settings
-
+from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
 
-BINARY = getattr(settings, 'COMPRESS_YUI_BINARY', 'java -jar yuicompressor.jar')
-CSS_ARGUMENTS = getattr(settings, 'COMPRESS_YUI_CSS_ARGUMENTS', '')
-JS_ARGUMENTS = getattr(settings, 'COMPRESS_YUI_JS_ARGUMENTS', '')
 
 class YUICompressorFilter(FilterBase):
 
     def output(self, **kwargs):
         arguments = ''
         if self.type == 'js':
-            arguments = JS_ARGUMENTS
+            arguments = settings.YUI_JS_ARGUMENTS
         if self.type == 'css':
-            arguments = CSS_ARGUMENTS
-            
-        command = '%s --type=%s %s' % (BINARY, self.type, arguments)
+            arguments = settings.YUI_CSS_ARGUMENTS
+
+        command = '%s --type=%s %s' % (settings.YUI_BINARY, self.type, arguments)
 
         if self.verbose:
             command += ' --verbose'

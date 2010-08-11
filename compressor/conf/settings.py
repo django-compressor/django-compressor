@@ -11,7 +11,20 @@ COMPRESS = getattr(settings, 'COMPRESS', not settings.DEBUG)
 COMPRESS_CSS_FILTERS = getattr(settings, 'COMPRESS_CSS_FILTERS', ['compressor.filters.css_default.CssAbsoluteFilter'])
 COMPRESS_JS_FILTERS = getattr(settings, 'COMPRESS_JS_FILTERS', ['compressor.filters.jsmin.JSMinFilter'])
 
-COMPRESS_LESSC_BINARY = getattr(settings, 'COMPRESS_LESSC_BINARY', 'lessc')
+COMPRESS_LESSC_BINARY = LESSC_BINARY = getattr(settings, 'COMPRESS_LESSC_BINARY', 'lessc')
+
+CLOSURE_COMPILER_BINARY = getattr(settings, 'COMPRESS_CLOSURE_COMPILER_BINARY', 'java -jar compiler.jar')
+CLOSURE_COMPILER_ARGUMENTS = getattr(settings, 'COMPRESS_CLOSURE_COMPILER_ARGUMENTS', '')
+
+CSSTIDY_BINARY = getattr(settings, 'CSSTIDY_BINARY',
+    getattr(settings, 'COMPRESS_CSSTIDY_BINARY', 'csstidy'))
+CSSTIDY_ARGUMENTS = getattr(settings, 'CSSTIDY_ARGUMENTS',
+    getattr(settings, 'COMPRESS_CSSTIDY_ARGUMENTS', '--template=highest'))
+
+YUI_BINARY = getattr(settings, 'COMPRESS_YUI_BINARY', 'java -jar yuicompressor.jar')
+YUI_CSS_ARGUMENTS = getattr(settings, 'COMPRESS_YUI_CSS_ARGUMENTS', '')
+YUI_JS_ARGUMENTS = getattr(settings, 'COMPRESS_YUI_JS_ARGUMENTS', '')
+
 
 if COMPRESS_CSS_FILTERS is None:
     COMPRESS_CSS_FILTERS = []
