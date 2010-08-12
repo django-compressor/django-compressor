@@ -50,7 +50,10 @@ class Command(NoArgsCommand):
         if (options['add'] and options['clean']) or (not options['add'] and not options['clean']):
             raise CommandError('Please specify either "--add" or "--clean"')
 
-        added_files = 0
+
+        files_to_add = set()
+        keys_to_delete = set()
+
         for root, dirs, files in os.walk(settings.MEDIA_ROOT, followlinks=options['follow_links']):
             for dir_ in dirs:
                 if self.is_ignored(dir_):
@@ -62,9 +65,15 @@ class Command(NoArgsCommand):
                 if self.is_ignored(os.path.join(common, filename)):
                     continue
                 filename = os.path.join(root, filename)
-                cache.delete(get_mtime_cachekey(filename))
+                keys_to_delete.add(get_mtime_cachekey(filename))
                 if options['add']:
-                    added_files += 1
-                    get_mtime(filename)
-        if added_files:
-            print "Added mtimes of %d files to cache." % added_files
+                    files_to_add.add(filename)
+
+        if keys_to_delete:
+            cache.delete_many(list(keys_to_delete))
+            print "Deleted mtimes of %d files from the cache." % len(keys_to_delete)
+
+        if files_to_add:
+            for filename in files_to_add:
+                get_mtime(filename)
+            print "Added mtimes of %d files to cache." % len(files_to_add)
