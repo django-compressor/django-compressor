@@ -8,7 +8,7 @@ README = read('README.rst')
 
 setup(
     name = "django_compressor",
-    version = "0.6a5",
+    version = "0.6a6",
     url = 'http://github.com/mintchaos/django_compressor',
     license = 'BSD',
     description = "Compresses linked and inline javascript or CSS into a single cached file.",
@@ -23,6 +23,8 @@ setup(
         'compressor.filters.jsmin',
         'compressor.filters.cssmin',
         'compressor.templatetags',
+        'compressor.management',
+        'compressor.management.commands',
     ],
     package_data = {
         'compressor': [
