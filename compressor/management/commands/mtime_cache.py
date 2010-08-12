@@ -50,6 +50,9 @@ class Command(NoArgsCommand):
         if (options['add'] and options['clean']) or (not options['add'] and not options['clean']):
             raise CommandError('Please specify either "--add" or "--clean"')
 
+        if not settings.MTIME_DELAY:
+            raise CommandError('mtime caching is currently disabled. Please '
+                'set the COMPRESS_MTIME_DELAY setting to a number of seconds.')
 
         files_to_add = set()
         keys_to_delete = set()
