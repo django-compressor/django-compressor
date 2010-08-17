@@ -8,6 +8,7 @@ OUTPUT_DIR = getattr(settings, 'COMPRESS_OUTPUT_DIR', 'CACHE')
 STORAGE = getattr(settings, 'COMPRESS_STORAGE', 'compressor.storage.CompressorFileStorage')
 
 COMPRESS = getattr(settings, 'COMPRESS', not settings.DEBUG)
+COMPRESS_OFFLINE = getattr(settings, 'COMPRESS_OFFLINE', False)
 COMPRESS_CSS_FILTERS = getattr(settings, 'COMPRESS_CSS_FILTERS', ['compressor.filters.css_default.CssAbsoluteFilter'])
 COMPRESS_JS_FILTERS = getattr(settings, 'COMPRESS_JS_FILTERS', ['compressor.filters.jsmin.JSMinFilter'])
 
@@ -25,6 +26,12 @@ YUI_BINARY = getattr(settings, 'COMPRESS_YUI_BINARY', 'java -jar yuicompressor.j
 YUI_CSS_ARGUMENTS = getattr(settings, 'COMPRESS_YUI_CSS_ARGUMENTS', '')
 YUI_JS_ARGUMENTS = getattr(settings, 'COMPRESS_YUI_JS_ARGUMENTS', '')
 
+TEMPLATE_LOADERS = getattr(settings,
+                           "COMPRESS_TEMPLATE_LOADERS",
+                           getattr(settings, "TEMPLATE_LOADERS", ('django.template.loaders.app_directories.Loader', ))
+)
+
+TEMPLATE_GLOB = getattr(settings, "COMPRESS_TEMPLATE_GLOB", ('*.html', '*.htm', '*.txt'))
 
 if COMPRESS_CSS_FILTERS is None:
     COMPRESS_CSS_FILTERS = []
