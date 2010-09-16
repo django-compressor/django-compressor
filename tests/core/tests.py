@@ -12,7 +12,7 @@ from django.core.cache.backends import dummy
 from compressor import CssCompressor, JsCompressor, storage
 from compressor.conf import settings
 from compressor.storage import CompressorFileStorage
-from compressor.utils import get_hexdigest, get_mtime
+from compressor.utils import get_hashed_mtime
 
 
 class CompressorTestCase(TestCase):
@@ -111,6 +111,7 @@ class CompressorTestCase(TestCase):
         self.assertEqual(output, JsCompressor(self.js).output())
         settings.OUTPUT_DIR = old_output_dir
 
+
 class LxmlCompressorTestCase(CompressorTestCase):
 
     def test_css_split(self):
@@ -131,10 +132,6 @@ class LxmlCompressorTestCase(CompressorTestCase):
     def tearDown(self):
         settings.PARSER = self.old_parser
 
-def get_hashed_mtime(filename, length=12):
-    filename = os.path.realpath(filename)
-    mtime = str(int(get_mtime(filename)))
-    return get_hexdigest(mtime)[:length]
 
 class CssAbsolutizingTestCase(TestCase):
     def setUp(self):
@@ -180,7 +177,6 @@ class CssAbsolutizingTestCase(TestCase):
         settings.MEDIA_URL = 'https://media.example.com/'
         output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename))
-
 
     def test_css_hunks(self):
         hash_dict = {
@@ -326,6 +322,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}"""
         self.assertRaises(TemplateSyntaxError, render, template, {})
 
+
 class TestStorage(CompressorFileStorage):
     """
     Test compressor storage that gzips storage files
@@ -338,6 +335,7 @@ class TestStorage(CompressorFileStorage):
         out = gzip.open(u'%s.gz' % self.path(filename), 'wb')
         out.writelines(open(self.path(filename), 'rb'))
         out.close()
+
 
 class StorageTestCase(TestCase):
     def setUp(self):

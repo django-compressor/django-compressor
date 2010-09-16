@@ -24,6 +24,11 @@ def get_mtime(filename):
         return mtime
     return os.path.getmtime(filename)
 
+def get_hashed_mtime(filename, length=12):
+    filename = os.path.realpath(filename)
+    mtime = str(int(get_mtime(filename)))
+    return get_hexdigest(mtime)[:length]
+
 
 def get_class(class_string, exception=FilterError):
     """
