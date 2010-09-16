@@ -23,3 +23,6 @@ TEMPLATE_LOADERS = (
 TEMPLATE_DIRS = (
     join(TEST_DIR, 'templates'),
 )
+
+COMPRESS_CACHE_BACKEND = "dummy://"
+

@@ -39,6 +39,13 @@ they will be silently stripped.
 If COMPRESS is False (defaults to the opposite of DEBUG) the compress tag
 simply returns exactly what it was given, to ease development.
 
+.. note::
+
+    For production sites it is advisable to use a real cache backend such as
+    memcached to speed up the checks of compressed files. Make sure you
+    set the ``CACHE_BACKEND`` setting (or ``COMPRESS_CACHE_BACKEND``)
+    appropriately.
+
 
 CSS Notes:
 **********
@@ -160,6 +167,14 @@ The backends included in ``compressor``:
   - ``compressor.parser.LxmlParser``
 
 See `Dependencies`_ for more info about the packages you need for each parser.
+
+``COMPRESS_CACHE_BACKEND``
+--------------------------
+
+:Default: ``CACHE_BACKEND``
+
+The backend to use for caching, in case you want to use a different cache
+backend for compressor. Defaults to the ``CACHE_BACKEND`` setting.
 
 ``COMPRESS_REBUILD_TIMEOUT``
 ----------------------------

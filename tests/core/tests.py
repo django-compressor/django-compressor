@@ -7,6 +7,7 @@ from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
 from django.core.files.storage import get_storage_class
 from django.conf import settings as django_settings
+from django.core.cache.backends import dummy
 
 from compressor import CssCompressor, JsCompressor, storage
 from compressor.conf import settings
@@ -364,3 +365,10 @@ class VerboseTestCase(CompressorTestCase):
     def setUp(self):
         super(VerboseTestCase, self).setUp()
         setattr(settings, "COMPRESS_VERBOSE", True)
+
+
+class CacheBackendTestCase(CompressorTestCase):
+
+    def test_correct_backend(self):
+        from compressor.cache import cache
+        self.assertEqual(cache.__class__, dummy.CacheClass)

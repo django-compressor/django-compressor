@@ -1,5 +1,5 @@
 import os
-from django.core.cache import cache
+from compressor.cache import cache
 from compressor.conf import settings
 from compressor.exceptions import FilterError
 

@@ -1,6 +1,4 @@
-from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
-
 
 MEDIA_URL = getattr(settings, 'COMPRESS_URL', settings.MEDIA_URL)
 MEDIA_ROOT = getattr(settings, 'COMPRESS_ROOT', settings.MEDIA_ROOT)
@@ -49,3 +47,6 @@ PARSER = getattr(settings, 'COMPRESS_PARSER', 'compressor.parser.BeautifulSoupPa
 
 # Allows changing verbosity from the settings.
 VERBOSE = getattr(settings, "COMPRESS_VERBOSE", False)
+
+# the cache backend to use
+CACHE_BACKEND = getattr(settings, 'COMPRESS_CACHE_BACKEND', settings.CACHE_BACKEND)
