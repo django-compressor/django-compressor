@@ -4,3 +4,4 @@ dist
 MANIFEST
 *.pyc
 *.egg-info
+tests/media/
