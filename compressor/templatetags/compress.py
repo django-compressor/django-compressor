@@ -4,6 +4,7 @@ from django import template
 from django.core.cache import cache
 from compressor import CssCompressor, JsCompressor
 from compressor.conf import settings
+from compressor.utils import make_offline_cache_key
 
 
 OUTPUT_FILE = 'file'
@@ -36,6 +37,11 @@ class CompressorNode(template.Node):
         return cache.set(key, packed_val, real_timeout)
 
     def render(self, context):
+        if settings.COMPRESS and settings.COMPRESS_OFFLINE and not context.get("_ignore_offline_setting", False):
+            key = make_offline_cache_key(self.nodelist)
+            content = cache.get(key)
+            if content:
+                return content
         content = self.nodelist.render(context)
         if not settings.COMPRESS or not len(content.strip()):
             return content

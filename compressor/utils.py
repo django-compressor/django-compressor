@@ -14,6 +14,9 @@ def get_hexdigest(plaintext):
 def get_mtime_cachekey(filename):
     return "django_compressor.mtime.%s" % filename
 
+def make_offline_cache_key(source):
+    return "compress-offline-%s" % get_hexdigest("".join(str(s) for s in source))
+
 def get_mtime(filename):
     if settings.MTIME_DELAY:
         key = get_mtime_cachekey(filename)
