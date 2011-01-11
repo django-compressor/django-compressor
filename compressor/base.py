@@ -25,12 +25,12 @@ class Compressor(object):
         try:
             base_url = self.storage.base_url
         except AttributeError:
-            base_url = django_settings.MEDIA_URL
+            base_url = settings.MEDIA_URL
 
         if not url.startswith(base_url):
             raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, base_url))
         basename = url.replace(base_url, "", 1)
-        filename = os.path.join(django_settings.MEDIA_ROOT, basename)
+        filename = os.path.join(settings.MEDIA_ROOT, basename)
         if not os.path.exists(filename):
             raise UncompressableFileError('"%s" does not exist' % filename)
         return filename
