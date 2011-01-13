@@ -1,6 +1,11 @@
+from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 
 MEDIA_URL = getattr(settings, 'COMPRESS_URL', settings.MEDIA_URL)
+if not MEDIA_URL.endswith('/'):
+    raise ImproperlyConfigured(
+        'The MEDIA_URL and COMPRESS_URL settings must have a trailing slash.')
+
 MEDIA_ROOT = getattr(settings, 'COMPRESS_ROOT', settings.MEDIA_ROOT)
 OUTPUT_DIR = getattr(settings, 'COMPRESS_OUTPUT_DIR', 'CACHE')
 STORAGE = getattr(settings, 'COMPRESS_STORAGE', 'compressor.storage.CompressorFileStorage')
