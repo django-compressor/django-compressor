@@ -5,12 +5,14 @@ Compresses linked and inline javascript or CSS into a single cached file.
 
 Syntax::
 
+    {% load compress %}
     {% compress <js/css> %}
     <html of inline or linked JS/CSS>
     {% endcompress %}
 
 Examples::
 
+    {% load compress %}
     {% compress css %}
     <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
     <style type="text/css">p { border:5px solid green;}</style>
@@ -23,6 +25,7 @@ Which would be rendered something like::
 
 or::
 
+    {% load compress %}
     {% compress js %}
     <script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
