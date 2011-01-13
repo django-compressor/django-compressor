@@ -22,12 +22,18 @@ class Compressor(object):
         raise NotImplementedError('split_contents must be defined in a subclass')
 
     def get_filename(self, url):
-        if not url.startswith(self.storage.base_url):
-            raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, self.storage.base_url))
-        basename = url.replace(self.storage.base_url, "", 1)
-        if not self.storage.exists(basename):
-            raise UncompressableFileError('"%s" does not exist' % self.storage.path(basename))
-        return self.storage.path(basename)
+        try:
+            base_url = self.storage.base_url
+        except AttributeError:
+            base_url = settings.MEDIA_URL
+
+        if not url.startswith(base_url):
+            raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, base_url))
+        basename = url.replace(base_url, "", 1)
+        filename = os.path.join(settings.MEDIA_ROOT, basename)
+        if not os.path.exists(filename):
+            raise UncompressableFileError('"%s" does not exist' % filename)
+        return filename
 
     def _get_parser(self):
         if self._parser:
