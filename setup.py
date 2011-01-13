@@ -1,5 +1,5 @@
 import os
-from distutils.core import setup
+from setuptools import setup
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -31,7 +31,7 @@ setup(
                 'templates/compressor/*.html',
             ],
     },
-    requires = [
+    install_requires = [
         'BeautifulSoup',
     ],
     classifiers = [
@@ -42,5 +42,6 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP',
-    ]
+    ],
+    zip_safe = False,
 )
