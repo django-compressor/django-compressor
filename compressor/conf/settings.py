@@ -54,4 +54,11 @@ PARSER = getattr(settings, 'COMPRESS_PARSER', 'compressor.parser.BeautifulSoupPa
 VERBOSE = getattr(settings, "COMPRESS_VERBOSE", False)
 
 # the cache backend to use
-CACHE_BACKEND = getattr(settings, 'COMPRESS_CACHE_BACKEND', settings.CACHE_BACKEND)
+CACHE_BACKEND = getattr(settings, 'COMPRESS_CACHE_BACKEND', None)
+if CACHE_BACKEND is None:
+    # If we are on Django 1.3 AND using the new CACHES setting...
+    if getattr(settings, "CACHES", None):
+        CACHE_BACKEND = "default"
+    else:
+        # fallback for people still using the old CACHE_BACKEND setting
+        CACHE_BACKEND = settings.CACHE_BACKEND
