@@ -45,9 +45,8 @@ simply returns exactly what it was given, to ease development.
 .. note::
 
     For production sites it is advisable to use a real cache backend such as
-    memcached to speed up the checks of compressed files. Make sure you
-    set the ``CACHE_BACKEND`` setting (or ``COMPRESS_CACHE_BACKEND``)
-    appropriately.
+    memcached to speed up the checks of compressed files. Make sure you set
+    your Django cache backend appropriately.
 
 
 CSS Notes:
@@ -174,10 +173,18 @@ See `Dependencies`_ for more info about the packages you need for each parser.
 ``COMPRESS_CACHE_BACKEND``
 --------------------------
 
-:Default: ``CACHE_BACKEND``
+:Default: ``"default"`` or ``CACHE_BACKEND``
 
 The backend to use for caching, in case you want to use a different cache
-backend for compressor. Defaults to the ``CACHE_BACKEND`` setting.
+backend for compressor.
+
+If you have set the ``CACHES`` setting (new in Django 1.3),
+``COMPRESS_CACHE_BACKEND`` defaults to ``"default"``, which is the alias for
+the default cache backend. You can set it to a different alias that you have
+configured in your ``CACHES`` setting.
+
+If you have not set ``CACHES`` and are still using the old ``CACHE_BACKEND``
+setting, ``COMPRESS_CACHE_BACKEND`` defaults to the ``CACHE_BACKEND`` setting.
 
 ``COMPRESS_REBUILD_TIMEOUT``
 ----------------------------
