@@ -61,3 +61,18 @@ def get_mod_func(callback):
     except ValueError:
         return callback, ''
     return callback[:dot], callback[dot+1:]
+
+
+def walk(root, topdown=True, onerror=None, followlinks=False):
+    """
+    A version of os.walk that can follow symlinks for Python < 2.6
+    """
+    for dirpath, dirnames, filenames in os.walk(root, topdown, onerror):
+        yield (dirpath, dirnames, filenames)
+        if followlinks:
+            for d in dirnames:
+                p = os.path.join(dirpath, d)
+                if os.path.islink(p):
+                    for link_dirpath, link_dirnames, link_filenames in walk(p):
+                        yield (link_dirpath, link_dirnames, link_filenames)
+
