@@ -1,5 +1,6 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
+from finddata import find_package_data
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -13,23 +14,10 @@ setup(
     license = 'BSD',
     description = "Compresses linked and inline javascript or CSS into a single cached file.",
     long_description = README,
-    packages = [
-        'compressor',
-        'compressor.conf',
-        'compressor.filters',
-        'compressor.filters.jsmin',
-        'compressor.filters.cssmin',
-        'compressor.templatetags',
-        'compressor.management',
-        'compressor.management.commands',
-    ],
     author = 'Jannis Leidel',
     author_email = 'jannis@leidel.info',
-    package_data = {
-        'compressor': [
-                'templates/compressor/*.html',
-            ],
-    },
+    packages = find_packages(),
+    package_data = find_package_data('compressor'),
     install_requires = [
         'BeautifulSoup',
     ],
