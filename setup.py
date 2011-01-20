@@ -33,6 +33,9 @@ setup(
     install_requires = [
         'BeautifulSoup',
     ],
+    tests_require = [
+        'Django', 'lxml', 'BeautifulSoup',
+    ],
     classifiers = [
         'Development Status :: 4 - Beta',
         'Framework :: Django',
@@ -42,5 +45,6 @@ setup(
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP',
     ],
+    test_suite='compressor.tests.runtests.runtests',
     zip_safe = False,
 )

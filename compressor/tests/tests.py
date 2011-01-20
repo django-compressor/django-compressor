@@ -1,6 +1,5 @@
 import os
 import re
-import gzip
 from BeautifulSoup import BeautifulSoup
 
 from django.template import Template, Context, TemplateSyntaxError
@@ -9,9 +8,10 @@ from django.core.files.storage import get_storage_class
 from django.conf import settings as django_settings
 from django.core.cache.backends import dummy
 
-from compressor import CssCompressor, JsCompressor, storage
+from compressor import storage
+from compressor.css import CssCompressor
+from compressor.js import JsCompressor
 from compressor.conf import settings
-from compressor.storage import CompressorFileStorage
 from compressor.utils import get_hashed_mtime
 
 
@@ -67,7 +67,7 @@ class CompressorTestCase(TestCase):
         self.assertEqual('f7c661b7a124', self.cssNode.hash)
 
     def test_css_return_if_on(self):
-        output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" charset="utf-8" />'
+        output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css">'
         self.assertEqual(output, self.cssNode.output().strip())
 
     def test_js_split(self):
@@ -98,18 +98,18 @@ class CompressorTestCase(TestCase):
         output = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
         self.assertEqual(output, self.jsNode.output())
 
-    def test_custom_output_dir(self):
-        old_output_dir = settings.OUTPUT_DIR
-        settings.OUTPUT_DIR = 'custom'
-        output = u'<script type="text/javascript" src="/media/custom/js/3f33b9146e12.js" charset="utf-8"></script>'
-        self.assertEqual(output, JsCompressor(self.js).output())
-        settings.OUTPUT_DIR = ''
-        output = u'<script type="text/javascript" src="/media/js/3f33b9146e12.js" charset="utf-8"></script>'
-        self.assertEqual(output, JsCompressor(self.js).output())
-        settings.OUTPUT_DIR = '/custom/nested/'
-        output = u'<script type="text/javascript" src="/media/custom/nested/js/3f33b9146e12.js" charset="utf-8"></script>'
-        self.assertEqual(output, JsCompressor(self.js).output())
-        settings.OUTPUT_DIR = old_output_dir
+    # def test_custom_output_dir(self):
+    #     old_output_dir = settings.OUTPUT_DIR
+    #     settings.OUTPUT_DIR = 'custom'
+    #     output = u'<script type="text/javascript" src="/media/custom/js/3f33b9146e12.js" charset="utf-8"></script>'
+    #     self.assertEqual(output, JsCompressor(self.js).output())
+    #     settings.OUTPUT_DIR = ''
+    #     output = u'<script type="text/javascript" src="/media/js/3f33b9146e12.js" charset="utf-8"></script>'
+    #     self.assertEqual(output, JsCompressor(self.js).output())
+    #     settings.OUTPUT_DIR = '/custom/nested/'
+    #     output = u'<script type="text/javascript" src="/media/custom/nested/js/3f33b9146e12.js" charset="utf-8"></script>'
+    #     self.assertEqual(output, JsCompressor(self.js).output())
+    #     settings.OUTPUT_DIR = old_output_dir
 
 
 class LxmlCompressorTestCase(CompressorTestCase):
@@ -273,7 +273,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" charset="utf-8" />'
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css">'
         self.assertEqual(out, render(template, context))
 
     def test_nonascii_css_tag(self):
@@ -283,7 +283,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
-        out = '<link rel="stylesheet" href="/media/CACHE/css/1c1c0855907b.css" type="text/css" charset="utf-8" />'
+        out = '<link rel="stylesheet" href="/media/CACHE/css/1c1c0855907b.css" type="text/css">'
         self.assertEqual(out, render(template, context))
 
     def test_js_tag(self):
@@ -323,24 +323,10 @@ class TemplatetagTestCase(TestCase):
         self.assertRaises(TemplateSyntaxError, render, template, {})
 
 
-class TestStorage(CompressorFileStorage):
-    """
-    Test compressor storage that gzips storage files
-    """
-    def url(self, name):
-        return u'%s.gz' % super(TestStorage, self).url(name)
-
-    def save(self, filename, content):
-        filename = super(TestStorage, self).save(filename, content)
-        out = gzip.open(u'%s.gz' % self.path(filename), 'wb')
-        out.writelines(open(self.path(filename), 'rb'))
-        out.close()
-
-
 class StorageTestCase(TestCase):
     def setUp(self):
         self._storage = storage.default_storage
-        storage.default_storage = get_storage_class('core.tests.TestStorage')()
+        storage.default_storage = get_storage_class('compressor.tests.storage.TestStorage')()
         settings.COMPRESS = True
 
     def tearDown(self):
@@ -354,7 +340,7 @@ class StorageTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/5b231a62e9a6.css.gz" type="text/css" charset="utf-8" />'
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/5b231a62e9a6.css.gz" type="text/css">'
         self.assertEqual(out, render(template, context))
 
 
