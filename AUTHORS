@@ -1,4 +1,5 @@
 Christian Metts
+Jannis Leidel
 
 Django Compressor's filters started life as the filters from Andreas Pelme's
 django-compress.
@@ -12,7 +13,6 @@ Carl Meyer
 Chris Adams
 David Ziegler
 Gert Van Gool
-Jannis Leidel
 Justin Lilly
 Maciek Szczesniak
 Mehmet S. Catalbas

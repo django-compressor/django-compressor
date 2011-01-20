@@ -9,13 +9,10 @@ README = read('README.rst')
 setup(
     name = "django_compressor",
     version = "0.6a8",
-    url = 'http://github.com/mintchaos/django_compressor',
+    url = 'http://github.com/jezdez/django_compressor',
     license = 'BSD',
     description = "Compresses linked and inline javascript or CSS into a single cached file.",
     long_description = README,
-
-    author = 'Christian Metts',
-    author_email = 'xian@mintchaos.com',
     packages = [
         'compressor',
         'compressor.conf',
@@ -26,6 +23,8 @@ setup(
         'compressor.management',
         'compressor.management.commands',
     ],
+    author = 'Jannis Leidel',
+    author_email = 'jannis@leidel.info',
     package_data = {
         'compressor': [
                 'templates/compressor/*.html',
