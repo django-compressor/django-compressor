@@ -4,3 +4,5 @@ dist
 MANIFEST
 *.pyc
 *.egg-info
+.tox/
+*.egg
