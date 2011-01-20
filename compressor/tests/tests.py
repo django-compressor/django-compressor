@@ -98,18 +98,18 @@ class CompressorTestCase(TestCase):
         output = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
         self.assertEqual(output, self.jsNode.output())
 
-    # def test_custom_output_dir(self):
-    #     old_output_dir = settings.OUTPUT_DIR
-    #     settings.OUTPUT_DIR = 'custom'
-    #     output = u'<script type="text/javascript" src="/media/custom/js/3f33b9146e12.js" charset="utf-8"></script>'
-    #     self.assertEqual(output, JsCompressor(self.js).output())
-    #     settings.OUTPUT_DIR = ''
-    #     output = u'<script type="text/javascript" src="/media/js/3f33b9146e12.js" charset="utf-8"></script>'
-    #     self.assertEqual(output, JsCompressor(self.js).output())
-    #     settings.OUTPUT_DIR = '/custom/nested/'
-    #     output = u'<script type="text/javascript" src="/media/custom/nested/js/3f33b9146e12.js" charset="utf-8"></script>'
-    #     self.assertEqual(output, JsCompressor(self.js).output())
-    #     settings.OUTPUT_DIR = old_output_dir
+    def test_custom_output_dir(self):
+        old_output_dir = settings.OUTPUT_DIR
+        settings.OUTPUT_DIR = 'custom'
+        output = u'<script type="text/javascript" src="/media/custom/js/3f33b9146e12.js" charset="utf-8"></script>'
+        self.assertEqual(output, JsCompressor(self.js).output())
+        settings.OUTPUT_DIR = ''
+        output = u'<script type="text/javascript" src="/media/js/3f33b9146e12.js" charset="utf-8"></script>'
+        self.assertEqual(output, JsCompressor(self.js).output())
+        settings.OUTPUT_DIR = '/custom/nested/'
+        output = u'<script type="text/javascript" src="/media/custom/nested/js/3f33b9146e12.js" charset="utf-8"></script>'
+        self.assertEqual(output, JsCompressor(self.js).output())
+        settings.OUTPUT_DIR = old_output_dir
 
 
 class LxmlCompressorTestCase(CompressorTestCase):
