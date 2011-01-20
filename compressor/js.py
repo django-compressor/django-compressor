@@ -1,7 +1,9 @@
 from django.conf import settings as django_settings
 
 from compressor.conf import settings
-from compressor.base import Compressor, UncompressableFileError
+from compressor.base import Compressor
+from compressor.exceptions import UncompressableFileError
+
 
 class JsCompressor(Compressor):
 

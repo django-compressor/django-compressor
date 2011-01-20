@@ -2,7 +2,8 @@ import time
 
 from django import template
 
-from compressor import CssCompressor, JsCompressor
+from compressor.css import CssCompressor
+from compressor.js import JsCompressor
 from compressor.cache import cache
 from compressor.conf import settings
 
