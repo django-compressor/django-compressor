@@ -102,7 +102,7 @@ README = read('README.rst')
 setup(
     name = "django_compressor",
     version = "0.6a8",
-    url = 'http://github.com/jezdez/django_compressor',
+    url = 'http://django_compressor.readthedocs.org/',
     license = 'BSD',
     description = "Compresses linked and inline javascript or CSS into a single cached file.",
     long_description = README,
