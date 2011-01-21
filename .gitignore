@@ -6,3 +6,4 @@ MANIFEST
 *.egg-info
 .tox/
 *.egg
+docs/_build/
