@@ -15,38 +15,54 @@ from optparse import make_option
 from django.core.cache import cache
 from compressor.utils import make_offline_cache_key
 
-__author__ = 'ulo'
 
 class Command(NoArgsCommand):
+    """Management command to offline generate the django_compressor cache content."""
+
     option_list = NoArgsCommand.option_list + (
         make_option('-c', '--context', default="", dest='context',
             help="""Context to use while rendering the 'compress' nodes."""
-                """ (In JSON format; e.g.: '{"something": 1, "other": "value"}'"""),
+                 """ (In JSON format; e.g.: '{"something": 1, "other": "value"}'"""),
         make_option('-f', '--force', default=False, action="store_true", dest='force',
-            help="""Force generation of offline cache even if settings.COMPRESS_OFFLINE is not set."""),
+            help="Force generation of offline cache even if "
+                 "settings.COMPRESS and/or settings.COMPRESS_OFFLINE is not set."),
     )
 
     def handle_noargs(self, **options):
         verbosity = int(options.get("verbosity", 0))
 
-        if not settings.COMPRESS:
-            raise CommandError("Compressor is disabled. Set COMPRESS settting to True (or DEBUG to False) to enable.")
-        
+        if not settings.COMPRESS and not options.get("force"):
+            raise CommandError(
+                "Compressor is disabled. Set COMPRESS settting to True "
+                "(or DEBUG to False) to enable. (Use -f to override)")
+
         if not settings.COMPRESS_OFFLINE:
             if not options.get("force"):
-                raise CommandError("Aborting; COMPRESS_OFFLINE is not set. (Use -f to override)")
-            warnings.warn("COMPRESS_OFFLINE is not set. Offline generated cache will not be used.")
+                raise CommandError(
+                    "Aborting; COMPRESS_OFFLINE is not set. (Use -f to override)")
+            warnings.warn(
+                "COMPRESS_OFFLINE is not set. Offline generated cache will not be used.")
+
+        if not settings.TEMPLATE_LOADERS:
+            raise CommandError("No template loaders defined. You need to "
+                               "configure TEMPLATE_LOADERS in your settings module.")
 
         paths = []
         for loader in settings.TEMPLATE_LOADERS:
             loader_class = find_template_loader(loader)
 
-            # We need new-style template loaders
+            # We need new-style class-based template loaders that have a
+            # 'get_template_sources' method
             if hasattr(loader_class, "get_template_sources"):
                 paths.extend(loader_class.get_template_sources(''))
 
         if not paths:
-            raise CommandError("No template paths found. You need to configure settings.TEMPLATE_LOADERS.")
+            raise CommandError(
+                'No template paths found. None of the configured template '
+                'loaders provided template paths. Offline compression needs '
+                '"new-style" class-based template loaders. \n'
+                'See: http://docs.djangoproject.com/en/dev/ref/settings/#template-loaders '
+                'for more information on class-based loaders.')
 
         if verbosity > 1:
             sys.stdout.write("Considering paths:\n\t")
@@ -56,10 +72,14 @@ class Command(NoArgsCommand):
         template_files = []
         for path in paths:
             for root, dirs, files in os.walk(path):
-                template_files.extend(os.path.join(root, name) for name in files if any(fnmatch(name, glob) for glob in settings.TEMPLATE_GLOB))
+                template_files.extend(
+                    os.path.join(root, name) for name in files if any(
+                        fnmatch(name, glob) for glob in settings.TEMPLATE_GLOB
+                ))
 
         if not template_files:
-            raise CommandError("No templates found. You need to configure settings.TEMPLATE_LOADERS.")
+            raise CommandError(
+                "No templates found. You need to configure settings.TEMPLATE_LOADERS.")
 
         if verbosity > 1:
             sys.stdout.write("Found templates:\n\t")
@@ -71,7 +91,8 @@ class Command(NoArgsCommand):
             try:
                 template_file = open(template_filename)
                 try:
-                    template = Template(template_file.read().decode(django_settings.FILE_CHARSET))
+                    template = Template(
+                        template_file.read().decode(django_settings.FILE_CHARSET))
                 finally:
                     template_file.close()
             except IOError: # unreadable file -> ignore
@@ -102,13 +123,18 @@ class Command(NoArgsCommand):
             except ValueError, e:
                 raise CommandError("Invalid context JSON specified.", e)
 
+
+        sys.stdout.write("Compressing... ")
         count = 0
         for filename, nodes in compressor_nodes.items():
             for node in nodes:
                 key = make_offline_cache_key(node.nodelist)
                 result = node.render(Context(context_content))
+                print result
                 cache.set(key, result, settings.OFFLINE_TIMEOUT)
                 count += 1
+        sys.stdout.write("done\nCompressed %d block(s) from %d template(s)." %
+                         (count, len(compressor_nodes)))
 
     def walk_nodes(self, start_node):
         compressor_nodes = []
