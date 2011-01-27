@@ -1,18 +1,20 @@
-Christian Metts
+Christian Metts <xian@mintchaos.com>
+Carl Meyer
+Jannis Leidel
 
 Django Compressor's filters started life as the filters from Andreas Pelme's
 django-compress.
+
+Contributors:
 
 Aaron Godfrey
 Atamert Ölçgen
 Ben Spaulding
 Benjamin Wohlwend
 Brad Whittington
-Carl Meyer
 Chris Adams
 David Ziegler
 Gert Van Gool
-Jannis Leidel
 Justin Lilly
 Maciek Szczesniak
 Mehmet S. Catalbas

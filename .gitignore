@@ -4,4 +4,6 @@ dist
 MANIFEST
 *.pyc
 *.egg-info
-tests/media/
+.tox/
+*.egg
+docs/_build/

@@ -2,11 +2,11 @@ import fnmatch
 import os
 from optparse import make_option
 
-from django.core.cache import cache
 from django.core.management.base import NoArgsCommand, CommandError
 
+from compressor.cache import cache
 from compressor.conf import settings
-from compressor.utils import get_mtime, get_mtime_cachekey
+from compressor.utils import get_mtime, get_mtime_cachekey, walk
 
 class Command(NoArgsCommand):
     help = "Add or remove all mtime values from the cache"
@@ -57,7 +57,7 @@ class Command(NoArgsCommand):
         files_to_add = set()
         keys_to_delete = set()
 
-        for root, dirs, files in os.walk(settings.MEDIA_ROOT, followlinks=options['follow_links']):
+        for root, dirs, files in walk(settings.MEDIA_ROOT, followlinks=options['follow_links']):
             for dir_ in dirs:
                 if self.is_ignored(dir_):
                     dirs.remove(dir_)

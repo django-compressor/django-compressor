@@ -1,8 +1,11 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 
-
 MEDIA_URL = getattr(settings, 'COMPRESS_URL', settings.MEDIA_URL)
+if not MEDIA_URL.endswith('/'):
+    raise ImproperlyConfigured(
+        'The MEDIA_URL and COMPRESS_URL settings must have a trailing slash.')
+
 MEDIA_ROOT = getattr(settings, 'COMPRESS_ROOT', settings.MEDIA_ROOT)
 OUTPUT_DIR = getattr(settings, 'COMPRESS_OUTPUT_DIR', 'CACHE')
 STORAGE = getattr(settings, 'COMPRESS_STORAGE', 'compressor.storage.CompressorFileStorage')
@@ -58,3 +61,13 @@ PARSER = getattr(settings, 'COMPRESS_PARSER', 'compressor.parser.BeautifulSoupPa
 
 # Allows changing verbosity from the settings.
 VERBOSE = getattr(settings, "COMPRESS_VERBOSE", False)
+
+# the cache backend to use
+CACHE_BACKEND = getattr(settings, 'COMPRESS_CACHE_BACKEND', None)
+if CACHE_BACKEND is None:
+    # If we are on Django 1.3 AND using the new CACHES setting...
+    if getattr(settings, "CACHES", None):
+        CACHE_BACKEND = "default"
+    else:
+        # fallback for people still using the old CACHE_BACKEND setting
+        CACHE_BACKEND = settings.CACHE_BACKEND

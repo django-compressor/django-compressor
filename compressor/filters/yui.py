@@ -1,7 +1,8 @@
-import subprocess
+from subprocess import Popen, PIPE
 
 from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
+from compressor.utils import cmd_split
 
 
 class YUICompressorFilter(FilterBase):
@@ -19,16 +20,8 @@ class YUICompressorFilter(FilterBase):
             command += ' --verbose'
 
         try:
-            p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-            p.stdin.write(self.content)
-            p.stdin.close()
-
-            filtered = p.stdout.read()
-            p.stdout.close()
-
-            err = p.stderr.read()
-            p.stderr.close()
-
+            p = Popen(cmd_split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            filtered, err = p.communicate(self.content)
         except IOError, e:
             raise FilterError(e)
 
@@ -42,10 +35,12 @@ class YUICompressorFilter(FilterBase):
 
         return filtered
 
+
 class YUICSSFilter(YUICompressorFilter):
     def __init__(self, *args, **kwargs):
         super(YUICSSFilter, self).__init__(*args, **kwargs)
         self.type = 'css'
+
 
 class YUIJSFilter(YUICompressorFilter):
     def __init__(self, *args, **kwargs):

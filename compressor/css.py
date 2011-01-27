@@ -1,17 +1,18 @@
 from django.conf import settings as django_settings
 
 from compressor.conf import settings
-from compressor.base import Compressor, UncompressableFileError
+from compressor.base import Compressor
+from compressor.exceptions import UncompressableFileError
 
 class CssCompressor(Compressor):
 
     def __init__(self, content, output_prefix="css"):
+        super(CssCompressor, self).__init__(content, output_prefix)
         self.extension = ".css"
         self.template_name = "compressor/css.html"
         self.template_name_inline = "compressor/css_inline.html"
         self.filters = list(settings.COMPRESS_CSS_FILTERS)
         self.type = 'css'
-        super(CssCompressor, self).__init__(content, output_prefix)
 
     def split_contents(self):
         if self.split_content:
