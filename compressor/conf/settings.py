@@ -28,7 +28,7 @@ YUI_JS_ARGUMENTS = getattr(settings, 'COMPRESS_YUI_JS_ARGUMENTS', '')
 
 TEMPLATE_LOADERS = getattr(settings,
                            "COMPRESS_TEMPLATE_LOADERS",
-                           getattr(settings, "TEMPLATE_LOADERS", ('django.template.loaders.app_directories.Loader', ))
+                           getattr(settings, "TEMPLATE_LOADERS", ())
 )
 
 TEMPLATE_GLOB = getattr(settings, "COMPRESS_TEMPLATE_GLOB", ('*.html', '*.htm', '*.txt'))
