@@ -116,13 +116,16 @@ class Command(NoArgsCommand):
             sys.stdout.write("\n\t".join(compressor_nodes.keys()))
             print
 
-        context_content = {'_ignore_offline_setting': True}
+        context_content = {}
         if "context" in options and options['context']:
             try:
                 context_content.update(JSONDecoder().decode(options['context']))
             except ValueError, e:
                 raise CommandError("Invalid context JSON specified.", e)
 
+        # enable compression for render() calls below
+        settings.COMPRESS = True
+        settings.COMPRESS_OFFLINE = False
 
         sys.stdout.write("Compressing... ")
         count = 0
