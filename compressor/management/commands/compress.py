@@ -1,23 +1,23 @@
 import sys
 import warnings
+from optparse import make_option
 
 from django.core.management.base import  NoArgsCommand, CommandError
-from optparse import make_option
 from django.utils.simplejson.decoder import JSONDecoder
-from compressor.offline import compress_offline
+
 from compressor.conf import settings
+from compressor.offline import compress_offline
 
 
 class Command(NoArgsCommand):
-    """Management command to offline generate the django_compressor cache content."""
-
+    help = "Generate the compressor cache content"
     option_list = NoArgsCommand.option_list + (
         make_option('-c', '--context', default="", dest='context',
             help="""Context to use while rendering the 'compress' nodes."""
-                 """ (In JSON format; e.g.: '{"something": 1, "other": "value"}'"""),
+                """(In JSON format; e.g.: '{"something": 1, "other": "value"}'"""),
         make_option('-f', '--force', default=False, action="store_true", dest='force',
             help="Force generation of offline cache even if "
-                 "settings.COMPRESS and/or settings.COMPRESS_OFFLINE is not set."),
+                "settings.COMPRESS and/or settings.COMPRESS_OFFLINE is not set."),
     )
 
     def handle_noargs(self, **options):
@@ -30,10 +30,10 @@ class Command(NoArgsCommand):
 
         if not settings.COMPRESS_OFFLINE:
             if not options.get("force"):
-                raise CommandError(
-                    "Aborting; COMPRESS_OFFLINE is not set. (Use -f to override)")
-            warnings.warn(
-                "COMPRESS_OFFLINE is not set. Offline generated cache will not be used.")
+                raise CommandError("Aborting; COMPRESS_OFFLINE is not set. "
+                                   "(Use -f to override)")
+            warnings.warn("COMPRESS_OFFLINE is not set. "
+                          "Offline generated cache will not be used.")
 
         context = None
         if "context" in options and options['context']:

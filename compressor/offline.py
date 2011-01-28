@@ -1,18 +1,21 @@
 import os
-from compressor.conf import settings
 from fnmatch import fnmatch
-from django.template.loader import find_template_loader
-from django.template import Template, TemplateSyntaxError
+
 from django.conf import settings as django_settings
+from django.template import Context, Template, TemplateSyntaxError
+from django.template.loader import find_template_loader
+
+from compressor.cache import cache
+from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
-from django.template.context import Context
-from django.core.cache import cache
-from compressor.utils import make_offline_cache_key
+from compressor.utils import get_offline_cachekey
+
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
+
 
 def _walk_nodes(start_node):
     compressor_nodes = []
@@ -26,9 +29,11 @@ def _walk_nodes(start_node):
 
 def compress_offline(verbosity=0, context=None, log=None):
     """
-    Searches templates containing 'compress' nodes and compresses them "offline".
-    The result is cached with a cache-key derived from the content of the compress
-    nodes (not the content of the possibly linked files!).
+    Searches templates containing 'compress' nodes and compresses them
+    "offline" -- outside of the request/response cycle.
+
+    The result is cached with a cache-key derived from the content of the
+    compress nodes (not the content of the possibly linked files!).
     """
     if not log:
         log = StringIO()
@@ -124,7 +129,7 @@ def compress_offline(verbosity=0, context=None, log=None):
     results = []
     for filename, nodes in compressor_nodes.items():
         for node in nodes:
-            key = make_offline_cache_key(node.nodelist)
+            key = get_offline_cachekey(node.nodelist)
             result = node.render(Context(context_content))
             cache.set(key, result, settings.OFFLINE_TIMEOUT)
             results.append(result)

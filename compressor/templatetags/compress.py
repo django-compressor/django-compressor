@@ -6,7 +6,7 @@ from compressor.css import CssCompressor
 from compressor.js import JsCompressor
 from compressor.cache import cache
 from compressor.conf import settings
-from compressor.utils import make_offline_cache_key
+from compressor.utils import get_offline_cachekey
 
 
 OUTPUT_FILE = 'file'
@@ -40,7 +40,7 @@ class CompressorNode(template.Node):
 
     def render(self, context):
         if settings.COMPRESS and settings.COMPRESS_OFFLINE:
-            key = make_offline_cache_key(self.nodelist)
+            key = get_offline_cachekey(self.nodelist)
             content = cache.get(key)
             if content:
                 return content

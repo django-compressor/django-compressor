@@ -1,5 +1,6 @@
 import os
 from shlex import split as cmd_split
+from django.utils.encoding import smart_str
 
 from compressor.cache import cache
 from compressor.conf import settings
@@ -16,8 +17,9 @@ def get_hexdigest(plaintext):
 def get_mtime_cachekey(filename):
     return "django_compressor.mtime.%s" % filename
 
-def make_offline_cache_key(source):
-    return "compress-offline-%s" % get_hexdigest("".join(str(s) for s in source))
+def get_offline_cachekey(source):
+    return ("django_compressor.offline.%s"
+            % get_hexdigest("".join(smart_str(s) for s in source)))
 
 def get_mtime(filename):
     if settings.MTIME_DELAY:

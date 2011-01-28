@@ -1,5 +1,4 @@
-from django.core.files.storage import FileSystemStorage
-from django.core.files.storage import get_storage_class
+from django.core.files.storage import FileSystemStorage, get_storage_class
 from django.utils.functional import LazyObject
 
 from compressor.conf import settings
