@@ -12,6 +12,7 @@ from compressor import storage
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
 from compressor.conf import settings
+from compressor.offline import compress_offline
 from compressor.utils import get_hashed_mtime
 
 
@@ -356,3 +357,19 @@ class CacheBackendTestCase(CompressorTestCase):
     def test_correct_backend(self):
         from compressor.cache import cache
         self.assertEqual(cache.__class__, dummy.CacheClass)
+
+class OfflineGenerationTestCase(TestCase):
+    """Uses templates/test_compressor_offline.html"""
+
+    def setUp(self):
+        settings.COMPRESS = True
+        settings.COMPRESS_OFFLINE = True
+
+    def test_offline(self):
+        count, result = compress_offline()
+        self.assertEqual(2, count)
+        self.assertEqual(
+            [u'<link rel="stylesheet" href="/media/CACHE/css/a55e1cf95000.css" type="text/css">\n',
+             u'<script type="text/javascript" src="/media/CACHE/js/bf53fa5b13e2.js" charset="utf-8"></script>'],
+            result
+        )
