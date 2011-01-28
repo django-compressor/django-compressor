@@ -25,6 +25,11 @@ def _walk_nodes(start_node):
 
 
 def compress_offline(verbosity=0, context=None, log=None):
+    """
+    Searches templates containing 'compress' nodes and compresses them "offline".
+    The result is cached with a cache-key derived from the content of the compress
+    nodes (not the content of the possibly linked files!).
+    """
     if not log:
         log = StringIO()
     if not settings.TEMPLATE_LOADERS:
@@ -83,12 +88,17 @@ def compress_offline(verbosity=0, context=None, log=None):
                 template_file.close()
         except IOError: # unreadable file -> ignore
             if verbosity > 0:
-                log.write("Unreadable template at: %s\n" % template_filename)
+                log.write("Unreadable template at: %s\n" % (template_filename, ))
             continue
         except TemplateSyntaxError: # broken template -> ignore
             if verbosity > 0:
-                log.write("Invalid template at: %s\n" % template_filename)
+                log.write("Invalid template at: %s\n" % (template_filename, ))
             continue
+        except UnicodeDecodeError, e:
+            if verbosity > 0:
+                log.write(
+                    "UnicodeDecodeError while trying to read template at: %s\n" %
+                    (template_filename, ))
 
         nodes = _walk_nodes(template)
         if nodes:
