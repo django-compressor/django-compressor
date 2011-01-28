@@ -15,3 +15,9 @@ class ParserError(Exception):
     This exception is raised when the parser fails
     """
     pass
+
+class OfflineGenerationError(Exception):
+    """
+    Offline compression generation related exceptions
+    """
+    pass
