@@ -1,18 +1,14 @@
 import os
 from shlex import split as cmd_split
 from django.utils.encoding import smart_str
+from django.utils.hashcompat import sha_constructor
 
 from compressor.cache import cache
 from compressor.conf import settings
 from compressor.exceptions import FilterError
 
 def get_hexdigest(plaintext):
-    try:
-        import hashlib
-        return hashlib.sha1(plaintext).hexdigest()
-    except ImportError:
-        import sha
-        return sha.new(plaintext).hexdigest()
+    return sha_constructor(plaintext).hexdigest()
 
 def get_mtime_cachekey(filename):
     return "django_compressor.mtime.%s" % filename
