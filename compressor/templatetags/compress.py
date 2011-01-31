@@ -38,17 +38,14 @@ class CompressorNode(template.Node):
         packed_val = (val, refresh_time, refreshed)
         return cache.set(key, packed_val, real_timeout)
 
-    def render(self, context):
-        if settings.COMPRESS and settings.COMPRESS_OFFLINE:
+    def render(self, context, compress=settings.COMPRESS, offline=False):
+        if compress and not offline:
             key = get_offline_cachekey(self.nodelist)
             content = cache.get(key)
             if content:
                 return content
-            # TODO: Add logging / warning about missing offline cache
-
         content = self.nodelist.render(context)
-        if (not settings.COMPRESS or settings.COMPRESS_OFFLINE
-                or not len(content.strip())):
+        if not compress or not len(content.strip()):
             return content
         if self.kind == 'css':
             compressor = CssCompressor(content)

@@ -1,11 +1,21 @@
 import os
-from shlex import split as cmd_split
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.encoding import smart_str
 from django.utils.hashcompat import sha_constructor
+from django.utils.importlib import import_module
 
 from compressor.cache import cache
 from compressor.conf import settings
 from compressor.exceptions import FilterError
+
+try:
+    any = any
+except NameError:
+    def any(seq):
+        for item in seq:
+            if item:
+                return True
+        return False
 
 def get_hexdigest(plaintext):
     return sha_constructor(plaintext).hexdigest()
@@ -77,3 +87,43 @@ def walk(root, topdown=True, onerror=None, followlinks=False):
                     for link_dirpath, link_dirnames, link_filenames in walk(p):
                         yield (link_dirpath, link_dirnames, link_filenames)
 
+
+def find_template_loader(loader):
+    if isinstance(loader, (tuple, list)):
+        loader, args = loader[0], loader[1:]
+    else:
+        args = []
+    if isinstance(loader, basestring):
+        module, attr = loader.rsplit('.', 1)
+        try:
+            mod = import_module(module)
+        except ImportError, e:
+            raise ImproperlyConfigured(
+                'Error importing template source loader %s: "%s"' % (loader, e))
+        try:
+            TemplateLoader = getattr(mod, attr)
+        except AttributeError, e:
+            raise ImproperlyConfigured(
+                'Error importing template source loader %s: "%s"' % (loader, e))
+
+        if hasattr(TemplateLoader, 'load_template_source'):
+            func = TemplateLoader(*args)
+        else:
+            # Try loading module the old way - string is full path to callable
+            if args:
+                raise ImproperlyConfigured(
+                    "Error importing template source loader %s - can't "
+                    "pass arguments to function-based loader." % loader)
+            func = TemplateLoader
+        if not func.is_usable:
+            import warnings
+            warnings.warn(
+                "Your TEMPLATE_LOADERS setting includes %r, but your Python "
+                "installation doesn't support that type of template loading. "
+                "Consider removing that line from TEMPLATE_LOADERS." % loader)
+            return None
+        else:
+            return func
+    else:
+        raise ImproperlyConfigured('Loader does not define a "load_template" '
+                                   'callable template source loader')

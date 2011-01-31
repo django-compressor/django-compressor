@@ -2,17 +2,17 @@ import os
 import re
 from BeautifulSoup import BeautifulSoup
 
-from django.template import Template, Context, TemplateSyntaxError
-from django.test import TestCase
-from django.core.files.storage import get_storage_class
 from django.conf import settings as django_settings
 from django.core.cache.backends import dummy
+from django.core.files.storage import get_storage_class
+from django.template import Template, Context, TemplateSyntaxError
+from django.test import TestCase
 
 from compressor import storage
+from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
-from compressor.conf import settings
-from compressor.offline import compress_offline
+from compressor.management.commands.compress import Command as CompressCommand
 from compressor.utils import get_hashed_mtime
 
 
@@ -358,18 +358,34 @@ class CacheBackendTestCase(CompressorTestCase):
         from compressor.cache import cache
         self.assertEqual(cache.__class__, dummy.CacheClass)
 
+
 class OfflineGenerationTestCase(TestCase):
     """Uses templates/test_compressor_offline.html"""
 
     def setUp(self):
+        self._old_compress = settings.COMPRESS
         settings.COMPRESS = True
-        settings.COMPRESS_OFFLINE = True
+
+    def tearDown(self):
+        settings.COMPRESS = self._old_compress
 
     def test_offline(self):
-        count, result = compress_offline()
+        count, result = CompressCommand().compress()
         self.assertEqual(2, count)
-        self.assertEqual(
-            [u'<link rel="stylesheet" href="/media/CACHE/css/a55e1cf95000.css" type="text/css">\n',
-             u'<script type="text/javascript" src="/media/CACHE/js/bf53fa5b13e2.js" charset="utf-8"></script>'],
-            result
-        )
+        self.assertEqual(result, [
+            u'<link rel="stylesheet" href="/media/CACHE/css/a55e1cf95000.css" type="text/css">\n',
+            u'<script type="text/javascript" src="/media/CACHE/js/bf53fa5b13e2.js" charset="utf-8"></script>',
+        ])
+
+    def test_offline_with_context(self):
+        self._old_offline_context = settings.OFFLINE_CONTEXT
+        settings.OFFLINE_CONTEXT = {
+            'color': 'blue',
+        }
+        count, result = CompressCommand().compress()
+        self.assertEqual(2, count)
+        self.assertEqual(result, [
+            u'<link rel="stylesheet" href="/media/CACHE/css/8a2405e029de.css" type="text/css">\n',
+            u'<script type="text/javascript" src="/media/CACHE/js/bf53fa5b13e2.js" charset="utf-8"></script>',
+        ])
+        settings.OFFLINE_CONTEXT = self._old_offline_context
