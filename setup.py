@@ -110,7 +110,7 @@ setup(
     author = 'Jannis Leidel',
     author_email = 'jannis@leidel.info',
     packages = find_packages(),
-    package_data = find_package_data('compressor'),
+    package_data = find_package_data('compressor',only_in_packages=False),
     install_requires = [
         'BeautifulSoup',
     ],
