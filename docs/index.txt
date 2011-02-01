@@ -56,7 +56,7 @@ simply returns exactly what it was given, to ease development.
 
     For production sites it is recommended to use a real cache backend such as
     memcached to speed up the checks of compressed files. Make sure you set
-    your Django cache backend appropriately (or ).
+    your Django cache backend appropriately (also see COMPRESS_CACHE_BACKEND_).
 
 
 CSS Notes:
@@ -81,7 +81,7 @@ downloading CSS for irrelevant media types.
 * Use only relative or full domain absolute URLs in your CSS files.
 * Avoid @import! Simply list all your CSS files in the HTML, they'll be combined anyway.
 
-Why another static file combiner for django?
+Why another static file combiner for Django?
 ********************************************
 
 Short version: None of them did exactly what I needed.
@@ -89,7 +89,7 @@ Short version: None of them did exactly what I needed.
 Long version:
 
 **JS/CSS belong in the templates**
-  Every static combiner for django I've seen makes you configure
+  Every static combiner for Django I've seen makes you configure
   your static files in your settings.py. While that works, it doesn't make
   sense. Static files are for display. And it's not even an option if your
   settings are in completely different repositories and use different deploy
@@ -194,6 +194,68 @@ configured in your ``CACHES`` setting.
 If you have not set ``CACHES`` and are still using the old ``CACHE_BACKEND``
 setting, ``COMPRESS_CACHE_BACKEND`` defaults to the ``CACHE_BACKEND`` setting.
 
+COMPRESS_REBUILD_TIMEOUT
+------------------------
+
+:Default: ``2592000`` (30 days in seconds)
+
+The period of time after which the compressed files are rebuilt even if
+no file changes are detected.
+
+This is also used by the ``compress`` management command which pre-compresses
+the contents of ``{% compress %}`` template tags in the cache.
+
+COMPRESS_MINT_DELAY
+-------------------
+
+:Default: ``30`` (seconds)
+
+The upper bound on how long any compression should take to run. Prevents
+dog piling, should be a lot smaller than COMPRESS_REBUILD_TIMEOUT_.
+
+COMPRESS_MTIME_DELAY
+--------------------
+
+:Default: ``None``
+
+The amount of time (in seconds) to cache the result of the check of the
+modification timestamp of a file. Disabled by default. Should be smaller
+than COMPRESS_REBUILD_TIMEOUT_ and COMPRESS_MINT_DELAY_.
+
+COMPRESS_OFFLINE
+----------------
+
+:Default: ``False``
+
+Boolean that decides if compression should also be done outside of the
+request/response loop -- independent from user requests. This allows to
+pre-compress CSS and JavaScript files and works just like the automatic
+compression with the ``{% compress %}`` tag.
+
+To compress the files "offline" and update the offline cache you have
+to use the ``compress`` mangement command, e.g. during deployment.
+In case you don't use the ``compressor`` management command ``compressor``
+will automatically fallback to the automatic compression.
+
+It'll will look in the templates that can be found with the template
+loader you specify in ``TEMPLATE_LOADERS`` for ``{% compress %}`` blocks
+and use COMPRESS_OFFLINE_CONTEXT_ to render its content. So if you use
+any variables inside the ``{% compress %}`` blocks, make sure to list
+all values you require in COMPRESS_OFFLINE_CONTEXT_.
+
+The result of running the ``compress`` management command will be saved
+in the cache as defined in COMPRESS_CACHE_BACKEND_ for the number of
+seconds defined in COMPRESS_OFFLINE_TIMEOUT_.
+
+COMPRESS_OFFLINE_TIMEOUT
+------------------------
+
+:Default: ``31536000`` (1 year in seconds)
+
+The period of time with which the ``compress`` management command stores
+the pre-compressesed the contents of ``{% compress %}`` template tags in
+the cache.
+
 COMPRESS_OFFLINE_CONTEXT
 ------------------------
 
@@ -201,8 +263,8 @@ COMPRESS_OFFLINE_CONTEXT
 
 The context to be used by the ``compress`` management command when rendering
 the contents of ``{% compress %}`` template tags and saving the result in the
-cache. It's similar to a template context and should be used if a variable
-is used in the blocks, e.g.::
+offline cache. It's similar to a template context and should be used if a
+variable is used in the blocks, e.g.::
 
     {% load compress %}
     {% compress js %}
@@ -221,38 +283,7 @@ If not specified the COMPRESS_OFFLINE_CONTEXT will fall back to contain
 the commonly used setting to refer to saved files ``MEDIA_URL``.
 
 For forward compatibility ``compressor`` will also add the ``STATIC_URL``
-setting (added in Django 1.3) to the COMPRESS_OFFLINE_CONTEXT if it's set.
-
-
-COMPRESS_REBUILD_TIMEOUT
-----------------------------
-
-:Default: ``2592000`` (30 days in seconds)
-
-The period of time after which the compressed files are rebuilt even if
-no file changes are detected.
-
-This is also used by the ``compress`` management command which pre-compresses
-the contents of ``{% compress %}`` template tags in the cache.
-
-COMPRESS_MINT_DELAY
-------------------------
-
-:Default: ``30`` (seconds)
-
-The upper bound on how long any compression should take to run. Prevents
-dog piling, should be a lot smaller than COMPRESS_REBUILD_TIMEOUT.
-
-COMPRESS_MTIME_DELAY
-------------------------
-
-:Default: ``None``
-
-The amount of time (in seconds) to cache the result of the check of the
-modification timestamp of a file. Disabled by default. Should be smaller
-than COMPRESS_REBUILD_TIMEOUT`` and ``COMPRESS_MINT_DELAY.
-
-
+setting (added in Django 1.3) to the COMPRESS_OFFLINE_CONTEXT_ if it's set.
 
 Dependencies
 ************
