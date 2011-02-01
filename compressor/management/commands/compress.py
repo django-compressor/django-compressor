@@ -18,7 +18,7 @@ from compressor.cache import cache
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
-from compressor.utils import get_offline_cachekey, walk, any, find_template_loader, import_module
+from compressor.utils import get_offline_cachekey, walk, any, import_module
 
 
 class Command(NoArgsCommand):
