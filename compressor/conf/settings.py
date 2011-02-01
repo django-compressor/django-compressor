@@ -7,7 +7,7 @@ if not MEDIA_URL.endswith('/'):
         'The MEDIA_URL and COMPRESS_URL settings must have a trailing slash.')
 
 MEDIA_ROOT = getattr(settings, 'COMPRESS_ROOT', settings.MEDIA_ROOT)
-OUTPUT_DIR = getattr(settings, 'COMPRESS_OUTPUT_DIR', 'CACHE')
+OUTPUT_DIR = getattr(settings, 'COMPRESS_OUTPUT_DIR', 'cache')
 STORAGE = getattr(settings, 'COMPRESS_STORAGE', 'compressor.storage.CompressorFileStorage')
 
 COMPRESS = getattr(settings, 'COMPRESS', not settings.DEBUG)
