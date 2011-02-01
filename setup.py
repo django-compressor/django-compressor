@@ -98,10 +98,11 @@ def find_package_data(
 
 
 README = read('README.rst')
+VERSION = __import__("compressor").__version__
 
 setup(
     name = "django_compressor",
-    version = "0.6a8",
+    version = VERSION,
     url = 'http://django_compressor.readthedocs.org/',
     license = 'BSD',
     description = "Compresses linked and inline javascript or CSS into a single cached file.",
