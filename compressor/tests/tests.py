@@ -54,7 +54,7 @@ class CompressorTestCase(TestCase):
     def test_css_mtimes(self):
         is_date = re.compile(r'^\d{10}\.\d$')
         for date in self.cssNode.mtimes:
-            self.assert_(is_date.match(str(date)), "mtimes is returning something that doesn't look like a date")
+            self.assert_(is_date.match(str(float(date))), "mtimes is returning something that doesn't look like a date")
 
     def test_css_return_if_off(self):
         settings.COMPRESS = False
