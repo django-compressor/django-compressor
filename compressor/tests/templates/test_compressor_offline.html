@@ -1,0 +1,14 @@
+{% load compress %}
+{% compress css%}
+    <style type="text/css">
+        body {
+            background: {{ color|default:"red" }};
+        }
+    </style>
+{% endcompress %}
+
+{% compress js%}
+    <script type="text/javascript">
+        alert("test");
+    </script>
+{% endcompress %}
