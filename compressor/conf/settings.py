@@ -63,10 +63,11 @@ if CACHE_BACKEND is None:
         CACHE_BACKEND = settings.CACHE_BACKEND
 
 # The context to be used when compressing the files "offline"
-OFFLINE_CONTEXT = getattr(settings, 'COMPRESS_OFFLINE', None)
-if OFFLINE_CONTEXT is None:
+OFFLINE_CONTEXT = getattr(settings, 'COMPRESS_OFFLINE_CONTEXT', {})
+if not OFFLINE_CONTEXT:
     OFFLINE_CONTEXT = {
         'MEDIA_URL': settings.MEDIA_URL,
     }
+    # Adds the 1.3 STATIC_URL setting to the context if available
     if getattr(settings, 'STATIC_URL', None):
         OFFLINE_CONTEXT['STATIC_URL'] = settings.STATIC_URL
