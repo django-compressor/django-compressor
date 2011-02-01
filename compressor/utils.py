@@ -107,7 +107,10 @@ def find_template_loader(loader):
                 'Error importing template source loader %s: "%s"' % (loader, e))
 
         if hasattr(TemplateLoader, 'load_template_source'):
-            func = TemplateLoader(*args)
+            if callable(TemplateLoader):
+                func = TemplateLoader(*args)
+            else:
+                func = TemplateLoader
         else:
             # Try loading module the old way - string is full path to callable
             if args:

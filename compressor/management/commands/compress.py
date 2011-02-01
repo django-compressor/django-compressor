@@ -18,7 +18,7 @@ from compressor.cache import cache
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
-from compressor.utils import get_offline_cachekey, walk, any, find_template_loader
+from compressor.utils import get_offline_cachekey, walk, any, find_template_loader, import_module
 
 
 class Command(NoArgsCommand):
@@ -46,6 +46,7 @@ class Command(NoArgsCommand):
         The result is cached with a cache-key derived from the content of the
         compress nodes (not the content of the possibly linked files!).
         """
+        from django.template.loader import template_source_loaders
         extensions = self.handle_extensions(options.get('extensions', ['html']))
         verbosity = int(options.get("verbosity", 0))
         if not log:
@@ -55,15 +56,14 @@ class Command(NoArgsCommand):
                                          "must set TEMPLATE_LOADERS in your "
                                          "settings.")
         paths = set()
-        for loader_name in django_settings.TEMPLATE_LOADERS:
+        for loader in template_source_loaders:
             try:
-                loader = find_template_loader(loader_name)
-                if hasattr(loader, '__class__'):
-                    source_list_func = loader.get_template_sources
-                else:
-                    source_list_func = loader.get_template_sources
-                paths.update(source_list_func(''))
-            except (ImportError, AttributeError):
+                module = import_module(loader.__module__)
+                get_template_sources = getattr(module, 'get_template_sources', None)
+                if get_template_sources is None:
+                    get_template_sources = loader.get_template_sources
+                paths.update(list(get_template_sources('')))
+            except (ImportError, AttributeError), e:
                 # Yeah, this didn't work out so well, let's move on
                 pass
         if not paths:
@@ -75,7 +75,6 @@ class Command(NoArgsCommand):
                                          "loaders.")
         if verbosity > 1:
             log.write("Considering paths:\n\t" + "\n\t".join(paths) + "\n")
-
         templates = set()
         for path in paths:
             for root, dirs, files in walk(path, followlinks=options.get('followlinks', False)):
@@ -92,12 +91,12 @@ class Command(NoArgsCommand):
         compressor_nodes = SortedDict()
         for template_name in templates:
             try:
-                _file = open(template_name)
+                template_file = open(template_name)
                 try:
-                    template = Template(
-                        _file.read().decode(django_settings.FILE_CHARSET))
+                    template = Template(template_file.read().decode(
+                                        django_settings.FILE_CHARSET))
                 finally:
-                    _file.close()
+                    template_file.close()
             except IOError: # unreadable file -> ignore
                 if verbosity > 0:
                     log.write("Unreadable template at: %s\n" % template_name)
@@ -110,7 +109,7 @@ class Command(NoArgsCommand):
                 if verbosity > 0:
                     log.write("UnicodeDecodeError while trying to read "
                               "template %s\n" % template_name)
-            nodes = self.walk_nodes(template)
+            nodes = list(self.walk_nodes(template))
             if nodes:
                 compressor_nodes.setdefault(template_name, []).extend(nodes)
 
@@ -120,10 +119,11 @@ class Command(NoArgsCommand):
         if verbosity > 0:
             log.write("Found 'compress' tags in:\n\t" +
                       "\n\t".join(compressor_nodes.keys()) + "\n")
-        context = Context(settings.OFFLINE_CONTEXT)
+
         log.write("Compressing... ")
         count = 0
         results = []
+        context = Context(settings.OFFLINE_CONTEXT)
         for nodes in compressor_nodes.values():
             for node in nodes:
                 key = get_offline_cachekey(node.nodelist)
@@ -131,13 +131,14 @@ class Command(NoArgsCommand):
                 cache.set(key, result, settings.REBUILD_TIMEOUT)
                 results.append(result)
                 count += 1
-        log.write("done\nCompressed %d block(s) from %d template(s)." %
-                  (count, len(compressor_nodes)))
+        log.write("done\nCompressed %d block(s) from %d template(s).\n"
+                  % (count, len(compressor_nodes)))
         return count, results
 
     def walk_nodes(self, node):
         for node in getattr(node, "nodelist", []):
-            if isinstance(node, CompressorNode):
+            if (isinstance(node, CompressorNode) or
+                    node.__class__.__name__ == "CompressorNode"): # for 1.1.X
                 yield node
             else:
                 for node in self.walk_nodes(node):
