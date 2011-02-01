@@ -62,6 +62,12 @@ if CACHE_BACKEND is None:
         # fallback for people still using the old CACHE_BACKEND setting
         CACHE_BACKEND = settings.CACHE_BACKEND
 
+# enables the offline cache -- a cache that is filled by the compress management command
+OFFLINE = getattr(settings, 'COMPRESS_OFFLINE', False)
+
+# invalidates the offline cache after one year
+OFFLINE_TIMEOUT = getattr(settings, 'COMPRESS_OFFLINE_TIMEOUT', 60 * 60 * 24 * 365) # 1 year
+
 # The context to be used when compressing the files "offline"
 OFFLINE_CONTEXT = getattr(settings, 'COMPRESS_OFFLINE_CONTEXT', {})
 if not OFFLINE_CONTEXT:

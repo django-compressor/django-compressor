@@ -22,14 +22,14 @@ from compressor.utils import get_offline_cachekey, walk, any, import_module
 
 
 class Command(NoArgsCommand):
-    help = "Generate the compressor cache content"
+    help = "Generate the compressor content outside of the request/response cycle"
     option_list = NoArgsCommand.option_list + (
         make_option('--extension', '-e', action='append', dest='extensions',
             help='The file extension(s) to examine (default: ".html", '
                 'separate multiple extensions with commas, or use -e '
                 'multiple times)'),
         make_option('-f', '--force', default=False, action='store_true', dest='force',
-            help="Force generation of offline cache even if "
+            help="Force generation of compressor content even if "
                 "COMPRESS setting is not True."),
         make_option('--follow-links', default=False, action='store_true', dest='follow_links',
             help="Follow symlinks when traversing the COMPRESS_ROOT "
@@ -127,8 +127,8 @@ class Command(NoArgsCommand):
         for nodes in compressor_nodes.values():
             for node in nodes:
                 key = get_offline_cachekey(node.nodelist)
-                result = node.render(context, compress=True, offline=True)
-                cache.set(key, result, settings.REBUILD_TIMEOUT)
+                result = node.render(context, compress=True, offline=False)
+                cache.set(key, result, settings.OFFLINE_TIMEOUT)
                 results.append(result)
                 count += 1
         log.write("done\nCompressed %d block(s) from %d template(s).\n"
@@ -174,4 +174,10 @@ class Command(NoArgsCommand):
             raise CommandError("Compressor is disabled. Set COMPRESS "
                                "settting to True to enable it "
                                "(Use -f/--force to override).")
+        if not settings.OFFLINE:
+            if not options.get("force"):
+                raise CommandError("Aborting; COMPRESS_OFFLINE is not set. "
+                                   "(Use -f/--force to override)")
+            warnings.warn("COMPRESS_OFFLINE is not set. Offline generated "
+                          "cache will not be used.")
         self.compress(sys.stdout, **options)

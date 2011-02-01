@@ -43,14 +43,11 @@ def get_hashed_mtime(filename, length=12):
     mtime = str(int(get_mtime(filename)))
     return get_hexdigest(mtime)[:length]
 
-
 def get_class(class_string, exception=FilterError):
     """
     Convert a string version of a function name to the callable object.
     """
-
     if not hasattr(class_string, '__bases__'):
-
         try:
             class_string = class_string.encode('ascii')
             mod_name, class_name = get_mod_func(class_string)
@@ -58,22 +55,18 @@ def get_class(class_string, exception=FilterError):
                 cls = getattr(__import__(mod_name, {}, {}, ['']), class_name)
         except (ImportError, AttributeError):
             raise exception('Failed to import filter %s' % class_string)
-
     return cls
-
 
 def get_mod_func(callback):
     """
     Converts 'django.views.news.stories.story_detail' to
     ('django.views.news.stories', 'story_detail')
     """
-
     try:
         dot = callback.rindex('.')
     except ValueError:
         return callback, ''
     return callback[:dot], callback[dot+1:]
-
 
 def walk(root, topdown=True, onerror=None, followlinks=False):
     """
@@ -88,7 +81,6 @@ def walk(root, topdown=True, onerror=None, followlinks=False):
                     for link_dirpath, link_dirnames, link_filenames in walk(p):
                         yield (link_dirpath, link_dirnames, link_filenames)
 
-
 # Taken from Django 1.3-beta1 and before that from Python 2.7 with permission from/by the original author.
 def _resolve_name(name, package, level):
    """Return the absolute name of the module to be imported."""
@@ -102,7 +94,6 @@ def _resolve_name(name, package, level):
            raise ValueError("attempted relative import beyond top-level "
                              "package")
    return "%s.%s" % (package[:dot], name)
-
 
 def import_module(name, package=None):
    """Import a module.
