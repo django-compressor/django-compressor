@@ -11,7 +11,7 @@ except ImportError:
 
 from django.conf import settings as django_settings
 from django.core.management.base import  NoArgsCommand, CommandError
-from django.template import Context, Template, TemplateSyntaxError
+from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
 from django.utils.datastructures import SortedDict
 
 from compressor.cache import cache
@@ -37,6 +37,19 @@ class Command(NoArgsCommand):
                 "can lead to infinite recursion if a link points to a parent "
                 "directory of itself."),
     )
+    def get_loaders(self):
+        from django.template.loader import template_source_loaders
+        if template_source_loaders is None:
+            try:
+                from django.template.loader import find_template as finder_func
+            except ImportError:
+                from django.template.loader import find_template_source as finder_func
+            try:
+                source, name = finder_func('test')
+            except TemplateDoesNotExist, e:
+                pass
+            from django.template.loader import template_source_loaders
+        return template_source_loaders or []
 
     def compress(self, log=None, **options):
         """
@@ -46,8 +59,8 @@ class Command(NoArgsCommand):
         The result is cached with a cache-key derived from the content of the
         compress nodes (not the content of the possibly linked files!).
         """
-        from django.template.loader import template_source_loaders
-        extensions = self.handle_extensions(options.get('extensions', ['html']))
+        extensions = options.get('extensions')
+        extensions = self.handle_extensions(extensions or ['html'])
         verbosity = int(options.get("verbosity", 0))
         if not log:
             log = StringIO()
@@ -56,7 +69,7 @@ class Command(NoArgsCommand):
                                          "must set TEMPLATE_LOADERS in your "
                                          "settings.")
         paths = set()
-        for loader in template_source_loaders:
+        for loader in self.get_loaders():
             try:
                 module = import_module(loader.__module__)
                 get_template_sources = getattr(module, 'get_template_sources', None)
