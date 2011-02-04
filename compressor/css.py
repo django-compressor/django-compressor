@@ -11,7 +11,7 @@ class CssCompressor(Compressor):
         self.extension = ".css"
         self.template_name = "compressor/css.html"
         self.template_name_inline = "compressor/css_inline.html"
-        self.filters = list(settings.COMPRESS_CSS_FILTERS)
+        self.filters = list(settings.CSS_FILTERS)
         self.type = 'css'
 
     def split_contents(self):
@@ -48,7 +48,7 @@ class CssCompressor(Compressor):
         self.split_contents()
         if not hasattr(self, 'media_nodes'):
             return super(CssCompressor, self).output()
-        if not settings.COMPRESS:
+        if not settings.ENABLED:
             return self.content
         ret = []
         for media, subnode in self.media_nodes:

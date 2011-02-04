@@ -25,12 +25,12 @@ class Compressor(object):
         try:
             base_url = self.storage.base_url
         except AttributeError:
-            base_url = settings.MEDIA_URL
+            base_url = settings.URL
 
         if not url.startswith(base_url):
             raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, base_url))
         basename = url.replace(base_url, "", 1)
-        filename = os.path.join(settings.MEDIA_ROOT, basename)
+        filename = os.path.join(settings.ROOT, basename)
         if not os.path.exists(filename):
             raise UncompressableFileError('"%s" does not exist' % filename)
         return filename
@@ -130,7 +130,7 @@ class Compressor(object):
         return True
 
     def output(self):
-        if not settings.COMPRESS:
+        if not settings.ENABLED:
             return self.content
         self.save_file()
         context = getattr(self, 'extra_context', {})
@@ -138,7 +138,7 @@ class Compressor(object):
         return render_to_string(self.template_name, context)
 
     def output_inline(self):
-        context = {'content': settings.COMPRESS and self.combined or self.concat()}
+        context = {'content': settings.ENABLED and self.combined or self.concat()}
         if hasattr(self, 'extra_context'):
             context.update(self.extra_context)
         return render_to_string(self.template_name_inline, context)

@@ -183,7 +183,7 @@ class Command(NoArgsCommand):
         return set([x for x in ext_list if x != '.py'])
 
     def handle_noargs(self, **options):
-        if not settings.COMPRESS and not options.get("force"):
+        if not settings.ENABLED and not options.get("force"):
             raise CommandError("Compressor is disabled. Set COMPRESS "
                                "settting to True to enable it "
                                "(Use -f/--force to override).")
