@@ -113,25 +113,31 @@ class CompressorTestCase(TestCase):
         settings.OUTPUT_DIR = old_output_dir
 
 
-class LxmlCompressorTestCase(CompressorTestCase):
+try:
+    import lxml
+except ImportError:
+    import warnings
+    warnings.warn("lxml library couldn't be found, skipping tests.")
+else:
+    class LxmlCompressorTestCase(CompressorTestCase):
 
-    def test_css_split(self):
-        out = [
-            ('file', os.path.join(settings.ROOT, u'css/one.css'), u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">'),
-            ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
-            ('file', os.path.join(settings.ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">'),
-        ]
-        split = self.cssNode.split_contents()
-        split = [(x[0], x[1], self.cssNode.parser.elem_str(x[2])) for x in split]
-        self.assertEqual(out, split)
+        def test_css_split(self):
+            out = [
+                ('file', os.path.join(settings.ROOT, u'css/one.css'), u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">'),
+                ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
+                ('file', os.path.join(settings.ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">'),
+            ]
+            split = self.cssNode.split_contents()
+            split = [(x[0], x[1], self.cssNode.parser.elem_str(x[2])) for x in split]
+            self.assertEqual(out, split)
 
-    def setUp(self):
-        self.old_parser = settings.PARSER
-        settings.PARSER = 'compressor.parser.LxmlParser'
-        super(LxmlCompressorTestCase, self).setUp()
+        def setUp(self):
+            self.old_parser = settings.PARSER
+            settings.PARSER = 'compressor.parser.LxmlParser'
+            super(LxmlCompressorTestCase, self).setUp()
 
-    def tearDown(self):
-        settings.PARSER = self.old_parser
+        def tearDown(self):
+            settings.PARSER = self.old_parser
 
 
 class CssAbsolutizingTestCase(TestCase):

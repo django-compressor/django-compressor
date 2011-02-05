@@ -115,7 +115,7 @@ setup(
         'BeautifulSoup',
     ],
     tests_require = [
-        'Django', 'lxml', 'BeautifulSoup',
+        'Django', 'BeautifulSoup',
     ],
     classifiers = [
         'Development Status :: 4 - Beta',
