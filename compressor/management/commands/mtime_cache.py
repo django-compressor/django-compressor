@@ -57,12 +57,12 @@ class Command(NoArgsCommand):
         files_to_add = set()
         keys_to_delete = set()
 
-        for root, dirs, files in walk(settings.MEDIA_ROOT, followlinks=options['follow_links']):
+        for root, dirs, files in walk(settings.ROOT, followlinks=options['follow_links']):
             for dir_ in dirs:
                 if self.is_ignored(dir_):
                     dirs.remove(dir_)
             for filename in files:
-                common = "".join(root.split(settings.MEDIA_ROOT))
+                common = "".join(root.split(settings.ROOT))
                 if common.startswith(os.sep):
                     common = common[len(os.sep):]
                 if self.is_ignored(os.path.join(common, filename)):

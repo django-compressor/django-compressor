@@ -3,9 +3,9 @@ import re
 import mimetypes
 import urlparse
 from base64 import b64encode
+
 from compressor.filters import FilterBase
 from compressor.conf import settings
-
 
 class DataUriFilter(FilterBase):
     """Filter for embedding media as data: URIs.
@@ -18,7 +18,7 @@ class DataUriFilter(FilterBase):
     Don't use this class directly. Use a subclass.
     """
     def input(self, filename=None, **kwargs):
-        if not filename or not filename.startswith(settings.MEDIA_ROOT):
+        if not filename or not filename.startswith(settings.ROOT):
             return self.content
         output = self.content
         for url_pattern in self.url_patterns:
@@ -29,7 +29,7 @@ class DataUriFilter(FilterBase):
         # strip query string of file paths
         if "?" in url:
             url = url.split("?")[0]
-        return os.path.join(settings.MEDIA_ROOT, url[len(settings.MEDIA_URL):])
+        return os.path.join(settings.ROOT, url[len(settings.URL):])
 
     def data_uri_converter(self, matchobj):
         url = matchobj.group(1).strip(' \'"')

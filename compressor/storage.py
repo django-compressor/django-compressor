@@ -13,9 +13,9 @@ class CompressorFileStorage(FileSystemStorage):
     """
     def __init__(self, location=None, base_url=None, *args, **kwargs):
         if location is None:
-            location = settings.MEDIA_ROOT
+            location = settings.ROOT
         if base_url is None:
-            base_url = settings.MEDIA_URL
+            base_url = settings.URL
         super(CompressorFileStorage, self).__init__(location, base_url,
                                                     *args, **kwargs)
 
