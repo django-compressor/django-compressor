@@ -92,6 +92,6 @@ def compress(parser, token):
 
     kind = args[1]
     if not kind in ['css', 'js']:
-        raise template.TemplateSyntaxError("%r's argument must be 'js' or 'css'." % (args[0], ', '.join(ALLOWED_ARGS)))
+        raise template.TemplateSyntaxError("%r's argument must be 'js' or 'css'." % args[0])
 
     return CompressorNode(nodelist, kind)
