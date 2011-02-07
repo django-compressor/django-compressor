@@ -1,3 +1,4 @@
+import os
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
@@ -13,13 +14,18 @@ if URL:
     if not ROOT:
         raise ImproperlyConfigured('The COMPRESS_ROOT setting (or its '
                                    'fallback STATIC_ROOT) must be set.')
-    # In case staticfiles is used make sure COMPRESS_URL can be used
+    # In case staticfiles is used, make sure COMPRESS_URL can be used
     # by checking if the the FileSystemFinder is installed, and if is
     # checking if COMPRESS_ROOT is in STATICFILES_DIRS to allow finding
     # compressed files.
     if ("staticfiles" in settings.INSTALLED_APPS or
             "django.contrib.staticfiles" in settings.INSTALLED_APPS):
-        finders = getattr(settings, 'STATICFILES_FINDERS', [])
+        try:
+            from staticfiles.settings import FINDERS as finders
+        except ImportError:
+            finders = []
+        if not finders:
+            finders = getattr(settings, 'STATICFILES_FINDERS', [])
         if ("django.contrib.staticfiles.finders.FileSystemFinder" not in finders and
                 "staticfiles.finders.FileSystemFinder" not in finders):
             raise ImproperlyConfigured('Please enable the FileSystemFinder '
