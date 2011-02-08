@@ -1,7 +1,7 @@
 Django compressor
 =================
 
-Compresses linked and inline javascript or CSS into a single cached file.
+Compresses linked and inline JavaScript or CSS into a single cached file.
 
 Syntax:
 
@@ -109,7 +109,7 @@ Long version:
 Settings
 ********
 
-Django compressor has a number of settings that control it's behavior.
+Django compressor has a number of settings that control its behavior.
 They've been given sensible defaults.
 
 COMPRESS
@@ -233,7 +233,7 @@ pre-compress CSS and JavaScript files and works just like the automatic
 compression with the ``{% compress %}`` tag.
 
 To compress the files "offline" and update the offline cache you have
-to use the ``compress`` mangement command, e.g. during deployment.
+to use the ``compress`` management command, e.g. during deployment.
 In case you don't use the ``compressor`` management command ``compressor``
 will automatically fallback to the automatic compression.
 
@@ -253,7 +253,7 @@ COMPRESS_OFFLINE_TIMEOUT
 :Default: ``31536000`` (1 year in seconds)
 
 The period of time with which the ``compress`` management command stores
-the pre-compressesed the contents of ``{% compress %}`` template tags in
+the pre-compressed the contents of ``{% compress %}`` template tags in
 the cache.
 
 COMPRESS_OFFLINE_CONTEXT
