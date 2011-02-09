@@ -122,25 +122,35 @@ Boolean that decides if compression will happen.
 COMPRESS_URL
 ------------
 
-:Default: ``MEDIA_URL``
+:Default: ``STATIC_URL`` (``MEDIA_URL`` for older Django versions)
 
 Controls the URL that linked media will be read from and compressed media
 will be written to.
 
+.. note::
+
+    This settings defaults to ``MEDIA_URL`` in case ``STATIC_URL``
+    is not given, e.g. on older Django versions (<1.3).
+
 COMPRESS_ROOT
 -------------
 
-:Default: ``MEDIA_ROOT``
+:Default: ``STATIC_ROOT`` (``MEDIA_ROOT`` for older Django versions)
 
 Controls the absolute file path that linked media will be read from and
 compressed media will be written to.
+
+.. note::
+
+    This settings defaults to ``MEDIA_ROOT`` in case ``STATIC_ROOT``
+    is not given, e.g. on older Django versions (<1.3).
 
 COMPRESS_OUTPUT_DIR
 -------------------
 
 :Default: ``'cache'``
 
-Controls the directory inside `COMPRESS_ROOT` that compressed files will
+Controls the directory inside COMPRESS_ROOT_ that compressed files will
 be written to.
 
 COMPRESS_CSS_FILTERS
