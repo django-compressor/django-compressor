@@ -4,9 +4,9 @@ from optparse import make_option
 
 from django.core.management.base import NoArgsCommand, CommandError
 
-from compressor.cache import cache
+from compressor.cache import cache, get_mtime, get_mtime_cachekey
 from compressor.conf import settings
-from compressor.utils import get_mtime, get_mtime_cachekey, walk
+from compressor.utils import walk
 
 class Command(NoArgsCommand):
     help = "Add or remove all mtime values from the cache"
@@ -50,19 +50,19 @@ class Command(NoArgsCommand):
         if (options['add'] and options['clean']) or (not options['add'] and not options['clean']):
             raise CommandError('Please specify either "--add" or "--clean"')
 
-        if not settings.MTIME_DELAY:
+        if not settings.COMPRESS_MTIME_DELAY:
             raise CommandError('mtime caching is currently disabled. Please '
                 'set the COMPRESS_MTIME_DELAY setting to a number of seconds.')
 
         files_to_add = set()
         keys_to_delete = set()
 
-        for root, dirs, files in walk(settings.ROOT, followlinks=options['follow_links']):
+        for root, dirs, files in walk(settings.COMPRESS_ROOT, followlinks=options['follow_links']):
             for dir_ in dirs:
                 if self.is_ignored(dir_):
                     dirs.remove(dir_)
             for filename in files:
-                common = "".join(root.split(settings.ROOT))
+                common = "".join(root.split(settings.COMPRESS_ROOT))
                 if common.startswith(os.sep):
                     common = common[len(os.sep):]
                 if self.is_ignored(os.path.join(common, filename)):

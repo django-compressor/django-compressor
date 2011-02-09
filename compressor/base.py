@@ -1,13 +1,13 @@
 import os
 
-from django.conf import settings as django_settings
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
 
-from compressor.conf import settings
 from compressor import filters
+from compressor.cache import get_hexdigest, get_mtime
+from compressor.conf import settings
 from compressor.exceptions import UncompressableFileError
-from compressor.utils import get_hexdigest, get_mtime, get_class
+from compressor.utils import get_class
 
 class Compressor(object):
 
@@ -25,12 +25,12 @@ class Compressor(object):
         try:
             base_url = self.storage.base_url
         except AttributeError:
-            base_url = settings.URL
+            base_url = settings.COMPRESS_URL
 
         if not url.startswith(base_url):
             raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, base_url))
         basename = url.replace(base_url, "", 1)
-        filename = os.path.join(settings.ROOT, basename)
+        filename = os.path.join(settings.COMPRESS_ROOT, basename)
         if not os.path.exists(filename):
             raise UncompressableFileError('"%s" does not exist' % filename)
         return filename
@@ -38,7 +38,7 @@ class Compressor(object):
     def _get_parser(self):
         if self._parser:
             return self._parser
-        parser_cls = get_class(settings.PARSER)
+        parser_cls = get_class(settings.COMPRESS_PARSER)
         self._parser = parser_cls(self.content)
         return self._parser
 
@@ -54,7 +54,7 @@ class Compressor(object):
     def cachekey(self):
         cachebits = [self.content]
         cachebits.extend([str(m) for m in self.mtimes])
-        cachestr = "".join(cachebits).encode(django_settings.DEFAULT_CHARSET)
+        cachestr = "".join(cachebits).encode(settings.DEFAULT_CHARSET)
         return "django_compressor.%s" % get_hexdigest(cachestr)[:12]
 
     @property
@@ -82,7 +82,7 @@ class Compressor(object):
                 input = fd.read()
                 if self.filters:
                     input = self.filter(input, 'input', filename=v, elem=elem)
-                charset = attribs.get('charset', django_settings.DEFAULT_CHARSET)
+                charset = attribs.get('charset', settings.DEFAULT_CHARSET)
                 self._hunks.append(unicode(input, charset))
                 fd.close()
         return self._hunks
@@ -91,7 +91,7 @@ class Compressor(object):
         # Design decision needed: either everything should be unicode up to
         # here or we encode strings as soon as we acquire them. Currently
         # concat() expects all hunks to be unicode and does the encoding
-        return "\n".join([hunk.encode(django_settings.DEFAULT_CHARSET) for hunk in self.hunks])
+        return "\n".join([hunk.encode(settings.DEFAULT_CHARSET) for hunk in self.hunks])
 
     def filter(self, content, method, **kwargs):
         for f in self.filters:
@@ -121,7 +121,7 @@ class Compressor(object):
     def new_filepath(self):
         filename = "".join([self.hash, self.extension])
         return os.path.join(
-            settings.OUTPUT_DIR.strip(os.sep), self.output_prefix, filename)
+            settings.COMPRESS_OUTPUT_DIR.strip(os.sep), self.output_prefix, filename)
 
     def save_file(self):
         if self.storage.exists(self.new_filepath):
@@ -130,7 +130,7 @@ class Compressor(object):
         return True
 
     def output(self):
-        if not settings.ENABLED:
+        if not settings.COMPRESS_ENABLED:
             return self.content
         self.save_file()
         context = getattr(self, 'extra_context', {})
@@ -138,7 +138,7 @@ class Compressor(object):
         return render_to_string(self.template_name, context)
 
     def output_inline(self):
-        context = {'content': settings.ENABLED and self.combined or self.concat()}
+        context = {'content': settings.COMPRESS_ENABLED and self.combined or self.concat()}
         if hasattr(self, 'extra_context'):
             context.update(self.extra_context)
         return render_to_string(self.template_name_inline, context)

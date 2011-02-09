@@ -16,7 +16,7 @@ class CSSTidyFilter(FilterBase):
 
         output_file = tempfile.NamedTemporaryFile(mode='w+b')
 
-        command = '%s %s %s %s' % (settings.CSSTIDY_BINARY, tmp_file.name, settings.CSSTIDY_ARGUMENTS, output_file.name)
+        command = '%s %s %s %s' % (settings.COMPRESS_CSSTIDY_BINARY, tmp_file.name, settings.COMPRESS_CSSTIDY_ARGUMENTS, output_file.name)
 
         command_output = Popen(command, shell=True,
             stdout=PIPE, stdin=PIPE, stderr=PIPE).communicate()

@@ -9,16 +9,15 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-from django.conf import settings as django_settings
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
 from django.utils.datastructures import SortedDict
 
-from compressor.cache import cache
+from compressor.cache import cache, get_offline_cachekey
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
-from compressor.utils import get_offline_cachekey, walk, any, import_module
+from compressor.utils import walk, any, import_module
 
 
 class Command(NoArgsCommand):
@@ -46,7 +45,7 @@ class Command(NoArgsCommand):
                 from django.template.loader import find_template_source as finder_func
             try:
                 source, name = finder_func('test')
-            except TemplateDoesNotExist, e:
+            except TemplateDoesNotExist:
                 pass
             from django.template.loader import template_source_loaders
         return template_source_loaders or []
@@ -64,7 +63,7 @@ class Command(NoArgsCommand):
         verbosity = int(options.get("verbosity", 0))
         if not log:
             log = StringIO()
-        if not django_settings.TEMPLATE_LOADERS:
+        if not settings.TEMPLATE_LOADERS:
             raise OfflineGenerationError("No template loaders defined. You "
                                          "must set TEMPLATE_LOADERS in your "
                                          "settings.")
@@ -76,7 +75,7 @@ class Command(NoArgsCommand):
                 if get_template_sources is None:
                     get_template_sources = loader.get_template_sources
                 paths.update(list(get_template_sources('')))
-            except (ImportError, AttributeError), e:
+            except (ImportError, AttributeError):
                 # Yeah, this didn't work out so well, let's move on
                 pass
         if not paths:
@@ -107,7 +106,7 @@ class Command(NoArgsCommand):
                 template_file = open(template_name)
                 try:
                     template = Template(template_file.read().decode(
-                                        django_settings.FILE_CHARSET))
+                                        settings.FILE_CHARSET))
                 finally:
                     template_file.close()
             except IOError: # unreadable file -> ignore
@@ -136,12 +135,12 @@ class Command(NoArgsCommand):
         log.write("Compressing... ")
         count = 0
         results = []
-        context = Context(settings.OFFLINE_CONTEXT)
+        context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
         for nodes in compressor_nodes.values():
             for node in nodes:
                 key = get_offline_cachekey(node.nodelist)
                 result = node.render(context, compress=True, offline=False)
-                cache.set(key, result, settings.OFFLINE_TIMEOUT)
+                cache.set(key, result, settings.COMPRESS_OFFLINE_TIMEOUT)
                 results.append(result)
                 count += 1
         log.write("done\nCompressed %d block(s) from %d template(s).\n"
@@ -183,11 +182,11 @@ class Command(NoArgsCommand):
         return set([x for x in ext_list if x != '.py'])
 
     def handle_noargs(self, **options):
-        if not settings.ENABLED and not options.get("force"):
+        if not settings.COMPRESS_ENABLED and not options.get("force"):
             raise CommandError("Compressor is disabled. Set COMPRESS "
                                "settting to True to enable it "
                                "(Use -f/--force to override).")
-        if not settings.OFFLINE:
+        if not settings.COMPRESS_OFFLINE:
             if not options.get("force"):
                 raise CommandError("Aborting; COMPRESS_OFFLINE is not set. "
                                    "(Use -f/--force to override)")

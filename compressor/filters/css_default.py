@@ -2,23 +2,23 @@ import os
 import re
 import posixpath
 
-from compressor.filters import FilterBase, FilterError
+from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
-from compressor.utils import get_hexdigest, get_mtime
+from compressor.filters import FilterBase
 
 URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 
 
 class CssAbsoluteFilter(FilterBase):
     def input(self, filename=None, **kwargs):
-        media_root = os.path.normcase(os.path.abspath(settings.ROOT))
+        media_root = os.path.normcase(os.path.abspath(settings.COMPRESS_ROOT))
         if filename is not None:
             filename = os.path.normcase(os.path.abspath(filename))
         if not filename or not filename.startswith(media_root):
             return self.content
         self.media_path = filename[len(media_root):].replace(os.sep, '/')
         self.media_path = self.media_path.lstrip('/')
-        self.media_url = settings.URL.rstrip('/')
+        self.media_url = settings.COMPRESS_URL.rstrip('/')
         try:
             mtime = get_mtime(filename)
             self.mtime = get_hexdigest(str(int(mtime)))[:12]

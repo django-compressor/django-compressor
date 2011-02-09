@@ -13,14 +13,14 @@ class CompressorFileStorage(FileSystemStorage):
     """
     def __init__(self, location=None, base_url=None, *args, **kwargs):
         if location is None:
-            location = settings.ROOT
+            location = settings.COMPRESS_ROOT
         if base_url is None:
-            base_url = settings.URL
+            base_url = settings.COMPRESS_URL
         super(CompressorFileStorage, self).__init__(location, base_url,
                                                     *args, **kwargs)
 
 class DefaultStorage(LazyObject):
     def _setup(self):
-        self._wrapped = get_storage_class(settings.STORAGE)()
+        self._wrapped = get_storage_class(settings.COMPRESS_STORAGE)()
 
 default_storage = DefaultStorage()

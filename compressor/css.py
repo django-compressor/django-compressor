@@ -1,5 +1,3 @@
-from django.conf import settings as django_settings
-
 from compressor.conf import settings
 from compressor.base import Compressor
 from compressor.exceptions import UncompressableFileError
@@ -11,7 +9,7 @@ class CssCompressor(Compressor):
         self.extension = ".css"
         self.template_name = "compressor/css.html"
         self.template_name_inline = "compressor/css_inline.html"
-        self.filters = list(settings.CSS_FILTERS)
+        self.filters = list(settings.COMPRESS_CSS_FILTERS)
         self.type = 'css'
 
     def split_contents(self):
@@ -27,7 +25,7 @@ class CssCompressor(Compressor):
                     content = self.parser.elem_content(elem)
                     data = ('file', self.get_filename(elem_attribs['href']), elem)
                 except UncompressableFileError:
-                    if django_settings.DEBUG:
+                    if settings.DEBUG:
                         raise
             elif elem_name == 'style':
                 data = ('hunk', self.parser.elem_content(elem), elem)
@@ -48,7 +46,7 @@ class CssCompressor(Compressor):
         self.split_contents()
         if not hasattr(self, 'media_nodes'):
             return super(CssCompressor, self).output()
-        if not settings.ENABLED:
+        if not settings.COMPRESS_ENABLED:
             return self.content
         ret = []
         for media, subnode in self.media_nodes:

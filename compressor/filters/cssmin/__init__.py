@@ -1,4 +1,4 @@
-from compressor.filters import FilterBase, FilterError
+from compressor.filters import FilterBase
 from compressor.filters.cssmin.cssmin import cssmin
 
 class CSSMinFilter(FilterBase):

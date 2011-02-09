@@ -1,15 +1,11 @@
+import inspect
 import os
 import sys
-
-from django.core.exceptions import ImproperlyConfigured
-from django.utils.encoding import smart_str
-from django.utils.hashcompat import sha_constructor
-
-from compressor.cache import cache
-from compressor.conf import settings
-from compressor.exceptions import FilterError
-
 from shlex import split as cmd_split
+
+from django.conf import settings
+
+from compressor.exceptions import FilterError
 
 try:
     any = any
@@ -19,31 +15,6 @@ except NameError:
             if item:
                 return True
         return False
-
-def get_hexdigest(plaintext):
-    return sha_constructor(plaintext).hexdigest()
-
-def get_mtime_cachekey(filename):
-    return "django_compressor.mtime.%s" % filename
-
-def get_offline_cachekey(source):
-    return ("django_compressor.offline.%s"
-            % get_hexdigest("".join(smart_str(s) for s in source)))
-
-def get_mtime(filename):
-    if settings.MTIME_DELAY:
-        key = get_mtime_cachekey(filename)
-        mtime = cache.get(key)
-        if mtime is None:
-            mtime = os.path.getmtime(filename)
-            cache.set(key, mtime, settings.MTIME_DELAY)
-        return mtime
-    return os.path.getmtime(filename)
-
-def get_hashed_mtime(filename, length=12):
-    filename = os.path.realpath(filename)
-    mtime = str(int(get_mtime(filename)))
-    return get_hexdigest(mtime)[:length]
 
 def get_class(class_string, exception=FilterError):
     """
