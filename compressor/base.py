@@ -95,7 +95,7 @@ class Compressor(object):
 
     def filter(self, content, method, **kwargs):
         for f in self.filters:
-            filter = getattr(filters.get_class(f)(content, filter_type=self.type), method)
+            filter = getattr(get_class(f)(content, filter_type=self.type), method)
             try:
                 if callable(filter):
                     content = filter(**kwargs)
