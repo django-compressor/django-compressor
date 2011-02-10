@@ -7,7 +7,7 @@ from compressor.utils import AppSettings
 
 class CompressorSettings(AppSettings):
     # Main switch
-    ENABLED = False
+    ENABLED = not settings.DEBUG
     # Allows changing verbosity from the settings.
     VERBOSE = False
     # the backend to use when parsing the JavaScript or Stylesheet files
@@ -50,7 +50,7 @@ class CompressorSettings(AppSettings):
     OFFLINE_CONTEXT = {}
 
     def configure_enabled(self, value):
-        return value or getattr(settings, 'COMPRESS', not self.DEBUG)
+        return value or getattr(settings, 'COMPRESS', value)
 
     def configure_url(self, value):
         # Uses the 1.3 STATIC_URL setting by default
