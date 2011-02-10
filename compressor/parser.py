@@ -1,9 +1,6 @@
-from django.conf import settings as django_settings
 from django.utils.encoding import smart_unicode
 
-from compressor.conf import settings
 from compressor.exceptions import ParserError
-from compressor.utils import get_class
 
 class ParserBase(object):
 

@@ -1,11 +1,10 @@
 import os
 import re
 import mimetypes
-import urlparse
 from base64 import b64encode
-from compressor.filters import FilterBase
-from compressor.conf import settings
 
+from compressor.conf import settings
+from compressor.filters import FilterBase
 
 class DataUriFilter(FilterBase):
     """Filter for embedding media as data: URIs.
@@ -18,7 +17,7 @@ class DataUriFilter(FilterBase):
     Don't use this class directly. Use a subclass.
     """
     def input(self, filename=None, **kwargs):
-        if not filename or not filename.startswith(settings.MEDIA_ROOT):
+        if not filename or not filename.startswith(settings.COMPRESS_ROOT):
             return self.content
         output = self.content
         for url_pattern in self.url_patterns:
@@ -29,13 +28,13 @@ class DataUriFilter(FilterBase):
         # strip query string of file paths
         if "?" in url:
             url = url.split("?")[0]
-        return os.path.join(settings.MEDIA_ROOT, url[len(settings.MEDIA_URL):])
+        return os.path.join(settings.COMPRESS_ROOT, url[len(settings.COMPRESS_URL):])
 
     def data_uri_converter(self, matchobj):
         url = matchobj.group(1).strip(' \'"')
         if not url.startswith('data:'):
             path = self.get_file_path(url)
-            if os.stat(path).st_size <= settings.DATA_URI_MIN_SIZE:
+            if os.stat(path).st_size <= settings.COMPRESS_DATA_URI_MIN_SIZE:
                 data = b64encode(open(path, 'rb').read())
                 return 'url("data:%s;base64,%s")' % (mimetypes.guess_type(path)[0], data)
         return 'url("%s")' % url

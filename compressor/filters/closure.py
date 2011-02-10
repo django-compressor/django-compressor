@@ -8,9 +8,9 @@ from compressor.utils import cmd_split
 class ClosureCompilerFilter(FilterBase):
 
     def output(self, **kwargs):
-        arguments = settings.CLOSURE_COMPILER_ARGUMENTS
+        arguments = settings.COMPRESS_CLOSURE_COMPILER_ARGUMENTS
 
-        command = '%s %s' % (settings.CLOSURE_COMPILER_BINARY, arguments)
+        command = '%s %s' % (settings.COMPRESS_CLOSURE_COMPILER_BINARY, arguments)
 
         try:
             p = Popen(cmd_split(command), stdout=PIPE, stdin=PIPE, stderr=PIPE)

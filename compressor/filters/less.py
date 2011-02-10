@@ -3,7 +3,7 @@ import warnings
 import tempfile
 
 from compressor.conf import settings
-from compressor.filters import FilterBase, FilterError
+from compressor.filters import FilterBase
 
 warnings.simplefilter('ignore', RuntimeWarning)
 
@@ -17,7 +17,7 @@ class LessFilter(FilterBase):
         
         output_file = tempfile.NamedTemporaryFile(mode='w+b')
         
-        command = '%s %s %s' % (settings.LESSC_BINARY, tmp_file.name, output_file.name)
+        command = '%s %s %s' % (settings.COMPRESS_LESSC_BINARY, tmp_file.name, output_file.name)
 
         command_output = os.popen(command).read()
         

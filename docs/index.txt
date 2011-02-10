@@ -1,9 +1,10 @@
 Django compressor
 =================
 
-Compresses linked and inline javascript or CSS into a single cached file.
+Compresses linked and inline JavaScript or CSS into a single cached file.
 
-Syntax:
+Syntax
+------
 
 .. code-block:: django
 
@@ -12,55 +13,60 @@ Syntax:
     <html of inline or linked JS/CSS>
     {% endcompress %}
 
-Examples:
+Examples
+--------
 
 .. code-block:: django
 
     {% load compress %}
+
     {% compress css %}
-    <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
+    <link rel="stylesheet" href="/static/css/one.css" type="text/css" charset="utf-8">
     <style type="text/css">p { border:5px solid green;}</style>
-    <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
+    <link rel="stylesheet" href="/static/css/two.css" type="text/css" charset="utf-8">
     {% endcompress %}
 
 Which would be rendered something like:
 
-.. code-block:: html
+.. code-block:: django
 
-    <link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" charset="utf-8">
+    <link rel="stylesheet" href="/static/cache/css/f7c661b7a124.css" type="text/css" charset="utf-8">
 
 or:
 
 .. code-block:: django
 
     {% load compress %}
+
     {% compress js %}
-    <script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
     {% endcompress %}
 
 Which would be rendered something like:
 
-.. code-block:: html
+.. code-block:: django
 
-    <script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/static/cache/js/3f33b9146e12.js" charset="utf-8"></script>
 
-Linked files must be on your COMPRESS_URL (which defaults to MEDIA_URL).
-If DEBUG is true off-site files will throw exceptions. If DEBUG is false
-they will be silently stripped.
+Linked files must be accesible via COMPRESS_URL_. If DEBUG is true off-site
+files will throw exceptions. If DEBUG is false they will be silently stripped.
 
-If COMPRESS is False (defaults to the opposite of DEBUG) the compress tag
-simply returns exactly what it was given, to ease development.
+If COMPRESS is ``False`` (defaults to the opposite of DEBUG) the ``compress``
+template tag simply returns exactly what it was given, to ease development.
 
 .. warning::
 
-    For production sites it is recommended to use a real cache backend such as
-    memcached to speed up the checks of compressed files. Make sure you set
-    your Django cache backend appropriately (also see COMPRESS_CACHE_BACKEND_).
+    For production sites it is **strongly recommended** to use a real cache
+    backend such as memcached_ to speed up the checks of compressed files.
+    Make sure you set your Django cache backend appropriately (also see
+    COMPRESS_CACHE_BACKEND_ and Django's `caching documentation`_).
 
+.. _memcached: http://memcached.org/
+.. _caching documentation: http://docs.djangoproject.com/en/1.2/topics/cache/#memcached
 
-CSS Notes:
-**********
+CSS Notes
+---------
 
 All relative ``url()`` bits specified in linked CSS files are automatically
 converted to absolute URLs while being processed. Any local absolute URLs (those
@@ -76,13 +82,14 @@ instead of wrapping your CSS with @media blocks (which can break your own
 @media queries or @font-face declarations). It also allows browsers to avoid
 downloading CSS for irrelevant media types.
 
-**Recommendations:**
+Recommendations
+^^^^^^^^^^^^^^^
 
 * Use only relative or full domain absolute URLs in your CSS files.
 * Avoid @import! Simply list all your CSS files in the HTML, they'll be combined anyway.
 
 Why another static file combiner for Django?
-********************************************
+--------------------------------------------
 
 Short version: None of them did exactly what I needed.
 
@@ -107,58 +114,68 @@ Long version:
   I has one.
 
 Settings
-********
+--------
 
-Django compressor has a number of settings that control it's behavior.
+Django compressor has a number of settings that control its behavior.
 They've been given sensible defaults.
 
 COMPRESS
---------
+^^^^^^^^
 
 :Default: the opposite of ``DEBUG``
 
 Boolean that decides if compression will happen.
 
 COMPRESS_URL
-------------
+^^^^^^^^^^^^
 
-:Default: ``MEDIA_URL``
+:Default: ``STATIC_URL`` (``MEDIA_URL`` for older Django versions)
 
-Controls the URL that linked media will be read from and compressed media
+Controls the URL that linked files will be read from and compressed files
 will be written to.
 
+.. note::
+
+    This setting defaults to ``MEDIA_URL`` in case ``STATIC_URL``
+    is not given, e.g. on older Django versions (<1.3).
+
 COMPRESS_ROOT
--------------
+^^^^^^^^^^^^^
 
-:Default: ``MEDIA_ROOT``
+:Default: ``STATIC_ROOT`` (``MEDIA_ROOT`` for older Django versions)
 
-Controls the absolute file path that linked media will be read from and
-compressed media will be written to.
+Controls the absolute file path that linked static will be read from and
+compressed static will be written to.
+
+.. note::
+
+    This setting defaults to ``MEDIA_ROOT`` in case ``STATIC_ROOT``
+    is not given, e.g. on older Django versions (<1.3).
 
 COMPRESS_OUTPUT_DIR
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 :Default: ``'cache'``
 
-Controls the directory inside `COMPRESS_ROOT` that compressed files will
+Controls the directory inside COMPRESS_ROOT_ that compressed files will
 be written to.
 
 COMPRESS_CSS_FILTERS
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 :Default: ``['compressor.filters.css_default.CssAbsoluteFilter']``
 
 A list of filters that will be applied to CSS.
 
 COMPRESS_JS_FILTERS
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 :Default: ``['compressor.filters.jsmin.JSMinFilter']``
 
 A list of filters that will be applied to javascript.
 
 COMPRESS_STORAGE
-----------------
+^^^^^^^^^^^^^^^^
 
 :Default: ``'compressor.storage.CompressorFileStorage'``
 
@@ -166,7 +183,7 @@ The dotted path to a Django Storage backend to be used to save the
 compressed files.
 
 COMPRESS_PARSER
----------------
+^^^^^^^^^^^^^^^
 
 :Default: ``'compressor.parser.BeautifulSoupParser'``
 
@@ -179,7 +196,7 @@ The backends included in ``compressor``:
 See `Dependencies`_ for more info about the packages you need for each parser.
 
 COMPRESS_CACHE_BACKEND
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 :Default: ``"default"`` or ``CACHE_BACKEND``
 
@@ -187,15 +204,15 @@ The backend to use for caching, in case you want to use a different cache
 backend for compressor.
 
 If you have set the ``CACHES`` setting (new in Django 1.3),
-COMPRESS_CACHE_BACKEND`` defaults to ``"default", which is the alias for
+``COMPRESS_CACHE_BACKEND`` defaults to ``"default"``, which is the alias for
 the default cache backend. You can set it to a different alias that you have
 configured in your ``CACHES`` setting.
 
-If you have not set ``CACHES`` and are still using the old ``CACHE_BACKEND``
+If you have not set ``CACHES`` and are using the old ``CACHE_BACKEND``
 setting, ``COMPRESS_CACHE_BACKEND`` defaults to the ``CACHE_BACKEND`` setting.
 
 COMPRESS_REBUILD_TIMEOUT
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 :Default: ``2592000`` (30 days in seconds)
 
@@ -205,8 +222,8 @@ no file changes are detected.
 This is also used by the ``compress`` management command which pre-compresses
 the contents of ``{% compress %}`` template tags in the cache.
 
-COMPRESS_MINT_DELAY
--------------------
+COMPRESS_MINT_DELAY``
+^^^^^^^^^^^^^^^^^^^
 
 :Default: ``30`` (seconds)
 
@@ -214,16 +231,16 @@ The upper bound on how long any compression should take to run. Prevents
 dog piling, should be a lot smaller than COMPRESS_REBUILD_TIMEOUT_.
 
 COMPRESS_MTIME_DELAY
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
-:Default: ``None``
+:Default: ``10``
 
-The amount of time (in seconds) to cache the result of the check of the
-modification timestamp of a file. Disabled by default. Should be smaller
-than COMPRESS_REBUILD_TIMEOUT_ and COMPRESS_MINT_DELAY_.
+The amount of time (in seconds) to cache the modification timestamp of a
+file. Disabled by default. Should be smaller than COMPRESS_REBUILD_TIMEOUT_
+and COMPRESS_MINT_DELAY_.
 
 COMPRESS_OFFLINE
-----------------
+^^^^^^^^^^^^^^^^
 
 :Default: ``False``
 
@@ -233,7 +250,7 @@ pre-compress CSS and JavaScript files and works just like the automatic
 compression with the ``{% compress %}`` tag.
 
 To compress the files "offline" and update the offline cache you have
-to use the ``compress`` mangement command, e.g. during deployment.
+to use the ``compress`` management command, e.g. during deployment.
 In case you don't use the ``compressor`` management command ``compressor``
 will automatically fallback to the automatic compression.
 
@@ -248,23 +265,25 @@ in the cache as defined in COMPRESS_CACHE_BACKEND_ for the number of
 seconds defined in COMPRESS_OFFLINE_TIMEOUT_.
 
 COMPRESS_OFFLINE_TIMEOUT
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 :Default: ``31536000`` (1 year in seconds)
 
 The period of time with which the ``compress`` management command stores
-the pre-compressesed the contents of ``{% compress %}`` template tags in
+the pre-compressed the contents of ``{% compress %}`` template tags in
 the cache.
 
 COMPRESS_OFFLINE_CONTEXT
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 :Default: ``{'MEDIA_URL': settings.MEDIA_URL}``
 
 The context to be used by the ``compress`` management command when rendering
 the contents of ``{% compress %}`` template tags and saving the result in the
 offline cache. It's similar to a template context and should be used if a
-variable is used in the blocks, e.g.::
+variable is used in the blocks, e.g.:
+
+.. code-block:: django
 
     {% load compress %}
     {% compress js %}
@@ -286,7 +305,7 @@ For forward compatibility ``compressor`` will also add the ``STATIC_URL``
 setting (added in Django 1.3) to the COMPRESS_OFFLINE_CONTEXT_ if it's set.
 
 Dependencies
-************
+------------
 
 * BeautifulSoup_ (for the default ``compressor.parser.BeautifulSoupParser``)
 

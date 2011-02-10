@@ -2,24 +2,23 @@ import os
 import re
 from BeautifulSoup import BeautifulSoup
 
-from django.conf import settings as django_settings
 from django.core.cache.backends import dummy
 from django.core.files.storage import get_storage_class
 from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
 
 from compressor import storage
+from compressor.cache import get_hashed_mtime
 from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
 from compressor.management.commands.compress import Command as CompressCommand
-from compressor.utils import get_hashed_mtime
 
 
 class CompressorTestCase(TestCase):
 
     def setUp(self):
-        settings.COMPRESS = True
+        settings.COMPRESS_ENABLED = True
         self.css = """
         <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
@@ -35,9 +34,9 @@ class CompressorTestCase(TestCase):
 
     def test_css_split(self):
         out = [
-            ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css'), u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />'),
+            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />'),
             ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
-            ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
+            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
         ]
         split = self.cssNode.split_contents()
         split = [(x[0], x[1], self.cssNode.parser.elem_str(x[2])) for x in split]
@@ -52,12 +51,12 @@ class CompressorTestCase(TestCase):
         self.assertEqual(out, self.cssNode.combined)
 
     def test_css_mtimes(self):
-        is_date = re.compile(r'^\d{10}\.\d$')
+        is_date = re.compile(r'^\d{10}[\.\d]+$')
         for date in self.cssNode.mtimes:
-            self.assert_(is_date.match(str(float(date))), "mtimes is returning something that doesn't look like a date")
+            self.assert_(is_date.match(str(float(date))), "mtimes is returning something that doesn't look like a date: %s" % date)
 
     def test_css_return_if_off(self):
-        settings.COMPRESS = False
+        settings.COMPRESS_ENABLED = False
         self.assertEqual(self.css, self.cssNode.output())
 
     def test_cachekey(self):
@@ -72,7 +71,7 @@ class CompressorTestCase(TestCase):
         self.assertEqual(output, self.cssNode.output().strip())
 
     def test_js_split(self):
-        out = [('file', os.path.join(settings.MEDIA_ROOT, u'js/one.js'), '<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>'),
+        out = [('file', os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), '<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>'),
          ('hunk', u'obj.value = "value";', '<script type="text/javascript" charset="utf-8">obj.value = "value";</script>')
          ]
         split = self.jsNode.split_contents()
@@ -92,7 +91,7 @@ class CompressorTestCase(TestCase):
         self.assertEqual(out, self.jsNode.combined)
 
     def test_js_return_if_off(self):
-        settings.COMPRESS = False
+        settings.COMPRESS_ENABLED = False
         self.assertEqual(self.js, self.jsNode.output())
 
     def test_js_return_if_on(self):
@@ -100,44 +99,50 @@ class CompressorTestCase(TestCase):
         self.assertEqual(output, self.jsNode.output())
 
     def test_custom_output_dir(self):
-        old_output_dir = settings.OUTPUT_DIR
-        settings.OUTPUT_DIR = 'custom'
+        old_output_dir = settings.COMPRESS_OUTPUT_DIR
+        settings.COMPRESS_OUTPUT_DIR = 'custom'
         output = u'<script type="text/javascript" src="/media/custom/js/3f33b9146e12.js" charset="utf-8"></script>'
         self.assertEqual(output, JsCompressor(self.js).output())
-        settings.OUTPUT_DIR = ''
+        settings.COMPRESS_OUTPUT_DIR = ''
         output = u'<script type="text/javascript" src="/media/js/3f33b9146e12.js" charset="utf-8"></script>'
         self.assertEqual(output, JsCompressor(self.js).output())
-        settings.OUTPUT_DIR = '/custom/nested/'
+        settings.COMPRESS_OUTPUT_DIR = '/custom/nested/'
         output = u'<script type="text/javascript" src="/media/custom/nested/js/3f33b9146e12.js" charset="utf-8"></script>'
         self.assertEqual(output, JsCompressor(self.js).output())
-        settings.OUTPUT_DIR = old_output_dir
+        settings.COMPRESS_OUTPUT_DIR = old_output_dir
 
 
-class LxmlCompressorTestCase(CompressorTestCase):
+try:
+    import lxml
+except ImportError:
+    import warnings
+    warnings.warn("lxml library couldn't be found, skipping tests.")
+else:
+    class LxmlCompressorTestCase(CompressorTestCase):
 
-    def test_css_split(self):
-        out = [
-            ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css'), u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">'),
-            ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
-            ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">'),
-        ]
-        split = self.cssNode.split_contents()
-        split = [(x[0], x[1], self.cssNode.parser.elem_str(x[2])) for x in split]
-        self.assertEqual(out, split)
+        def test_css_split(self):
+            out = [
+                ('file', os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">'),
+                ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
+                ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">'),
+            ]
+            split = self.cssNode.split_contents()
+            split = [(x[0], x[1], self.cssNode.parser.elem_str(x[2])) for x in split]
+            self.assertEqual(out, split)
 
-    def setUp(self):
-        self.old_parser = settings.PARSER
-        settings.PARSER = 'compressor.parser.LxmlParser'
-        super(LxmlCompressorTestCase, self).setUp()
+        def setUp(self):
+            self.old_parser = settings.COMPRESS_PARSER
+            settings.COMPRESS_PARSER = 'compressor.parser.LxmlParser'
+            super(LxmlCompressorTestCase, self).setUp()
 
-    def tearDown(self):
-        settings.PARSER = self.old_parser
+        def tearDown(self):
+            settings.COMPRESS_PARSER = self.old_parser
 
 
 class CssAbsolutizingTestCase(TestCase):
     def setUp(self):
-        settings.COMPRESS = True
-        settings.MEDIA_URL = '/media/'
+        settings.COMPRESS_ENABLED = True
+        settings.COMPRESS_URL = '/media/'
         self.css = """
         <link rel="stylesheet" href="/media/css/url/url1.css" type="text/css" charset="utf-8">
         <link rel="stylesheet" href="/media/css/url/2/url2.css" type="text/css" charset="utf-8">
@@ -146,43 +151,43 @@ class CssAbsolutizingTestCase(TestCase):
 
     def test_css_absolute_filter(self):
         from compressor.filters.css_default import CssAbsoluteFilter
-        filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
-        settings.MEDIA_URL = 'http://media.example.com/'
-        filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
+        settings.COMPRESS_URL = 'http://media.example.com/'
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename))
 
     def test_css_absolute_filter_https(self):
         from compressor.filters.css_default import CssAbsoluteFilter
-        filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
-        settings.MEDIA_URL = 'https://media.example.com/'
-        filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
+        settings.COMPRESS_URL = 'https://media.example.com/'
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename))
 
     def test_css_absolute_filter_relative_path(self):
         from compressor.filters.css_default import CssAbsoluteFilter
-        filename = os.path.join(django_settings.TEST_DIR, 'whatever', '..', 'media', 'whatever/../css/url/test.css')
+        filename = os.path.join(settings.TEST_DIR, 'whatever', '..', 'media', 'whatever/../css/url/test.css')
         content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
-        settings.MEDIA_URL = 'https://media.example.com/'
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.MEDIA_URL, get_hashed_mtime(filename))
+        settings.COMPRESS_URL = 'https://media.example.com/'
+        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename))
 
     def test_css_hunks(self):
         hash_dict = {
-            'hash1': get_hashed_mtime(os.path.join(settings.MEDIA_ROOT, 'css/url/url1.css')),
-            'hash2': get_hashed_mtime(os.path.join(settings.MEDIA_ROOT, 'css/url/2/url2.css')),
+            'hash1': get_hashed_mtime(os.path.join(settings.COMPRESS_ROOT, 'css/url/url1.css')),
+            'hash2': get_hashed_mtime(os.path.join(settings.COMPRESS_ROOT, 'css/url/2/url2.css')),
         }
         out = [u"p { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\n" % hash_dict,
                u"p { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\n" % hash_dict]
@@ -191,19 +196,19 @@ class CssAbsolutizingTestCase(TestCase):
 
 class CssDataUriTestCase(TestCase):
     def setUp(self):
-        settings.COMPRESS = True
+        settings.COMPRESS_ENABLED = True
         settings.COMPRESS_CSS_FILTERS = [
             'compressor.filters.css_default.CssAbsoluteFilter',
             'compressor.filters.datauri.CssDataUriFilter',
         ]
-        settings.MEDIA_URL = '/media/'
+        settings.COMPRESS_URL = '/media/'
         self.css = """
         <link rel="stylesheet" href="/media/css/datauri.css" type="text/css" charset="utf-8">
         """
         self.cssNode = CssCompressor(self.css)
 
     def test_data_uris(self):
-        datauri_hash = get_hashed_mtime(os.path.join(settings.MEDIA_ROOT, 'css/datauri.css'))
+        datauri_hash = get_hashed_mtime(os.path.join(settings.COMPRESS_ROOT, 'css/datauri.css'))
         out = [u'.add { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJvSURBVDjLpZPrS5NhGIf9W7YvBYOkhlkoqCklWChv2WyKik7blnNris72bi6dus0DLZ0TDxW1odtopDs4D8MDZuLU0kXq61CijSIIasOvv94VTUfLiB74fXngup7nvrnvJABJ/5PfLnTTdcwOj4RsdYmo5glBWP6iOtzwvIKSWstI0Wgx80SBblpKtE9KQs/We7EaWoT/8wbWP61gMmCH0lMDvokT4j25TiQU/ITFkek9Ow6+7WH2gwsmahCPdwyw75uw9HEO2gUZSkfyI9zBPCJOoJ2SMmg46N61YO/rNoa39Xi41oFuXysMfh36/Fp0b7bAfWAH6RGi0HglWNCbzYgJaFjRv6zGuy+b9It96N3SQvNKiV9HvSaDfFEIxXItnPs23BzJQd6DDEVM0OKsoVwBG/1VMzpXVWhbkUM2K4oJBDYuGmbKIJ0qxsAbHfRLzbjcnUbFBIpx/qH3vQv9b3U03IQ/HfFkERTzfFj8w8jSpR7GBE123uFEYAzaDRIqX/2JAtJbDat/COkd7CNBva2cMvq0MGxp0PRSCPF8BXjWG3FgNHc9XPT71Ojy3sMFdfJRCeKxEsVtKwFHwALZfCUk3tIfNR8XiJwc1LmL4dg141JPKtj3WUdNFJqLGFVPC4OkR4BxajTWsChY64wmCnMxsWPCHcutKBxMVp5mxA1S+aMComToaqTRUQknLTH62kHOVEE+VQnjahscNCy0cMBWsSI0TCQcZc5ALkEYckL5A5noWSBhfm2AecMAjbcRWV0pUTh0HE64TNf0mczcnnQyu/MilaFJCae1nw2fbz1DnVOxyGTlKeZft/Ff8x1BRssfACjTwQAAAABJRU5ErkJggg=="); }\n.python { background-image: url("/media/img/python.png?%s"); }\n.datauri { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9YGARc5KB0XV+IAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAF1JREFUGNO9zL0NglAAxPEfdLTs4BZM4DIO4C7OwQg2JoQ9LE1exdlYvBBeZ7jqch9//q1uH4TLzw4d6+ErXMMcXuHWxId3KOETnnXXV6MJpcq2MLaI97CER3N0 vr4MkhoXe0rZigAAAABJRU5ErkJggg=="); }\n' % datauri_hash]
         self.assertEqual(out, self.cssNode.hunks)
 
@@ -258,12 +263,12 @@ def render(template_string, context_dict=None):
 
 class TemplatetagTestCase(TestCase):
     def setUp(self):
-        settings.COMPRESS = True
+        settings.COMPRESS_ENABLED = True
 
     def test_empty_tag(self):
         template = u"""{% load compress %}{% compress js %}{% block js %}
         {% endblock %}{% endcompress %}"""
-        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        context = { 'MEDIA_URL': settings.COMPRESS_URL }
         self.assertEqual(u'', render(template, context))
 
     def test_css_tag(self):
@@ -273,7 +278,7 @@ class TemplatetagTestCase(TestCase):
         <link rel="stylesheet" href="{{ MEDIA_URL }}css/two.css" type="text/css" charset="utf-8">
         {% endcompress %}
         """
-        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        context = { 'MEDIA_URL': settings.COMPRESS_URL }
         out = u'<link rel="stylesheet" href="/media/cache/css/f7c661b7a124.css" type="text/css">'
         self.assertEqual(out, render(template, context))
 
@@ -283,7 +288,7 @@ class TemplatetagTestCase(TestCase):
         <style type="text/css">p { border:5px solid green;}</style>
         {% endcompress %}
         """
-        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        context = { 'MEDIA_URL': settings.COMPRESS_URL }
         out = '<link rel="stylesheet" href="/media/cache/css/1c1c0855907b.css" type="text/css">'
         self.assertEqual(out, render(template, context))
 
@@ -293,7 +298,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         {% endcompress %}
         """
-        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        context = { 'MEDIA_URL': settings.COMPRESS_URL }
         out = u'<script type="text/javascript" src="/media/cache/js/3f33b9146e12.js" charset="utf-8"></script>'
         self.assertEqual(out, render(template, context))
 
@@ -303,7 +308,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript" charset="utf-8">var test_value = "\u2014";</script>
         {% endcompress %}
         """
-        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        context = { 'MEDIA_URL': settings.COMPRESS_URL }
         out = u'<script type="text/javascript" src="/media/cache/js/5d5c0e1cb25f.js" charset="utf-8"></script>'
         self.assertEqual(out, render(template, context))
 
@@ -313,7 +318,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript" charset="utf-8">var test_value = "\u2014";</script>
         {% endcompress %}
         """
-        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        context = { 'MEDIA_URL': settings.COMPRESS_URL }
         out = u'<script type="text/javascript" src="/media/cache/js/40a8e9ffb476.js" charset="utf-8"></script>'
         self.assertEqual(out, render(template, context))
 
@@ -328,7 +333,7 @@ class StorageTestCase(TestCase):
     def setUp(self):
         self._storage = storage.default_storage
         storage.default_storage = get_storage_class('compressor.tests.storage.TestStorage')()
-        settings.COMPRESS = True
+        settings.COMPRESS_ENABLED = True
 
     def tearDown(self):
         storage.default_storage = self._storage
@@ -340,7 +345,7 @@ class StorageTestCase(TestCase):
         <link rel="stylesheet" href="{{ MEDIA_URL }}css/two.css" type="text/css" charset="utf-8">
         {% endcompress %}
         """
-        context = { 'MEDIA_URL': settings.MEDIA_URL }
+        context = { 'MEDIA_URL': settings.COMPRESS_URL }
         out = u'<link rel="stylesheet" href="/media/cache/css/5b231a62e9a6.css.gz" type="text/css">'
         self.assertEqual(out, render(template, context))
 
@@ -349,7 +354,7 @@ class VerboseTestCase(CompressorTestCase):
 
     def setUp(self):
         super(VerboseTestCase, self).setUp()
-        setattr(settings, "COMPRESS_VERBOSE", True)
+        settings.COMPRESS_VERBOSE = True
 
 
 class CacheBackendTestCase(CompressorTestCase):
@@ -363,11 +368,11 @@ class OfflineGenerationTestCase(TestCase):
     """Uses templates/test_compressor_offline.html"""
 
     def setUp(self):
-        self._old_compress = settings.COMPRESS
-        settings.COMPRESS = True
+        self._old_compress = settings.COMPRESS_ENABLED
+        settings.COMPRESS_ENABLED = True
 
     def tearDown(self):
-        settings.COMPRESS = self._old_compress
+        settings.COMPRESS_ENABLED = self._old_compress
 
     def test_offline(self):
         count, result = CompressCommand().compress()
@@ -378,8 +383,8 @@ class OfflineGenerationTestCase(TestCase):
         ])
 
     def test_offline_with_context(self):
-        self._old_offline_context = settings.OFFLINE_CONTEXT
-        settings.OFFLINE_CONTEXT = {
+        self._old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
+        settings.COMPRESS_OFFLINE_CONTEXT = {
             'color': 'blue',
         }
         count, result = CompressCommand().compress()
@@ -388,4 +393,4 @@ class OfflineGenerationTestCase(TestCase):
             u'<link rel="stylesheet" href="/media/cache/css/8a2405e029de.css" type="text/css">\n',
             u'<script type="text/javascript" src="/media/cache/js/bf53fa5b13e2.js" charset="utf-8"></script>',
         ])
-        settings.OFFLINE_CONTEXT = self._old_offline_context
+        settings.COMPRESS_OFFLINE_CONTEXT = self._old_offline_context

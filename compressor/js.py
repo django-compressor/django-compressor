@@ -1,5 +1,3 @@
-from django.conf import settings as django_settings
-
 from compressor.conf import settings
 from compressor.base import Compressor
 from compressor.exceptions import UncompressableFileError
@@ -24,7 +22,7 @@ class JsCompressor(Compressor):
                 try:
                     self.split_content.append(('file', self.get_filename(attribs['src']), elem))
                 except UncompressableFileError:
-                    if django_settings.DEBUG:
+                    if settings.DEBUG:
                         raise
             else:
                 content = self.parser.elem_content(elem)

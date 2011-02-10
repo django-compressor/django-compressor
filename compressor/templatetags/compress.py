@@ -2,11 +2,10 @@ import time
 
 from django import template
 
+from compressor.cache import cache, get_offline_cachekey
+from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
-from compressor.cache import cache
-from compressor.conf import settings
-from compressor.utils import get_offline_cachekey
 
 
 OUTPUT_FILE = 'file'
@@ -28,17 +27,17 @@ class CompressorNode(template.Node):
         if (time.time() > refresh_time) and not refreshed:
             # Store the stale value while the cache
             # revalidates for another MINT_DELAY seconds.
-            self.cache_set(key, val, timeout=settings.MINT_DELAY, refreshed=True)
+            self.cache_set(key, val, timeout=settings.COMPRESS_MINT_DELAY, refreshed=True)
             return None
         return val
 
-    def cache_set(self, key, val, timeout=settings.REBUILD_TIMEOUT, refreshed=False):
+    def cache_set(self, key, val, timeout=settings.COMPRESS_REBUILD_TIMEOUT, refreshed=False):
         refresh_time = timeout + time.time()
-        real_timeout = timeout + settings.MINT_DELAY
+        real_timeout = timeout + settings.COMPRESS_MINT_DELAY
         packed_val = (val, refresh_time, refreshed)
         return cache.set(key, packed_val, real_timeout)
 
-    def render(self, context, compress=settings.COMPRESS, offline=settings.OFFLINE):
+    def render(self, context, compress=settings.COMPRESS_ENABLED, offline=settings.COMPRESS_OFFLINE):
         if compress and offline:
             key = get_offline_cachekey(self.nodelist)
             content = cache.get(key)
