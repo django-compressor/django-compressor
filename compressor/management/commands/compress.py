@@ -143,8 +143,8 @@ class Command(NoArgsCommand):
                 cache.set(key, result, settings.COMPRESS_OFFLINE_TIMEOUT)
                 results.append(result)
                 count += 1
-        log.write("done\nCompressed %d block(s) from %d template(s).\n"
-                  % (count, len(compressor_nodes)))
+        log.write("done\nCompressed %d block(s) from %d template(s).\n" %
+                  (count, len(compressor_nodes)))
         return count, results
 
     def walk_nodes(self, node):
