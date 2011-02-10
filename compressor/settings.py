@@ -112,7 +112,7 @@ class CompressorSettings(AppSettings):
         return value
 
     def configure_offline_context(self, value):
-        if value:
+        if not value:
             value = {
                 'MEDIA_URL': settings.MEDIA_URL,
             }
