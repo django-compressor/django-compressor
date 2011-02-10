@@ -226,11 +226,11 @@ dog piling, should be a lot smaller than COMPRESS_REBUILD_TIMEOUT_.
 COMPRESS_MTIME_DELAY
 --------------------
 
-:Default: ``None``
+:Default: ``10``
 
-The amount of time (in seconds) to cache the result of the check of the
-modification timestamp of a file. Disabled by default. Should be smaller
-than COMPRESS_REBUILD_TIMEOUT_ and COMPRESS_MINT_DELAY_.
+The amount of time (in seconds) to cache the modification timestamp of a
+file. Disabled by default. Should be smaller than COMPRESS_REBUILD_TIMEOUT_
+and COMPRESS_MINT_DELAY_.
 
 COMPRESS_OFFLINE
 ----------------

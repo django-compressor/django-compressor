@@ -29,19 +29,16 @@ class CompressorSettings(AppSettings):
     YUI_BINARY = 'java -jar yuicompressor.jar'
     YUI_CSS_ARGUMENTS = ''
     YUI_JS_ARGUMENTS = 'COMPRESS_YUI_JS_ARGUMENTS'
-
     DATA_URI_MIN_SIZE = 1024
-
     # the cache backend to use
     CACHE_BACKEND = None
     # rebuilds the cache every 30 days if nothing has changed.
     REBUILD_TIMEOUT = 60 * 60 * 24 * 30 # 30 days
     # the upper bound on how long any compression should take to be generated
     # (used against dog piling, should be a lot smaller than REBUILD_TIMEOUT
-    MINT_DELAY = 30 # 30 seconds
-    # check for file changes only after a delay (in seconds, disabled by default)
-    MTIME_DELAY = None
-
+    MINT_DELAY = 30 # seconds
+    # check for file changes only after a delay
+    MTIME_DELAY = 10 # seconds
     # enables the offline cache -- a cache that is filled by the compress management command
     OFFLINE = False
     # invalidates the offline cache after one year
