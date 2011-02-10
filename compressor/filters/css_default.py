@@ -2,7 +2,7 @@ import os
 import re
 import posixpath
 
-from compressor.cache import get_hexdigest, get_mtime
+from compressor.cache import get_hashed_mtime
 from compressor.conf import settings
 from compressor.filters import FilterBase
 
@@ -21,8 +21,7 @@ class CssAbsoluteFilter(FilterBase):
         self.url = settings.COMPRESS_URL.rstrip('/')
         self.url_path = self.url
         try:
-            mtime = get_mtime(filename)
-            self.mtime = get_hexdigest(str(int(mtime)))[:12]
+            self.mtime = get_hashed_mtime(filename)
         except OSError:
             self.mtime = None
         self.has_http = False
@@ -51,7 +50,7 @@ class CssAbsoluteFilter(FilterBase):
 
     def add_mtime(self, url):
         filename = self.guess_filename(url)
-        mtime = filename and get_mtime(filename) or self.mtime
+        mtime = filename and get_hashed_mtime(filename) or self.mtime
         if mtime is None:
             return url
         if (url.startswith('http://') or
