@@ -1,6 +1,6 @@
-import inspect
 import os
 import sys
+from inspect import getmembers
 from shlex import split as cmd_split
 
 from django.conf import settings
@@ -172,27 +172,23 @@ class AppSettings(object):
        if name.startswith(self._prefix):
            raise AttributeError("%r object has no attribute %r" %
                                 (self.__class__.__name__, name))
-       try:
-           return getattr(settings, name)
-       except AttributeError:
-           raise
+       return getattr(settings, name)
+
+   def __setattr__(self, name, value):
+       super(AppSettings, self).__setattr__(name, value)
+       if name in dir(settings):
+           setattr(settings, name, value)
 
    def __init__(self, prefix):
-       defaults = filter(self.issetting, inspect.getmembers(self.__class__))
-       self._prefix = prefix
-       for name, value in defaults:
-           prefixed_name = "%s_%s" % (self._prefix.upper(), name.upper())
+       super(AppSettings, self).__setattr__('_prefix', prefix)
+       for name, value in filter(self.issetting, getmembers(self.__class__)):
+           prefixed_name = "%s_%s" % (prefix.upper(), name.upper())
            value = getattr(settings, prefixed_name, value)
-           try:
-               callback = getattr(self, "configure_%s" % name.lower())
-               if callable(callback):
-                   callback_value = callback(value)
-                   if callback_value is not None:
-                       value = callback_value
-           except AttributeError:
-               pass
+           callback = getattr(self, "configure_%s" % name.lower(), None)
+           if callable(callback):
+               value = callback(value)
            delattr(self.__class__, name)
            setattr(self, prefixed_name, value)
 
-   def issetting(self, setting):
-       return setting[0] == setting[0].upper()
+   def issetting(self, (name, value)):
+       return name == name.upper()
