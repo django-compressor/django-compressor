@@ -50,9 +50,9 @@ class CompressorNode(template.Node):
             compressor = CssCompressor(content)
         if self.kind == 'js':
             compressor = JsCompressor(content)
-        cachekey = "%s-%s" % (compressor.cachekey, self.mode)
+        cachekey = "%s.%s" % (compressor.cachekey, self.mode)
         output = self.cache_get(cachekey)
-        if output is None:
+        if output is None or not offline:
             try:
                 if self.mode == OUTPUT_FILE:
                     output = compressor.output()
