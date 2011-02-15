@@ -143,8 +143,8 @@ class Command(NoArgsCommand):
                 cache.set(key, result, settings.COMPRESS_OFFLINE_TIMEOUT)
                 results.append(result)
                 count += 1
-        log.write("done\nCompressed %d block(s) from %d template(s).\n"
-                  % (count, len(compressor_nodes)))
+        log.write("done\nCompressed %d block(s) from %d template(s).\n" %
+                  (count, len(compressor_nodes)))
         return count, results
 
     def walk_nodes(self, node):
@@ -183,13 +183,10 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **options):
         if not settings.COMPRESS_ENABLED and not options.get("force"):
-            raise CommandError("Compressor is disabled. Set COMPRESS "
-                               "settting to True to enable it "
-                               "(Use -f/--force to override).")
+            raise CommandError("Compressor is disabled. Set COMPRESS settting or use --force to override.")
         if not settings.COMPRESS_OFFLINE:
             if not options.get("force"):
-                raise CommandError("Aborting; COMPRESS_OFFLINE is not set. "
-                                   "(Use -f/--force to override)")
+                raise CommandError("Offline compressiong is disabled. Set COMPRESS_OFFLINE or use the --force to override.")
             warnings.warn("COMPRESS_OFFLINE is not set. Offline generated "
                           "cache will not be used.")
         self.compress(sys.stdout, **options)

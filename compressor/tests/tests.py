@@ -2,6 +2,11 @@ import os
 import re
 from BeautifulSoup import BeautifulSoup
 
+try:
+    import lxml
+except ImportError:
+    lxml = None
+
 from django.core.cache.backends import dummy
 from django.core.files.storage import get_storage_class
 from django.template import Template, Context, TemplateSyntaxError
@@ -111,13 +116,7 @@ class CompressorTestCase(TestCase):
         self.assertEqual(output, JsCompressor(self.js).output())
         settings.COMPRESS_OUTPUT_DIR = old_output_dir
 
-
-try:
-    import lxml
-except ImportError:
-    import warnings
-    warnings.warn("lxml library couldn't be found, skipping tests.")
-else:
+if lxml:
     class LxmlCompressorTestCase(CompressorTestCase):
 
         def test_css_split(self):

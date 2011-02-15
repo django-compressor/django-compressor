@@ -1,5 +1,6 @@
 import os
 
+from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
@@ -105,14 +106,14 @@ class CompressorSettings(AppSettings):
     def configure_cache_backend(self, value):
         if value is None:
             # If we are on Django 1.3 AND using the new CACHES setting...
-            if getattr(settings, "CACHES", None):
+            if getattr(settings, "CACHES", None) and DJANGO_VERSION[:2] >= (1, 3):
                 return "default"
             # fallback for people still using the old CACHE_BACKEND setting
             return settings.CACHE_BACKEND
         return value
 
     def configure_offline_context(self, value):
-        if value:
+        if not value:
             value = {
                 'MEDIA_URL': settings.MEDIA_URL,
             }
