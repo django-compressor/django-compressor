@@ -6,7 +6,6 @@ class CssCompressor(Compressor):
 
     def __init__(self, content, output_prefix="css"):
         super(CssCompressor, self).__init__(content, output_prefix)
-        self.extension = ".css"
         self.template_name = "compressor/css.html"
         self.template_name_inline = "compressor/css_inline.html"
         self.filters = list(settings.COMPRESS_CSS_FILTERS)

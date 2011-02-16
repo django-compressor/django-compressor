@@ -7,7 +7,6 @@ class JsCompressor(Compressor):
 
     def __init__(self, content, output_prefix="js"):
         super(JsCompressor, self).__init__(content, output_prefix)
-        self.extension = ".js"
         self.template_name = "compressor/js.html"
         self.template_name_inline = "compressor/js_inline.html"
         self.filters = settings.COMPRESS_JS_FILTERS
