@@ -96,8 +96,12 @@ class CompressorTestCase(TestCase):
         self.assertEqual(out, self.js_node.combined)
 
     def test_js_return_if_off(self):
-        settings.COMPRESS_ENABLED = False
-        self.assertEqual(self.js, self.js_node.output())
+        try:
+            enabled = settings.COMPRESS_ENABLED
+            settings.COMPRESS_ENABLED = False
+            self.assertEqual(self.js, self.js_node.output())
+        finally:
+            settings.COMPRESS_ENABLED = enabled
 
     def test_js_return_if_on(self):
         output = u'<script type="text/javascript" src="/media/cache/js/3f33b9146e12.js" charset="utf-8"></script>'
