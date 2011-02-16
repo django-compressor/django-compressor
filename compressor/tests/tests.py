@@ -12,7 +12,7 @@ from django.core.files.storage import get_storage_class
 from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
 
-from compressor import storage
+from compressor import storage, base
 from compressor.cache import get_hashed_mtime
 from compressor.conf import settings
 from compressor.css import CssCompressor
@@ -332,12 +332,12 @@ class TemplatetagTestCase(TestCase):
 
 class StorageTestCase(TestCase):
     def setUp(self):
-        self._storage = storage.default_storage
-        storage.default_storage = get_storage_class('compressor.tests.storage.TestStorage')()
+        self._storage = base.default_storage
+        base.default_storage = get_storage_class('compressor.tests.storage.TestStorage')()
         settings.COMPRESS_ENABLED = True
 
     def tearDown(self):
-        storage.default_storage = self._storage
+        base.default_storage = self._storage
 
     def test_css_tag_with_storage(self):
         template = u"""{% load compress %}{% compress css %}
