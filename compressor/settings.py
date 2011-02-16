@@ -16,6 +16,9 @@ class CompressorSettings(AppSettings):
     OUTPUT_DIR = 'cache'
     STORAGE = 'compressor.storage.CompressorFileStorage'
 
+    CSS_COMPRESSOR = "compressor.css.CssCompressor"
+    JS_COMPRESSOR = "compressor.js.JsCompressor"
+
     URL = None
     ROOT = None
 

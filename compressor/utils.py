@@ -27,8 +27,10 @@ def get_class(class_string, exception=FilterError):
             if class_name != '':
                 cls = getattr(__import__(mod_name, {}, {}, ['']), class_name)
         except (ImportError, AttributeError):
-            raise exception('Failed to import filter %s' % class_string)
-    return cls
+            pass
+        else:
+            return cls
+    raise exception('Failed to import %s' % class_string)
 
 def get_mod_func(callback):
     """

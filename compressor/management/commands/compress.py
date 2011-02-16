@@ -139,7 +139,7 @@ class Command(NoArgsCommand):
         for nodes in compressor_nodes.values():
             for node in nodes:
                 key = get_offline_cachekey(node.nodelist)
-                result = node.render(context, compress=True, offline=False)
+                result = node.render(context, forced=True)
                 cache.set(key, result, settings.COMPRESS_OFFLINE_TIMEOUT)
                 results.append(result)
                 count += 1

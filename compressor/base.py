@@ -117,8 +117,8 @@ class Compressor(object):
         self.storage.save(self.new_filepath, ContentFile(self.combined))
         return True
 
-    def output(self):
-        if not settings.COMPRESS_ENABLED:
+    def output(self, forced=False):
+        if not settings.COMPRESS_ENABLED and not forced:
             return self.content
         context = {
             "saved": self.save_file(),

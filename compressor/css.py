@@ -41,14 +41,14 @@ class CssCompressor(Compressor):
                     self.media_nodes.append((media, node))
         return self.split_content
 
-    def output(self):
+    def output(self, forced=False):
         self.split_contents()
         if not hasattr(self, 'media_nodes'):
-            return super(CssCompressor, self).output()
-        if not settings.COMPRESS_ENABLED:
+            return super(CssCompressor, self).output(forced=forced)
+        if not settings.COMPRESS_ENABLED and not forced:
             return self.content
         ret = []
         for media, subnode in self.media_nodes:
             subnode.extra_context.update({'media': media})
-            ret.append(subnode.output())
+            ret.append(subnode.output(forced=forced))
         return "".join(ret)

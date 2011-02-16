@@ -1,15 +1,21 @@
 import time
 
 from django import template
+from django.core.exceptions import ImproperlyConfigured
 
 from compressor.cache import cache, get_offline_cachekey
 from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
-
+from compressor.utils import get_class
 
 OUTPUT_FILE = 'file'
 OUTPUT_INLINE = 'inline'
+OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
+COMPRESSORS = {
+    "css": settings.COMPRESS_CSS_COMPRESSOR,
+    "js": settings.COMPRESS_JS_COMPRESSOR,
+}
 
 register = template.Library()
 
@@ -18,6 +24,8 @@ class CompressorNode(template.Node):
         self.nodelist = nodelist
         self.kind = kind
         self.mode = mode
+        self.compressor_cls = get_class(
+            COMPRESSORS.get(self.kind), exception=ImproperlyConfigured)
 
     def cache_get(self, key):
         packed_val = cache.get(key)
@@ -37,30 +45,23 @@ class CompressorNode(template.Node):
         packed_val = (val, refresh_time, refreshed)
         return cache.set(key, packed_val, real_timeout)
 
-    def render(self, context, compress=settings.COMPRESS_ENABLED,
-            offline=settings.COMPRESS_OFFLINE):
-        if compress and offline:
+    def render(self, context, forced=False):
+        if (settings.COMPRESS_ENABLED and settings.COMPRESS_OFFLINE) and not forced:
             key = get_offline_cachekey(self.nodelist)
             content = cache.get(key)
             if content:
                 return content
         content = self.nodelist.render(context)
-        if offline or not compress or not len(content.strip()):
+        if (not settings.COMPRESS_ENABLED or not len(content.strip())) and not forced:
             return content
-        if self.kind == 'css':
-            compressor = CssCompressor(content)
-        elif self.kind == 'js':
-            compressor = JsCompressor(content)
         cachekey = "%s.%s" % (compressor.cachekey, self.mode)
+        compressor = self.compressor_cls(content)
         output = self.cache_get(cachekey)
-        if output is None or not offline:
+        if output is None or forced:
             try:
-                if self.mode == OUTPUT_FILE:
-                    output = compressor.output()
-                elif self.mode == OUTPUT_INLINE:
-                    output = compressor.output_inline()
-                else:
-                    output = content
+                if self.mode == OUTPUT_INLINE:
+                    return compressor.output_inline()
+                output = compressor.output(forced=forced)
                 self.cache_set(cachekey, output)
             except:
                 from traceback import format_exc
@@ -116,13 +117,13 @@ def compress(parser, token):
             "%r tag requires either one or two arguments." % args[0])
 
     kind = args[1]
-    if not kind in ('css', 'js'):
+    if not kind in COMPRESSORS.keys():
         raise template.TemplateSyntaxError(
             "%r's argument must be 'js' or 'css'." % args[0])
 
     if len(args) == 3:
         mode = args[2]
-        if not mode in (OUTPUT_FILE, OUTPUT_INLINE):
+        if not mode in OUTPUT_MODES:
             raise template.TemplateSyntaxError(
                 "%r's second argument must be '%s' or '%s'." %
                 (args[0], OUTPUT_FILE, OUTPUT_INLINE))
