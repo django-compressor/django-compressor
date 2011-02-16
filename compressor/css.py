@@ -4,7 +4,7 @@ from compressor.exceptions import UncompressableFileError
 
 class CssCompressor(Compressor):
 
-    def __init__(self, content, output_prefix="css"):
+    def __init__(self, content=None, output_prefix="css"):
         super(CssCompressor, self).__init__(content, output_prefix)
         self.template_name = "compressor/css.html"
         self.template_name_inline = "compressor/css_inline.html"
@@ -36,7 +36,7 @@ class CssCompressor(Compressor):
                 if self.media_nodes and self.media_nodes[-1][0] == media:
                     self.media_nodes[-1][1].split_content.append(data)
                 else:
-                    node = CssCompressor(content='')
+                    node = CssCompressor()
                     node.split_content.append(data)
                     self.media_nodes.append((media, node))
         return self.split_content

@@ -11,8 +11,8 @@ from compressor.utils import get_class
 
 class Compressor(object):
 
-    def __init__(self, content, output_prefix="compressed"):
-        self.content = content
+    def __init__(self, content=None, output_prefix="compressed"):
+        self.content = content or ""
         self.type = None
         self.output_prefix = output_prefix
         self.split_content = []

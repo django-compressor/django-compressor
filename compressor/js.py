@@ -5,11 +5,11 @@ from compressor.exceptions import UncompressableFileError
 
 class JsCompressor(Compressor):
 
-    def __init__(self, content, output_prefix="js"):
+    def __init__(self, content=None, output_prefix="js"):
         super(JsCompressor, self).__init__(content, output_prefix)
         self.template_name = "compressor/js.html"
         self.template_name_inline = "compressor/js_inline.html"
-        self.filters = settings.COMPRESS_JS_FILTERS
+        self.filters = list(settings.COMPRESS_JS_FILTERS)
         self.type = 'js'
 
     def split_contents(self):
