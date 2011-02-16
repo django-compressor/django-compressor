@@ -37,7 +37,8 @@ class CompressorNode(template.Node):
         packed_val = (val, refresh_time, refreshed)
         return cache.set(key, packed_val, real_timeout)
 
-    def render(self, context, compress=settings.COMPRESS_ENABLED, offline=settings.COMPRESS_OFFLINE):
+    def render(self, context, compress=settings.COMPRESS_ENABLED,
+            offline=settings.COMPRESS_OFFLINE):
         if compress and offline:
             key = get_offline_cachekey(self.nodelist)
             content = cache.get(key)
@@ -111,17 +112,20 @@ def compress(parser, token):
     args = token.split_contents()
 
     if not len(args) in (2, 3):
-        raise template.TemplateSyntaxError("%r tag requires either one or two arguments." % args[0])
+        raise template.TemplateSyntaxError(
+            "%r tag requires either one or two arguments." % args[0])
 
     kind = args[1]
-    if not kind in ['css', 'js']:
-        raise template.TemplateSyntaxError("%r's argument must be 'js' or 'css'." % args[0])
+    if not kind in ('css', 'js'):
+        raise template.TemplateSyntaxError(
+            "%r's argument must be 'js' or 'css'." % args[0])
 
     if len(args) == 3:
         mode = args[2]
         if not mode in (OUTPUT_FILE, OUTPUT_INLINE):
-            raise template.TemplateSyntaxError("%r's second argument must be '%s' or '%s'." % (args[0], OUTPUT_FILE, OUTPUT_INLINE))
+            raise template.TemplateSyntaxError(
+                "%r's second argument must be '%s' or '%s'." %
+                (args[0], OUTPUT_FILE, OUTPUT_INLINE))
     else:
         mode = OUTPUT_FILE
-
     return CompressorNode(nodelist, kind, mode)

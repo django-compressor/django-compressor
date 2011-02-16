@@ -29,13 +29,13 @@ class CompressorTestCase(TestCase):
         <style type="text/css">p { border:5px solid green;}</style>
         <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
         """
-        self.cssNode = CssCompressor(self.css)
+        self.css_node = CssCompressor(self.css)
 
         self.js = """
         <script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         """
-        self.jsNode = JsCompressor(self.js)
+        self.js_node = JsCompressor(self.js)
 
     def test_css_split(self):
         out = [
@@ -43,65 +43,65 @@ class CompressorTestCase(TestCase):
             ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
             ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
         ]
-        split = self.cssNode.split_contents()
-        split = [(x[0], x[1], self.cssNode.parser.elem_str(x[2])) for x in split]
+        split = self.css_node.split_contents()
+        split = [(x[0], x[1], self.css_node.parser.elem_str(x[2])) for x in split]
         self.assertEqual(out, split)
 
     def test_css_hunks(self):
         out = ['body { background:#990; }', u'p { border:5px solid green;}', 'body { color:#fff; }']
-        self.assertEqual(out, self.cssNode.hunks)
+        self.assertEqual(out, list(self.css_node.hunks))
 
     def test_css_output(self):
         out = u'body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }'
-        self.assertEqual(out, self.cssNode.combined)
+        self.assertEqual(out, self.css_node.combined)
 
     def test_css_mtimes(self):
         is_date = re.compile(r'^\d{10}[\.\d]+$')
-        for date in self.cssNode.mtimes:
+        for date in self.css_node.mtimes:
             self.assert_(is_date.match(str(float(date))), "mtimes is returning something that doesn't look like a date: %s" % date)
 
     def test_css_return_if_off(self):
         settings.COMPRESS_ENABLED = False
-        self.assertEqual(self.css, self.cssNode.output())
+        self.assertEqual(self.css, self.css_node.output())
 
     def test_cachekey(self):
         is_cachekey = re.compile(r'django_compressor\.\w{12}')
-        self.assert_(is_cachekey.match(self.cssNode.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.\w{12}'")
+        self.assert_(is_cachekey.match(self.css_node.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.\w{12}'")
 
     def test_css_hash(self):
-        self.assertEqual('f7c661b7a124', self.cssNode.hash)
+        self.assertEqual('f7c661b7a124', self.css_node.hash)
 
     def test_css_return_if_on(self):
         output = u'<link rel="stylesheet" href="/media/cache/css/f7c661b7a124.css" type="text/css">'
-        self.assertEqual(output, self.cssNode.output().strip())
+        self.assertEqual(output, self.css_node.output().strip())
 
     def test_js_split(self):
         out = [('file', os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), '<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>'),
          ('hunk', u'obj.value = "value";', '<script type="text/javascript" charset="utf-8">obj.value = "value";</script>')
          ]
-        split = self.jsNode.split_contents()
-        split = [(x[0], x[1], self.jsNode.parser.elem_str(x[2])) for x in split]
+        split = self.js_node.split_contents()
+        split = [(x[0], x[1], self.js_node.parser.elem_str(x[2])) for x in split]
         self.assertEqual(out, split)
 
     def test_js_hunks(self):
         out = ['obj = {};', u'obj.value = "value";']
-        self.assertEqual(out, self.jsNode.hunks)
+        self.assertEqual(out, list(self.js_node.hunks))
 
     def test_js_concat(self):
         out = u'obj = {};\nobj.value = "value";'
-        self.assertEqual(out, self.jsNode.concat())
+        self.assertEqual(out, self.js_node.concat())
 
     def test_js_output(self):
         out = u'obj={};obj.value="value";'
-        self.assertEqual(out, self.jsNode.combined)
+        self.assertEqual(out, self.js_node.combined)
 
     def test_js_return_if_off(self):
         settings.COMPRESS_ENABLED = False
-        self.assertEqual(self.js, self.jsNode.output())
+        self.assertEqual(self.js, self.js_node.output())
 
     def test_js_return_if_on(self):
         output = u'<script type="text/javascript" src="/media/cache/js/3f33b9146e12.js" charset="utf-8"></script>'
-        self.assertEqual(output, self.jsNode.output())
+        self.assertEqual(output, self.js_node.output())
 
     def test_custom_output_dir(self):
         try:
@@ -127,8 +127,8 @@ if lxml:
                 ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
                 ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">'),
             ]
-            split = self.cssNode.split_contents()
-            split = [(x[0], x[1], self.cssNode.parser.elem_str(x[2])) for x in split]
+            split = self.css_node.split_contents()
+            split = [(x[0], x[1], self.css_node.parser.elem_str(x[2])) for x in split]
             self.assertEqual(out, split)
 
         def setUp(self):
@@ -148,7 +148,7 @@ class CssAbsolutizingTestCase(TestCase):
         <link rel="stylesheet" href="/media/css/url/url1.css" type="text/css" charset="utf-8">
         <link rel="stylesheet" href="/media/css/url/2/url2.css" type="text/css" charset="utf-8">
         """
-        self.cssNode = CssCompressor(self.css)
+        self.css_node = CssCompressor(self.css)
 
     def test_css_absolute_filter(self):
         from compressor.filters.css_default import CssAbsoluteFilter
@@ -192,7 +192,7 @@ class CssAbsolutizingTestCase(TestCase):
         }
         out = [u"p { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\n" % hash_dict,
                u"p { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\n" % hash_dict]
-        self.assertEqual(out, self.cssNode.hunks)
+        self.assertEqual(out, list(self.css_node.hunks))
 
 
 class CssDataUriTestCase(TestCase):
@@ -206,12 +206,12 @@ class CssDataUriTestCase(TestCase):
         self.css = """
         <link rel="stylesheet" href="/media/css/datauri.css" type="text/css" charset="utf-8">
         """
-        self.cssNode = CssCompressor(self.css)
+        self.css_node = CssCompressor(self.css)
 
     def test_data_uris(self):
         datauri_hash = get_hashed_mtime(os.path.join(settings.COMPRESS_ROOT, 'css/datauri.css'))
         out = [u'.add { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJvSURBVDjLpZPrS5NhGIf9W7YvBYOkhlkoqCklWChv2WyKik7blnNris72bi6dus0DLZ0TDxW1odtopDs4D8MDZuLU0kXq61CijSIIasOvv94VTUfLiB74fXngup7nvrnvJABJ/5PfLnTTdcwOj4RsdYmo5glBWP6iOtzwvIKSWstI0Wgx80SBblpKtE9KQs/We7EaWoT/8wbWP61gMmCH0lMDvokT4j25TiQU/ITFkek9Ow6+7WH2gwsmahCPdwyw75uw9HEO2gUZSkfyI9zBPCJOoJ2SMmg46N61YO/rNoa39Xi41oFuXysMfh36/Fp0b7bAfWAH6RGi0HglWNCbzYgJaFjRv6zGuy+b9It96N3SQvNKiV9HvSaDfFEIxXItnPs23BzJQd6DDEVM0OKsoVwBG/1VMzpXVWhbkUM2K4oJBDYuGmbKIJ0qxsAbHfRLzbjcnUbFBIpx/qH3vQv9b3U03IQ/HfFkERTzfFj8w8jSpR7GBE123uFEYAzaDRIqX/2JAtJbDat/COkd7CNBva2cMvq0MGxp0PRSCPF8BXjWG3FgNHc9XPT71Ojy3sMFdfJRCeKxEsVtKwFHwALZfCUk3tIfNR8XiJwc1LmL4dg141JPKtj3WUdNFJqLGFVPC4OkR4BxajTWsChY64wmCnMxsWPCHcutKBxMVp5mxA1S+aMComToaqTRUQknLTH62kHOVEE+VQnjahscNCy0cMBWsSI0TCQcZc5ALkEYckL5A5noWSBhfm2AecMAjbcRWV0pUTh0HE64TNf0mczcnnQyu/MilaFJCae1nw2fbz1DnVOxyGTlKeZft/Ff8x1BRssfACjTwQAAAABJRU5ErkJggg=="); }\n.python { background-image: url("/media/img/python.png?%s"); }\n.datauri { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9YGARc5KB0XV+IAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAF1JREFUGNO9zL0NglAAxPEfdLTs4BZM4DIO4C7OwQg2JoQ9LE1exdlYvBBeZ7jqch9//q1uH4TLzw4d6+ErXMMcXuHWxId3KOETnnXXV6MJpcq2MLaI97CER3N0 vr4MkhoXe0rZigAAAABJRU5ErkJggg=="); }\n' % datauri_hash]
-        self.assertEqual(out, self.cssNode.hunks)
+        self.assertEqual(out, list(self.css_node.hunks))
 
 
 class CssMediaTestCase(TestCase):
@@ -222,10 +222,10 @@ class CssMediaTestCase(TestCase):
         <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" media="all">
         <style type="text/css">h1 { border:5px solid green;}</style>
         """
-        self.cssNode = CssCompressor(self.css)
+        self.css_node = CssCompressor(self.css)
 
     def test_css_output(self):
-        links = BeautifulSoup(self.cssNode.output()).findAll('link')
+        links = BeautifulSoup(self.css_node.output()).findAll('link')
         media = [u'screen', u'print', u'all', None]
         self.assertEqual(len(links), 4)
         self.assertEqual(media, [l.get('media', None) for l in links])

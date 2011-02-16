@@ -21,20 +21,22 @@ class Compressor(object):
         self.charset = settings.DEFAULT_CHARSET
 
     def split_contents(self):
-        raise NotImplementedError('split_contents must be defined in a subclass')
+        raise NotImplementedError(
+            "split_contents must be defined in a subclass")
 
     def get_filename(self, url):
         try:
             base_url = self.storage.base_url
         except AttributeError:
             base_url = settings.COMPRESS_URL
-
         if not url.startswith(base_url):
-            raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, base_url))
+            raise UncompressableFileError(
+                "'%s' is not in COMPRESS_URL ('%s') and can not be compressed"
+                % (url, base_url))
         basename = url.replace(base_url, "", 1)
         filename = os.path.join(settings.COMPRESS_ROOT, basename)
         if not os.path.exists(filename):
-            raise UncompressableFileError('"%s" does not exist' % filename)
+            raise UncompressableFileError("'%s' does not exist" % filename)
         return filename
 
     def _get_parser(self):
