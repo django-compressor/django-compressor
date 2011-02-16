@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # This code is original from jsmin by Douglas Crockford, it was translated to
 # Python by Baruch Even. The original code had the following copyright and
@@ -29,8 +29,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # */
-
-from StringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
 
 def jsmin(js):
     ins = StringIO(js)
@@ -87,10 +89,10 @@ class JavascriptMinify(object):
 
     def _next(self):
         """get the next character, excluding comments. peek() is used to see
-           if a '/' is followed by a '/' or '*'.
+           if an unescaped '/' is followed by a '/' or '*'.
         """
         c = self._get()
-        if c == '/':
+        if c == '/' and self.theA != '\\':
             p = self._peek()
             if p == '/':
                 c = self._get()
