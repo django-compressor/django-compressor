@@ -13,6 +13,7 @@ class Compressor(object):
 
     def __init__(self, content=None, output_prefix="compressed"):
         self.content = content or ""
+        self.extra_context = {}
         self.type = None
         self.output_prefix = output_prefix
         self.split_content = []
@@ -131,13 +132,17 @@ class Compressor(object):
     def output(self):
         if not settings.COMPRESS_ENABLED:
             return self.content
-        self.save_file()
-        context = getattr(self, 'extra_context', {})
-        context['url'] = self.storage.url(self.new_filepath)
+        context = {
+            "saved": self.save_file(),
+            "url": self.storage.url(self.new_filepath),
+        }
+        context.update(self.extra_context)
         return render_to_string(self.template_name, context)
 
     def output_inline(self):
-        context = {'content': settings.COMPRESS_ENABLED and self.combined or self.concat()}
-        if hasattr(self, 'extra_context'):
-            context.update(self.extra_context)
+        if settings.COMPRESS_ENABLED:
+            content = self.combined
+        else:
+            content = self.concat()
+        context = dict(content=content, **self.extra_context)
         return render_to_string(self.template_name_inline, context)

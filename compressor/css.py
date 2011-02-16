@@ -49,6 +49,6 @@ class CssCompressor(Compressor):
             return self.content
         ret = []
         for media, subnode in self.media_nodes:
-            subnode.extra_context = {'media': media}
+            subnode.extra_context.update({'media': media})
             ret.append(subnode.output())
         return ''.join(ret)
