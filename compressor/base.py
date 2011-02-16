@@ -1,13 +1,14 @@
 import os
+from itertools import chain
 
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
 
-from compressor import filters
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
 from compressor.exceptions import UncompressableFileError
-from compressor.utils import get_class
+from compressor.storage import default_storage
+from compressor.utils import get_class, cached_property
 
 class Compressor(object):
 
@@ -17,7 +18,6 @@ class Compressor(object):
         self.type = None
         self.output_prefix = output_prefix
         self.split_content = []
-        self._parser = None
         self.charset = settings.DEFAULT_CHARSET
 
     def split_contents(self):
@@ -39,89 +39,74 @@ class Compressor(object):
             raise UncompressableFileError("'%s' does not exist" % filename)
         return filename
 
-    def _get_parser(self):
-        if self._parser:
-            return self._parser
-        parser_cls = get_class(settings.COMPRESS_PARSER)
-        self._parser = parser_cls(self.content)
-        return self._parser
+    @cached_property
+    def parser(self):
+        return get_class(settings.COMPRESS_PARSER)(self.content)
 
-    def _set_parser(self, parser):
-        self._parser = parser
-    parser = property(_get_parser, _set_parser)
+    @cached_property
+    def cached_filters(self):
+        return [get_class(filter_cls) for filter_cls in self.filters]
 
-    @property
+    @cached_property
     def mtimes(self):
-        return [get_mtime(h[1]) for h in self.split_contents() if h[0] == 'file']
+        for kind, value, elem in self.split_contents():
+            if kind == 'file':
+                yield str(get_mtime(value))
 
-    @property
+    @cached_property
     def cachekey(self):
-        cachebits = [self.content]
-        cachebits.extend([str(m) for m in self.mtimes])
-        cachestr = "".join(cachebits).encode(settings.DEFAULT_CHARSET)
+        cachestr = "".join(
+            chain([self.content], self.mtimes)).encode(self.charset)
         return "django_compressor.%s" % get_hexdigest(cachestr)[:12]
 
-    @property
+    @cached_property
     def storage(self):
-        from compressor.storage import default_storage
         return default_storage
 
-    @property
+    @cached_property
     def hunks(self):
-        if getattr(self, '_hunks', ''):
-            return self._hunks
-        self._hunks = []
-        for kind, v, elem in self.split_contents():
+        for kind, value, elem in self.split_contents():
             attribs = self.parser.elem_attribs(elem)
             if kind == 'hunk':
-                input = v
-                if self.filters:
-                    input = self.filter(input, 'input', elem=elem)
                 # Let's cast BeautifulSoup element to unicode here since
                 # it will try to encode using ascii internally later
-                self._hunks.append(unicode(input))
-            if kind == 'file':
-                # TODO: wrap this in a try/except for IoErrors(?)
-                fd = open(v, 'rb')
-                input = fd.read()
-                if self.filters:
-                    input = self.filter(input, 'input', filename=v, elem=elem)
-                charset = attribs.get('charset', settings.DEFAULT_CHARSET)
-                self._hunks.append(unicode(input, charset))
-                fd.close()
-        return self._hunks
+                yield unicode(self.filter(value, 'input', elem=elem))
+            elif kind == 'file':
+                try:
+                    fd = open(value, 'rb')
+                    try:
+                        content = self.filter(fd.read(), 'input', filename=value, elem=elem)
+                        charset = attribs.get('charset', self.charset)
+                        yield unicode(content, charset)
+                    finally:
+                        fd.close()
+                except IOError, e:
+                    raise UncompressableFileError(
+                        "IOError while processing '%s': %s" % (value, e))
 
     def concat(self):
-        # Design decision needed: either everything should be unicode up to
-        # here or we encode strings as soon as we acquire them. Currently
-        # concat() expects all hunks to be unicode and does the encoding
-        return "\n".join([hunk.encode(settings.DEFAULT_CHARSET) for hunk in self.hunks])
+        return "\n".join((hunk.encode(self.charset) for hunk in self.hunks))
 
     def filter(self, content, method, **kwargs):
-        for f in self.filters:
-            filter = getattr(get_class(f)(content, filter_type=self.type), method)
+        for filter_cls in self.cached_filters:
+            filter_func = getattr(
+                filter_cls(content, filter_type=self.type), method)
             try:
-                if callable(filter):
-                    content = filter(**kwargs)
+                if callable(filter_func):
+                    content = filter_func(**kwargs)
             except NotImplementedError:
                 pass
         return content
 
-    @property
+    @cached_property
     def combined(self):
-        if getattr(self, '_output', ''):
-            return self._output
-        output = self.concat()
-        if self.filters:
-            output = self.filter(output, 'output')
-        self._output = output
-        return self._output
+        return self.filter(self.concat(), 'output')
 
-    @property
+    @cached_property
     def hash(self):
         return get_hexdigest(self.combined)[:12]
 
-    @property
+    @cached_property
     def new_filepath(self):
         return os.path.join(settings.COMPRESS_OUTPUT_DIR.strip(os.sep),
                             self.output_prefix, "%s.%s" % (self.hash, self.type))
