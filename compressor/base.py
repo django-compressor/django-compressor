@@ -18,6 +18,7 @@ class Compressor(object):
         self.output_prefix = output_prefix
         self.split_content = []
         self._parser = None
+        self.charset = settings.DEFAULT_CHARSET
 
     def split_contents(self):
         raise NotImplementedError('split_contents must be defined in a subclass')

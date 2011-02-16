@@ -48,7 +48,7 @@ class CompressorNode(template.Node):
             return content
         if self.kind == 'css':
             compressor = CssCompressor(content)
-        if self.kind == 'js':
+        elif self.kind == 'js':
             compressor = JsCompressor(content)
         cachekey = "%s.%s" % (compressor.cachekey, self.mode)
         output = self.cache_get(cachekey)
@@ -56,8 +56,10 @@ class CompressorNode(template.Node):
             try:
                 if self.mode == OUTPUT_FILE:
                     output = compressor.output()
-                else:
+                elif self.mode == OUTPUT_INLINE:
                     output = compressor.output_inline()
+                else:
+                    output = content
                 self.cache_set(cachekey, output)
             except:
                 from traceback import format_exc
