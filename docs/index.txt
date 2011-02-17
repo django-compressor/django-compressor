@@ -226,9 +226,6 @@ COMPRESS_REBUILD_TIMEOUT
 The period of time after which the compressed files are rebuilt even if
 no file changes are detected.
 
-This is also used by the ``compress`` management command which pre-compresses
-the contents of ``{% compress %}`` template tags in the cache.
-
 COMPRESS_MINT_DELAY
 ^^^^^^^^^^^^^^^^^^^
 
