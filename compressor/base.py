@@ -67,22 +67,23 @@ class Compressor(object):
     def hunks(self):
         for kind, value, elem in self.split_contents():
             attribs = self.parser.elem_attribs(elem)
-            if kind == 'hunk':
+            if kind == "hunk":
                 # Let's cast BeautifulSoup element to unicode here since
                 # it will try to encode using ascii internally later
-                yield unicode(self.filter(value, 'input', elem=elem))
-            elif kind == 'file':
+                yield unicode(self.filter(value, "input", elem=elem))
+            elif kind == "file":
+                content = ""
                 try:
                     fd = open(value, 'rb')
                     try:
-                        content = self.filter(fd.read(), 'input', filename=value, elem=elem)
-                        charset = attribs.get('charset', self.charset)
-                        yield unicode(content, charset)
+                        content = fd.read()
                     finally:
                         fd.close()
                 except IOError, e:
                     raise UncompressableFileError(
                         "IOError while processing '%s': %s" % (value, e))
+                content = self.filter(content, "input", filename=value, elem=elem)
+                yield unicode(content, attribs.get("charset", self.charset))
 
     def concat(self):
         return "\n".join((hunk.encode(self.charset) for hunk in self.hunks))
