@@ -11,7 +11,7 @@ class YUICompressorFilter(FilterBase):
         arguments = ''
         if self.type == 'js':
             arguments = settings.COMPRESS_YUI_JS_ARGUMENTS
-        if self.type == 'css':
+        elif self.type == 'css':
             arguments = settings.COMPRESS_YUI_CSS_ARGUMENTS
 
         command = '%s --type=%s %s' % (settings.COMPRESS_YUI_BINARY, self.type, arguments)

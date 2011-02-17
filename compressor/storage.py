@@ -1,3 +1,5 @@
+import gzip
+
 from django.core.files.storage import FileSystemStorage, get_storage_class
 from django.utils.functional import LazyObject
 
@@ -18,6 +20,21 @@ class CompressorFileStorage(FileSystemStorage):
             base_url = settings.COMPRESS_URL
         super(CompressorFileStorage, self).__init__(location, base_url,
                                                     *args, **kwargs)
+
+class GzipCompressorFileStorage(CompressorFileStorage):
+    """
+    The standard compressor file system storage that gzips storage files
+    additionally to the usual files.
+    """
+    def url(self, name):
+        return u'%s.gz' % super(GzipCompressorFileStorage, self).url(name)
+
+    def save(self, filename, content):
+        filename = super(GzipCompressorFileStorage, self).save(filename, content)
+        out = gzip.open(u'%s.gz' % self.path(filename), 'wb')
+        out.writelines(open(self.path(filename), 'rb'))
+        out.close()
+
 
 class DefaultStorage(LazyObject):
     def _setup(self):
