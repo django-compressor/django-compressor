@@ -45,6 +45,9 @@ class CompressorNode(template.Node):
         packed_val = (val, refresh_time, refreshed)
         return cache.set(key, packed_val, real_timeout)
 
+    def cache_key(self, compressor):
+        return "%s.%s.%s" % (compressor.cachekey, self.mode, self.kind)
+
     def render(self, context, forced=False):
         if (settings.COMPRESS_ENABLED and settings.COMPRESS_OFFLINE) and not forced:
             key = get_offline_cachekey(self.nodelist)
@@ -54,8 +57,8 @@ class CompressorNode(template.Node):
         content = self.nodelist.render(context)
         if (not settings.COMPRESS_ENABLED or not len(content.strip())) and not forced:
             return content
-        cachekey = "%s.%s" % (compressor.cachekey, self.mode)
         compressor = self.compressor_cls(content)
+        cachekey = self.cache_key(compressor)
         output = self.cache_get(cachekey)
         if output is None or forced:
             try:
