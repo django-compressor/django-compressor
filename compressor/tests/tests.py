@@ -12,7 +12,7 @@ from django.core.files.storage import get_storage_class
 from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
 
-from compressor import storage, base
+from compressor import base
 from compressor.cache import get_hashed_mtime
 from compressor.conf import settings
 from compressor.css import CssCompressor

@@ -5,8 +5,6 @@ from django.core.exceptions import ImproperlyConfigured
 
 from compressor.cache import cache, get_offline_cachekey
 from compressor.conf import settings
-from compressor.css import CssCompressor
-from compressor.js import JsCompressor
 from compressor.utils import get_class
 
 OUTPUT_FILE = 'file'
