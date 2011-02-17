@@ -182,6 +182,13 @@ COMPRESS_STORAGE
 The dotted path to a Django Storage backend to be used to save the
 compressed files.
 
+``compressor`` ships with one additional storage backend:
+
+* ``'compressor.storage.GzipCompressorFileStorage'``
+
+  A subclass of the default storage backend, which will additionally
+  create ``*.gz`` files of each of the compressed files.
+
 COMPRESS_PARSER
 ^^^^^^^^^^^^^^^
 
@@ -222,7 +229,7 @@ no file changes are detected.
 This is also used by the ``compress`` management command which pre-compresses
 the contents of ``{% compress %}`` template tags in the cache.
 
-COMPRESS_MINT_DELAY``
+COMPRESS_MINT_DELAY
 ^^^^^^^^^^^^^^^^^^^
 
 :Default: ``30`` (seconds)

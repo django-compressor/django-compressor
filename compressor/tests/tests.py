@@ -337,7 +337,7 @@ class TemplatetagTestCase(TestCase):
 class StorageTestCase(TestCase):
     def setUp(self):
         self._storage = base.default_storage
-        base.default_storage = get_storage_class('compressor.tests.storage.TestStorage')()
+        base.default_storage = get_storage_class('compressor.storage.GzipCompressorFileStorage')()
         settings.COMPRESS_ENABLED = True
 
     def tearDown(self):
