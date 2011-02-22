@@ -30,6 +30,8 @@ class CompressorSettings(AppSettings):
     CLOSURE_COMPILER_ARGUMENTS = ''
     CSSTIDY_BINARY = 'csstidy'
     CSSTIDY_ARGUMENTS = '--template=highest'
+    UGLIFY_BINARY = 'uglifyjs'
+    UGLIFY_ARGUMENTS = ''
     YUI_BINARY = 'java -jar yuicompressor.jar'
     YUI_CSS_ARGUMENTS = ''
     YUI_JS_ARGUMENTS = 'COMPRESS_YUI_JS_ARGUMENTS'
