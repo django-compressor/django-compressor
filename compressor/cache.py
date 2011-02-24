@@ -1,4 +1,5 @@
 import os
+import socket
 
 from django.core.cache import get_cache
 from django.utils.encoding import smart_str
@@ -10,11 +11,13 @@ def get_hexdigest(plaintext):
     return sha_constructor(plaintext).hexdigest()
 
 def get_mtime_cachekey(filename):
-    return "django_compressor.mtime.%s" % get_hexdigest(filename)
+    return "django_compressor.mtime.%s.%s" % (socket.gethostname(),
+                                              get_hexdigest(filename))
 
 def get_offline_cachekey(source):
-    return ("django_compressor.offline.%s" %
-            get_hexdigest("".join(smart_str(s) for s in source)))
+    return ("django_compressor.offline.%s.%s" %
+            (socket.gethostname(),
+             get_hexdigest("".join(smart_str(s) for s in source))))
 
 def get_mtime(filename):
     if settings.COMPRESS_MTIME_DELAY:
