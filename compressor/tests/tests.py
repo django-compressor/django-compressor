@@ -1,5 +1,6 @@
 import os
 import re
+import socket
 from BeautifulSoup import BeautifulSoup
 
 try:
@@ -65,8 +66,9 @@ class CompressorTestCase(TestCase):
         self.assertEqual(self.css, self.css_node.output())
 
     def test_cachekey(self):
-        is_cachekey = re.compile(r'django_compressor\.\w{12}')
-        self.assert_(is_cachekey.match(self.css_node.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.\w{12}'")
+        host_name = socket.gethostname()
+        is_cachekey = re.compile(r'django_compressor\.%s\.\w{12}' % host_name)
+        self.assert_(is_cachekey.match(self.css_node.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.%s\.\w{12}'" % host_name)
 
     def test_css_hash(self):
         self.assertEqual('f7c661b7a124', self.css_node.hash)
