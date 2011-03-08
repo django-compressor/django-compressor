@@ -13,7 +13,7 @@ class CompressorSettings(AppSettings):
     VERBOSE = False
     # the backend to use when parsing the JavaScript or Stylesheet files
     PARSER = 'compressor.parser.BeautifulSoupParser'
-    OUTPUT_DIR = 'cache'
+    OUTPUT_DIR = 'CACHE'
     STORAGE = 'compressor.storage.CompressorFileStorage'
 
     CSS_COMPRESSOR = "compressor.css.CssCompressor"

@@ -58,7 +58,7 @@ Which would be rendered something like:
 
 .. code-block:: django
 
-    <link rel="stylesheet" href="/static/cache/css/f7c661b7a124.css" type="text/css" charset="utf-8">
+    <link rel="stylesheet" href="/static/CACHE/css/f7c661b7a124.css" type="text/css" charset="utf-8">
 
 or:
 
@@ -75,7 +75,7 @@ Which would be rendered something like:
 
 .. code-block:: django
 
-    <script type="text/javascript" src="/static/cache/js/3f33b9146e12.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
 Linked files must be accesible via COMPRESS_URL_. If DEBUG is ``True``,
 off-site files will throw exceptions. If DEBUG is ``False`` they will be
@@ -185,7 +185,7 @@ compressed static will be written to when using the default COMPRESS_STORAGE_
 COMPRESS_OUTPUT_DIR
 ^^^^^^^^^^^^^^^^^^^
 
-:Default: ``'cache'``
+:Default: ``'CACHE'``
 
 Controls the directory inside COMPRESS_ROOT_ that compressed files will
 be written to.
