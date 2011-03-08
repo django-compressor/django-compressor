@@ -3,8 +3,36 @@ Django compressor
 
 Compresses linked and inline JavaScript or CSS into a single cached file.
 
-Syntax
-------
+Installation
+------------
+
+* Install django_compressor with your favorite Python package manager::
+
+    pip install django_compressor
+
+* Add ``'compressor'`` to your ``INSTALLED_APPS`` setting::
+
+    INSTALLED_APPS = (
+        # other apps
+        "compressor",
+    )
+
+* See the list of settings_ to modify django_compressor's default behaviour.
+
+* In case you use Django 1.3's staticfiles_ contrib app (or its standalone
+  clone django-staticfiles_) you have to add django_compressor's file finder
+  to the ``STATICFILES_FINDERS`` setting::
+
+    STATICFILES_FINDERS = (
+        # other finders..
+        'compressor.finders.CompressorFinder',
+    )
+
+.. _staticfiles: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
+.. _django-staticfiles: http://pypi.python.org/pypi/django-staticfiles
+
+Usage
+-----
 
 .. code-block:: django
 
@@ -14,7 +42,7 @@ Syntax
     {% endcompress %}
 
 Examples
---------
+^^^^^^^^
 
 .. code-block:: django
 
@@ -49,8 +77,9 @@ Which would be rendered something like:
 
     <script type="text/javascript" src="/static/cache/js/3f33b9146e12.js" charset="utf-8"></script>
 
-Linked files must be accesible via COMPRESS_URL_. If DEBUG is true off-site
-files will throw exceptions. If DEBUG is false they will be silently stripped.
+Linked files must be accesible via COMPRESS_URL_. If DEBUG is ``True``,
+off-site files will throw exceptions. If DEBUG is ``False`` they will be
+silently stripped.
 
 If COMPRESS is ``False`` (defaults to the opposite of DEBUG) the ``compress``
 template tag simply returns exactly what it was given, to ease development.
@@ -145,7 +174,8 @@ COMPRESS_ROOT
 :Default: ``STATIC_ROOT`` (``MEDIA_ROOT`` for older Django versions)
 
 Controls the absolute file path that linked static will be read from and
-compressed static will be written to.
+compressed static will be written to when using the default COMPRESS_STORAGE_
+``compressor.storage.CompressorFileStorage``.
 
 .. note::
 

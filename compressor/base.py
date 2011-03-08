@@ -32,8 +32,8 @@ class Compressor(object):
             base_url = settings.COMPRESS_URL
         if not url.startswith(base_url):
             raise UncompressableFileError(
-                "'%s' is not in COMPRESS_URL ('%s') and can not be compressed"
-                % (url, base_url))
+                "'%s' isn't accesible via COMPRESS_URL ('%s') and can't be"
+                " compressed" % (url, base_url))
         basename = url.replace(base_url, "", 1)
         filename = os.path.join(settings.COMPRESS_ROOT, basename)
         if not os.path.exists(filename):

@@ -63,35 +63,18 @@ class CompressorSettings(AppSettings):
         # In case staticfiles is used, make sure the FileSystemFinder is
         # installed, and if it is, check if COMPRESS_ROOT is listed in
         # STATICFILES_DIRS to allow finding compressed files
-        if ("staticfiles" in self.INSTALLED_APPS or
-                "django.contrib.staticfiles" in self.INSTALLED_APPS):
-            try:
-                from staticfiles.conf import settings as staticfiles_settings
-                finders = staticfiles_settings.STATICFILES_FINDERS
-                standalone = True
-            except ImportError:
-                finders = []
-                standalone = False
-            if not finders:
-                finders = getattr(settings, 'STATICFILES_FINDERS', [])
-            if ("django.contrib.staticfiles.finders.FileSystemFinder" not in finders and
-                    "staticfiles.finders.FileSystemFinder" not in finders):
+        staticfiles_settings = None
+        if "staticfiles" in self.INSTALLED_APPS:
+            from staticfiles.conf import settings as staticfiles_settings
+        elif "django.contrib.staticfiles" in self.INSTALLED_APPS:
+            staticfiles_settings = settings
+        if staticfiles_settings is not None:
+            if ("compressor.finders.CompressorFinder" not in
+                    staticfiles_settings.STATICFILES_FINDERS):
                 raise ImproperlyConfigured(
-                    'Please enable the FileSystemFinder finder of the '
-                    'staticfiles app to use it with django_compressor.')
-            abs_paths = []
-            output_path = os.path.join(value, self.COMPRESS_OUTPUT_DIR)
-            for path in getattr(settings, 'STATICFILES_DIRS', []):
-                if isinstance(path, tuple) or isinstance(path, list): # stupid Python 2.4
-                    path = path[1] # in case the STATICFILES_DIRS setting has a prefix
-                abs_paths.append(os.path.abspath(path))
-            if os.path.abspath(output_path) not in abs_paths:
-                extension = ((self.COMPRESS_OUTPUT_DIR, output_path),)
-                if standalone:
-                    from staticfiles.conf import settings as staticfiles_settings
-                    staticfiles_settings.STATICFILES_DIRS += extension
-                else:
-                    settings.STATICFILES_DIRS += extension
+                    "When using django_compressor together with staticfiles, "
+                    "please add 'compressor.finders.CompressorFinder' to the "
+                    "STATICFILES_FINDERS setting.")
         return value
 
     def configure_url(self, value):
