@@ -55,7 +55,9 @@ class CompressorSettings(AppSettings):
 
     def configure_root(self, value):
         if value is None:
-            value = getattr(settings, 'STATIC_ROOT', settings.MEDIA_ROOT)
+            value = getattr(settings, 'STATIC_ROOT', None)
+            if not value:
+                value = settings.MEDIA_ROOT
         if not value:
             raise ImproperlyConfigured("The COMPRESS_ROOT setting must be set.")
         # In case staticfiles is used, make sure the FileSystemFinder is
@@ -94,8 +96,10 @@ class CompressorSettings(AppSettings):
 
     def configure_url(self, value):
         # Falls back to the 1.3 STATIC_URL setting by default or falls back to MEDIA_URL
-        if not value:
-            value = getattr(settings, 'STATIC_URL', settings.MEDIA_URL)
+        if value is None:
+            value = getattr(settings, 'STATIC_URL', None)
+            if not value:
+                value = settings.MEDIA_URL
         if not value.endswith('/'):
             raise ImproperlyConfigured('The URL settings (e.g. COMPRESS_URL) '
                                        'must have a trailing slash.')
