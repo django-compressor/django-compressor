@@ -13,7 +13,7 @@ class CompressorSettings(AppSettings):
     VERBOSE = False
     # the backend to use when parsing the JavaScript or Stylesheet files
     PARSER = 'compressor.parser.BeautifulSoupParser'
-    OUTPUT_DIR = 'cache'
+    OUTPUT_DIR = 'CACHE'
     STORAGE = 'compressor.storage.CompressorFileStorage'
 
     CSS_COMPRESSOR = "compressor.css.CssCompressor"
@@ -53,58 +53,40 @@ class CompressorSettings(AppSettings):
     def configure_enabled(self, value):
         return value or getattr(settings, 'COMPRESS', value)
 
-    def configure_url(self, value):
-        # Uses the 1.3 STATIC_URL setting by default
-        url = getattr(settings, 'STATIC_URL', value)
-        # Check for emptyness since STATIC_URL can be None and ''
-        if url:
-            # Then on to extensive testing
-            root = getattr(settings, 'STATIC_ROOT', None)
-            if not root:
-                raise ImproperlyConfigured('The COMPRESS_ROOT setting (or its '
-                                           'fallback STATIC_ROOT) must be set.')
-            # In case staticfiles is used, make sure COMPRESS_URL can be used
-            # by checking if the the FileSystemFinder is installed, and if is
-            # checking if COMPRESS_ROOT is in STATICFILES_DIRS to allow finding
-            # compressed files.
-            if ("staticfiles" in self.INSTALLED_APPS or
-                    "django.contrib.staticfiles" in self.INSTALLED_APPS):
-                try:
-                    from staticfiles.conf import settings as staticfiles_settings
-                    finders = staticfiles_settings.STATICFILES_FINDERS
-                    standalone = True
-                except ImportError:
-                    finders = []
-                    standalone = False
-                if not finders:
-                    finders = getattr(settings, 'STATICFILES_FINDERS', [])
-                if ("django.contrib.staticfiles.finders.FileSystemFinder" not in finders and
-                        "staticfiles.finders.FileSystemFinder" not in finders):
-                    raise ImproperlyConfigured(
-                        'Please enable the FileSystemFinder finder of the '
-                        'staticfiles app to use it with django_compressor.')
-                abs_paths = []
-                output_path = os.path.join(root, self.COMPRESS_OUTPUT_DIR)
-                for path in getattr(settings, 'STATICFILES_DIRS', []):
-                    if isinstance(path, tuple) or isinstance(path, list): # stupid Python 2.4
-                        path = path[1] # in case the STATICFILES_DIRS setting has a prefix
-                    abs_paths.append(os.path.abspath(path))
-                if os.path.abspath(output_path) not in abs_paths:
-                    extension = ((self.COMPRESS_OUTPUT_DIR, output_path),)
-                    if standalone:
-                        from staticfiles.conf import settings as staticfiles_settings
-                        staticfiles_settings.STATICFILES_DIRS += extension
-                    else:
-                        settings.STATICFILES_DIRS += extension
-        else:
-            # Fallback to good ol' times of ambiguity
-            url, root = settings.MEDIA_URL, settings.MEDIA_ROOT
+    def configure_root(self, value):
+        if value is None:
+            value = getattr(settings, 'STATIC_ROOT', None)
+            if not value:
+                value = settings.MEDIA_ROOT
+        if not value:
+            raise ImproperlyConfigured("The COMPRESS_ROOT setting must be set.")
+        # In case staticfiles is used, make sure the FileSystemFinder is
+        # installed, and if it is, check if COMPRESS_ROOT is listed in
+        # STATICFILES_DIRS to allow finding compressed files
+        staticfiles_settings = None
+        if "staticfiles" in self.INSTALLED_APPS:
+            from staticfiles.conf import settings as staticfiles_settings
+        elif "django.contrib.staticfiles" in self.INSTALLED_APPS:
+            staticfiles_settings = settings
+        if staticfiles_settings is not None:
+            if ("compressor.finders.CompressorFinder" not in
+                    staticfiles_settings.STATICFILES_FINDERS):
+                raise ImproperlyConfigured(
+                    "When using django_compressor together with staticfiles, "
+                    "please add 'compressor.finders.CompressorFinder' to the "
+                    "STATICFILES_FINDERS setting.")
+        return value
 
-        if not url.endswith('/'):
+    def configure_url(self, value):
+        # Falls back to the 1.3 STATIC_URL setting by default or falls back to MEDIA_URL
+        if value is None:
+            value = getattr(settings, 'STATIC_URL', None)
+            if not value:
+                value = settings.MEDIA_URL
+        if not value.endswith('/'):
             raise ImproperlyConfigured('The URL settings (e.g. COMPRESS_URL) '
                                        'must have a trailing slash.')
-        self.COMPRESS_ROOT = root
-        return url
+        return value
 
     def configure_cache_backend(self, value):
         if value is None:
