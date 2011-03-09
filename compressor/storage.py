@@ -21,6 +21,14 @@ class CompressorFileStorage(FileSystemStorage):
         super(CompressorFileStorage, self).__init__(location, base_url,
                                                     *args, **kwargs)
 
+    def get_available_name(self, name):
+        """
+        Deletes the given file if it exists.
+        """
+        if self.exists(name):
+            self.delete(name)
+        return name
+
 class GzipCompressorFileStorage(CompressorFileStorage):
     """
     The standard compressor file system storage that gzips storage files

@@ -91,10 +91,14 @@ class CompressorSettings(AppSettings):
     def configure_cache_backend(self, value):
         if value is None:
             # If we are on Django 1.3 AND using the new CACHES setting...
-            if getattr(settings, "CACHES", None) and DJANGO_VERSION[:2] >= (1, 3):
-                return "default"
-            # fallback for people still using the old CACHE_BACKEND setting
-            return settings.CACHE_BACKEND
+            if DJANGO_VERSION[:2] >= (1, 3) and hasattr(settings, "CACHES"):
+                value = "default"
+            else:
+                # falling back to the old CACHE_BACKEND setting
+                value = getattr(settings, "CACHE_BACKEND", None)
+                if not value:
+                    raise ImproperlyConfigured(
+                        "Please specify a cache backend in your settings.")
         return value
 
     def configure_offline_context(self, value):
