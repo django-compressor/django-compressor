@@ -6,7 +6,7 @@ from compressor.storage import CompressorFileStorage
 if "django.contrib.staticfiles" in settings.INSTALLED_APPS:
     from django.contrib.staticfiles.finders import BaseStorageFinder
 elif "staticfiles" in settings.INSTALLED_APPS:
-    from staticfiles import BaseStorageFinder
+    from staticfiles.finders import BaseStorageFinder
 else:
     raise ImproperlyConfigured("When using the compressor staticfiles finder"
                                "either django.contrib.staticfiles or the "
