@@ -1,4 +1,6 @@
 import gzip
+from os import path
+from datetime import datetime
 
 from django.core.files.storage import FileSystemStorage, get_storage_class
 from django.utils.functional import LazyObject
@@ -20,6 +22,15 @@ class CompressorFileStorage(FileSystemStorage):
             base_url = settings.COMPRESS_URL
         super(CompressorFileStorage, self).__init__(location, base_url,
                                                     *args, **kwargs)
+
+    def accessed_time(self, name):
+        return datetime.fromtimestamp(path.getatime(self.path(name)))
+
+    def created_time(self, name):
+        return datetime.fromtimestamp(path.getctime(self.path(name)))
+
+    def modified_time(self, name):
+        return datetime.fromtimestamp(path.getmtime(self.path(name)))
 
     def get_available_name(self, name):
         """
