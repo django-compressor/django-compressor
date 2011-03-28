@@ -1,6 +1,9 @@
 import os
+import re
 import socket
 from itertools import chain
+import tempfile
+from subprocess import Popen, PIPE
 
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
@@ -9,7 +12,9 @@ from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
 from compressor.exceptions import UncompressableFileError
 from compressor.storage import default_storage
-from compressor.utils import get_class, cached_property
+from compressor.utils import get_class, cached_property, cmd_split
+
+class PrecompilerError(UncompressableFileError): pass
 
 class Compressor(object):
 
@@ -72,7 +77,7 @@ class Compressor(object):
             if kind == "hunk":
                 # Let's cast BeautifulSoup element to unicode here since
                 # it will try to encode using ascii internally later
-                yield unicode(self.filter(value, "input", elem=elem))
+                yield unicode(self.filter(value, "input", elem=elem, kind=kind))
             elif kind == "file":
                 content = ""
                 try:
@@ -84,13 +89,70 @@ class Compressor(object):
                 except IOError, e:
                     raise UncompressableFileError(
                         "IOError while processing '%s': %s" % (value, e))
-                content = self.filter(content, "input", filename=value, elem=elem)
+                content = self.filter(content, "input", filename=value, elem=elem, kind=kind)
                 yield unicode(content, attribs.get("charset", self.charset))
 
     def concat(self):
         return "\n".join((hunk.encode(self.charset) for hunk in self.hunks))
 
+    @cached_property
+    def precompilers(self):
+        return settings.COMPRESS_PRECOMPILERS        
+
+    def precompile(self, content, **kwargs):
+        type = None
+        compiler = None
+        elem = kwargs['elem']
+        kind = kwargs['kind']
+        if kind == "file":
+            type = os.path.splitext(kwargs['filename'])[1][1:]
+            for pc in self.precompilers:
+                if pc.get('extension', None) == type:
+                    compiler = pc
+                    break
+        elif kind == "hunk":
+            type = self.parser.elem_attribs(elem).get('type', None)
+            slash = type.rindex('/')
+            if slash >= 0:
+                type = type[slash + 1:]
+            for pc in self.precompilers:
+                if pc.get('type', None) == type:
+                    compiler = pc
+                    break
+        if not compiler:
+            return content
+        
+        source_file = tempfile.NamedTemporaryFile(mode='w+b', suffix='.' + compiler['extension'])
+        dest_file_name = source_file.name[:-len(compiler['extension'])] + compiler['dest_extension']
+        dest_dir_name = os.path.split(dest_file_name)[0]
+        command = compiler['command'].format(source=source_file.name, dest=dest_file_name, dest_dir=dest_dir_name)
+        source_file.write(content)
+        source_file.flush()
+        try:
+            p = Popen(cmd_split(command), stdout=PIPE, stdin=PIPE, stderr=PIPE)
+            output, err = p.communicate(self.content)
+        except IOError, e:
+            raise PrecompilerError(e)
+        if p.wait() != 0:
+            if not err:
+                err = 'Error running pre-compiler with command "{0}"'.format(command)
+            raise PrecompilerError(err)
+        if compiler.get('stdout', False):
+            content = output
+        else:
+            output_file = open(dest_file_name)
+            content = output_file.read()
+            output_file.close()
+            os.remove(dest_file_name)
+        source_file.close()
+        return content
+
+    
     def filter(self, content, method, **kwargs):
+        # run compiler
+        if method == "input":
+            content = self.precompile(content, **kwargs)
+
         for filter_cls in self.cached_filters:
             filter_func = getattr(
                 filter_cls(content, filter_type=self.type), method)
