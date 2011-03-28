@@ -23,6 +23,7 @@ class Compressor(object):
         self.output_prefix = output_prefix
         self.split_content = []
         self.charset = settings.DEFAULT_CHARSET
+        self.precompilers = settings.COMPRESS_PRECOMPILERS
 
     def split_contents(self):
         raise NotImplementedError(
@@ -92,10 +93,6 @@ class Compressor(object):
 
     def concat(self):
         return "\n".join((hunk.encode(self.charset) for hunk in self.hunks))
-
-    @cached_property
-    def precompilers(self):
-        return settings.COMPRESS_PRECOMPILERS        
 
     def precompile(self, content, **kwargs):
         type = None
