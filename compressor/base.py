@@ -10,11 +10,9 @@ from django.core.files.base import ContentFile
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
-from compressor.exceptions import UncompressableFileError
+from compressor.exceptions import UncompressableFileError, PrecompilerError
 from compressor.storage import default_storage
 from compressor.utils import get_class, cached_property, cmd_split
-
-class PrecompilerError(UncompressableFileError): pass
 
 class Compressor(object):
 
