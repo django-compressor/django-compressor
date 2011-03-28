@@ -22,6 +22,7 @@ class CompressorSettings(AppSettings):
     URL = None
     ROOT = None
 
+    PRECOMPILERS = {}
     CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
     JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
 
