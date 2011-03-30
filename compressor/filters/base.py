@@ -30,11 +30,13 @@ class CompilerFilter(FilterBase):
     A filter subclass that is able to filter content via
     external commands.
     """
+    command = None
+
     def __init__(self, content, filter_type=None, verbose=0, command=None):
         super(CompilerFilter, self).__init__(content, filter_type, verbose)
         if command:
             self.command = command
-        if not self.command:
+        if self.command is None:
             raise FilterError("Required command attribute not set")
         self.options = {}
         self.stdout = subprocess.PIPE
