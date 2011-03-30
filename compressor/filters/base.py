@@ -8,6 +8,7 @@ from compressor.utils import cmd_split
 
 logger = logging.getLogger("compressor.filters")
 
+
 class FilterBase(object):
 
     def __init__(self, content, filter_type=None, verbose=0):

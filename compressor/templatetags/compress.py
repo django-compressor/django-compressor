@@ -33,11 +33,13 @@ class CompressorNode(template.Node):
         if (time.time() > refresh_time) and not refreshed:
             # Store the stale value while the cache
             # revalidates for another MINT_DELAY seconds.
-            self.cache_set(key, val, timeout=settings.COMPRESS_MINT_DELAY, refreshed=True)
+            self.cache_set(key, val, refreshed=True,
+                timeout=settings.COMPRESS_MINT_DELAY)
             return None
         return val
 
-    def cache_set(self, key, val, timeout=settings.COMPRESS_REBUILD_TIMEOUT, refreshed=False):
+    def cache_set(self, key, val, refreshed=False,
+            timeout=settings.COMPRESS_REBUILD_TIMEOUT):
         refresh_time = timeout + time.time()
         real_timeout = timeout + settings.COMPRESS_MINT_DELAY
         packed_val = (val, refresh_time, refreshed)
@@ -47,13 +49,15 @@ class CompressorNode(template.Node):
         return "%s.%s.%s" % (compressor.cachekey, self.mode, self.kind)
 
     def render(self, context, forced=False):
-        if (settings.COMPRESS_ENABLED and settings.COMPRESS_OFFLINE) and not forced:
+        if (settings.COMPRESS_ENABLED and
+                settings.COMPRESS_OFFLINE) and not forced:
             key = get_offline_cachekey(self.nodelist)
             content = cache.get(key)
             if content:
                 return content
         content = self.nodelist.render(context)
-        if (not settings.COMPRESS_ENABLED or not len(content.strip())) and not forced:
+        if (not settings.COMPRESS_ENABLED or
+                not len(content.strip())) and not forced:
             return content
         compressor = self.compressor_cls(content)
         cachekey = self.cache_key(compressor)

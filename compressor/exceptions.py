@@ -17,11 +17,13 @@ class FilterError(Exception):
     """
     pass
 
+
 class ParserError(Exception):
     """
     This exception is raised when the parser fails
     """
     pass
+
 
 class OfflineGenerationError(Exception):
     """

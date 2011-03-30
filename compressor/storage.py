@@ -7,6 +7,7 @@ from django.utils.functional import LazyObject
 
 from compressor.conf import settings
 
+
 class CompressorFileStorage(FileSystemStorage):
     """
     Standard file system storage for files handled by django-compressor.
@@ -39,6 +40,7 @@ class CompressorFileStorage(FileSystemStorage):
         if self.exists(name):
             self.delete(name)
         return name
+
 
 class GzipCompressorFileStorage(CompressorFileStorage):
     """

@@ -26,8 +26,11 @@ class Compressor(object):
         self.precompilers = settings.COMPRESS_PRECOMPILERS
 
     def split_contents(self):
-        raise NotImplementedError(
-            "split_contents must be defined in a subclass")
+        """
+        To be implemented in a subclass, should return an
+        iterable with three values: kind, value, element
+        """
+        raise NotImplementedError
 
     def get_filename(self, url):
         try:
@@ -76,7 +79,8 @@ class Compressor(object):
             if kind == "hunk":
                 # Let's cast BeautifulSoup element to unicode here since
                 # it will try to encode using ascii internally later
-                yield unicode(self.filter(value, "input", elem=elem, kind=kind))
+                yield unicode(
+                    self.filter(value, method="input", elem=elem, kind=kind))
             elif kind == "file":
                 content = ""
                 try:
@@ -142,7 +146,6 @@ class Compressor(object):
         source_file.close()
         return content
 
-    
     def filter(self, content, method, **kwargs):
         # run compiler
         if method == "input":
@@ -160,7 +163,7 @@ class Compressor(object):
 
     @cached_property
     def combined(self):
-        return self.filter(self.concat(), 'output')
+        return self.filter(self.concat(), method="output")
 
     @cached_property
     def hash(self):
@@ -169,7 +172,7 @@ class Compressor(object):
     @cached_property
     def new_filepath(self):
         return os.path.join(settings.COMPRESS_OUTPUT_DIR.strip(os.sep),
-                            self.output_prefix, "%s.%s" % (self.hash, self.type))
+            self.output_prefix, "%s.%s" % (self.hash, self.type))
 
     def save_file(self):
         if self.storage.exists(self.new_filepath):
