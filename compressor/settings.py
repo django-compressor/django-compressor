@@ -22,8 +22,6 @@ class CompressorSettings(AppSettings):
 
     CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
     JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
-
-    LESSC_BINARY = LESSC_BINARY = 'lessc'
     PRECOMPILERS = {
         "*.coffee": {
             "command": "coffee --compile --stdio",
@@ -43,8 +41,9 @@ class CompressorSettings(AppSettings):
     CSSTIDY_ARGUMENTS = '--template=highest'
     YUI_BINARY = 'java -jar yuicompressor.jar'
     YUI_CSS_ARGUMENTS = ''
-    YUI_JS_ARGUMENTS = 'COMPRESS_YUI_JS_ARGUMENTS'
+    YUI_JS_ARGUMENTS = ''
     DATA_URI_MIN_SIZE = 1024
+
     # the cache backend to use
     CACHE_BACKEND = None
     # rebuilds the cache every 30 days if nothing has changed.

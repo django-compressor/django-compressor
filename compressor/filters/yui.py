@@ -1,48 +1,28 @@
-from subprocess import Popen, PIPE
-
 from compressor.conf import settings
-from compressor.filters import FilterBase, FilterError
-from compressor.utils import cmd_split
+from compressor.filters import CompilerFilter
 
 
-class YUICompressorFilter(FilterBase):
+class YUICompressorFilter(CompilerFilter):
+    command = "%(binary)s %(args)s"
 
-    def output(self, **kwargs):
-        arguments = ''
-        if self.type == 'js':
-            arguments = settings.COMPRESS_YUI_JS_ARGUMENTS
-        elif self.type == 'css':
-            arguments = settings.COMPRESS_YUI_CSS_ARGUMENTS
-
-        command = '%s --type=%s %s' % (settings.COMPRESS_YUI_BINARY, self.type, arguments)
-
+    def __init__(self, *args, **kwargs):
+        super(YUICompressorFilter, self).__init__(*args, **kwargs)
+        self.command += '--type=%s' % self.type
         if self.verbose:
-            command += ' --verbose'
-
-        try:
-            p = Popen(cmd_split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            filtered, err = p.communicate(self.content)
-        except IOError, e:
-            raise FilterError(e)
-
-        if p.wait() != 0:
-            if not err:
-                err = 'Unable to apply YUI Compressor filter'
-            raise FilterError(err)
-
-        if self.verbose:
-            print err
-
-        return filtered
+            self.command += ' --verbose'
 
 
 class YUICSSFilter(YUICompressorFilter):
-    def __init__(self, *args, **kwargs):
-        super(YUICSSFilter, self).__init__(*args, **kwargs)
-        self.type = 'css'
+    type = 'css'
+    options = {
+        "binary": settings.COMPRESS_YUI_BINARY,
+        "args": settings.COMPRESS_YUI_CSS_ARGUMENTS,
+    }
 
 
 class YUIJSFilter(YUICompressorFilter):
-    def __init__(self, *args, **kwargs):
-        super(YUIJSFilter, self).__init__(*args, **kwargs)
-        self.type = 'js'
+    type = 'js'
+    options = {
+        "binary": settings.COMPRESS_YUI_BINARY,
+        "args": settings.COMPRESS_YUI_CSS_ARGUMENTS,
+    }
