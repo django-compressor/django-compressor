@@ -163,7 +163,7 @@ class Compressor(object):
 
     @cached_property
     def hash(self):
-        return get_hexdigest(self.combined)[:12]
+        return get_hexdigest(self.concat())[:12]
 
     @cached_property
     def new_filepath(self):
