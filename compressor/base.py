@@ -117,7 +117,7 @@ class Compressor(object):
                 return True
         return False
 
-    def compilers(self, kind, filename, elem):
+    def compiler_options(self, kind, filename, elem):
         if kind == "file" and filename:
             for patterns, options in self.precompilers.items():
                 if self.matches_patterns(filename, patterns):
@@ -125,7 +125,7 @@ class Compressor(object):
         elif kind == "hunk" and elem is not None:
             # get the mimetype of the file and handle "text/<type>" cases
             attrs = self.parser.elem_attribs(elem)
-            mimetype = attrs.get("type", "").split("/")[-1:]
+            mimetype = attrs.get("type", "").split("/")[-1]
             for options in self.precompilers.values():
                 if options.get("mimetype", None) == mimetype:
                     yield options
@@ -133,8 +133,8 @@ class Compressor(object):
     def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
         if not kind:
             return content
-        for compiler in self.compilers(kind, filename, elem):
-            command = compiler.get("command")
+        for options in self.compiler_options(kind, filename, elem):
+            command = options.get("command")
             if command is None:
                 continue
             content = CompilerFilter(content,
