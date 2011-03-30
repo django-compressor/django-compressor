@@ -127,7 +127,8 @@ class Compressor(object):
             attrs = self.parser.elem_attribs(elem)
             mimetype = attrs.get("type", "").split("/")[-1]
             for options in self.precompilers.values():
-                if options.get("mimetype", None) == mimetype:
+                if (mimetype and
+                        mimetype = options.get("mimetype", "").split("/")[-1]):
                     yield options
 
     def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
