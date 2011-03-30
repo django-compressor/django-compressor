@@ -1,29 +1,34 @@
+import fnmatch
 import os
-import re
 import socket
 from itertools import chain
-import tempfile
-from subprocess import Popen, PIPE
 
-from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
+from django.core.exceptions import ImproperlyConfigured
+from django.template.loader import render_to_string
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
-from compressor.exceptions import UncompressableFileError, PrecompilerError
+from compressor.exceptions import UncompressableFileError
+from compressor.filters import CompilerFilter
 from compressor.storage import default_storage
-from compressor.utils import get_class, cached_property, cmd_split
+from compressor.utils import get_class, cached_property
+
 
 class Compressor(object):
+    """
+    Base compressor object to be subclassed for content type
+    depending implementations details.
+    """
+    type = None
 
     def __init__(self, content=None, output_prefix="compressed"):
         self.content = content or ""
-        self.extra_context = {}
-        self.type = None
         self.output_prefix = output_prefix
-        self.split_content = []
         self.charset = settings.DEFAULT_CHARSET
         self.precompilers = settings.COMPRESS_PRECOMPILERS
+        self.split_content = []
+        self.extra_context = {}
 
     def split_contents(self):
         """
@@ -75,7 +80,6 @@ class Compressor(object):
     @cached_property
     def hunks(self):
         for kind, value, elem in self.split_contents():
-            attribs = self.parser.elem_attribs(elem)
             if kind == "hunk":
                 # Let's cast BeautifulSoup element to unicode here since
                 # it will try to encode using ascii internally later
@@ -92,58 +96,49 @@ class Compressor(object):
                 except IOError, e:
                     raise UncompressableFileError(
                         "IOError while processing '%s': %s" % (value, e))
-                content = self.filter(content, "input", filename=value, elem=elem, kind=kind)
-                yield unicode(content, attribs.get("charset", self.charset))
+                content = self.filter(content,
+                    method="input", filename=value, elem=elem, kind=kind)
+                attribs = self.parser.elem_attribs(elem)
+                charset = attribs.get("charset", self.charset)
+                yield unicode(content, charset)
 
     def concat(self):
         return "\n".join((hunk.encode(self.charset) for hunk in self.hunks))
 
-    def precompile(self, content, **kwargs):
-        type = None
-        compiler = None
-        elem = kwargs['elem']
-        kind = kwargs['kind']
-        if kind == "file":
-            type = os.path.splitext(kwargs['filename'])[1][1:]
-            for pc in self.precompilers:
-                if pc.get('extension', None) == type:
-                    compiler = pc
-                    break
-        elif kind == "hunk":
-            type = self.parser.elem_attribs(elem).get('type', None)
-            slash = type.rindex('/')
-            if slash >= 0:
-                type = type[slash + 1:]
-            for pc in self.precompilers:
-                if pc.get('type', None) == type:
-                    compiler = pc
-                    break
-        if not compiler:
+    def matches_patterns(self, path, patterns=[]):
+        """
+        Return True or False depending on whether the ``path`` matches the
+        list of give the given patterns.
+        """
+        if not isinstance(patterns, (list, tuple)):
+            patterns = (patterns,)
+        for pattern in patterns:
+            if fnmatch.fnmatchcase(path, pattern):
+                return True
+        return False
+
+    def compilers(self, kind, filename, elem):
+        if kind == "file" and filename:
+            for patterns, options in self.precompilers.items():
+                if self.matches_patterns(filename, patterns):
+                    yield options
+        elif kind == "hunk" and elem:
+            # get the mimetype of the file and handle "text/<type>" cases
+            attrs = self.parser.elem_attribs(elem)
+            mimetype = attrs.get("type", "").split("/")[-1:]
+            for options in self.precompilers.values():
+                if options.get("mimetype", None) == mimetype:
+                    yield options
+
+    def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
+        if not kind:
             return content
-        
-        source_file = tempfile.NamedTemporaryFile(mode='w+b', suffix='.' + compiler['extension'])
-        dest_file_name = source_file.name[:-len(compiler['extension'])] + compiler['dest_extension']
-        dest_dir_name = os.path.split(dest_file_name)[0]
-        command = compiler['command'].format(source=source_file.name, dest=dest_file_name, dest_dir=dest_dir_name)
-        source_file.write(content)
-        source_file.flush()
-        try:
-            p = Popen(cmd_split(command), stdout=PIPE, stdin=PIPE, stderr=PIPE)
-            output, err = p.communicate(self.content)
-        except IOError, e:
-            raise PrecompilerError(e)
-        if p.wait() != 0:
-            if not err:
-                err = 'Error running pre-compiler with command "{0}"'.format(command)
-            raise PrecompilerError(err)
-        if compiler.get('stdout', False):
-            content = output
-        else:
-            output_file = open(dest_file_name)
-            content = output_file.read()
-            output_file.close()
-            os.remove(dest_file_name)
-        source_file.close()
+        for compiler in self.compilers(kind, filename, elem):
+            command = compiler.get("command")
+            if command is None:
+                continue
+            content = CompilerFilter(content,
+                filter_type=self.type, command=command).output(**kwargs)
         return content
 
     def filter(self, content, method, **kwargs):

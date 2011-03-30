@@ -20,11 +20,23 @@ class CompressorSettings(AppSettings):
     URL = None
     ROOT = None
 
-    PRECOMPILERS = {}
     CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
     JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
 
     LESSC_BINARY = LESSC_BINARY = 'lessc'
+    PRECOMPILERS = {
+        "*.coffee": {
+            "command": "coffee --compile --stdio",
+            "mimetype": "text/coffeescript",
+        },
+        ("*.sass", "*.scss"): {
+            "command": "sass %(infile)s %(outfile)s",
+            "mimetype": "sass",
+        },
+        "*.less": {
+            "command": "lessc %(infile)s %(outfile)s",
+        },
+    }
     CLOSURE_COMPILER_BINARY = 'java -jar compiler.jar'
     CLOSURE_COMPILER_ARGUMENTS = ''
     CSSTIDY_BINARY = 'csstidy'
@@ -109,4 +121,12 @@ class CompressorSettings(AppSettings):
             # Adds the 1.3 STATIC_URL setting to the context if available
             if getattr(settings, "STATIC_URL", None):
                 value["STATIC_URL"] = settings.STATIC_URL
+        return value
+
+    def configure_precompilers(self, value):
+        for glob, options in value.items():
+            mimetype = options.get("mimetype", "")
+            if mimetype.startswith("text/"):
+                options["mimetype"] = mimetype[5:]
+                value[glob].update(options)
         return value

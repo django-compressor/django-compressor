@@ -4,12 +4,6 @@ class UncompressableFileError(Exception):
     """
     pass
 
-class PrecompilerError(UncompressableFileError):
-    """
-    This exception is raise like UncompressableFileError only
-    specifically when pre-compilation fails.
-    """
-    pass
 
 class FilterError(Exception):
     """
