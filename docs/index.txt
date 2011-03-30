@@ -285,6 +285,85 @@ COMPRESS_JS_FILTERS
 
 A list of filters that will be applied to javascript.
 
+COMPRESS_PRECOMPILERS
+^^^^^^^^^^^^^^^^^^^^^
+
+:Default: ``{}``
+
+A mapping of file pattern(s) to compiler options to be used on the
+matching files. The options dictionary requires two items:
+
+* command
+    The command to call on each of the files. Standard Python string
+    formatting will be provided for the two variables ``%(infile)s`` and
+    ``%(outfile)s`` and will also trigger the actual creation of those
+    temporary files. If not given in the command string, django_compressor
+    will use ``stdin`` and ``stdout`` respectively instead.
+
+* mimetype
+    The mimetype of the file in case inline code should be compiled
+    (see below).
+
+Example::
+
+    COMPRESS_PRECOMPILERS = {
+        "*.coffee": {
+            "command": "coffee --compile --stdio",
+            "mimetype": "text/coffeescript",
+        },
+        "*.less": {
+            "command": "lessc %(infile)s %(outfile)s",
+            "mimetype": "text/less",
+        },
+        ("*.sass", "*.scss"): {
+            "command": "sass %(infile)s %(outfile)s",
+            "mimetype": "sass",
+        },
+    }
+
+With that setting (and CoffeeScript_ installed), you could add the following
+code to your templates:
+
+.. code-block:: django
+
+    {% load compress %}
+
+    {% compress js %}
+    <script type="text/coffeescript" charset="utf-8" src="/static/js/awesome.coffee" />
+    <script type="text/coffeescript" charset="utf-8">
+    # Functions:
+    square = (x) -> x * x
+    </script>
+    {% endcompress %}
+
+This would give you something like this::
+
+    <script type="text/javascript" src="/static/CACHE/js/8dd1a2872443.js" charset="utf-8"></script>
+
+The same works for less_, too:
+
+.. code-block:: django
+
+    {% load compress %}
+
+    {% compress css %}
+    <link rel="stylesheet" href="/static/css/styles.less" charset="utf-8">
+    <style type="text/less">
+    @color: #4D926F;
+
+    #header {
+      color: @color;
+    }
+    </style>
+    {% endcompress %}
+
+Which would be rendered something like::
+
+    <link rel="stylesheet" href="/static/CACHE/css/8ccf8d877f18.css" type="text/css" charset="utf-8">
+
+.. _less: http://lesscss.org/
+.. _CoffeeScript: http://jashkenas.github.com/coffee-script/
+
 COMPRESS_STORAGE
 ^^^^^^^^^^^^^^^^
 
@@ -437,3 +516,20 @@ Dependencies
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://codespeak.net/lxml/
 .. _libxml2: http://xmlsoft.org/
+
+Deprecation
+-----------
+
+This section lists features and settings that are deprecated or removed
+in newer versions of django_compressor.
+
+* ``COMPRESS_LESSC_BINARY``
+    Superseded by the COMPRESS_PRECOMPILERS_ setting. Just add the following
+    to your settings::
+
+        COMPRESS_PRECOMPILERS = {
+            "*.less": {
+                "command": "lessc %(infile)s %(outfile)s",
+                "mimetype": "text/less",
+            },
+        }
