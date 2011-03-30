@@ -123,9 +123,15 @@ class CompressorSettings(AppSettings):
         return value
 
     def configure_precompilers(self, value):
-        for glob, options in value.items():
-            mimetype = options.get("mimetype", "")
+        for patterns, options in value.items():
+            if options.get("command", None) is None:
+                raise ImproperlyConfigured("Please specify a command "
+                    "for compiler with the pattern %r." % patterns)
+            mimetype = options.get("mimetype", None)
+            if mimetype is None:
+                raise ImproperlyConfigured("Please specify a mimetype "
+                    "for compiler with the pattern %r." % patterns)
             if mimetype.startswith("text/"):
                 options["mimetype"] = mimetype[5:]
-                value[glob].update(options)
+            value[patterns].update(options)
         return value
