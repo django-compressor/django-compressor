@@ -7,7 +7,7 @@ class YUICompressorFilter(CompilerFilter):
 
     def __init__(self, *args, **kwargs):
         super(YUICompressorFilter, self).__init__(*args, **kwargs)
-        self.command += '--type=%s' % self.type
+        self.command += ' --type=%s' % self.type
         if self.verbose:
             self.command += ' --verbose'
 
