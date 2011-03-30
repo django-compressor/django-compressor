@@ -25,18 +25,14 @@ class CompressorSettings(AppSettings):
     CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
     JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
     PRECOMPILERS = {
-        # "coffee": {
-        #     "command": "coffee --compile --stdio",
-        #     "mimetype": "text/coffeescript",
-        # },
-        # "less": {
-        #     "command": "lessc %(infile)s %(outfile)s",
-        #     "mimetype": "text/less",
-        # },
-        # ("sass", "scss"): {
-        #     "command": "sass %(infile)s %(outfile)s",
-        #     "mimetype": "sass",
-        # },
+        #"coffee": {
+        #    "command": "coffee --compile --stdio",
+        #    "type": "js"
+        #},
+        #"sass": {
+        #    "command": "sass %(infile)s %(outfile)s",
+        #    "type": "css"
+        #},
     }
     CLOSURE_COMPILER_BINARY = 'java -jar compiler.jar'
     CLOSURE_COMPILER_ARGUMENTS = ''

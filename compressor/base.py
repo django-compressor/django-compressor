@@ -62,7 +62,7 @@ class PrecompilerMixin(object):
             attrs = self.parser.elem_attribs(elem)
             mimetype = attrs.get("type", "").split("/")[-1]
             for options in self.precompilers.values():
-                if options.get("mimetype", "").split("/")[-1] == mimetype:
+                if options.get("mimetype") == mimetype:
                     yield options
         elif kind == "preprocess":
             for patterns, options in self.precompilers.items():

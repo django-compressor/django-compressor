@@ -41,6 +41,17 @@ Usage
     <html of inline or linked JS/CSS>
     {% endcompress %}
 
+Precompilers Usage
+-----
+
+Set ``COMPRESS_PRECOMPILERS`` setting (see below). Then use
+
+.. code-block:: django
+
+    {% load compress %}
+    {% process <coffee/sass/any key from your COMPRESS_PRECOMPILERS> "path/to/file1" "path/to/file2" ... %}
+
+
 Examples
 ^^^^^^^^
 
@@ -76,6 +87,23 @@ Which would be rendered something like:
 .. code-block:: django
 
     <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
+
+When using {% process %} tag:
+
+.. code-block:: django
+
+    {% load compress %}
+
+    {% process sass "/static/css/one.css" "/static/css/two.css" %}
+
+Which would be rendered something like:
+
+.. code-block:: django
+
+    <link rel="stylesheet" href="/static/CACHE/processed/f7c661b7a124.css" type="text/css" charset="utf-8">
+    <link rel="stylesheet" href="/static/CACHE/processed/f6c0a1109fbd.css" type="text/css" charset="utf-8">
+    {% endcompress %}
+
 
 Linked files must be accesible via COMPRESS_URL_. If DEBUG is ``True``,
 off-site files will throw exceptions. If DEBUG is ``False`` they will be
