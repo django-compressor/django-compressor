@@ -15,7 +15,73 @@ from compressor.storage import default_storage
 from compressor.utils import get_class, cached_property
 
 
-class Compressor(object):
+class StorageMixin(object):
+    def get_filename(self, url):
+        try:
+            base_url = self.storage.base_url
+        except AttributeError:
+            base_url = settings.COMPRESS_URL
+        if not url.startswith(base_url):
+            raise UncompressableFileError(
+                "'%s' isn't accesible via COMPRESS_URL ('%s') and can't be"
+                " processed" % (url, base_url))
+        basename = url.replace(base_url, "", 1)
+        filename = os.path.join(settings.COMPRESS_ROOT, basename)
+        if not os.path.exists(filename):
+            raise UncompressableFileError("'%s' does not exist" % filename)
+        return filename
+
+    @cached_property
+    def storage(self):
+        return default_storage
+
+class PrecompilerMixin(object):
+    def matches_patterns(self, path, patterns, options):
+        """
+        Return True or False depending on whether the ``path`` matches the
+        list of give the given patterns.
+        """
+        if "match" in options:
+            patterns = options["match"]
+            if not isinstance(patterns, (list, tuple)):
+                patterns = (patterns,)
+        else:
+            patterns = ("*." + ext for ext in ((patterns,) if not isinstance(patterns, (list, tuple)) else patterns))
+        for pattern in patterns:
+            if fnmatch.fnmatchcase(path, pattern):
+                return True
+        return False
+
+    def compiler_options(self, kind, filename=None, elem=None, content_type=None):
+        if kind == "file" and filename:
+            for patterns, options in self.precompilers.items():
+                if self.matches_patterns(filename, patterns, options):
+                    yield options
+        elif kind == "hunk" and elem is not None:
+            # get the mimetype of the file and handle "text/<type>" or "<type>" cases
+            attrs = self.parser.elem_attribs(elem)
+            mimetype = attrs.get("type", "").split("/")[-1]
+            for options in self.precompilers.values():
+                if options.get("mimetype", "").split("/")[-1] == mimetype:
+                    yield options
+        elif kind == "preprocess":
+            for patterns, options in self.precompilers.items():
+                if (content_type in patterns) if isinstance(patterns, (list, tuple)) else (content_type == patterns):
+                    yield options
+            
+
+    def precompile(self, content, kind=None, elem=None, filename=None, content_type=None, **kwargs):
+        if not kind:
+            return content
+        for options in self.compiler_options(kind, filename, elem, content_type):
+            command = options.get("command")
+            if command is None:
+                continue
+            content = CompilerFilter(content,
+                filter_type=self.type, command=command).output(**kwargs)
+        return content
+
+class Compressor(StorageMixin, PrecompilerMixin):
     """
     Base compressor object to be subclassed for content type
     depending implementations details.
@@ -37,20 +103,6 @@ class Compressor(object):
         """
         raise NotImplementedError
 
-    def get_filename(self, url):
-        try:
-            base_url = self.storage.base_url
-        except AttributeError:
-            base_url = settings.COMPRESS_URL
-        if not url.startswith(base_url):
-            raise UncompressableFileError(
-                "'%s' isn't accesible via COMPRESS_URL ('%s') and can't be"
-                " compressed" % (url, base_url))
-        basename = url.replace(base_url, "", 1)
-        filename = os.path.join(settings.COMPRESS_ROOT, basename)
-        if not os.path.exists(filename):
-            raise UncompressableFileError("'%s' does not exist" % filename)
-        return filename
 
     @cached_property
     def parser(self):
@@ -72,10 +124,6 @@ class Compressor(object):
             chain([self.content], self.mtimes)).encode(self.charset)
         return "django_compressor.%s.%s" % (socket.gethostname(),
                                             get_hexdigest(cachestr)[:12])
-
-    @cached_property
-    def storage(self):
-        return default_storage
 
     @cached_property
     def hunks(self):
@@ -105,41 +153,6 @@ class Compressor(object):
     def concat(self):
         return "\n".join((hunk.encode(self.charset) for hunk in self.hunks))
 
-    def matches_patterns(self, path, patterns=[]):
-        """
-        Return True or False depending on whether the ``path`` matches the
-        list of give the given patterns.
-        """
-        if not isinstance(patterns, (list, tuple)):
-            patterns = (patterns,)
-        for pattern in patterns:
-            if fnmatch.fnmatchcase(path, pattern):
-                return True
-        return False
-
-    def compiler_options(self, kind, filename, elem):
-        if kind == "file" and filename:
-            for patterns, options in self.precompilers.items():
-                if self.matches_patterns(filename, patterns):
-                    yield options
-        elif kind == "hunk" and elem is not None:
-            # get the mimetype of the file and handle "text/<type>" cases
-            attrs = self.parser.elem_attribs(elem)
-            mimetype = attrs.get("type", "").split("/")[-1]
-            for options in self.precompilers.values():
-                if options.get("mimetype", None) == mimetype:
-                    yield options
-
-    def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
-        if not kind:
-            return content
-        for options in self.compiler_options(kind, filename, elem):
-            command = options.get("command")
-            if command is None:
-                continue
-            content = CompilerFilter(content,
-                filter_type=self.type, command=command).output(**kwargs)
-        return content
 
     def filter(self, content, method, **kwargs):
         # run compiler
@@ -192,3 +205,63 @@ class Compressor(object):
             content = self.concat()
         context = dict(content=content, **self.extra_context)
         return render_to_string(self.template_name_inline, context)
+
+
+class Processor(StorageMixin, PrecompilerMixin):
+    """
+    Base preprocessor object to be subclassed for content type
+    depending implementations details.
+    """
+    type = None
+
+    def __init__(self, value, kind, content_type, output_prefix="preprocessed"):
+        if kind == "file":
+            path = self.get_filename(value)
+            with open(path) as f:
+                self.content = f.read()
+            self.file = path
+        else:
+            self.content = value
+            self.file = None
+        self.kind = kind
+        self.content_type = content_type
+        self.output_prefix = output_prefix
+        self.charset = settings.DEFAULT_CHARSET
+        self.precompilers = settings.COMPRESS_PRECOMPILERS
+
+    @cached_property
+    def mtimes(self):
+        if self.kind == "file":
+            yield str(get_mtime(self.file))
+
+    @cached_property
+    def cachekey(self):
+        cachestr = "".join(
+            chain([self.content] if self.kind != "file" else [], self.mtimes)).encode(self.charset)
+        return "django_compressor.preprocess.%s.%s" % (socket.gethostname(),
+                                            get_hexdigest(cachestr)[:12])
+
+    @cached_property
+    def hash(self):
+        return get_hexdigest(self.content)[:12]
+
+    @cached_property
+    def new_filepath(self):
+        return os.path.join(settings.COMPRESS_OUTPUT_DIR.strip(os.sep),
+            self.output_prefix, "%s.%s" % (self.hash, self.type))
+
+    def save_file(self, content):
+        if self.storage.exists(self.new_filepath):
+            return False
+        self.storage.save(self.new_filepath, ContentFile(content))
+        return True
+
+    def output(self, mode="file"):
+        content = self.precompile(self.content, kind="preprocess", content_type=self.content_type)
+        template_name = self.template_name if mode == "file" else self.template_name_inline 
+        context = {
+            "saved": self.save_file(content),
+            "url": self.storage.url(self.new_filepath),
+        }
+        #context.update(self.extra_context)
+        return render_to_string(template_name, context)

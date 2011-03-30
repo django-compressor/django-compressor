@@ -1,5 +1,5 @@
 from compressor.conf import settings
-from compressor.base import Compressor
+from compressor.base import Compressor, Processor
 from compressor.exceptions import UncompressableFileError
 
 
@@ -28,3 +28,8 @@ class JsCompressor(Compressor):
                 content = self.parser.elem_content(elem)
                 self.split_content.append(('hunk', content, elem))
         return self.split_content
+
+class JsProcessor(Processor):
+    template_name = "compressor/js.html"
+    template_name_inline = "compressor/js_inline.html"
+    type = "js"

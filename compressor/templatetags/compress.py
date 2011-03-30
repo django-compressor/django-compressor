@@ -1,4 +1,5 @@
 import time
+import re
 
 from django import template
 from django.core.exceptions import ImproperlyConfigured
@@ -14,17 +15,15 @@ COMPRESSORS = {
     "css": settings.COMPRESS_CSS_COMPRESSOR,
     "js": settings.COMPRESS_JS_COMPRESSOR,
 }
+PROCESSORS = {
+    "css": settings.COMPRESS_CSS_PROCESSOR,
+    "js": settings.COMPRESS_JS_PROCESSOR,
+}
+PRECOMPILERS = settings.COMPRESS_PRECOMPILERS
 
 register = template.Library()
 
-class CompressorNode(template.Node):
-    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE):
-        self.nodelist = nodelist
-        self.kind = kind
-        self.mode = mode
-        self.compressor_cls = get_class(
-            COMPRESSORS.get(self.kind), exception=ImproperlyConfigured)
-
+class CacheMixin(object):
     def cache_get(self, key):
         packed_val = cache.get(key)
         if packed_val is None:
@@ -45,8 +44,18 @@ class CompressorNode(template.Node):
         packed_val = (val, refresh_time, refreshed)
         return cache.set(key, packed_val, real_timeout)
 
-    def cache_key(self, compressor):
-        return "%s.%s.%s" % (compressor.cachekey, self.mode, self.kind)
+    def cache_key(self, cls, mode, type):
+        return "%s.%s.%s" % (cls.cachekey, mode, type)
+    
+
+class CompressorNode(template.Node, CacheMixin):
+    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE):
+        self.nodelist = nodelist
+        self.kind = kind
+        self.mode = mode
+        self.compressor_cls = get_class(
+            COMPRESSORS.get(self.kind), exception=ImproperlyConfigured)
+
 
     def render(self, context, forced=False):
         if (settings.COMPRESS_ENABLED and
@@ -60,7 +69,7 @@ class CompressorNode(template.Node):
                 not len(content.strip())) and not forced:
             return content
         compressor = self.compressor_cls(content)
-        cachekey = self.cache_key(compressor)
+        cachekey = self.cache_key(compressor, self.mode, self.kind)
         output = self.cache_get(cachekey)
         if output is None or forced:
             try:
@@ -138,3 +147,48 @@ def compress(parser, token):
     else:
         mode = OUTPUT_FILE
     return CompressorNode(nodelist, kind, mode)
+
+class ProcessorNode(template.Node, CacheMixin):
+    def __init__(self, value, is_inline=False, content_type=None, output_mode=OUTPUT_FILE):
+        if content_type not in PRECOMPILERS:
+            raise ImproperlyConfigured("Type %s is not configured in settings" % content_type) 
+        self.value = value
+        self.content_type = content_type
+        self.mode = output_mode
+        self.is_inline = is_inline
+        self.type = PRECOMPILERS[content_type]["type"]
+        self.processor_cls = get_class(
+            PROCESSORS.get(self.type), exception=ImproperlyConfigured)
+
+    def render(self, context):                
+        def _render_one(value):
+            processor = self.processor_cls(value, 
+                                           "hunk" if self.is_inline else "file",
+                                           self.content_type)
+            cachekey = self.cache_key(processor, self.mode, self.type)
+            output = self.cache_get(cachekey)
+            if output is None:
+                try:
+                    output = processor.output(self.mode)
+                    self.cache_set(cachekey, output)
+                except:
+                    if settings.DEBUG:
+                        from traceback import format_exc
+                        raise Exception(format_exc())
+                    else:
+                        return content
+            return output
+        if self.is_inline:
+            return _render_one(self.value)
+        else:
+            return "\n".join(_render_one(file) for file in self.value)
+            
+
+
+@register.tag
+def process(parser, token):
+    args = token.split_contents()
+    type = args[1]
+    files = [f.strip()[1:-1] for f in args[2:]]
+    
+    return ProcessorNode(files, content_type=type, output_mode=OUTPUT_FILE, is_inline=False)

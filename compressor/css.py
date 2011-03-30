@@ -1,5 +1,5 @@
 from compressor.conf import settings
-from compressor.base import Compressor
+from compressor.base import Compressor, Processor
 from compressor.exceptions import UncompressableFileError
 
 
@@ -53,3 +53,8 @@ class CssCompressor(Compressor):
             subnode.extra_context.update({'media': media})
             ret.append(subnode.output(forced=forced))
         return "".join(ret)
+
+class CssProcessor(Processor):
+    template_name = "compressor/css.html"
+    template_name_inline = "compressor/css_inline.html"
+    type = "css"

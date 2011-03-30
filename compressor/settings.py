@@ -16,6 +16,8 @@ class CompressorSettings(AppSettings):
 
     CSS_COMPRESSOR = "compressor.css.CssCompressor"
     JS_COMPRESSOR = "compressor.js.JsCompressor"
+    CSS_PROCESSOR = "compressor.css.CssProcessor"
+    JS_PROCESSOR = "compressor.js.JsProcessor"
 
     URL = None
     ROOT = None
@@ -23,15 +25,15 @@ class CompressorSettings(AppSettings):
     CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
     JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
     PRECOMPILERS = {
-        # "*.coffee": {
+        # "coffee": {
         #     "command": "coffee --compile --stdio",
         #     "mimetype": "text/coffeescript",
         # },
-        # "*.less": {
+        # "less": {
         #     "command": "lessc %(infile)s %(outfile)s",
         #     "mimetype": "text/less",
         # },
-        # ("*.sass", "*.scss"): {
+        # ("sass", "scss"): {
         #     "command": "sass %(infile)s %(outfile)s",
         #     "mimetype": "sass",
         # },
