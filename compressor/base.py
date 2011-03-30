@@ -1,29 +1,41 @@
+import fnmatch
 import os
 import socket
 from itertools import chain
 
-from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
+from django.core.exceptions import ImproperlyConfigured
+from django.template.loader import render_to_string
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
 from compressor.exceptions import UncompressableFileError
+from compressor.filters import CompilerFilter
 from compressor.storage import default_storage
 from compressor.utils import get_class, cached_property
 
+
 class Compressor(object):
+    """
+    Base compressor object to be subclassed for content type
+    depending implementations details.
+    """
+    type = None
 
     def __init__(self, content=None, output_prefix="compressed"):
         self.content = content or ""
-        self.extra_context = {}
-        self.type = None
         self.output_prefix = output_prefix
-        self.split_content = []
         self.charset = settings.DEFAULT_CHARSET
+        self.precompilers = settings.COMPRESS_PRECOMPILERS
+        self.split_content = []
+        self.extra_context = {}
 
     def split_contents(self):
-        raise NotImplementedError(
-            "split_contents must be defined in a subclass")
+        """
+        To be implemented in a subclass, should return an
+        iterable with three values: kind, value, element
+        """
+        raise NotImplementedError
 
     def get_filename(self, url):
         try:
@@ -68,11 +80,11 @@ class Compressor(object):
     @cached_property
     def hunks(self):
         for kind, value, elem in self.split_contents():
-            attribs = self.parser.elem_attribs(elem)
             if kind == "hunk":
                 # Let's cast BeautifulSoup element to unicode here since
                 # it will try to encode using ascii internally later
-                yield unicode(self.filter(value, "input", elem=elem))
+                yield unicode(
+                    self.filter(value, method="input", elem=elem, kind=kind))
             elif kind == "file":
                 content = ""
                 try:
@@ -84,13 +96,56 @@ class Compressor(object):
                 except IOError, e:
                     raise UncompressableFileError(
                         "IOError while processing '%s': %s" % (value, e))
-                content = self.filter(content, "input", filename=value, elem=elem)
-                yield unicode(content, attribs.get("charset", self.charset))
+                content = self.filter(content,
+                    method="input", filename=value, elem=elem, kind=kind)
+                attribs = self.parser.elem_attribs(elem)
+                charset = attribs.get("charset", self.charset)
+                yield unicode(content, charset)
 
     def concat(self):
         return "\n".join((hunk.encode(self.charset) for hunk in self.hunks))
 
+    def matches_patterns(self, path, patterns=[]):
+        """
+        Return True or False depending on whether the ``path`` matches the
+        list of give the given patterns.
+        """
+        if not isinstance(patterns, (list, tuple)):
+            patterns = (patterns,)
+        for pattern in patterns:
+            if fnmatch.fnmatchcase(path, pattern):
+                return True
+        return False
+
+    def compiler_options(self, kind, filename, elem):
+        if kind == "file" and filename:
+            for patterns, options in self.precompilers.items():
+                if self.matches_patterns(filename, patterns):
+                    yield options
+        elif kind == "hunk" and elem is not None:
+            # get the mimetype of the file and handle "text/<type>" cases
+            attrs = self.parser.elem_attribs(elem)
+            mimetype = attrs.get("type", "").split("/")[-1]
+            for options in self.precompilers.values():
+                if options.get("mimetype", None) == mimetype:
+                    yield options
+
+    def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
+        if not kind:
+            return content
+        for options in self.compiler_options(kind, filename, elem):
+            command = options.get("command")
+            if command is None:
+                continue
+            content = CompilerFilter(content,
+                filter_type=self.type, command=command).output(**kwargs)
+        return content
+
     def filter(self, content, method, **kwargs):
+        # run compiler
+        if method == "input":
+            content = self.precompile(content, **kwargs)
+
         for filter_cls in self.cached_filters:
             filter_func = getattr(
                 filter_cls(content, filter_type=self.type), method)
@@ -103,7 +158,7 @@ class Compressor(object):
 
     @cached_property
     def combined(self):
-        return self.filter(self.concat(), 'output')
+        return self.filter(self.concat(), method="output")
 
     @cached_property
     def hash(self):
@@ -112,7 +167,7 @@ class Compressor(object):
     @cached_property
     def new_filepath(self):
         return os.path.join(settings.COMPRESS_OUTPUT_DIR.strip(os.sep),
-                            self.output_prefix, "%s.%s" % (self.hash, self.type))
+            self.output_prefix, "%s.%s" % (self.hash, self.type))
 
     def save_file(self):
         if self.storage.exists(self.new_filepath):

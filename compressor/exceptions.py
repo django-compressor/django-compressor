@@ -4,17 +4,20 @@ class UncompressableFileError(Exception):
     """
     pass
 
+
 class FilterError(Exception):
     """
     This exception is raised when a filter fails
     """
     pass
 
+
 class ParserError(Exception):
     """
     This exception is raised when the parser fails
     """
     pass
+
 
 class OfflineGenerationError(Exception):
     """

@@ -21,28 +21,30 @@ from compressor.utils import walk, any, import_module
 
 
 class Command(NoArgsCommand):
-    help = "Generate the compressor content outside of the request/response cycle"
+    help = "Compress content outside of the request/response cycle"
     option_list = NoArgsCommand.option_list + (
         make_option('--extension', '-e', action='append', dest='extensions',
             help='The file extension(s) to examine (default: ".html", '
                 'separate multiple extensions with commas, or use -e '
                 'multiple times)'),
-        make_option('-f', '--force', default=False, action='store_true', dest='force',
+        make_option('-f', '--force', default=False, action='store_true',
             help="Force generation of compressor content even if "
-                "COMPRESS setting is not True."),
-        make_option('--follow-links', default=False, action='store_true', dest='follow_links',
+                "COMPRESS setting is not True.", dest='force'),
+        make_option('--follow-links', default=False, action='store_true',
             help="Follow symlinks when traversing the COMPRESS_ROOT "
                 "(which defaults to MEDIA_ROOT). Be aware that using this "
                 "can lead to infinite recursion if a link points to a parent "
-                "directory of itself."),
+                "directory of itself.", dest='follow_links'),
     )
     def get_loaders(self):
         from django.template.loader import template_source_loaders
         if template_source_loaders is None:
             try:
-                from django.template.loader import find_template as finder_func
+                from django.template.loader import (
+                    find_template as finder_func)
             except ImportError:
-                from django.template.loader import find_template_source as finder_func
+                from django.template.loader import (
+                    find_template_source as finder_func)
             try:
                 source, name = finder_func('test')
             except TemplateDoesNotExist:
@@ -71,7 +73,8 @@ class Command(NoArgsCommand):
         for loader in self.get_loaders():
             try:
                 module = import_module(loader.__module__)
-                get_template_sources = getattr(module, 'get_template_sources', None)
+                get_template_sources = getattr(module,
+                    'get_template_sources', None)
                 if get_template_sources is None:
                     get_template_sources = loader.get_template_sources
                 paths.update(list(get_template_sources('')))
@@ -89,7 +92,8 @@ class Command(NoArgsCommand):
             log.write("Considering paths:\n\t" + "\n\t".join(paths) + "\n")
         templates = set()
         for path in paths:
-            for root, dirs, files in walk(path, followlinks=options.get('followlinks', False)):
+            for root, dirs, files in walk(path,
+                    followlinks=options.get('followlinks', False)):
                 templates.update(os.path.join(root, name)
                     for name in files if any(fnmatch(name, "*%s" % glob)
                         for glob in extensions))
@@ -126,7 +130,8 @@ class Command(NoArgsCommand):
                 compressor_nodes.setdefault(template_name, []).extend(nodes)
 
         if not compressor_nodes:
-            raise OfflineGenerationError("No 'compress' template tags found in templates.")
+            raise OfflineGenerationError(
+                "No 'compress' template tags found in templates.")
 
         if verbosity > 0:
             log.write("Found 'compress' tags in:\n\t" +
@@ -175,18 +180,19 @@ class Command(NoArgsCommand):
         for i, ext in enumerate(ext_list):
             if not ext.startswith('.'):
                 ext_list[i] = '.%s' % ext_list[i]
-
-        # we don't want *.py files here because of the way non-*.py files
-        # are handled in make_messages() (they are copied to file.ext.py files to
-        # trick xgettext to parse them as Python files)
-        return set([x for x in ext_list if x != '.py'])
+        return set(ext_list)
 
     def handle_noargs(self, **options):
         if not settings.COMPRESS_ENABLED and not options.get("force"):
-            raise CommandError("Compressor is disabled. Set COMPRESS settting or use --force to override.")
+            raise CommandError(
+                "Compressor is disabled. Set COMPRESS "
+                "settting or use --force to override.")
         if not settings.COMPRESS_OFFLINE:
             if not options.get("force"):
-                raise CommandError("Offline compressiong is disabled. Set COMPRESS_OFFLINE or use the --force to override.")
-            warnings.warn("COMPRESS_OFFLINE is not set. Offline generated "
-                          "cache will not be used.")
+                raise CommandError(
+                    "Offline compressiong is disabled. Set "
+                    "COMPRESS_OFFLINE or use the --force to override.")
+            warnings.warn(
+                "COMPRESS_OFFLINE is not set to True. "
+                "Offline generated cache will not be used.")
         self.compress(sys.stdout, **options)
