@@ -122,7 +122,7 @@ class Compressor(object):
             for patterns, options in self.precompilers.items():
                 if self.matches_patterns(filename, patterns):
                     yield options
-        elif kind == "hunk" and elem:
+        elif kind == "hunk" and elem is not None:
             # get the mimetype of the file and handle "text/<type>" cases
             attrs = self.parser.elem_attribs(elem)
             mimetype = attrs.get("type", "").split("/")[-1:]

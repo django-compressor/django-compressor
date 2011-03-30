@@ -8,7 +8,7 @@ from django.conf import settings
 from compressor.exceptions import FilterError
 
 try:
-    any
+    any = any
 
 except NameError:
 
