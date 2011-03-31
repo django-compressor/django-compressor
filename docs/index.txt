@@ -102,7 +102,6 @@ Which would be rendered something like:
 
     <link rel="stylesheet" href="/static/CACHE/processed/f7c661b7a124.css" type="text/css" charset="utf-8">
     <link rel="stylesheet" href="/static/CACHE/processed/f6c0a1109fbd.css" type="text/css" charset="utf-8">
-    {% endcompress %}
 
 
 Linked files must be accesible via COMPRESS_URL_. If DEBUG is ``True``,
