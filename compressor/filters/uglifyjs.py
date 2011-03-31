@@ -20,7 +20,7 @@ class UglifyJSFilter(FilterBase):
 
         if p.wait() != 0:
             if not err:
-                err = 'Unable to apply Closure Compiler filter'
+                err = 'Unable to apply UglifyJS filter'
             raise FilterError(err)
 
         if self.verbose:
