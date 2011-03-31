@@ -16,19 +16,19 @@ from compressor.utils import get_class, cached_property
 
 
 class StorageMixin(object):
-#    from django import VERSION as DJANGO_VERSION
-#    if DJANGO_VERSION[:2] >= (1, 3):
-#        from django.contrib.staticfiles.finders import find as _django_find
-#        def _find_file_path(self, path):
-#            return self._django_find(path)
-#    else:
-    def _find_file_path(self, path):
-        static_roots = getattr(settings, 'STATIC_ROOTS', []) + [settings.COMPRESS_ROOT]
-        for root in static_roots:
-            filename = os.path.join(root, path)
-            if os.path.exists(filename):
-                return filename
-        return None
+    from django import VERSION as DJANGO_VERSION
+    if DJANGO_VERSION[:2] >= (1, 3):
+        from django.contrib.staticfiles import finders
+        def _find_file_path(self, path):
+            return self.finders.find(path)
+    else:
+        def _find_file_path(self, path):
+            static_roots = getattr(settings, 'STATIC_ROOTS', []) + [settings.COMPRESS_ROOT]
+            for root in static_roots:
+                filename = os.path.join(root, path)
+                if os.path.exists(filename):
+                    return filename
+            return None
     
     def get_filename(self, file, is_url=True):
         if is_url:
