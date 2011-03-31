@@ -16,6 +16,20 @@ from compressor.utils import get_class, cached_property
 
 
 class StorageMixin(object):
+#    from django import VERSION as DJANGO_VERSION
+#    if DJANGO_VERSION[:2] >= (1, 3):
+#        from django.contrib.staticfiles.finders import find as _django_find
+#        def _find_file_path(self, path):
+#            return self._django_find(path)
+#    else:
+    def _find_file_path(self, path):
+        static_roots = getattr(settings, 'STATIC_ROOTS', []) + [settings.COMPRESS_ROOT]
+        for root in static_roots:
+            filename = os.path.join(root, path)
+            if os.path.exists(filename):
+                return filename
+        return None
+    
     def get_filename(self, file, is_url=True):
         if is_url:
             try:
@@ -26,15 +40,12 @@ class StorageMixin(object):
                 raise UncompressableFileError(
                     "'%s' isn't accesible via COMPRESS_URL ('%s') and can't be"
                     " processed" % (file, base_url))
-            basename = file.replace(base_url, "", 1)
+            res = self._find_file_path(file.replace(base_url, "", 1))
         else:
-            basename = file
-        static_roots = getattr(settings, 'STATIC_ROOTS', []) + [settings.COMPRESS_ROOT]
-        for root in static_roots:
-            filename = os.path.join(root, basename)
-            if os.path.exists(filename):
-                return filename
-        raise UncompressableFileError("'%s' does not exist" % file)
+            res = self._find_file_path(file)
+        if res is None:
+            raise UncompressableFileError("'%s' does not exist" % file)
+        return res
 
     @cached_property
     def storage(self):
