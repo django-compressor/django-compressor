@@ -16,20 +16,25 @@ from compressor.utils import get_class, cached_property
 
 
 class StorageMixin(object):
-    def get_filename(self, url):
-        try:
-            base_url = self.storage.base_url
-        except AttributeError:
-            base_url = settings.COMPRESS_URL
-        if not url.startswith(base_url):
-            raise UncompressableFileError(
-                "'%s' isn't accesible via COMPRESS_URL ('%s') and can't be"
-                " processed" % (url, base_url))
-        basename = url.replace(base_url, "", 1)
-        filename = os.path.join(settings.COMPRESS_ROOT, basename)
-        if not os.path.exists(filename):
-            raise UncompressableFileError("'%s' does not exist" % filename)
-        return filename
+    def get_filename(self, file, is_url=True):
+        if is_url:
+            try:
+                base_url = self.storage.base_url
+            except AttributeError:
+                base_url = settings.COMPRESS_URL
+            if not file.startswith(base_url):
+                raise UncompressableFileError(
+                    "'%s' isn't accesible via COMPRESS_URL ('%s') and can't be"
+                    " processed" % (file, base_url))
+            basename = file.replace(base_url, "", 1)
+        else:
+            basename = file
+        static_roots = getattr(settings, 'STATIC_ROOTS', []) + [settings.COMPRESS_ROOT]
+        for root in static_roots:
+            filename = os.path.join(root, basename)
+            if os.path.exists(filename):
+                return filename
+        raise UncompressableFileError("'%s' does not exist" % file)
 
     @cached_property
     def storage(self):
@@ -58,7 +63,7 @@ class PrecompilerMixin(object):
                 if self.matches_patterns(filename, patterns, options):
                     yield options
         elif kind == "hunk" and elem is not None:
-            # get the mimetype of the file and handle "text/<type>" or "<type>" cases
+            # get the mimetype of the hunk and handle "text/<type>" or "<type>" cases
             attrs = self.parser.elem_attribs(elem)
             mimetype = attrs.get("type", "").split("/")[-1]
             for options in self.precompilers.values():
