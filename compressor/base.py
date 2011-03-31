@@ -221,7 +221,7 @@ class Processor(StorageMixin, PrecompilerMixin):
 
     def __init__(self, value, kind, content_type, output_prefix="preprocessed"):
         if kind == "file":
-            path = self.get_filename(value)
+            path = self.get_filename(value, False)
             with open(path) as f:
                 self.content = f.read()
             self.file = path
