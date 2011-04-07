@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
-from compressor.exceptions import UncompressableFileError
+from compressor.exceptions import CompressorError, UncompressableFileError
 from compressor.filters import CompilerFilter
 from compressor.storage import default_storage
 from compressor.utils import get_class, cached_property
@@ -27,6 +27,7 @@ class Compressor(object):
         self.output_prefix = output_prefix
         self.charset = settings.DEFAULT_CHARSET
         self.precompilers = settings.COMPRESS_PRECOMPILERS
+        self.storage = default_storage
         self.split_content = []
         self.extra_context = {}
 
@@ -74,10 +75,6 @@ class Compressor(object):
                                             get_hexdigest(cachestr)[:12])
 
     @cached_property
-    def storage(self):
-        return default_storage
-
-    @cached_property
     def hunks(self):
         for kind, value, elem in self.split_contents():
             if kind == "hunk":
@@ -102,8 +99,9 @@ class Compressor(object):
                 charset = attribs.get("charset", self.charset)
                 yield unicode(content, charset)
 
+    @cached_property
     def concat(self):
-        return "\n".join((hunk.encode(self.charset) for hunk in self.hunks))
+        return '\n'.join((hunk.encode(self.charset) for hunk in self.hunks))
 
     def matches_patterns(self, path, patterns=[]):
         """
@@ -159,37 +157,65 @@ class Compressor(object):
 
     @cached_property
     def combined(self):
-        return self.filter(self.concat(), method="output")
+        return self.filter(self.concat, method="output")
 
-    @cached_property
-    def hash(self):
-        return get_hexdigest(self.concat())[:12]
+    def hash(self, content):
+        return get_hexdigest(content)[:12]
 
-    @cached_property
-    def new_filepath(self):
+    def filepath(self, content):
         return os.path.join(settings.COMPRESS_OUTPUT_DIR.strip(os.sep),
-            self.output_prefix, "%s.%s" % (self.hash, self.type))
+            self.output_prefix, "%s.%s" % (self.hash(content), self.type))
 
-    def save_file(self):
-        if self.storage.exists(self.new_filepath):
-            return False
-        self.storage.save(self.new_filepath, ContentFile(self.combined))
-        return True
-
-    def output(self, forced=False):
-        if not settings.COMPRESS_ENABLED and not forced:
-            return self.content
-        context = {
-            "saved": self.save_file(),
-            "url": self.storage.url(self.new_filepath),
-        }
-        context.update(self.extra_context)
-        return render_to_string(self.template_name, context)
-
-    def output_inline(self):
-        if settings.COMPRESS_ENABLED:
+    def output(self, mode='file', forced=False):
+        """
+        The general output method, override in subclass if you need to do
+        any custom modification. Calls other mode specific methods or simply
+        returns the content directly.
+        """
+        # First check whether we should do the full compression,
+        # including precompilation (or if it's forced)
+        if settings.COMPRESS_ENABLED or forced:
             content = self.combined
+        elif self.precompilers:
+            # or concatting it, if pre-compilation is enabled
+            content = self.concat
         else:
-            content = self.concat()
-        context = dict(content=content, **self.extra_context)
-        return render_to_string(self.template_name_inline, context)
+            # or just doing nothing, when neither
+            # compression nor compilation is enabled
+            return self.content
+        # Then check for the appropriate output method and call it
+        output_func = getattr(self, "output_%s" % mode, None)
+        if callable(output_func):
+            return output_func(mode, content)
+        # Total failure, raise a general exception
+        raise CompressorError(
+            "Couldn't find output method for mode '%s'" % mode)
+
+    def output_file(self, mode, content):
+        """
+        The output method that saves the content to a file and renders
+        the appropriate template with the file's URL.
+        """
+        new_filepath = self.filepath(content)
+        if not self.storage.exists(new_filepath):
+            self.storage.save(new_filepath, ContentFile(content))
+        url = self.storage.url(new_filepath)
+        return self.render_output(mode, {"url": url})
+
+    def output_inline(self, mode, content):
+        """
+        The output method that directly returns the content for inline
+        display.
+        """
+        return self.render_output(mode, {"content": content})
+
+    def render_output(self, mode, context=None):
+        """
+        Renders the compressor output with the appropriate template for
+        the given mode and template context.
+        """
+        if context is None:
+            context = {}
+        context.update(self.extra_context)
+        return render_to_string(
+            "compressor/%s_%s.html" % (self.type, mode), context)

@@ -25,6 +25,7 @@ class CompressorTestCase(TestCase):
 
     def setUp(self):
         settings.COMPRESS_ENABLED = True
+        settings.PRECOMPILERS = {}
         self.css = """
         <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
@@ -71,7 +72,7 @@ class CompressorTestCase(TestCase):
         self.assert_(is_cachekey.match(self.css_node.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.%s\.\w{12}'" % host_name)
 
     def test_css_hash(self):
-        self.assertEqual('f7c661b7a124', self.css_node.hash)
+        self.assertEqual('f7c661b7a124', self.css_node.hash(self.css_node.concat))
 
     def test_css_return_if_on(self):
         output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css">'
@@ -91,7 +92,7 @@ class CompressorTestCase(TestCase):
 
     def test_js_concat(self):
         out = u'obj = {};\nobj.value = "value";'
-        self.assertEqual(out, self.js_node.concat())
+        self.assertEqual(out, self.js_node.concat)
 
     def test_js_output(self):
         out = u'obj={};obj.value="value";'
@@ -384,10 +385,10 @@ class OfflineGenerationTestCase(TestCase):
     def test_offline(self):
         count, result = CompressCommand().compress()
         self.assertEqual(2, count)
-        self.assertEqual(result, [
+        self.assertEqual([
             u'<link rel="stylesheet" href="/media/CACHE/css/a55e1cf95000.css" type="text/css">\n',
             u'<script type="text/javascript" src="/media/CACHE/js/bf53fa5b13e2.js" charset="utf-8"></script>',
-        ])
+        ], result)
 
     def test_offline_with_context(self):
         self._old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
@@ -396,8 +397,8 @@ class OfflineGenerationTestCase(TestCase):
         }
         count, result = CompressCommand().compress()
         self.assertEqual(2, count)
-        self.assertEqual(result, [
+        self.assertEqual([
             u'<link rel="stylesheet" href="/media/CACHE/css/8a2405e029de.css" type="text/css">\n',
             u'<script type="text/javascript" src="/media/CACHE/js/bf53fa5b13e2.js" charset="utf-8"></script>',
-        ])
+        ], result)
         settings.COMPRESS_OFFLINE_CONTEXT = self._old_offline_context

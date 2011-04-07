@@ -51,8 +51,7 @@ class CompressorNode(template.Node):
     def render(self, context, forced=False):
         if (settings.COMPRESS_ENABLED and
                 settings.COMPRESS_OFFLINE) and not forced:
-            key = get_offline_cachekey(self.nodelist)
-            content = cache.get(key)
+            content = cache.get(get_offline_cachekey(self.nodelist))
             if content:
                 return content
         content = self.nodelist.render(context)
@@ -64,9 +63,7 @@ class CompressorNode(template.Node):
         output = self.cache_get(cachekey)
         if output is None or forced:
             try:
-                if self.mode == OUTPUT_INLINE:
-                    return compressor.output_inline()
-                output = compressor.output(forced=forced)
+                output = compressor.output(self.mode, forced=forced)
                 self.cache_set(cachekey, output)
             except:
                 if settings.DEBUG:
