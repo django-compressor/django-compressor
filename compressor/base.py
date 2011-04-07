@@ -26,7 +26,6 @@ class Compressor(object):
         self.content = content or ""
         self.output_prefix = output_prefix
         self.charset = settings.DEFAULT_CHARSET
-        self.precompilers = settings.COMPRESS_PRECOMPILERS
         self.storage = default_storage
         self.split_content = []
         self.extra_context = {}
@@ -78,19 +77,18 @@ class Compressor(object):
             if kind == "hunk":
                 # Let's cast BeautifulSoup element to unicode here since
                 # it will try to encode using ascii internally later
-                yield unicode(
-                    self.filter(value, method="input", elem=elem, kind=kind))
+                yield unicode(self.filter(
+                    value, method="input", elem=elem, kind=kind))
             elif kind == "file":
                 content = ""
+                fd = open(value, 'rb')
                 try:
-                    fd = open(value, 'rb')
-                    try:
-                        content = fd.read()
-                    finally:
-                        fd.close()
+                    content = fd.read()
                 except IOError, e:
                     raise UncompressableFileError(
                         "IOError while processing '%s': %s" % (value, e))
+                finally:
+                    fd.close()
                 content = self.filter(content,
                     method="input", filename=value, elem=elem, kind=kind)
                 attribs = self.parser.elem_attribs(elem)
@@ -101,41 +99,18 @@ class Compressor(object):
     def concat(self):
         return '\n'.join((hunk.encode(self.charset) for hunk in self.hunks))
 
-    def matches_patterns(self, path, patterns=[]):
-        """
-        Return True or False depending on whether the ``path`` matches the
-        list of give the given patterns.
-        """
-        if not isinstance(patterns, (list, tuple)):
-            patterns = (patterns,)
-        for pattern in patterns:
-            if fnmatch.fnmatchcase(path, pattern):
-                return True
-        return False
-
-    def compiler_options(self, kind, filename, elem):
-        if kind == "file" and filename:
-            for patterns, options in self.precompilers.items():
-                if self.matches_patterns(filename, patterns):
-                    yield options
-        elif kind == "hunk" and elem is not None:
-            # get the mimetype of the file and handle "text/<type>" cases
-            attrs = self.parser.elem_attribs(elem)
-            mimetype = attrs.get("type", "").split("/")[-1]
-            for options in self.precompilers.values():
-                if (mimetype and
-                        mimetype == options.get("mimetype", "").split("/")[-1]):
-                    yield options
-
     def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
         if not kind:
             return content
-        for options in self.compiler_options(kind, filename, elem):
-            command = options.get("command")
-            if command is None:
-                continue
-            content = CompilerFilter(content,
-                filter_type=self.type, command=command).output(**kwargs)
+        attrs = self.parser.elem_attribs(elem)
+        mimetype = attrs.get("type", None)
+        if mimetype is not None:
+            for mimetypes, command in settings.COMPRESS_PRECOMPILERS:
+                if not isinstance(mimetypes, (list, tuple)):
+                    mimetypes = (mimetypes,)
+                if mimetype in mimetypes:
+                    content = CompilerFilter(content, filter_type=self.type,
+                                             command=command).output(**kwargs)
         return content
 
     def filter(self, content, method, **kwargs):
@@ -174,7 +149,7 @@ class Compressor(object):
         # including precompilation (or if it's forced)
         if settings.COMPRESS_ENABLED or forced:
             content = self.combined
-        elif self.precompilers:
+        elif settings.COMPRESS_PRECOMPILERS:
             # or concatting it, if pre-compilation is enabled
             content = self.concat
         else:

@@ -288,38 +288,30 @@ A list of filters that will be applied to javascript.
 COMPRESS_PRECOMPILERS
 ^^^^^^^^^^^^^^^^^^^^^
 
-:Default: ``{}``
+:Default: ``()``
 
-A mapping of file pattern(s) to compiler options to be used on the
-matching files. The options dictionary requires two items:
-
-* command
-    The command to call on each of the files. Standard Python string
-    formatting will be provided for the two variables ``%(infile)s`` and
-    ``%(outfile)s`` and will also trigger the actual creation of those
-    temporary files. If not given in the command string, django_compressor
-    will use ``stdin`` and ``stdout`` respectively instead.
+An iterable of two-tuples whose first item is the mimetype of the files or
+hunks you want to compile with the command specified as the second item:
 
 * mimetype
-    The mimetype of the file in case inline code should be compiled
-    (see below).
+    The mimetype of the file or inline code should that should be compiled.
+
+* command
+    The command to call on each of the files. Modern Python string
+    formatting will be provided for the two placeholders ``{infile}`` and
+    ``{outfile}`` whose existence in the command string also triggers the
+    actual creation of those temporary files. If not given in the command
+    string, django_compressor will use ``stdin`` and ``stdout`` respectively
+    instead.
 
 Example::
 
-    COMPRESS_PRECOMPILERS = {
-        "*.coffee": {
-            "command": "coffee --compile --stdio",
-            "mimetype": "text/coffeescript",
-        },
-        "*.less": {
-            "command": "lessc %(infile)s %(outfile)s",
-            "mimetype": "text/less",
-        },
-        ("*.sass", "*.scss"): {
-            "command": "sass %(infile)s %(outfile)s",
-            "mimetype": "sass",
-        },
-    }
+    COMPRESS_PRECOMPILERS = (
+        ('text/coffeescript', 'coffee --compile --stdio'),
+        ('text/less', 'lessc {infile} {outfile}'),
+        ('text/x-sass', 'sass {infile} {outfile}'),
+        ('text/x-scss', 'sass --scss {infile} {outfile}'),
+    )
 
 With that setting (and CoffeeScript_ installed), you could add the following
 code to your templates:
@@ -347,7 +339,7 @@ The same works for less_, too:
     {% load compress %}
 
     {% compress css %}
-    <link rel="stylesheet" href="/static/css/styles.less" charset="utf-8">
+    <link type="text/less" rel="stylesheet" href="/static/css/styles.less" charset="utf-8">
     <style type="text/less">
     @color: #4D926F;
 
@@ -524,12 +516,10 @@ This section lists features and settings that are deprecated or removed
 in newer versions of django_compressor.
 
 * ``COMPRESS_LESSC_BINARY``
-    Superseded by the COMPRESS_PRECOMPILERS_ setting. Just add the following
-    to your settings::
+    Superseded by the COMPRESS_PRECOMPILERS_ setting. Just make sure to
+    use the correct mimetype when linking to less files or adding inline
+    code and add the following to your settings::
 
-        COMPRESS_PRECOMPILERS = {
-            "*.less": {
-                "command": "lessc %(infile)s %(outfile)s",
-                "mimetype": "text/less",
-            },
-        }
+        COMPRESS_PRECOMPILERS = (
+            ('text/less', 'lessc {infile} {outfile}'),
+        )

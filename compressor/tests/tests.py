@@ -101,10 +101,13 @@ class CompressorTestCase(TestCase):
     def test_js_return_if_off(self):
         try:
             enabled = settings.COMPRESS_ENABLED
+            precompilers = settings.COMPRESS_PRECOMPILERS
             settings.COMPRESS_ENABLED = False
+            settings.COMPRESS_PRECOMPILERS = {}
             self.assertEqual(self.js, self.js_node.output())
         finally:
             settings.COMPRESS_ENABLED = enabled
+            settings.COMPRESS_PRECOMPILERS = precompilers
 
     def test_js_return_if_on(self):
         output = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'

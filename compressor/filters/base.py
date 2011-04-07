@@ -5,7 +5,7 @@ import tempfile
 
 from compressor.conf import settings
 from compressor.exceptions import FilterError
-from compressor.utils import cmd_split
+from compressor.utils import cmd_split, FormattableString
 
 logger = logging.getLogger("compressor.filters")
 
@@ -38,26 +38,28 @@ class CompilerFilter(FilterBase):
             self.command = command
         if self.command is None:
             raise FilterError("Required command attribute not set")
-        self.options = {}
         self.stdout = subprocess.PIPE
         self.stdin = subprocess.PIPE
         self.stderr = subprocess.PIPE
 
     def output(self, **kwargs):
-        infile = outfile = ""
+        infile = None
+        outfile = None
+        options = {}
         try:
-            if "%(infile)s" in self.command:
+            if "{infile}" in self.command:
                 infile = tempfile.NamedTemporaryFile(mode='w')
                 infile.write(self.content)
                 infile.flush()
-                self.options["infile"] = infile.name
-            if "%(outfile)s" in self.command:
+                options["infile"] = infile.name
+            if "{outfile}" in self.command:
                 ext = ".%s" % self.type and self.type or ""
                 outfile = tempfile.NamedTemporaryFile(mode='w', suffix=ext)
-                self.options["outfile"] = outfile.name
-            proc = subprocess.Popen(cmd_split(self.command % self.options),
+                options["outfile"] = outfile.name
+            cmd = FormattableString(self.command).format(**options)
+            proc = subprocess.Popen(cmd_split(cmd),
                 stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
-            if infile:
+            if infile is not None:
                 filtered, err = proc.communicate()
             else:
                 filtered, err = proc.communicate(self.content)
@@ -74,7 +76,7 @@ class CompilerFilter(FilterBase):
             raise FilterError(err)
         if self.verbose:
             self.logger.debug(err)
-        if outfile:
+        if outfile is not None:
             try:
                 outfile_obj = open(outfile.name)
                 filtered = outfile_obj.read()

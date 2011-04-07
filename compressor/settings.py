@@ -22,20 +22,12 @@ class CompressorSettings(AppSettings):
 
     CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
     JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
-    PRECOMPILERS = {
-        # "*.coffee": {
-        #     "command": "coffee --compile --stdio",
-        #     "mimetype": "text/coffeescript",
-        # },
-        # "*.less": {
-        #     "command": "lessc %(infile)s %(outfile)s",
-        #     "mimetype": "text/less",
-        # },
-        # ("*.sass", "*.scss"): {
-        #     "command": "sass %(infile)s %(outfile)s",
-        #     "mimetype": "sass",
-        # },
-    }
+    PRECOMPILERS = (
+        # ('text/coffeescript', 'coffee --compile --stdio'),
+        # ('text/less', 'lessc {infile} {outfile}'),
+        # ('text/x-sass', 'sass {infile} {outfile}'),
+        # ('text/x-scss', 'sass --scss {infile} {outfile}'),
+    )
     CLOSURE_COMPILER_BINARY = 'java -jar compiler.jar'
     CLOSURE_COMPILER_ARGUMENTS = ''
     CSSTIDY_BINARY = 'csstidy'
@@ -124,15 +116,7 @@ class CompressorSettings(AppSettings):
         return value
 
     def configure_precompilers(self, value):
-        for patterns, options in value.items():
-            if options.get("command", None) is None:
-                raise ImproperlyConfigured("Please specify a command "
-                    "for compiler with the pattern %r." % patterns)
-            mimetype = options.get("mimetype", None)
-            if mimetype is None:
-                raise ImproperlyConfigured("Please specify a mimetype "
-                    "for compiler with the pattern %r." % patterns)
-            if mimetype.startswith("text/"):
-                options["mimetype"] = mimetype[5:]
-            value[patterns].update(options)
+        if not isinstance(value, (list, tuple)):
+            raise ImproperlyConfigured("The COMPRESS_PRECOMPILERS setting "
+                "must be a list or tuple. Check for missing commas.")
         return value
