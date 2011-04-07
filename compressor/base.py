@@ -63,16 +63,14 @@ class Compressor(object):
 
     @cached_property
     def mtimes(self):
-        for kind, value, elem in self.split_contents():
-            if kind == 'file':
-                yield str(get_mtime(value))
+        return [str(get_mtime(value))
+                for kind, value, _ in self.split_contents() if kind == 'file']
 
     @cached_property
     def cachekey(self):
-        cachestr = "".join(
-            chain([self.content], self.mtimes)).encode(self.charset)
-        return "django_compressor.%s.%s" % (socket.gethostname(),
-                                            get_hexdigest(cachestr)[:12])
+        key = get_hexdigest(''.join(
+            [self.content] + self.mtimes).encode(self.charset), 12)
+        return "django_compressor.%s.%s" % (socket.gethostname(), key)
 
     @cached_property
     def hunks(self):
