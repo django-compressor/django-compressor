@@ -1,1 +1,0 @@
-obj={};obj.value="value";
