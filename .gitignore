@@ -1,5 +1,6 @@
 build
-*CACHE*
+compressor/tests/media/CACHE
+compressor/tests/media/custom
 dist
 MANIFEST
 *.pyc
