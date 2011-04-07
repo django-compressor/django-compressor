@@ -2,12 +2,13 @@ from compressor.conf import settings
 from compressor.base import Compressor
 from compressor.exceptions import UncompressableFileError
 
+
 class CssCompressor(Compressor):
+    template_name = "compressor/css.html"
+    template_name_inline = "compressor/css_inline.html"
 
     def __init__(self, content=None, output_prefix="css"):
         super(CssCompressor, self).__init__(content, output_prefix)
-        self.template_name = "compressor/css.html"
-        self.template_name_inline = "compressor/css_inline.html"
         self.filters = list(settings.COMPRESS_CSS_FILTERS)
         self.type = 'css'
 
@@ -21,8 +22,8 @@ class CssCompressor(Compressor):
             elem_attribs = self.parser.elem_attribs(elem)
             if elem_name == 'link' and elem_attribs['rel'] == 'stylesheet':
                 try:
-                    content = self.parser.elem_content(elem)
-                    data = ('file', self.get_filename(elem_attribs['href']), elem)
+                    data = (
+                        'file', self.get_filename(elem_attribs['href']), elem)
                 except UncompressableFileError:
                     if settings.DEBUG:
                         raise
@@ -41,14 +42,14 @@ class CssCompressor(Compressor):
                     self.media_nodes.append((media, node))
         return self.split_content
 
-    def output(self, forced=False):
+    def output(self, *args, **kwargs):
         self.split_contents()
         if not hasattr(self, 'media_nodes'):
-            return super(CssCompressor, self).output(forced=forced)
-        if not settings.COMPRESS_ENABLED and not forced:
-            return self.content
-        ret = []
-        for media, subnode in self.media_nodes:
-            subnode.extra_context.update({'media': media})
-            ret.append(subnode.output(forced=forced))
-        return "".join(ret)
+            return super(CssCompressor, self).output(*args, **kwargs)
+        if settings.COMPRESS_ENABLED or kwargs.get('forced', False):
+            ret = []
+            for media, subnode in self.media_nodes:
+                subnode.extra_context.update({'media': media})
+                ret.append(subnode.output(*args, **kwargs))
+            return "".join(ret)
+        return self.content

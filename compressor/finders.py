@@ -13,6 +13,7 @@ else:
                                "standalone version django-staticfiles needs "
                                "to be installed.")
 
+
 class CompressorFinder(BaseStorageFinder):
     """
     A staticfiles finder that looks in COMPRESS_ROOT

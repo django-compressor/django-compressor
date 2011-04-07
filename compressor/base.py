@@ -1,29 +1,41 @@
+import fnmatch
 import os
 import socket
 from itertools import chain
 
-from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
+from django.core.exceptions import ImproperlyConfigured
+from django.template.loader import render_to_string
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
-from compressor.exceptions import UncompressableFileError
+from compressor.exceptions import CompressorError, UncompressableFileError
+from compressor.filters import CompilerFilter
 from compressor.storage import default_storage
 from compressor.utils import get_class, cached_property
 
+
 class Compressor(object):
+    """
+    Base compressor object to be subclassed for content type
+    depending implementations details.
+    """
+    type = None
 
     def __init__(self, content=None, output_prefix="compressed"):
         self.content = content or ""
-        self.extra_context = {}
-        self.type = None
         self.output_prefix = output_prefix
-        self.split_content = []
         self.charset = settings.DEFAULT_CHARSET
+        self.storage = default_storage
+        self.split_content = []
+        self.extra_context = {}
 
     def split_contents(self):
-        raise NotImplementedError(
-            "split_contents must be defined in a subclass")
+        """
+        To be implemented in a subclass, should return an
+        iterable with three values: kind, value, element
+        """
+        raise NotImplementedError
 
     def get_filename(self, url):
         try:
@@ -50,47 +62,62 @@ class Compressor(object):
 
     @cached_property
     def mtimes(self):
-        for kind, value, elem in self.split_contents():
-            if kind == 'file':
-                yield str(get_mtime(value))
+        return [str(get_mtime(value))
+                for kind, value, _ in self.split_contents() if kind == 'file']
 
     @cached_property
     def cachekey(self):
-        cachestr = "".join(
-            chain([self.content], self.mtimes)).encode(self.charset)
-        return "django_compressor.%s.%s" % (socket.gethostname(),
-                                            get_hexdigest(cachestr)[:12])
-
-    @cached_property
-    def storage(self):
-        return default_storage
+        key = get_hexdigest(''.join(
+            [self.content] + self.mtimes).encode(self.charset), 12)
+        return "django_compressor.%s.%s" % (socket.gethostname(), key)
 
     @cached_property
     def hunks(self):
         for kind, value, elem in self.split_contents():
-            attribs = self.parser.elem_attribs(elem)
             if kind == "hunk":
                 # Let's cast BeautifulSoup element to unicode here since
                 # it will try to encode using ascii internally later
-                yield unicode(self.filter(value, "input", elem=elem))
+                yield unicode(self.filter(
+                    value, method="input", elem=elem, kind=kind))
             elif kind == "file":
                 content = ""
+                fd = open(value, 'rb')
                 try:
-                    fd = open(value, 'rb')
-                    try:
-                        content = fd.read()
-                    finally:
-                        fd.close()
+                    content = fd.read()
                 except IOError, e:
                     raise UncompressableFileError(
                         "IOError while processing '%s': %s" % (value, e))
-                content = self.filter(content, "input", filename=value, elem=elem)
-                yield unicode(content, attribs.get("charset", self.charset))
+                finally:
+                    fd.close()
+                content = self.filter(content,
+                    method="input", filename=value, elem=elem, kind=kind)
+                attribs = self.parser.elem_attribs(elem)
+                charset = attribs.get("charset", self.charset)
+                yield unicode(content, charset)
 
+    @cached_property
     def concat(self):
-        return "\n".join((hunk.encode(self.charset) for hunk in self.hunks))
+        return '\n'.join((hunk.encode(self.charset) for hunk in self.hunks))
+
+    def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
+        if not kind:
+            return content
+        attrs = self.parser.elem_attribs(elem)
+        mimetype = attrs.get("type", None)
+        if mimetype is not None:
+            for mimetypes, command in settings.COMPRESS_PRECOMPILERS:
+                if not isinstance(mimetypes, (list, tuple)):
+                    mimetypes = (mimetypes,)
+                if mimetype in mimetypes:
+                    content = CompilerFilter(content, filter_type=self.type,
+                                             command=command).output(**kwargs)
+        return content
 
     def filter(self, content, method, **kwargs):
+        # run compiler
+        if method == "input":
+            content = self.precompile(content, **kwargs)
+
         for filter_cls in self.cached_filters:
             filter_func = getattr(
                 filter_cls(content, filter_type=self.type), method)
@@ -103,37 +130,65 @@ class Compressor(object):
 
     @cached_property
     def combined(self):
-        return self.filter(self.concat(), 'output')
+        return self.filter(self.concat, method="output")
 
-    @cached_property
-    def hash(self):
-        return get_hexdigest(self.combined)[:12]
+    def hash(self, content):
+        return get_hexdigest(content)[:12]
 
-    @cached_property
-    def new_filepath(self):
+    def filepath(self, content):
         return os.path.join(settings.COMPRESS_OUTPUT_DIR.strip(os.sep),
-                            self.output_prefix, "%s.%s" % (self.hash, self.type))
+            self.output_prefix, "%s.%s" % (self.hash(content), self.type))
 
-    def save_file(self):
-        if self.storage.exists(self.new_filepath):
-            return False
-        self.storage.save(self.new_filepath, ContentFile(self.combined))
-        return True
-
-    def output(self, forced=False):
-        if not settings.COMPRESS_ENABLED and not forced:
-            return self.content
-        context = {
-            "saved": self.save_file(),
-            "url": self.storage.url(self.new_filepath),
-        }
-        context.update(self.extra_context)
-        return render_to_string(self.template_name, context)
-
-    def output_inline(self):
-        if settings.COMPRESS_ENABLED:
+    def output(self, mode='file', forced=False):
+        """
+        The general output method, override in subclass if you need to do
+        any custom modification. Calls other mode specific methods or simply
+        returns the content directly.
+        """
+        # First check whether we should do the full compression,
+        # including precompilation (or if it's forced)
+        if settings.COMPRESS_ENABLED or forced:
             content = self.combined
+        elif settings.COMPRESS_PRECOMPILERS:
+            # or concatting it, if pre-compilation is enabled
+            content = self.concat
         else:
-            content = self.concat()
-        context = dict(content=content, **self.extra_context)
-        return render_to_string(self.template_name_inline, context)
+            # or just doing nothing, when neither
+            # compression nor compilation is enabled
+            return self.content
+        # Then check for the appropriate output method and call it
+        output_func = getattr(self, "output_%s" % mode, None)
+        if callable(output_func):
+            return output_func(mode, content)
+        # Total failure, raise a general exception
+        raise CompressorError(
+            "Couldn't find output method for mode '%s'" % mode)
+
+    def output_file(self, mode, content):
+        """
+        The output method that saves the content to a file and renders
+        the appropriate template with the file's URL.
+        """
+        new_filepath = self.filepath(content)
+        if not self.storage.exists(new_filepath):
+            self.storage.save(new_filepath, ContentFile(content))
+        url = self.storage.url(new_filepath)
+        return self.render_output(mode, {"url": url})
+
+    def output_inline(self, mode, content):
+        """
+        The output method that directly returns the content for inline
+        display.
+        """
+        return self.render_output(mode, {"content": content})
+
+    def render_output(self, mode, context=None):
+        """
+        Renders the compressor output with the appropriate template for
+        the given mode and template context.
+        """
+        if context is None:
+            context = {}
+        context.update(self.extra_context)
+        return render_to_string(
+            "compressor/%s_%s.html" % (self.type, mode), context)

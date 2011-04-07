@@ -1,5 +1,3 @@
-import os
-
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -24,29 +22,34 @@ class CompressorSettings(AppSettings):
 
     CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
     JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
-
-    LESSC_BINARY = LESSC_BINARY = 'lessc'
+    PRECOMPILERS = (
+        # ('text/coffeescript', 'coffee --compile --stdio'),
+        # ('text/less', 'lessc {infile} {outfile}'),
+        # ('text/x-sass', 'sass {infile} {outfile}'),
+        # ('text/x-scss', 'sass --scss {infile} {outfile}'),
+    )
     CLOSURE_COMPILER_BINARY = 'java -jar compiler.jar'
     CLOSURE_COMPILER_ARGUMENTS = ''
     CSSTIDY_BINARY = 'csstidy'
     CSSTIDY_ARGUMENTS = '--template=highest'
     YUI_BINARY = 'java -jar yuicompressor.jar'
     YUI_CSS_ARGUMENTS = ''
-    YUI_JS_ARGUMENTS = 'COMPRESS_YUI_JS_ARGUMENTS'
+    YUI_JS_ARGUMENTS = ''
     DATA_URI_MIN_SIZE = 1024
+
     # the cache backend to use
     CACHE_BACKEND = None
     # rebuilds the cache every 30 days if nothing has changed.
-    REBUILD_TIMEOUT = 60 * 60 * 24 * 30 # 30 days
+    REBUILD_TIMEOUT = 60 * 60 * 24 * 30  # 30 days
     # the upper bound on how long any compression should take to be generated
     # (used against dog piling, should be a lot smaller than REBUILD_TIMEOUT
-    MINT_DELAY = 30 # seconds
+    MINT_DELAY = 30  # seconds
     # check for file changes only after a delay
-    MTIME_DELAY = 10 # seconds
-    # enables the offline cache -- a cache that is filled by the compress management command
+    MTIME_DELAY = 10  # seconds
+    # enables the offline cache -- also filled by the compress command
     OFFLINE = False
     # invalidates the offline cache after one year
-    OFFLINE_TIMEOUT = 60 * 60 * 24 * 365 # 1 year
+    OFFLINE_TIMEOUT = 60 * 60 * 24 * 365  # 1 year
     # The context to be used when compressing the files "offline"
     OFFLINE_CONTEXT = {}
 
@@ -59,7 +62,8 @@ class CompressorSettings(AppSettings):
             if not value:
                 value = settings.MEDIA_ROOT
         if not value:
-            raise ImproperlyConfigured("The COMPRESS_ROOT setting must be set.")
+            raise ImproperlyConfigured(
+                "The COMPRESS_ROOT setting must be set.")
         # In case staticfiles is used, make sure the FileSystemFinder is
         # installed, and if it is, check if COMPRESS_ROOT is listed in
         # STATICFILES_DIRS to allow finding compressed files
@@ -78,14 +82,14 @@ class CompressorSettings(AppSettings):
         return value
 
     def configure_url(self, value):
-        # Falls back to the 1.3 STATIC_URL setting by default or falls back to MEDIA_URL
+        # Uses Django 1.3's STATIC_URL by default or falls back to MEDIA_URL
         if value is None:
-            value = getattr(settings, 'STATIC_URL', None)
+            value = getattr(settings, "STATIC_URL", None)
             if not value:
                 value = settings.MEDIA_URL
-        if not value.endswith('/'):
-            raise ImproperlyConfigured('The URL settings (e.g. COMPRESS_URL) '
-                                       'must have a trailing slash.')
+        if not value.endswith("/"):
+            raise ImproperlyConfigured("The URL settings (e.g. COMPRESS_URL) "
+                                       "must have a trailing slash.")
         return value
 
     def configure_cache_backend(self, value):
@@ -104,9 +108,15 @@ class CompressorSettings(AppSettings):
     def configure_offline_context(self, value):
         if not value:
             value = {
-                'MEDIA_URL': settings.MEDIA_URL,
+                "MEDIA_URL": settings.MEDIA_URL,
             }
             # Adds the 1.3 STATIC_URL setting to the context if available
-            if getattr(settings, 'STATIC_URL', None):
-                value['STATIC_URL'] = settings.STATIC_URL
+            if getattr(settings, "STATIC_URL", None):
+                value["STATIC_URL"] = settings.STATIC_URL
+        return value
+
+    def configure_precompilers(self, value):
+        if not isinstance(value, (list, tuple)):
+            raise ImproperlyConfigured("The COMPRESS_PRECOMPILERS setting "
+                "must be a list or tuple. Check for missing commas.")
         return value

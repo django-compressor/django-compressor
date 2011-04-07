@@ -1,8 +1,15 @@
+class CompressorError(Exception):
+    """
+    A general error of the compressor
+    """
+    pass
+
 class UncompressableFileError(Exception):
     """
     This exception is raised when a file cannot be compressed
     """
     pass
+
 
 class FilterError(Exception):
     """
@@ -10,11 +17,13 @@ class FilterError(Exception):
     """
     pass
 
+
 class ParserError(Exception):
     """
     This exception is raised when the parser fails
     """
     pass
+
 
 class OfflineGenerationError(Exception):
     """

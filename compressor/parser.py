@@ -2,8 +2,11 @@ from django.utils.encoding import smart_unicode
 
 from compressor.exceptions import ParserError
 
-class ParserBase(object):
 
+class ParserBase(object):
+    """
+    Base parser to be subclassed when creating an own parser.
+    """
     def __init__(self, content):
         self.content = content
 
@@ -43,6 +46,7 @@ class ParserBase(object):
         """
         raise NotImplementedError
 
+
 class BeautifulSoupParser(ParserBase):
     _soup = None
 
@@ -57,7 +61,7 @@ class BeautifulSoupParser(ParserBase):
         return self._soup
 
     def css_elems(self):
-        return self.soup.findAll({'link' : True, 'style' : True})
+        return self.soup.findAll({'link': True, 'style': True})
 
     def js_elems(self):
         return self.soup.findAll('script')
@@ -73,6 +77,7 @@ class BeautifulSoupParser(ParserBase):
 
     def elem_str(self, elem):
         return smart_unicode(elem)
+
 
 class LxmlParser(ParserBase):
     _tree = None
@@ -110,4 +115,5 @@ class LxmlParser(ParserBase):
 
     def elem_str(self, elem):
         from lxml import etree
-        return smart_unicode(etree.tostring(elem, method='html', encoding=unicode))
+        return smart_unicode(
+            etree.tostring(elem, method='html', encoding=unicode))

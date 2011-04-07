@@ -1,5 +1,7 @@
 build
-*CACHE*
+compressor/tests/media/CACHE
+compressor/tests/media/custom
+compressor/tests/media/js/3f33b9146e12.js
 dist
 MANIFEST
 *.pyc
