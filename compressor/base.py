@@ -29,6 +29,7 @@ class Compressor(object):
         self.storage = default_storage
         self.split_content = []
         self.extra_context = {}
+        self.all_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
 
     def split_contents(self):
         """
@@ -105,12 +106,15 @@ class Compressor(object):
         attrs = self.parser.elem_attribs(elem)
         mimetype = attrs.get("type", None)
         if mimetype is not None:
-            for mimetypes, command in settings.COMPRESS_PRECOMPILERS:
-                if not isinstance(mimetypes, (list, tuple)):
-                    mimetypes = (mimetypes,)
-                if mimetype in mimetypes:
-                    content = CompilerFilter(content, filter_type=self.type,
-                                             command=command).output(**kwargs)
+            command = self.all_mimetypes.get(mimetype)
+            if command is None:
+                if mimetype not in ("text/css", "text/javascript"):
+                    raise CompressorError(
+                        "Couldn't find any configured precompiler "
+                        "for mimetype '%s'." % mimetype)
+            else:
+                content = CompilerFilter(content, filter_type=self.type,
+                                         command=command).output(**kwargs)
         return content
 
     def filter(self, content, method, **kwargs):
