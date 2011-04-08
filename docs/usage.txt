@@ -1,0 +1,87 @@
+Usage
+=====
+
+.. code-block:: django
+
+    {% load compress %}
+    {% compress <js/css> %}
+    <html of inline or linked JS/CSS>
+    {% endcompress %}
+
+Examples
+--------
+
+.. code-block:: django
+
+    {% load compress %}
+
+    {% compress css %}
+    <link rel="stylesheet" href="/static/css/one.css" type="text/css" charset="utf-8">
+    <style type="text/css">p { border:5px solid green;}</style>
+    <link rel="stylesheet" href="/static/css/two.css" type="text/css" charset="utf-8">
+    {% endcompress %}
+
+Which would be rendered something like:
+
+.. code-block:: django
+
+    <link rel="stylesheet" href="/static/CACHE/css/f7c661b7a124.css" type="text/css" charset="utf-8">
+
+or:
+
+.. code-block:: django
+
+    {% load compress %}
+
+    {% compress js %}
+    <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+    {% endcompress %}
+
+Which would be rendered something like:
+
+.. code-block:: django
+
+    <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
+
+Linked files must be accesible via :ref:`COMPRESS_URL <compress_url>`.
+If DEBUG is ``True``, off-site files will throw exceptions. If DEBUG is
+``False`` they will be silently stripped.
+
+If the :ref:`COMPRESS <compress>` setting is ``False`` (defaults to the
+opposite of DEBUG) the ``compress`` template tag simply returns exactly
+what it was given, to ease development.
+
+.. warning::
+
+    For production sites it is **strongly recommended** to use a real cache
+    backend such as memcached_ to speed up the checks of compressed files.
+    Make sure you set your Django cache backend appropriately (also see
+    :ref:`COMPRESS_CACHE_BACKEND <compress_cache_backend>` and
+    Django's `caching documentation`_).
+
+.. _memcached: http://memcached.org/
+.. _caching documentation: http://docs.djangoproject.com/en/1.2/topics/cache/#memcached
+
+CSS Notes
+---------
+
+All relative ``url()`` bits specified in linked CSS files are automatically
+converted to absolute URLs while being processed. Any local absolute URLs (those
+starting with a ``'/'``) are left alone.
+
+Stylesheets that are ``@import``'d are not compressed into the main file.
+They are left alone.
+
+If the media attribute is set on <style> and <link> elements, a separate
+compressed file is created and linked for each media value you specified.
+This allows the media attribute to remain on the generated link element,
+instead of wrapping your CSS with @media blocks (which can break your own
+@media queries or @font-face declarations). It also allows browsers to avoid
+downloading CSS for irrelevant media types.
+
+Recommendations
+---------------
+
+* Use only relative or full domain absolute URLs in your CSS files.
+* Avoid @import! Simply list all your CSS files in the HTML, they'll be combined anyway.
