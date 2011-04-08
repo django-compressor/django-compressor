@@ -156,6 +156,9 @@ class Compressor(object):
             # or just doing nothing, when neither
             # compression nor compilation is enabled
             return self.content
+        # Shortcurcuit in case the content is empty.
+        if not content:
+            return ''
         # Then check for the appropriate output method and call it
         output_func = getattr(self, "output_%s" % mode, None)
         if callable(output_func):
