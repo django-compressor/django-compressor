@@ -1,0 +1,47 @@
+Behind the scenes
+=================
+
+This document assumes you already have an up and running instance of
+Django Compressor, and that you understand how to use it in your templates.
+The goal is to explain what the main template tag, {% compress %}, does
+behind the scenes, to help you debug performance problems for instance.
+
+First step: Offline cache
+-------------------------
+
+The first thing {% compress %} tries to do is get the offline cache for its
+nodelist if offline cache is activated. It doesn't parse, doesn't check the
+modified times of the files, doesn't even know which files are concerned 
+actually, since it doesn't look inside the nodelist of the template block
+enclosed by the ``compress`` template tag. The cache should return the HTML
+containing the element code for the combined file or piece of code (which,
+if the cache key exists, is supposed to already exist on disk/custom storage).
+
+Everything stops here if the cache entry exists.
+
+Second step: parsing and file list
+----------------------------------
+
+A compressor instance is created, which in turns instanciates the HTML parser.
+The parser is used to determine a file or code hunk list. Each file mtime is
+checked, first in cache and then on disk/storage, and this is used to
+determine an unique cache key.
+
+Third step: Checking the "main" cache
+-------------------------------------
+
+Compressor checks if it can get some info about the combined file/hunks
+corresponding to its instance, using the cache key obtained in the previous
+step. The cache content here will actually be the HTML containing the final
+element code, just like in the offline step before. 
+
+Everything stops here if the cache entry exists.
+
+Fourth step: Generating the combined file if needed
+---------------------------------------------------
+
+The file is generated if necessary. All precompilers are called and all
+filters are executed, and a hash is determined from the contents. This in
+turns helps determine the file name, which is only saved if it didn't exist
+already. Then the HTML output is returned (and also saved in the cache).
+And that's it!

@@ -55,9 +55,6 @@ class CompressorNode(template.Node):
             if content:
                 return content
         content = self.nodelist.render(context)
-        if (not settings.COMPRESS_ENABLED or
-                not len(content.strip())) and not forced:
-            return content
         compressor = self.compressor_cls(content)
         cachekey = self.cache_key(compressor)
         output = self.cache_get(cachekey)

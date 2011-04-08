@@ -38,6 +38,7 @@ class CompilerFilter(FilterBase):
             self.command = command
         if self.command is None:
             raise FilterError("Required command attribute not set")
+        self.options = {}
         self.stdout = subprocess.PIPE
         self.stdin = subprocess.PIPE
         self.stderr = subprocess.PIPE
@@ -45,18 +46,17 @@ class CompilerFilter(FilterBase):
     def output(self, **kwargs):
         infile = None
         outfile = None
-        options = {}
         try:
             if "{infile}" in self.command:
                 infile = tempfile.NamedTemporaryFile(mode='w')
                 infile.write(self.content)
                 infile.flush()
-                options["infile"] = infile.name
+                self.options["infile"] = infile.name
             if "{outfile}" in self.command:
                 ext = ".%s" % self.type and self.type or ""
                 outfile = tempfile.NamedTemporaryFile(mode='w', suffix=ext)
-                options["outfile"] = outfile.name
-            cmd = FormattableString(self.command).format(**options)
+                self.options["outfile"] = outfile.name
+            cmd = FormattableString(self.command).format(**self.options)
             proc = subprocess.Popen(cmd_split(cmd),
                 stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
             if infile is not None:

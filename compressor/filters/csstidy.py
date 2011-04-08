@@ -3,7 +3,7 @@ from compressor.filters import CompilerFilter
 
 
 class CSSTidyFilter(CompilerFilter):
-    command = "%(binary)s %(infile)s %(args)s %(outfile)s"
+    command = "{binary} {infile} {args} {outfile}"
     options = {
         "binary": settings.COMPRESS_CSSTIDY_BINARY,
         "args": settings.COMPRESS_CSSTIDY_ARGUMENTS,
