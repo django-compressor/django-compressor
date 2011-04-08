@@ -48,6 +48,8 @@ class Compressor(object):
                 "'%s' isn't accesible via COMPRESS_URL ('%s') and can't be"
                 " compressed" % (url, base_url))
         basename = url.replace(base_url, "", 1)
+        # drop the querystring, which is used for non-compressed cache-busting.
+        basename = basename.split("?", 1)[0]
         filename = os.path.join(settings.COMPRESS_ROOT, basename)
         if not os.path.exists(filename):
             raise UncompressableFileError("'%s' does not exist" % filename)
