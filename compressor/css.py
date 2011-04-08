@@ -22,8 +22,8 @@ class CssCompressor(Compressor):
             elem_attribs = self.parser.elem_attribs(elem)
             if elem_name == 'link' and elem_attribs['rel'] == 'stylesheet':
                 try:
-                    data = (
-                        'file', self.get_filename(elem_attribs['href']), elem)
+                    filename = self.get_filename(elem_attribs['href'])
+                    data = ('file', filename, elem)
                 except UncompressableFileError:
                     if settings.DEBUG:
                         raise
@@ -43,13 +43,15 @@ class CssCompressor(Compressor):
         return self.split_content
 
     def output(self, *args, **kwargs):
+        # Populate self.split_content
         self.split_contents()
         if not hasattr(self, 'media_nodes'):
             return super(CssCompressor, self).output(*args, **kwargs)
-        if settings.COMPRESS_ENABLED or kwargs.get('forced', False):
+        if (settings.COMPRESS_ENABLED or settings.COMPRESS_PRECOMPILERS or
+                kwargs.get('forced', False)):
             ret = []
             for media, subnode in self.media_nodes:
                 subnode.extra_context.update({'media': media})
                 ret.append(subnode.output(*args, **kwargs))
-            return "".join(ret)
+            return ''.join(ret)
         return self.content
