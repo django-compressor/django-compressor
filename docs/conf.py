@@ -40,8 +40,8 @@ source_suffix = '.txt'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Django compressor'
-copyright = u'2011, Django compressor authors'
+project = u'Django Compressor'
+copyright = u'2011, Django Compressor authors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -178,8 +178,8 @@ htmlhelp_basename = 'django-compressordoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'django-compressor.tex', u'Django compressor Documentation',
-   u'Django compressor authors', 'manual'),
+  ('index', 'django-compressor.tex', u'Django Compressor Documentation',
+   u'Django Compressor authors', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -211,6 +211,6 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'django-compressor', u'Django compressor Documentation',
-     [u'Django compressor authors'], 1)
+    ('index', 'django-compressor', u'Django Compressor Documentation',
+     [u'Django Compressor authors'], 1)
 ]

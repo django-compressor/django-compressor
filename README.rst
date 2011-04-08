@@ -1,7 +1,7 @@
-Django compressor
-==================
+Django Compressor
+=================
 
-Compresses linked and inline javascript or CSS into a single cached file.
+Compresses linked and inline JavaCcript or CSS into a single cached file.
 
 The main website for django-compressor is
 `github.com/jezdez/django_compressor`_ where you can also file tickets.
