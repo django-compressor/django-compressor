@@ -144,7 +144,11 @@ class Command(NoArgsCommand):
         for nodes in compressor_nodes.values():
             for node in nodes:
                 key = get_offline_cachekey(node.nodelist)
-                result = node.render(context, forced=True)
+                try:
+                    result = node.render(context, forced=True)
+                except Exception, e:
+                    raise CommandError("An error occured during rending: "
+                                       "%s" % e)
                 cache.set(key, result, settings.COMPRESS_OFFLINE_TIMEOUT)
                 results.append(result)
                 count += 1
