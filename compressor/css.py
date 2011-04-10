@@ -37,7 +37,7 @@ class CssCompressor(Compressor):
                 if self.media_nodes and self.media_nodes[-1][0] == media:
                     self.media_nodes[-1][1].split_content.append(data)
                 else:
-                    node = CssCompressor()
+                    node = CssCompressor(str(elem))
                     node.split_content.append(data)
                     self.media_nodes.append((media, node))
         return self.split_content

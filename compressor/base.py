@@ -111,9 +111,10 @@ class Compressor(object):
             command = self.all_mimetypes.get(mimetype)
             if command is None:
                 if mimetype not in ("text/css", "text/javascript"):
-                    raise CompressorError(
-                        "Couldn't find any configured precompiler "
-                        "for mimetype '%s'." % mimetype)
+                    error = ("Couldn't find any precompiler in "
+                             "COMPRESS_PRECOMPILERS setting for "
+                             "mimetype '%s'." % mimetype)
+                    raise CompressorError(error)
             else:
                 content = CompilerFilter(content, filter_type=self.type,
                                          command=command).output(**kwargs)
@@ -178,7 +179,7 @@ class Compressor(object):
         The output method that saves the content to a file and renders
         the appropriate template with the file's URL.
         """
-        new_filepath = self.filepath(content)
+        new_filepath = self.filepath(self.content)
         if not self.storage.exists(new_filepath):
             self.storage.save(new_filepath, ContentFile(content))
         url = self.storage.url(new_filepath)

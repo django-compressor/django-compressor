@@ -9,7 +9,7 @@ from compressor.conf import settings
 
 
 def get_hexdigest(plaintext, length=None):
-    digest = sha_constructor(plaintext).hexdigest()
+    digest = sha_constructor(smart_str(plaintext)).hexdigest()
     if length:
         return digest[:length]
     return digest
