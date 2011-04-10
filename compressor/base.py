@@ -169,23 +169,23 @@ class Compressor(object):
         # Then check for the appropriate output method and call it
         output_func = getattr(self, "output_%s" % mode, None)
         if callable(output_func):
-            return output_func(mode, content)
+            return output_func(mode, content, forced)
         # Total failure, raise a general exception
         raise CompressorError(
             "Couldn't find output method for mode '%s'" % mode)
 
-    def output_file(self, mode, content):
+    def output_file(self, mode, content, forced=False):
         """
         The output method that saves the content to a file and renders
         the appropriate template with the file's URL.
         """
         new_filepath = self.filepath(self.content)
-        if not self.storage.exists(new_filepath):
+        if not self.storage.exists(new_filepath) or forced:
             self.storage.save(new_filepath, ContentFile(content))
         url = self.storage.url(new_filepath)
         return self.render_output(mode, {"url": url})
 
-    def output_inline(self, mode, content):
+    def output_inline(self, mode, content, forced=False):
         """
         The output method that directly returns the content for inline
         display.
