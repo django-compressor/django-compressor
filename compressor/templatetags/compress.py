@@ -63,7 +63,7 @@ class CompressorNode(template.Node):
                 output = compressor.output(self.mode, forced=forced)
                 self.cache_set(cachekey, output)
             except:
-                if settings.DEBUG:
+                if settings.DEBUG or forced:
                     from traceback import format_exc
                     raise Exception(format_exc())
                 else:
