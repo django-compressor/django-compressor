@@ -1,6 +1,5 @@
 import os
 import sys
-import warnings
 from fnmatch import fnmatch
 from optparse import make_option
 
@@ -196,7 +195,4 @@ class Command(NoArgsCommand):
                 raise CommandError(
                     "Offline compressiong is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
-            warnings.warn(
-                "COMPRESS_OFFLINE is not set to True. "
-                "Offline generated cache will not be used.")
         self.compress(sys.stdout, **options)
