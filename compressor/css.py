@@ -44,14 +44,13 @@ class CssCompressor(Compressor):
 
     def output(self, *args, **kwargs):
         # Populate self.split_content
-        self.split_contents()
-        if not hasattr(self, 'media_nodes'):
-            return super(CssCompressor, self).output(*args, **kwargs)
         if (settings.COMPRESS_ENABLED or settings.COMPRESS_PRECOMPILERS or
                 kwargs.get('forced', False)):
-            ret = []
-            for media, subnode in self.media_nodes:
-                subnode.extra_context.update({'media': media})
-                ret.append(subnode.output(*args, **kwargs))
-            return ''.join(ret)
-        return self.content
+            self.split_contents()
+            if hasattr(self, 'media_nodes'):
+                ret = []
+                for media, subnode in self.media_nodes:
+                    subnode.extra_context.update({'media': media})
+                    ret.append(subnode.output(*args, **kwargs))
+                return ''.join(ret)
+        return super(CssCompressor, self).output(*args, **kwargs)
