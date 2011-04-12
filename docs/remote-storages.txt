@@ -79,6 +79,7 @@ integrated.
 .. _boto: http://boto.cloudhackers.com/
 .. _django-storages: http://code.welldev.org/django-storages/
 .. _django-staticfiles: http://github.com/jezdez/django-staticfiles/
+.. _staticfiles: http://docs.djangoproject.com/en/dev/howto/static-files/
 .. _STATIC_ROOT: http://docs.djangoproject.com/en/dev/ref/settings/#static-root
 .. _STATIC_URL: http://docs.djangoproject.com/en/dev/ref/settings/#static-url
 .. _STATICFILES_STORAGE: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-storage
