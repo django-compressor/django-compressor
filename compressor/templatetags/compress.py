@@ -64,12 +64,16 @@ class CompressorNode(template.Node):
         if debug:
             return content
         compressor = self.compressor_cls(content)
-        cachekey = self.cache_key(compressor)
-        output = self.cache_get(cachekey)
+        if settings.COMPRESS_ENABLED:
+            cachekey = self.cache_key(compressor)
+            output = self.cache_get(cachekey)
+        else:
+            cachekey = output = None
         if output is None or forced:
             try:
                 output = compressor.output(self.mode, forced=forced)
-                self.cache_set(cachekey, output)
+                if cachekey:
+                    self.cache_set(cachekey, output)
             except:
                 if settings.DEBUG or forced:
                     from traceback import format_exc
