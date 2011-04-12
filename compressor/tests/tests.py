@@ -25,7 +25,8 @@ class CompressorTestCase(TestCase):
 
     def setUp(self):
         settings.COMPRESS_ENABLED = True
-        settings.PRECOMPILERS = {}
+        settings.COMPRESS_PRECOMPILERS = {}
+        settings.COMPRESS_DEBUG_TOGGLE = 'nocompress'
         self.css = """
         <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
@@ -339,6 +340,18 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}"""
         self.assertRaises(TemplateSyntaxError, render, template, {})
 
+    def test_debug_toggle(self):
+        template = u"""{% load compress %}{% compress js %}
+        <script src="{{ MEDIA_URL }}js/one.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+        {% endcompress %}
+        """
+        class MockDebugRequest(object):
+            GET = {settings.COMPRESS_DEBUG_TOGGLE: 'true'}
+        context = { 'MEDIA_URL': settings.COMPRESS_URL, 'request':  MockDebugRequest()}
+        out = u"""<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>"""
+        self.assertEqual(out, render(template, context))
 
 class StorageTestCase(TestCase):
     def setUp(self):
