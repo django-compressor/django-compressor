@@ -48,13 +48,21 @@ class CompressorNode(template.Node):
     def cache_key(self, compressor):
         return "%s.%s.%s" % (compressor.cachekey, self.mode, self.kind)
 
-    def render(self, context, forced=False):
+    def render(self, context, forced=False, debug=False):
+        if settings.COMPRESS_DEBUG_TOGGLE:
+            # Only check for the debug parameter
+            # if a RequestContext was used
+            request = context.get('request', None)
+            if request is not None:
+                debug = settings.COMPRESS_DEBUG_TOGGLE in request.GET
         if (settings.COMPRESS_ENABLED and
-                settings.COMPRESS_OFFLINE) and not forced:
+                settings.COMPRESS_OFFLINE) and not forced and not debug:
             content = cache.get(get_offline_cachekey(self.nodelist))
             if content:
                 return content
         content = self.nodelist.render(context)
+        if debug:
+            return content
         compressor = self.compressor_cls(content)
         cachekey = self.cache_key(compressor)
         output = self.cache_get(cachekey)
@@ -63,7 +71,7 @@ class CompressorNode(template.Node):
                 output = compressor.output(self.mode, forced=forced)
                 self.cache_set(cachekey, output)
             except:
-                if settings.DEBUG:
+                if settings.DEBUG or forced:
                     from traceback import format_exc
                     raise Exception(format_exc())
                 else:

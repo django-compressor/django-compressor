@@ -48,6 +48,8 @@ class Compressor(object):
                 "'%s' isn't accesible via COMPRESS_URL ('%s') and can't be"
                 " compressed" % (url, base_url))
         basename = url.replace(base_url, "", 1)
+        # drop the querystring, which is used for non-compressed cache-busting.
+        basename = basename.split("?", 1)[0]
         filename = os.path.join(settings.COMPRESS_ROOT, basename)
         if not os.path.exists(filename):
             raise UncompressableFileError("'%s' does not exist" % filename)
@@ -109,9 +111,10 @@ class Compressor(object):
             command = self.all_mimetypes.get(mimetype)
             if command is None:
                 if mimetype not in ("text/css", "text/javascript"):
-                    raise CompressorError(
-                        "Couldn't find any configured precompiler "
-                        "for mimetype '%s'." % mimetype)
+                    error = ("Couldn't find any precompiler in "
+                             "COMPRESS_PRECOMPILERS setting for "
+                             "mimetype '%s'." % mimetype)
+                    raise CompressorError(error)
             else:
                 content = CompilerFilter(content, filter_type=self.type,
                                          command=command).output(**kwargs)
@@ -166,23 +169,23 @@ class Compressor(object):
         # Then check for the appropriate output method and call it
         output_func = getattr(self, "output_%s" % mode, None)
         if callable(output_func):
-            return output_func(mode, content)
+            return output_func(mode, content, forced)
         # Total failure, raise a general exception
         raise CompressorError(
             "Couldn't find output method for mode '%s'" % mode)
 
-    def output_file(self, mode, content):
+    def output_file(self, mode, content, forced=False):
         """
         The output method that saves the content to a file and renders
         the appropriate template with the file's URL.
         """
-        new_filepath = self.filepath(content)
-        if not self.storage.exists(new_filepath):
+        new_filepath = self.filepath(self.content)
+        if not self.storage.exists(new_filepath) or forced:
             self.storage.save(new_filepath, ContentFile(content))
         url = self.storage.url(new_filepath)
         return self.render_output(mode, {"url": url})
 
-    def output_inline(self, mode, content):
+    def output_inline(self, mode, content, forced=False):
         """
         The output method that directly returns the content for inline
         display.

@@ -1,6 +1,5 @@
 import os
 import sys
-import warnings
 from fnmatch import fnmatch
 from optparse import make_option
 
@@ -144,7 +143,11 @@ class Command(NoArgsCommand):
         for nodes in compressor_nodes.values():
             for node in nodes:
                 key = get_offline_cachekey(node.nodelist)
-                result = node.render(context, forced=True)
+                try:
+                    result = node.render(context, forced=True)
+                except Exception, e:
+                    raise CommandError("An error occured during rending: "
+                                       "%s" % e)
                 cache.set(key, result, settings.COMPRESS_OFFLINE_TIMEOUT)
                 results.append(result)
                 count += 1
@@ -192,7 +195,4 @@ class Command(NoArgsCommand):
                 raise CommandError(
                     "Offline compressiong is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
-            warnings.warn(
-                "COMPRESS_OFFLINE is not set to True. "
-                "Offline generated cache will not be used.")
         self.compress(sys.stdout, **options)

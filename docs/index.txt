@@ -5,7 +5,7 @@ Django Compressor
 Compresses linked and inline JavaScript or CSS into a single cached file.
 
 Why another static file combiner for Django?
---------------------------------------------
+============================================
 
 Short version: None of them did exactly what I needed.
 

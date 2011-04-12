@@ -25,7 +25,8 @@ class CompressorTestCase(TestCase):
 
     def setUp(self):
         settings.COMPRESS_ENABLED = True
-        settings.PRECOMPILERS = {}
+        settings.COMPRESS_PRECOMPILERS = {}
+        settings.COMPRESS_DEBUG_TOGGLE = 'nocompress'
         self.css = """
         <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
@@ -72,10 +73,10 @@ class CompressorTestCase(TestCase):
         self.assert_(is_cachekey.match(self.css_node.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.%s\.\w{12}'" % host_name)
 
     def test_css_hash(self):
-        self.assertEqual('f7c661b7a124', self.css_node.hash(self.css_node.concat))
+        self.assertEqual('666f3aa8eacd', self.css_node.hash(self.css))
 
     def test_css_return_if_on(self):
-        output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css">'
+        output = u'<link rel="stylesheet" href="/media/CACHE/css/277b26db9a98.css" type="text/css">'
         self.assertEqual(output, self.css_node.output().strip())
 
     def test_js_split(self):
@@ -110,20 +111,20 @@ class CompressorTestCase(TestCase):
             settings.COMPRESS_PRECOMPILERS = precompilers
 
     def test_js_return_if_on(self):
-        output = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
+        output = u'<script type="text/javascript" src="/media/CACHE/js/dc78a3f5af20.js" charset="utf-8"></script>'
         self.assertEqual(output, self.js_node.output())
 
     def test_custom_output_dir(self):
         try:
             old_output_dir = settings.COMPRESS_OUTPUT_DIR
             settings.COMPRESS_OUTPUT_DIR = 'custom'
-            output = u'<script type="text/javascript" src="/media/custom/js/3f33b9146e12.js" charset="utf-8"></script>'
+            output = u'<script type="text/javascript" src="/media/custom/js/dc78a3f5af20.js" charset="utf-8"></script>'
             self.assertEqual(output, JsCompressor(self.js).output())
             settings.COMPRESS_OUTPUT_DIR = ''
-            output = u'<script type="text/javascript" src="/media/js/3f33b9146e12.js" charset="utf-8"></script>'
+            output = u'<script type="text/javascript" src="/media/js/dc78a3f5af20.js" charset="utf-8"></script>'
             self.assertEqual(output, JsCompressor(self.js).output())
             settings.COMPRESS_OUTPUT_DIR = '/custom/nested/'
-            output = u'<script type="text/javascript" src="/media/custom/nested/js/3f33b9146e12.js" charset="utf-8"></script>'
+            output = u'<script type="text/javascript" src="/media/custom/nested/js/dc78a3f5af20.js" charset="utf-8"></script>'
             self.assertEqual(output, JsCompressor(self.js).output())
         finally:
             settings.COMPRESS_OUTPUT_DIR = old_output_dir
@@ -290,7 +291,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.COMPRESS_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css">'
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/277b26db9a98.css" type="text/css">'
         self.assertEqual(out, render(template, context))
 
     def test_nonascii_css_tag(self):
@@ -300,7 +301,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.COMPRESS_URL }
-        out = '<link rel="stylesheet" href="/media/CACHE/css/1c1c0855907b.css" type="text/css">'
+        out = '<link rel="stylesheet" href="/media/CACHE/css/14e62fd8dc94.css" type="text/css">'
         self.assertEqual(out, render(template, context))
 
     def test_js_tag(self):
@@ -310,7 +311,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.COMPRESS_URL }
-        out = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
+        out = u'<script type="text/javascript" src="/media/CACHE/js/dc78a3f5af20.js" charset="utf-8"></script>'
         self.assertEqual(out, render(template, context))
 
     def test_nonascii_js_tag(self):
@@ -320,7 +321,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.COMPRESS_URL }
-        out = u'<script type="text/javascript" src="/media/CACHE/js/5d5c0e1cb25f.js" charset="utf-8"></script>'
+        out = u'<script type="text/javascript" src="/media/CACHE/js/52e783c7eb25.js" charset="utf-8"></script>'
         self.assertEqual(out, render(template, context))
 
     def test_nonascii_latin1_js_tag(self):
@@ -330,7 +331,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.COMPRESS_URL }
-        out = u'<script type="text/javascript" src="/media/CACHE/js/40a8e9ffb476.js" charset="utf-8"></script>'
+        out = u'<script type="text/javascript" src="/media/CACHE/js/e33dbf2e2457.js" charset="utf-8"></script>'
         self.assertEqual(out, render(template, context))
 
     def test_compress_tag_with_illegal_arguments(self):
@@ -339,6 +340,18 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}"""
         self.assertRaises(TemplateSyntaxError, render, template, {})
 
+    def test_debug_toggle(self):
+        template = u"""{% load compress %}{% compress js %}
+        <script src="{{ MEDIA_URL }}js/one.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+        {% endcompress %}
+        """
+        class MockDebugRequest(object):
+            GET = {settings.COMPRESS_DEBUG_TOGGLE: 'true'}
+        context = { 'MEDIA_URL': settings.COMPRESS_URL, 'request':  MockDebugRequest()}
+        out = u"""<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>"""
+        self.assertEqual(out, render(template, context))
 
 class StorageTestCase(TestCase):
     def setUp(self):
@@ -357,7 +370,7 @@ class StorageTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.COMPRESS_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/5b231a62e9a6.css.gz" type="text/css">'
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/277b26db9a98.css.gz" type="text/css">'
         self.assertEqual(out, render(template, context))
 
 
@@ -377,6 +390,7 @@ class CacheBackendTestCase(CompressorTestCase):
 
 class OfflineGenerationTestCase(TestCase):
     """Uses templates/test_compressor_offline.html"""
+    maxDiff = None
 
     def setUp(self):
         self._old_compress = settings.COMPRESS_ENABLED
@@ -389,8 +403,8 @@ class OfflineGenerationTestCase(TestCase):
         count, result = CompressCommand().compress()
         self.assertEqual(2, count)
         self.assertEqual([
-            u'<link rel="stylesheet" href="/media/CACHE/css/a55e1cf95000.css" type="text/css">\n',
-            u'<script type="text/javascript" src="/media/CACHE/js/bf53fa5b13e2.js" charset="utf-8"></script>',
+            u'<link rel="stylesheet" href="/media/CACHE/css/4208e0ded309.css" type="text/css">\n',
+            u'<script type="text/javascript" src="/media/CACHE/js/f57529d83f3a.js" charset="utf-8"></script>',
         ], result)
 
     def test_offline_with_context(self):
@@ -401,7 +415,7 @@ class OfflineGenerationTestCase(TestCase):
         count, result = CompressCommand().compress()
         self.assertEqual(2, count)
         self.assertEqual([
-            u'<link rel="stylesheet" href="/media/CACHE/css/8a2405e029de.css" type="text/css">\n',
-            u'<script type="text/javascript" src="/media/CACHE/js/bf53fa5b13e2.js" charset="utf-8"></script>',
+            u'<link rel="stylesheet" href="/media/CACHE/css/777d7c22e67c.css" type="text/css">\n',
+            u'<script type="text/javascript" src="/media/CACHE/js/f57529d83f3a.js" charset="utf-8"></script>',
         ], result)
         settings.COMPRESS_OFFLINE_CONTEXT = self._old_offline_context

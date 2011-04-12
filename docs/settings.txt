@@ -217,6 +217,30 @@ The amount of time (in seconds) to cache the modification timestamp of a
 file. Disabled by default. Should be smaller than COMPRESS_REBUILD_TIMEOUT_
 and COMPRESS_MINT_DELAY_.
 
+COMPRESS_DEBUG_TOGGLE
+^^^^^^^^^^^^^^^^^^^^^
+
+:Default: None
+
+The name of the GET variable that toggles the debug mode and prevents Django
+Compressor from performing the actual compression. Only useful for debugging.
+
+.. warning::
+
+    Don't use this option in production!
+
+    An easy convention is to only set it depending on the ``DEBUG`` setting::
+
+        if DEBUG:
+            COMPRESS_DEBUG_TOGGLE = 'whatever'
+
+.. note::
+
+    This only works for pages that are rendered using the RequestContext_
+    and the ``django.core.context_processors.request`` context processor.
+
+.. _RequestContext: http://docs.djangoproject.com/en/dev/ref/templates/api/#django.template.RequestContext
+
 COMPRESS_OFFLINE
 ^^^^^^^^^^^^^^^^
 
