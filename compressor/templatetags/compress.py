@@ -55,31 +55,46 @@ class CompressorNode(template.Node):
             request = context.get('request', None)
             if request is not None:
                 debug = settings.COMPRESS_DEBUG_TOGGLE in request.GET
+        # If enabled and in offline mode, and not forced or in debug mode
+        # check the offline cache and return the result if given
         if (settings.COMPRESS_ENABLED and
                 settings.COMPRESS_OFFLINE) and not forced and not debug:
             content = cache.get(get_offline_cachekey(self.nodelist))
             if content:
                 return content
+        # Render the actual tag content to return it if in debug mode
         content = self.nodelist.render(context)
         if debug:
             return content
+        # The actual compressor instance
         compressor = self.compressor_cls(content)
+        # If compression is enabled check the cache with the compressor's
+        # cache key (that containes mtime values if files are involved)
         if settings.COMPRESS_ENABLED:
             cachekey = self.cache_key(compressor)
             output = self.cache_get(cachekey)
+        # or just ignore that part completely
         else:
             cachekey = output = None
+        # If there is any previously handled output or an active force,
+        # use it, Luke.
         if output is None or forced:
             try:
                 output = compressor.output(self.mode, forced=forced)
+                # If a cache key from the compressor was previously
+                # generated use it to store the compressor output
                 if cachekey:
                     self.cache_set(cachekey, output)
             except:
+                # Catch all exception, I know :(
                 if settings.DEBUG or forced:
+                    # Be very loud about the exception we just encountered
                     from traceback import format_exc
                     raise Exception(format_exc())
                 else:
+                    # Or don't do anything in production
                     return content
+        # Well, show the cached entry from earlier, if found.
         return output
 
 @register.tag
