@@ -53,18 +53,19 @@ class Compressor(object):
         basename = basename.split("?", 1)[0]
         # first try finding the file in the root
         filename = os.path.join(settings.COMPRESS_ROOT, basename)
-        if not os.path.exists(filename):
-            # if not found and staticfiles is installed, use it
+        if (settings.DEBUG and self.finders) or not os.path.exists(filename):
+            filename = None
             if self.finders:
+                # if not found and staticfiles is installed, use it
                 filename = self.finders.find(basename)
-                if filename:
-                    return filename
+        if filename:
+            return filename
+        else:
             # or just raise an exception as the last resort
             raise UncompressableFileError(
                 "'%s' could not be found in the COMPRESS_ROOT '%s'%s" % (
                     basename, settings.COMPRESS_ROOT,
                     self.finders and " or with staticfiles." or "."))
-        return filename
 
     @cached_property
     def parser(self):
