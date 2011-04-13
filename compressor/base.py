@@ -173,17 +173,27 @@ class Compressor(object):
         else:
             # or just doing nothing, when neither
             # compression nor compilation is enabled
-            return self.content
+            content = self.concat
         # Shortcurcuit in case the content is empty.
         if not content:
             return ''
         # Then check for the appropriate output method and call it
         output_func = getattr(self, "output_%s" % mode, None)
+        if not settings.COMPRESS_ENABLED:
+            # In order to raise errors about uncompressable files we still
+            # need to fake output.
+            output_func = self.output_original
         if callable(output_func):
             return output_func(mode, content, forced)
         # Total failure, raise a general exception
         raise CompressorError(
             "Couldn't find output method for mode '%s'" % mode)
+
+    def output_original(self, mode, content, forced=False):
+        '''
+        Essentially a do nothing output method.
+        '''
+        return self.content.strip()
 
     def output_file(self, mode, content, forced=False):
         """
