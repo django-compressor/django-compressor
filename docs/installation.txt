@@ -16,8 +16,8 @@ Installation
   default behaviour and make adjustements for your website.
 
 * In case you use Django 1.3's staticfiles_ contrib app (or its standalone
-  clone django-staticfiles_) you have to add Django Compressor's file finder
-  to the ``STATICFILES_FINDERS`` setting, for example with
+  counterpart django-staticfiles_) you have to add Django Compressor's file
+  finder to the ``STATICFILES_FINDERS`` setting, for example with
   ``django.contrib.staticfiles``::
 
     STATICFILES_FINDERS = (
