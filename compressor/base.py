@@ -12,7 +12,7 @@ from compressor.conf import settings
 from compressor.exceptions import CompressorError, UncompressableFileError
 from compressor.filters import CompilerFilter
 from compressor.storage import default_storage
-from compressor.utils import get_class, cached_property
+from compressor.utils import get_class, cached_property, get_staticfiles_finders
 
 
 class Compressor(object):
@@ -30,6 +30,7 @@ class Compressor(object):
         self.split_content = []
         self.extra_context = {}
         self.all_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
+        self.finders = get_staticfiles_finders()
 
     def split_contents(self):
         """
@@ -50,9 +51,19 @@ class Compressor(object):
         basename = url.replace(base_url, "", 1)
         # drop the querystring, which is used for non-compressed cache-busting.
         basename = basename.split("?", 1)[0]
+        # first try finding the file in the root
         filename = os.path.join(settings.COMPRESS_ROOT, basename)
         if not os.path.exists(filename):
-            raise UncompressableFileError("'%s' does not exist" % filename)
+            # if not found and staticfiles is installed, use it
+            if self.finders:
+                filename = self.finders.find(basename)
+                if filename:
+                    return filename
+            # or just raise an exception as the last resort
+            raise UncompressableFileError(
+                "'%s' could not be found in the COMPRESS_ROOT '%s'%s" % (
+                    basename, settings.COMPRESS_ROOT,
+                    self.finders and " or with staticfiles." or "."))
         return filename
 
     @cached_property

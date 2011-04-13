@@ -78,7 +78,7 @@ class CompressorSettings(AppSettings):
             if ("compressor.finders.CompressorFinder" not in
                     staticfiles_settings.STATICFILES_FINDERS):
                 raise ImproperlyConfigured(
-                    "When using django_compressor together with staticfiles, "
+                    "When using Django Compressor together with staticfiles, "
                     "please add 'compressor.finders.CompressorFinder' to the "
                     "STATICFILES_FINDERS setting.")
         return value

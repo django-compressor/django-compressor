@@ -1,0 +1,69 @@
+Changelog
+=========
+
+0.6.1
+-----
+
+- Fixed staticfiles support to also use its finder API to find files during
+  developement -- when the static files haven't been collected in
+  ``STATIC_ROOT``.
+
+- Fixed regression with the ``COMPRESS`` setting, pre-compilation and
+  staticfiles.
+
+0.6
+---
+
+Major improvements and a lot of bugfixes, some of which are:
+
+- New precompilation support, which allows compilation of files and
+  hunks with easily configurable compilers before calling the actual
+  output filters. See the
+  :ref:`COMPRESS_PRECOMPILERS <compress_precompilers>` for more details.
+
+- New staticfiles support. With the introduction of the staticfiles app
+  to Django 1.3, compressor officially supports finding the files to
+  compress using the app's finder API. Have a look at the documentation
+  about :ref:`remote storages <remote_storages>` in case you want to use
+  those together with compressor.
+
+- New ``compress`` management command which allows pre-running of what the
+  compress template tag does. See the
+  :ref:`pre-compression <pre-compression>` docs for more information.
+
+- Various perfomance improvements by better caching and mtime cheking.
+
+- Deprecated ``COMPRESS_LESSC_BINARY`` setting because it's now
+  superseded by the :ref:`COMPRESS_PRECOMPILERS <compress_precompilers>`
+  setting. Just make sure to use the correct mimetype when linking to less
+  files or adding inline code and add the following to your settings::
+
+      COMPRESS_PRECOMPILERS = (
+          ('text/less', 'lessc {infile} {outfile}'),
+      )
+
+- Added cssmin_ filter (``compressor.filters.CSSMinFilter``) based on
+  Zachary Voase's Python port of the YUI CSS compression algorithm.
+
+- Reimplemented the dog-piling prevention.
+
+- Make sure the CssAbsoluteFilter works for relative paths.
+
+- Added inline render mode. See :ref:`usage <usage>` docs.
+
+- Added ``mtime_cache`` management command to add and/or remove all mtimes
+  from the cache.
+
+- Moved docs to Read The Docs: http://django_compressor.readthedocs.org
+
+- Added optional ``compressor.storage.GzipCompressorFileStorage`` storage
+  backend that gzips of the saved files automatically for easier deployment.
+
+- Reimplemented a few filters on top of the new
+  ``compressor.filters.base.CompilerFilter`` to be a bit more DRY.
+
+- Added tox based test configuration, testing on Django 1.1-1.3 and Python
+  2.5-2.7.
+
+.. _cssmin: http://pypi.python.org/pypi/cssmin/
+

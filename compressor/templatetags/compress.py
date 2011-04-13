@@ -48,35 +48,64 @@ class CompressorNode(template.Node):
     def cache_key(self, compressor):
         return "%s.%s.%s" % (compressor.cachekey, self.mode, self.kind)
 
-    def render(self, context, forced=False, debug=False):
+    def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
             # Only check for the debug parameter
             # if a RequestContext was used
             request = context.get('request', None)
             if request is not None:
-                debug = settings.COMPRESS_DEBUG_TOGGLE in request.GET
+                return settings.COMPRESS_DEBUG_TOGGLE in request.GET
+
+    def render_offline(self, forced):
+        """
+        If enabled and in offline mode, and not forced or in debug mode
+        check the offline cache and return the result if given
+        """
         if (settings.COMPRESS_ENABLED and
-                settings.COMPRESS_OFFLINE) and not forced and not debug:
-            content = cache.get(get_offline_cachekey(self.nodelist))
-            if content:
-                return content
-        content = self.nodelist.render(context)
-        if debug:
-            return content
-        compressor = self.compressor_cls(content)
-        cachekey = self.cache_key(compressor)
-        output = self.cache_get(cachekey)
-        if output is None or forced:
-            try:
-                output = compressor.output(self.mode, forced=forced)
-                self.cache_set(cachekey, output)
-            except:
-                if settings.DEBUG or forced:
-                    from traceback import format_exc
-                    raise Exception(format_exc())
-                else:
-                    return content
-        return output
+                settings.COMPRESS_OFFLINE) and not forced:
+            return cache.get(get_offline_cachekey(self.nodelist))
+
+    def render_cached(self, compressor, forced):
+        """
+        If enabled checks the cache for the given compressor's cache key
+        and return a tuple of cache key and output
+        """
+        if settings.COMPRESS_ENABLED and not forced:
+            cache_key = self.cache_key(compressor)
+            cache_content = self.cache_get(cache_key)
+            return cache_key, cache_content
+        return None, None
+
+    def render(self, context, forced=False):
+        # 1. Check if in debug mode
+        if self.debug_mode(context):
+            return self.nodelist.render(context)
+
+        # 2. Try offline cache.
+        cached_offline = self.render_offline(forced)
+        if cached_offline:
+            return cached_offline
+
+        # 3. Prepare the actual compressor and check cache
+        compressor = self.compressor_cls(self.nodelist.render(context))
+        cache_key, cache_content = self.render_cached(compressor, forced)
+        if cache_content is not None:
+            return cache_content
+
+        # 4. call compressor output method and handle exceptions
+        try:
+            rendered_output = compressor.output(self.mode, forced=forced)
+            if cache_key:
+                self.cache_set(cache_key, rendered_output)
+            return rendered_output
+        except:
+            if settings.DEBUG or forced:
+                # Be very loud about the exception we just encountered
+                from traceback import format_exc
+                raise Exception(format_exc())
+
+        # 5. Or don't do anything in production
+        return self.nodelist.render(context)
 
 @register.tag
 def compress(parser, token):
