@@ -16,7 +16,7 @@ Installation
   default behaviour and make adjustements for your website.
 
 * In case you use Django 1.3's staticfiles_ contrib app (or its standalone
-  clone django-staticfiles_) you have to add django_compressor's file finder
+  clone django-staticfiles_) you have to add Django Compressor's file finder
   to the ``STATICFILES_FINDERS`` setting::
 
     STATICFILES_FINDERS = (
@@ -58,11 +58,3 @@ Deprecation
 This section lists features and settings that are deprecated or removed
 in newer versions of Django Compressor.
 
-* ``COMPRESS_LESSC_BINARY``
-    Superseded by the :ref:`COMPRESS_PRECOMPILERS <compress_precompilers>`
-    setting. Just make sure to use the correct mimetype when linking to less
-    files or adding inline code and add the following to your settings::
-
-        COMPRESS_PRECOMPILERS = (
-            ('text/less', 'lessc {infile} {outfile}'),
-        )

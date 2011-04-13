@@ -1,10 +1,12 @@
+.. _usage:
+
 Usage
 =====
 
 .. code-block:: django
 
     {% load compress %}
-    {% compress <js/css> %}
+    {% compress <js/css> [<file/infile>] %}
     <html of inline or linked JS/CSS>
     {% endcompress %}
 
@@ -44,7 +46,7 @@ Which would be rendered something like:
 
     <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
-Linked files must be accesible via :ref:`COMPRESS_URL <compress_url>`.
+Linked files **must** be accesible via :ref:`COMPRESS_URL <compress_url>`.
 If DEBUG is ``True``, off-site files will throw exceptions. If DEBUG is
 ``False`` they will be silently stripped.
 
@@ -60,8 +62,81 @@ what it was given, to ease development.
     :ref:`COMPRESS_CACHE_BACKEND <compress_cache_backend>` and
     Django's `caching documentation`_).
 
+The compress template tag supports a second arguemnt specifying the output
+mode and defaults to saving the result in a file. Alternatively you can
+pass '``inline``' to the template tag to return the content directly to the
+rendered page, e.g.:
+
+.. code-block:: django
+
+    {% load compress %}
+
+    {% compress js inline %}
+    <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+    {% endcompress %}
+
+would be rendered something like:
+
+    <script type="text/javascript" charset="utf-8">
+    obj = {};
+    obj.value = "value";
+    </script>
+
 .. _memcached: http://memcached.org/
 .. _caching documentation: http://docs.djangoproject.com/en/1.2/topics/cache/#memcached
+
+.. _pre-compression:
+
+Pre-compression
+---------------
+
+Django Compressor comes with an optional ``compress`` mangement command to
+run the compression outside of the request/response loop -- independent
+from user requests. This allows to pre-compress CSS and JavaScript files and
+works just like the automatic compression with the ``{% compress %}`` tag.
+
+To compress the files "offline" and update the offline cache you have
+to use the ``compress`` management command, ideally during deployment.
+Also make sure to enable the :ref:`COMPRESS_OFFLINE <compress_offline>`
+setting. In case you don't use the ``compress`` management command, Django
+Compressor will automatically fallback to the automatic compression using
+the template tag.
+
+The command parses all templates that can be found with the template
+loader (as specified in the TEMPLATE_LOADERS_ setting) and looks for
+``{% compress %}`` blocks. It then will use the context as defined in
+:ref:`COMPRESS_OFFLINE_CONTEXT <compress_offline_context>` to render its
+content. So if you use any variables inside the ``{% compress %}`` blocks,
+make sure to list all values you require in ``COMPRESS_OFFLINE_CONTEXT``.
+It's similar to a template context and should be used if a variable is used
+in the blocks, e.g.:
+
+.. code-block:: django
+
+    {% load compress %}
+    {% compress js %}
+    <script src="{{ path_to_files }}js/one.js" type="text/javascript" charset="utf-8"></script>
+    {% endcompress %}
+
+Since this template requires a variable (``path_to_files``) you need to
+specify this in your settings before using the ``compress`` management
+command::
+
+    COMPRESS_OFFLINE_CONTEXT = {
+        'path_to_files': '/static/js/',
+    }
+
+If not specified, the ``COMPRESS_OFFLINE_CONTEXT`` will by default contain
+the commonly used setting to refer to saved files ``MEDIA_URL`` and
+``STATIC_URL`` (if specified in the settings).
+
+The result of running the ``compress`` management command will be saved
+in the cache defined in :ref:`COMPRESS_CACHE_BACKEND <compress_cache_backend>`
+for the number of seconds defined in the
+:ref:`COMPRESS_OFFLINE_TIMEOUT <compress_offline_timeout>` setting.
+
+.. _TEMPLATE_LOADERS: http://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
 
 CSS Notes
 ---------

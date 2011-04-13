@@ -241,6 +241,8 @@ Compressor from performing the actual compression. Only useful for debugging.
 
 .. _RequestContext: http://docs.djangoproject.com/en/dev/ref/templates/api/#django.template.RequestContext
 
+.. _compress_offline:
+
 COMPRESS_OFFLINE
 ^^^^^^^^^^^^^^^^
 
@@ -251,20 +253,7 @@ request/response loop -- independent from user requests. This allows to
 pre-compress CSS and JavaScript files and works just like the automatic
 compression with the ``{% compress %}`` tag.
 
-To compress the files "offline" and update the offline cache you have
-to use the ``compress`` management command, e.g. during deployment.
-In case you don't use the ``compress`` management command, Django
-Compressor will automatically fallback to the automatic compression.
-
-It'll will look in the templates that can be found with the template
-loader you specify in ``TEMPLATE_LOADERS`` for ``{% compress %}`` blocks
-and use COMPRESS_OFFLINE_CONTEXT_ to render its content. So if you use
-any variables inside the ``{% compress %}`` blocks, make sure to list
-all values you require in COMPRESS_OFFLINE_CONTEXT_.
-
-The result of running the ``compress`` management command will be saved
-in the cache as defined in COMPRESS_CACHE_BACKEND_ for the number of
-seconds defined in COMPRESS_OFFLINE_TIMEOUT_.
+.. _compress_offline_timeout:
 
 COMPRESS_OFFLINE_TIMEOUT
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -275,6 +264,8 @@ The period of time with which the ``compress`` management command stores
 the pre-compressed the contents of ``{% compress %}`` template tags in
 the cache.
 
+.. _compress_offline_context:
+
 COMPRESS_OFFLINE_CONTEXT
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -282,27 +273,4 @@ COMPRESS_OFFLINE_CONTEXT
 
 The context to be used by the ``compress`` management command when rendering
 the contents of ``{% compress %}`` template tags and saving the result in the
-offline cache. It's similar to a template context and should be used if a
-variable is used in the blocks, e.g.:
-
-.. code-block:: django
-
-    {% load compress %}
-    {% compress js %}
-    <script src="{{ path_to_files }}js/one.js" type="text/javascript" charset="utf-8"></script>
-    {% endcompress %}
-
-Since this template requires a variable (``path_to_files``) you need to
-specify this in your settings before using the ``compress`` management
-command::
-
-    COMPRESS_OFFLINE_CONTEXT = {
-        'path_to_files': '/static/js/',
-    }
-
-If not specified the COMPRESS_OFFLINE_CONTEXT will fall back to contain
-the commonly used setting to refer to saved files ``MEDIA_URL``.
-
-For forward compatibility Django Compressor will also add the ``STATIC_URL``
-setting (added in Django 1.3) to the COMPRESS_OFFLINE_CONTEXT_ if it's
-available.
+offline cache.

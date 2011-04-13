@@ -1,3 +1,5 @@
+.. _remote_storages:
+
 Remote storages
 ---------------
 

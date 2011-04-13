@@ -40,4 +40,4 @@ Contents
  settings
  remote-storages
  behind-the-scenes
-
+ changelog
