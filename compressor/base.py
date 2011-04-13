@@ -12,18 +12,8 @@ from compressor.conf import settings
 from compressor.exceptions import CompressorError, UncompressableFileError
 from compressor.filters import CompilerFilter
 from compressor.storage import default_storage
-from compressor.utils import get_class, cached_property
+from compressor.utils import get_class, cached_property, get_staticfiles_finders
 
-finders = None
-if ('staticfiles' in settings.INSTALLED_APPS or
-        'django.contrib.staticfiles' in settings.INSTALLED_APPS):
-    try:
-        from django.contrib.staticfiles import finders
-    except ImportError:
-        try:
-            from staticfiles import finders
-        except ImportError:
-            pass
 
 class Compressor(object):
     """
@@ -40,6 +30,7 @@ class Compressor(object):
         self.split_content = []
         self.extra_context = {}
         self.all_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
+        self.finders = get_staticfiles_finders()
 
     def split_contents(self):
         """
@@ -64,15 +55,15 @@ class Compressor(object):
         filename = os.path.join(settings.COMPRESS_ROOT, basename)
         if not os.path.exists(filename):
             # if not found and staticfiles is installed, use it
-            if finders:
-                filename = finders.find(basename)
+            if self.finders:
+                filename = self.finders.find(basename)
                 if filename:
                     return filename
             # or just raise an exception as the last resort
             raise UncompressableFileError(
                 "'%s' could not be found in the COMPRESS_ROOT '%s'%s" % (
                     basename, settings.COMPRESS_ROOT,
-                    finders and " or with staticfiles." or "."))
+                    self.finders and " or with staticfiles." or "."))
         return filename
 
     @cached_property
