@@ -98,11 +98,9 @@ class CompressorNode(template.Node):
             if cache_key:
                 self.cache_set(cache_key, rendered_output)
             return rendered_output
-        except:
+        except Exception, e:
             if settings.DEBUG or forced:
-                # Be very loud about the exception we just encountered
-                from traceback import format_exc
-                raise Exception(format_exc())
+                raise e
 
         # 5. Or don't do anything in production
         return self.nodelist.render(context)
