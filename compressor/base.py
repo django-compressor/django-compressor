@@ -14,6 +14,16 @@ from compressor.filters import CompilerFilter
 from compressor.storage import default_storage
 from compressor.utils import get_class, cached_property
 
+finders = None
+if ('staticfiles' in settings.INSTALLED_APPS or
+        'django.contrib.staticfiles' in settings.INSTALLED_APPS):
+    try:
+        from django.contrib.staticfiles import finders
+    except ImportError:
+        try:
+            from staticfiles import finders
+        except ImportError:
+            pass
 
 class Compressor(object):
     """
@@ -50,9 +60,19 @@ class Compressor(object):
         basename = url.replace(base_url, "", 1)
         # drop the querystring, which is used for non-compressed cache-busting.
         basename = basename.split("?", 1)[0]
+        # first try finding the file in the root
         filename = os.path.join(settings.COMPRESS_ROOT, basename)
         if not os.path.exists(filename):
-            raise UncompressableFileError("'%s' does not exist" % filename)
+            # if not found and staticfiles is installed, use it
+            if finders:
+                filename = finders.find(basename)
+                if filename:
+                    return filename
+            # or just raise an exception as the last resort
+            raise UncompressableFileError(
+                "'%s' could not be found in the COMPRESS_ROOT '%s'%s" % (
+                    basename, settings.COMPRESS_ROOT,
+                    finders and " or with staticfiles." or "."))
         return filename
 
     @cached_property
