@@ -190,7 +190,7 @@ class Compressor(object):
         The output method that saves the content to a file and renders
         the appropriate template with the file's URL.
         """
-        new_filepath = self.filepath(self.content)
+        new_filepath = self.filepath(content)
         if not self.storage.exists(new_filepath) or forced:
             self.storage.save(new_filepath, ContentFile(content))
         url = self.storage.url(new_filepath)
