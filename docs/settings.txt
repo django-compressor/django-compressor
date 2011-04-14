@@ -13,7 +13,8 @@ COMPRESS
 
 :Default: the opposite of ``DEBUG``
 
-Boolean that decides if compression will happen.
+Boolean that decides if compression will happen. In order to test compression
+when ``DEBUG`` is enabled COMPRESS needs to explicitly be set to ``True``.
 
 .. _compress_url:
 
