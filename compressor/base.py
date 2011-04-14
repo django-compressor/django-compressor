@@ -51,21 +51,20 @@ class Compressor(object):
         basename = url.replace(base_url, "", 1)
         # drop the querystring, which is used for non-compressed cache-busting.
         basename = basename.split("?", 1)[0]
-        # first try finding the file in the root
-        filename = os.path.join(settings.COMPRESS_ROOT, basename)
-        if (settings.DEBUG and self.finders) or not os.path.exists(filename):
-            filename = None
-            if self.finders:
-                # if not found and staticfiles is installed, use it
-                filename = self.finders.find(basename)
-        if filename:
-            return filename
+        # first try to find it with staticfiles (in debug mode)
+        filename = None
+        if settings.DEBUG and self.finders:
+            filename = self.finders.find(basename)
+        # secondly try finding the file in the root
         else:
-            # or just raise an exception as the last resort
-            raise UncompressableFileError(
-                "'%s' could not be found in the COMPRESS_ROOT '%s'%s" % (
-                    basename, settings.COMPRESS_ROOT,
-                    self.finders and " or with staticfiles." or "."))
+            filename = os.path.join(settings.COMPRESS_ROOT, basename)
+        if filename and os.path.exists(filename):
+            return filename
+        # or just raise an exception as the last resort
+        raise UncompressableFileError(
+            "'%s' could not be found in the COMPRESS_ROOT '%s'%s" % (
+                basename, settings.COMPRESS_ROOT,
+                self.finders and " or with staticfiles." or "."))
 
     @cached_property
     def parser(self):
