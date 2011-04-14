@@ -94,8 +94,8 @@ class Command(NoArgsCommand):
             for root, dirs, files in walk(path,
                     followlinks=options.get('followlinks', False)):
                 templates.update(os.path.join(root, name)
-                    for name in files if any(fnmatch(name, "*%s" % glob)
-                        for glob in extensions))
+                    for name in files if not name.startswith('.') and
+                        any(fnmatch(name, "*%s" % glob) for glob in extensions))
         if not templates:
             raise OfflineGenerationError("No templates found. Make sure your "
                                          "TEMPLATE_LOADERS and TEMPLATE_DIRS "
