@@ -12,9 +12,7 @@ from compressor.conf import settings
 from compressor.exceptions import CompressorError, UncompressableFileError
 from compressor.filters import CompilerFilter
 from compressor.storage import default_storage
-from compressor.utils import get_class, cached_property
-from compressor import staticfiles_compat as staticfiles
-
+from compressor.utils import get_class, cached_property, staticfiles
 
 class Compressor(object):
     """

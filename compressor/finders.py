@@ -1,4 +1,4 @@
-from compressor import staticfiles_compat as staticfiles
+from compressor.utils import staticfiles
 from compressor.storage import CompressorFileStorage
 
 class CompressorFinder(staticfiles.finders.BaseStorageFinder):
