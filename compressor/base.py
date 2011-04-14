@@ -57,8 +57,10 @@ class Compressor(object):
             filename = self.finders.find(basename)
         # secondly try finding the file in the root
         else:
-            filename = os.path.join(settings.COMPRESS_ROOT, basename)
-        if filename and os.path.exists(filename):
+            root_filename = os.path.join(settings.COMPRESS_ROOT, basename)
+            if os.path.exists(root_filename):
+                filename = root_filename
+        if filename:
             return filename
         # or just raise an exception as the last resort
         raise UncompressableFileError(
