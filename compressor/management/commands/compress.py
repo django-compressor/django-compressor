@@ -60,7 +60,7 @@ class Command(NoArgsCommand):
         compress nodes (not the content of the possibly linked files!).
         """
         extensions = options.get('extensions')
-        extensions = self.handle_extensions(extensions or ['html'])
+        extensions = self.handle_extensions(extensions or ['.html'])
         verbosity = int(options.get("verbosity", 0))
         if not log:
             log = StringIO()
@@ -94,7 +94,7 @@ class Command(NoArgsCommand):
             for root, dirs, files in walk(path,
                     followlinks=options.get('followlinks', False)):
                 templates.update(os.path.join(root, name)
-                    for name in files if any(fnmatch(name, "*%s" % glob)
+                    for name in files if not name.startswith('.') and any(fnmatch(name, "*%s" % glob)
                         for glob in extensions))
         if not templates:
             raise OfflineGenerationError("No templates found. Make sure your "
