@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.6.2
+-----
+
+- Minor bugfixes that caused the compression not working reliably in
+  development mode (e.g. updated files didn't trigger a new compression).
+
 0.6.1
 -----
 

@@ -51,20 +51,22 @@ class Compressor(object):
         basename = url.replace(base_url, "", 1)
         # drop the querystring, which is used for non-compressed cache-busting.
         basename = basename.split("?", 1)[0]
-        # first try finding the file in the root
-        filename = os.path.join(settings.COMPRESS_ROOT, basename)
-        if not os.path.exists(filename):
-            # if not found and staticfiles is installed, use it
-            if self.finders:
-                filename = self.finders.find(basename)
-                if filename:
-                    return filename
-            # or just raise an exception as the last resort
-            raise UncompressableFileError(
-                "'%s' could not be found in the COMPRESS_ROOT '%s'%s" % (
-                    basename, settings.COMPRESS_ROOT,
-                    self.finders and " or with staticfiles." or "."))
-        return filename
+        # first try to find it with staticfiles (in debug mode)
+        filename = None
+        if settings.DEBUG and self.finders:
+            filename = self.finders.find(basename)
+        # secondly try finding the file in the root
+        else:
+            root_filename = os.path.join(settings.COMPRESS_ROOT, basename)
+            if os.path.exists(root_filename):
+                filename = root_filename
+        if filename:
+            return filename
+        # or just raise an exception as the last resort
+        raise UncompressableFileError(
+            "'%s' could not be found in the COMPRESS_ROOT '%s'%s" % (
+                basename, settings.COMPRESS_ROOT,
+                self.finders and " or with staticfiles." or "."))
 
     @cached_property
     def parser(self):
@@ -190,7 +192,7 @@ class Compressor(object):
         The output method that saves the content to a file and renders
         the appropriate template with the file's URL.
         """
-        new_filepath = self.filepath(self.content)
+        new_filepath = self.filepath(content)
         if not self.storage.exists(new_filepath) or forced:
             self.storage.save(new_filepath, ContentFile(content))
         url = self.storage.url(new_filepath)

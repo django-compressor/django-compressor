@@ -76,7 +76,7 @@ rendered page, e.g.:
     <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
     {% endcompress %}
 
-would be rendered something like:
+would be rendered something like::
 
     <script type="text/javascript" charset="utf-8">
     obj = {};
