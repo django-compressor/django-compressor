@@ -2,7 +2,7 @@ from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-from compressor.utils import AppSettings
+from compressor.utils.settings import AppSettings
 
 class CompressorSettings(AppSettings):
     # Main switch
