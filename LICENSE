@@ -76,7 +76,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-utils.cached_property extracted from Celery
+utils.cache.cached_property extracted from Celery
 -------------------------------------------
 Copyright (c) 2009-2011, Ask Solem and contributors.
 All rights reserved.
