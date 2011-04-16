@@ -11,12 +11,13 @@ except ImportError:
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
 from django.utils.datastructures import SortedDict
+from django.utils.importlib import import_module
 
 from compressor.cache import cache, get_offline_cachekey
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
-from compressor.utils import walk, any, import_module
+from compressor.utils import walk, any
 
 
 class Command(NoArgsCommand):
