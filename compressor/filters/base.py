@@ -5,7 +5,7 @@ import tempfile
 
 from compressor.conf import settings
 from compressor.exceptions import FilterError
-from compressor.utils import cmd_split, FormattableString
+from compressor.utils import cmd_split, stringformat
 
 logger = logging.getLogger("compressor.filters")
 
@@ -56,7 +56,7 @@ class CompilerFilter(FilterBase):
                 ext = ".%s" % self.type and self.type or ""
                 outfile = tempfile.NamedTemporaryFile(mode='w', suffix=ext)
                 self.options["outfile"] = outfile.name
-            cmd = FormattableString(self.command).format(**self.options)
+            cmd = stringformat.FormattableString(self.command).format(**self.options)
             proc = subprocess.Popen(cmd_split(cmd),
                 stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
             if infile is not None:
