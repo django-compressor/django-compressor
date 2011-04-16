@@ -105,7 +105,7 @@ setup(
     version = VERSION,
     url = 'http://django_compressor.readthedocs.org/',
     license = 'BSD',
-    description = "Compresses linked and inline JavaScript or CSS into a single cached file.",
+    description = "Compresses linked and inline JavaScript or CSS into single cached files.",
     long_description = README,
     author = 'Jannis Leidel',
     author_email = 'jannis@leidel.info',
