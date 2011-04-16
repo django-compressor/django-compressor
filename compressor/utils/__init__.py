@@ -531,17 +531,3 @@ class FormattableString(object):
                 params[str(id(item))] = _format_field(value, parts, conv, spec,
                                                       want_bytes)
         return self._string % params
-
-
-def get_staticfiles_finders():
-    finders = None
-    if ('staticfiles' in settings.INSTALLED_APPS or
-            'django.contrib.staticfiles' in settings.INSTALLED_APPS):
-        try:
-            from django.contrib.staticfiles import finders
-        except ImportError:
-            try:
-                from staticfiles import finders
-            except ImportError:
-                pass
-    return finders
