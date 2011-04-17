@@ -8,18 +8,19 @@ class LxmlParser(ParserBase):
 
     @property
     def tree(self):
-        try:
-            from lxml import html
-            from lxml.etree import tostring
-        except ImportError, e:
-            raise ParserError("Error while initializing Parser: %s" % e)
         if self._tree is None:
-            content = '<root>%s</root>' % self.content
-            self._tree = html.fromstring(content)
             try:
-                ignore = tostring(self._tree, encoding=unicode)
-            except UnicodeDecodeError:
-                self._tree = html.soupparser.fromstring(content)
+                from lxml import html
+                from lxml.etree import tostring
+            except ImportError, e:
+                raise ParserError("Error while initializing Parser: %s" % e)
+            else:
+                content = '<root>%s</root>' % self.content
+                self._tree = html.fromstring(content)
+                try:
+                    ignore = tostring(self._tree, encoding=unicode)
+                except UnicodeDecodeError:
+                    self._tree = html.soupparser.fromstring(content)
         return self._tree
 
     def css_elems(self):
