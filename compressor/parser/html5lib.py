@@ -26,7 +26,7 @@ class Html5LibParser(ParserBase):
             import html5lib
             self.html5lib = html5lib
             return html5lib.parseFragment(self.content)
-        except ImortError, err:
+        except ImportError, err:
             raise ImproperlyConfigured("Error while importing html5lib: %s" % err)
         except Exception, err:
             raise ParserError("Error while initializing Parser: %s" % err)
