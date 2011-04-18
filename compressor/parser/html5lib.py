@@ -10,9 +10,9 @@ from compressor.utils.cache import cached_property
 class Html5LibParser(ParserBase):
 
     def _serialize(self, elem):
-        fragment = html5lib.treebuilders.simpletree.DocumentFragment()
+        fragment = self.html5lib.treebuilders.simpletree.DocumentFragment()
         fragment.appendChild(elem)
-        return html5lib.serialize(fragment,
+        return self.html5lib.serialize(fragment,
             quote_attr_values=True, omit_optional_tags=False)
 
     def _find(self, *names):
@@ -24,6 +24,7 @@ class Html5LibParser(ParserBase):
     def html(self):
         try:
             import html5lib
+            self.html5lib = html5lib
             return html5lib.parseFragment(self.content)
         except ImortError, err:
             raise ImproperlyConfigured("Error while importing html5lib: %s" % err)
