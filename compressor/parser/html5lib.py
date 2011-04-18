@@ -1,43 +1,40 @@
 from __future__ import absolute_import
+from django.utils.encoding import smart_unicode
+from django.core.exceptions import ImproperlyConfigured
+
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
-from django.utils.encoding import smart_unicode
+from compressor.utils.cache import cached_property
 
-try:
-    import html5lib
-except ImortError:
-    html5lib = None
-
-def _serialize(el):
-    fragment = html5lib.treebuilders.simpletree.DocumentFragment()
-    fragment.appendChild(el)
-    return html5lib.serialize(fragment, quote_attr_values=True,
-        omit_optional_tags=False)
-
-def _find(tree, *names):
-    for node in tree.childNodes:
-        if node.type == 5 and node.name in names:
-            yield node
 
 class Html5LibParser(ParserBase):
-    _html = None
 
-    @property
+    def _serialize(self, elem):
+        fragment = html5lib.treebuilders.simpletree.DocumentFragment()
+        fragment.appendChild(elem)
+        return html5lib.serialize(fragment,
+            quote_attr_values=True, omit_optional_tags=False)
+
+    def _find(self, *names):
+        for node in self.html.childNodes:
+            if node.type == 5 and node.name in names:
+                yield node
+
+    @cached_property
     def html(self):
-        if self._html is None:
-            try:
-                import html5lib
-                self._html = html5lib.parseFragment(self.content)
-            except Exception, e:
-                raise ParserError("Error while initializing Parser: %s" % e)
-        return self._html
-
+        try:
+            import html5lib
+            return html5lib.parseFragment(self.content)
+        except ImortError, err:
+            raise ImproperlyConfigured("Error while importing html5lib: %s" % err)
+        except Exception, err:
+            raise ParserError("Error while initializing Parser: %s" % err)
 
     def css_elems(self):
-        return _find(self.html, 'style', 'link')
+        return self._find('style', 'link')
 
     def js_elems(self):
-        return _find(self.html, 'script')
+        return self._find('script')
 
     def elem_attribs(self, elem):
         return elem.attributes
@@ -49,4 +46,4 @@ class Html5LibParser(ParserBase):
         return elem.name
 
     def elem_str(self, elem):
-        return smart_unicode(_serialize(elem))
+        return smart_unicode(self._serialize(elem))

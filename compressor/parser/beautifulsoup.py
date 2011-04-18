@@ -1,20 +1,23 @@
 from __future__ import absolute_import
-from compressor.exceptions import ParserError
-from compressor.parser import ParserBase
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.encoding import smart_unicode
 
-class BeautifulSoupParser(ParserBase):
-    _soup = None
+from compressor.exceptions import ParserError
+from compressor.parser import ParserBase
+from compressor.utils.cache import cached_property
 
-    @property
+
+class BeautifulSoupParser(ParserBase):
+
+    @cached_property
     def soup(self):
-        if self._soup is None:
-            try:
-                from BeautifulSoup import BeautifulSoup
-            except ImportError, e:
-                raise ParserError("Error while initializing Parser: %s" % e)
-            self._soup = BeautifulSoup(self.content)
-        return self._soup
+        try:
+            from BeautifulSoup import BeautifulSoup
+            return BeautifulSoup(self.content)
+        except ImportError, err:
+            raise ImproperlyConfigured("Error while importing BeautifulSoup: %s" % err)
+        except Exception, err:
+            raise ParserError("Error while initializing Parser: %s" % err)
 
     def css_elems(self):
         return self.soup.findAll({'link': True, 'style': True})
