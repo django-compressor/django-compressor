@@ -19,7 +19,7 @@ from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
 from compressor.management.commands.compress import Command as CompressCommand
-
+from compressor.utils import find_command
 
 class CompressorTestCase(TestCase):
 
@@ -419,3 +419,19 @@ class OfflineGenerationTestCase(TestCase):
             u'<script type="text/javascript" src="/media/CACHE/js/bf53fa5b13e2.js" charset="utf-8"></script>',
         ], result)
         settings.COMPRESS_OFFLINE_CONTEXT = self._old_offline_context
+
+
+if find_command(settings.COMPRESS_CSSTIDY_BINARY):
+
+    class CssTidyTestCase(TestCase):
+
+        def test_tidy(self):
+            content = """
+/* Some comment */
+font,th,td,p{
+    color: black;
+}
+"""
+            from compressor.filters.csstidy import CSSTidyFilter
+            self.assertEqual(
+                "font,th,td,p{color:#000;}", CSSTidyFilter(content).output())
