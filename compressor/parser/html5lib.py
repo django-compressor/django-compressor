@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 from django.utils.encoding import smart_unicode
