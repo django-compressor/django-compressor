@@ -1,6 +1,21 @@
 Changelog
 =========
 
+0.6.3
+-----
+
+- Fixed options mangling in CompilerFilter initialization.
+
+- Fixed tox configuration.
+
+- Extended documentation and README.
+
+- In the compress command ignore hidden files when looking for templates.
+
+- Restructured utilities and added staticfiles compat layer.
+
+- Restructered parsers and added a html5lib based parser.
+
 0.6.2
 -----
 
