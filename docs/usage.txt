@@ -47,12 +47,14 @@ Which would be rendered something like:
     <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
 Linked files **must** be accesible via :ref:`COMPRESS_URL <compress_url>`.
-If DEBUG is ``True``, off-site files will throw exceptions. If DEBUG is
-``False`` they will be silently stripped.
 
 If the :ref:`COMPRESS <compress>` setting is ``False`` (defaults to the
-opposite of DEBUG) the ``compress`` template tag simply returns exactly
-what it was given, to ease development.
+opposite of DEBUG) the ``compress`` template tag does nothing and simply returns
+exactly what it was given.
+
+If both DEBUG and :ref:`COMPRESS <compress>` are set to ``True``, uncompressable
+files (off-site or non existent) will throw and exception. If DEBUG is ``False``
+these files will be silently stripped.
 
 .. warning::
 

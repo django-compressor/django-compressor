@@ -11,12 +11,13 @@ except ImportError:
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
 from django.utils.datastructures import SortedDict
+from django.utils.importlib import import_module
 
 from compressor.cache import cache, get_offline_cachekey
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
-from compressor.utils import walk, any, import_module
+from compressor.utils import walk, any
 
 
 class Command(NoArgsCommand):
@@ -94,8 +95,8 @@ class Command(NoArgsCommand):
             for root, dirs, files in walk(path,
                     followlinks=options.get('followlinks', False)):
                 templates.update(os.path.join(root, name)
-                    for name in files if any(fnmatch(name, "*%s" % glob)
-                        for glob in extensions))
+                    for name in files if not name.startswith('.') and
+                        any(fnmatch(name, "*%s" % glob) for glob in extensions))
         if not templates:
             raise OfflineGenerationError("No templates found. Make sure your "
                                          "TEMPLATE_LOADERS and TEMPLATE_DIRS "

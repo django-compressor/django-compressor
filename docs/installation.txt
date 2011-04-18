@@ -51,9 +51,18 @@ for the optional :ref:`parser <compress_parser>`
 
     STATIC_DEPS=true pip install lxml
 
+html5lib_ (optional)
+^^^^^^^^^^^^^^^^^^^^
+
+for the optional :ref:`parser <compress_parser>`
+``compressor.parser.Html5LibParser``::
+
+    pip install html5lib
+
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://codespeak.net/lxml/
 .. _libxml2: http://xmlsoft.org/
+.. _html5lib: http://code.google.com/p/html5lib/
 
 Deprecation
 -----------

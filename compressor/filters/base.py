@@ -5,7 +5,7 @@ import tempfile
 
 from compressor.conf import settings
 from compressor.exceptions import FilterError
-from compressor.utils import cmd_split, FormattableString
+from compressor.utils import cmd_split, stringformat
 
 logger = logging.getLogger("compressor.filters")
 
@@ -31,14 +31,15 @@ class CompilerFilter(FilterBase):
     external commands.
     """
     command = None
+    options = {}
 
-    def __init__(self, content, filter_type=None, verbose=0, command=None):
+    def __init__(self, content, filter_type=None, verbose=0, command=None, **kwargs):
         super(CompilerFilter, self).__init__(content, filter_type, verbose)
         if command:
             self.command = command
+        self.options.update(kwargs)
         if self.command is None:
             raise FilterError("Required command attribute not set")
-        self.options = {}
         self.stdout = subprocess.PIPE
         self.stdin = subprocess.PIPE
         self.stderr = subprocess.PIPE
@@ -56,7 +57,7 @@ class CompilerFilter(FilterBase):
                 ext = ".%s" % self.type and self.type or ""
                 outfile = tempfile.NamedTemporaryFile(mode='w', suffix=ext)
                 self.options["outfile"] = outfile.name
-            cmd = FormattableString(self.command).format(**self.options)
+            cmd = stringformat.FormattableString(self.command).format(**self.options)
             proc = subprocess.Popen(cmd_split(cmd),
                 stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
             if infile is not None:

@@ -8,6 +8,11 @@ try:
 except ImportError:
     lxml = None
 
+try:
+    import html5lib
+except ImportError:
+    html5lib = None
+
 from django.core.cache.backends import dummy
 from django.core.files.storage import get_storage_class
 from django.template import Template, Context, TemplateSyntaxError
@@ -19,7 +24,7 @@ from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
 from compressor.management.commands.compress import Command as CompressCommand
-
+from compressor.utils import find_command
 
 class CompressorTestCase(TestCase):
 
@@ -150,6 +155,34 @@ if lxml:
         def tearDown(self):
             settings.COMPRESS_PARSER = self.old_parser
 
+if html5lib:
+    class Html5LibCompressorTesCase(CompressorTestCase):
+
+        def test_css_split(self):
+            out = [
+                ('file', os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'<link charset="utf-8" href="/media/css/one.css" rel="stylesheet" type="text/css">'),
+                ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
+                ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'<link charset="utf-8" href="/media/css/two.css" rel="stylesheet" type="text/css">'),
+            ]
+            split = self.css_node.split_contents()
+            split = [(x[0], x[1], self.css_node.parser.elem_str(x[2])) for x in split]
+            self.assertEqual(out, split)
+
+        def test_js_split(self):
+            out = [('file', os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), u'<script charset="utf-8" src="/media/js/one.js" type="text/javascript"></script>'),
+             ('hunk', u'obj.value = "value";', u'<script charset="utf-8" type="text/javascript">obj.value = "value";</script>')
+             ]
+            split = self.js_node.split_contents()
+            split = [(x[0], x[1], self.js_node.parser.elem_str(x[2])) for x in split]
+            self.assertEqual(out, split)
+
+        def setUp(self):
+            self.old_parser = settings.COMPRESS_PARSER
+            settings.COMPRESS_PARSER = 'compressor.parser.Html5LibParser'
+            super(Html5LibCompressorTesCase, self).setUp()
+
+        def tearDown(self):
+            settings.COMPRESS_PARSER = self.old_parser
 
 class CssAbsolutizingTestCase(TestCase):
     def setUp(self):
@@ -419,3 +452,19 @@ class OfflineGenerationTestCase(TestCase):
             u'<script type="text/javascript" src="/media/CACHE/js/bf53fa5b13e2.js" charset="utf-8"></script>',
         ], result)
         settings.COMPRESS_OFFLINE_CONTEXT = self._old_offline_context
+
+
+if find_command(settings.COMPRESS_CSSTIDY_BINARY):
+
+    class CssTidyTestCase(TestCase):
+
+        def test_tidy(self):
+            content = """
+/* Some comment */
+font,th,td,p{
+    color: black;
+}
+"""
+            from compressor.filters.csstidy import CSSTidyFilter
+            self.assertEqual(
+                "font,th,td,p{color:#000;}", CSSTidyFilter(content).output())

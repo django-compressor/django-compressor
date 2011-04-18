@@ -93,7 +93,7 @@ def find_package_data(
                         break
                 if bad_name:
                     continue
-                out.setdefault(package, []).append(prefix+name)
+                out.setdefault(package, []).append(prefix + name)
     return out
 
 
@@ -105,17 +105,14 @@ setup(
     version = VERSION,
     url = 'http://django_compressor.readthedocs.org/',
     license = 'BSD',
-    description = "Compresses linked and inline JavaScript or CSS into a single cached file.",
+    description = "Compresses linked and inline JavaScript or CSS into single cached files.",
     long_description = README,
     author = 'Jannis Leidel',
     author_email = 'jannis@leidel.info',
     packages = find_packages(),
-    package_data = find_package_data('compressor',only_in_packages=False),
+    package_data = find_package_data('compressor', only_in_packages=False),
     install_requires = [
         'BeautifulSoup',
-    ],
-    tests_require = [
-        'Django', 'BeautifulSoup',
     ],
     classifiers = [
         'Development Status :: 4 - Beta',
@@ -126,6 +123,5 @@ setup(
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP',
     ],
-    test_suite='compressor.tests.runtests.runtests',
     zip_safe = False,
 )

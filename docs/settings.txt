@@ -13,7 +13,8 @@ COMPRESS
 
 :Default: the opposite of ``DEBUG``
 
-Boolean that decides if compression will happen.
+Boolean that decides if compression will happen. In order to test compression
+when ``DEBUG`` is enabled COMPRESS needs to explicitly be set to ``True``.
 
 .. _compress_url:
 
@@ -170,6 +171,7 @@ The backends included in Django Compressor:
 
 - ``compressor.parser.BeautifulSoupParser``
 - ``compressor.parser.LxmlParser``
+- ``compressor.parser.Html5LibParser``
 
 See :ref:`dependencies` for more info about the packages you need
 for each parser.

@@ -2,7 +2,7 @@ from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-from compressor.utils import AppSettings
+from compressor.utils.settings import AppSettings
 
 class CompressorSettings(AppSettings):
     # Main switch
@@ -66,21 +66,6 @@ class CompressorSettings(AppSettings):
         if not value:
             raise ImproperlyConfigured(
                 "The COMPRESS_ROOT setting must be set.")
-        # In case staticfiles is used, make sure the FileSystemFinder is
-        # installed, and if it is, check if COMPRESS_ROOT is listed in
-        # STATICFILES_DIRS to allow finding compressed files
-        staticfiles_settings = None
-        if "staticfiles" in self.INSTALLED_APPS:
-            from staticfiles.conf import settings as staticfiles_settings
-        elif "django.contrib.staticfiles" in self.INSTALLED_APPS:
-            staticfiles_settings = settings
-        if staticfiles_settings is not None:
-            if ("compressor.finders.CompressorFinder" not in
-                    staticfiles_settings.STATICFILES_FINDERS):
-                raise ImproperlyConfigured(
-                    "When using Django Compressor together with staticfiles, "
-                    "please add 'compressor.finders.CompressorFinder' to the "
-                    "STATICFILES_FINDERS setting.")
         return value
 
     def configure_url(self, value):

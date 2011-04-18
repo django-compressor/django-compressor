@@ -12,8 +12,8 @@ from compressor.conf import settings
 from compressor.exceptions import CompressorError, UncompressableFileError
 from compressor.filters import CompilerFilter
 from compressor.storage import default_storage
-from compressor.utils import get_class, cached_property, get_staticfiles_finders
-
+from compressor.utils import get_class, staticfiles
+from compressor.utils.cache import cached_property
 
 class Compressor(object):
     """
@@ -30,7 +30,7 @@ class Compressor(object):
         self.split_content = []
         self.extra_context = {}
         self.all_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
-        self.finders = get_staticfiles_finders()
+        self.finders = staticfiles.finders
 
     def split_contents(self):
         """
