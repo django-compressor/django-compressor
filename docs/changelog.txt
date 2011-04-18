@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.6.4
+-----
+
+- Fixed Closure compiler arguments.
+
 0.6.3
 -----
 
