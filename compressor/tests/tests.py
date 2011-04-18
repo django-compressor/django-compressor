@@ -8,6 +8,11 @@ try:
 except ImportError:
     lxml = None
 
+try:
+    import html5lib
+except ImportError:
+    html5lib = None
+
 from django.core.cache.backends import dummy
 from django.core.files.storage import get_storage_class
 from django.template import Template, Context, TemplateSyntaxError
@@ -150,6 +155,34 @@ if lxml:
         def tearDown(self):
             settings.COMPRESS_PARSER = self.old_parser
 
+if html5lib:
+    class Html5LibCompressorTesCase(CompressorTestCase):
+
+        def test_css_split(self):
+            out = [
+                ('file', os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'<link charset="utf-8" href="/media/css/one.css" rel="stylesheet" type="text/css">'),
+                ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
+                ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'<link charset="utf-8" href="/media/css/two.css" rel="stylesheet" type="text/css">'),
+            ]
+            split = self.css_node.split_contents()
+            split = [(x[0], x[1], self.css_node.parser.elem_str(x[2])) for x in split]
+            self.assertEqual(out, split)
+
+        def test_js_split(self):
+            out = [('file', os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), u'<script charset="utf-8" src="/media/js/one.js" type="text/javascript"></script>'),
+             ('hunk', u'obj.value = "value";', u'<script charset="utf-8" type="text/javascript">obj.value = "value";</script>')
+             ]
+            split = self.js_node.split_contents()
+            split = [(x[0], x[1], self.js_node.parser.elem_str(x[2])) for x in split]
+            self.assertEqual(out, split)
+
+        def setUp(self):
+            self.old_parser = settings.COMPRESS_PARSER
+            settings.COMPRESS_PARSER = 'compressor.parser.Html5LibParser'
+            super(Html5LibCompressorTesCase, self).setUp()
+
+        def tearDown(self):
+            settings.COMPRESS_PARSER = self.old_parser
 
 class CssAbsolutizingTestCase(TestCase):
     def setUp(self):

@@ -171,6 +171,7 @@ The backends included in Django Compressor:
 
 - ``compressor.parser.BeautifulSoupParser``
 - ``compressor.parser.LxmlParser``
+- ``compressor.parser.Html5LibParser``
 
 See :ref:`dependencies` for more info about the packages you need
 for each parser.
