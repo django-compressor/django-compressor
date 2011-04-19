@@ -15,6 +15,11 @@ try:
 except ImportError:
     html5lib = None
 
+try:
+    from BeautifulSoup import BeautifulSoup
+except ImportError:
+    BeautifulSoup = None
+
 from django.core.cache.backends import dummy
 from django.core.files.storage import get_storage_class
 from django.template import Template, Context, TemplateSyntaxError
@@ -31,6 +36,7 @@ from compressor.utils import find_command
 class CompressorTestCase(TestCase):
 
     def setUp(self):
+        self.maxDiff = None
         settings.COMPRESS_ENABLED = True
         settings.COMPRESS_PRECOMPILERS = {}
         settings.COMPRESS_DEBUG_TOGGLE = 'nocompress'
@@ -136,29 +142,25 @@ class CompressorTestCase(TestCase):
         finally:
             settings.COMPRESS_OUTPUT_DIR = old_output_dir
 
-class LxmlCompressorTestCase(CompressorTestCase):
 
-    def test_css_split(self):
-        out = [
-            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">'),
-            ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
-            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">'),
-        ]
-        split = self.css_node.split_contents()
-        split = [(x[0], x[1], self.css_node.parser.elem_str(x[2])) for x in split]
-        self.assertEqual(out, split)
+class ParserTestCase(object):
 
     def setUp(self):
         self.old_parser = settings.COMPRESS_PARSER
-        settings.COMPRESS_PARSER = 'compressor.parser.LxmlParser'
-        super(LxmlCompressorTestCase, self).setUp()
+        settings.COMPRESS_PARSER = self.parser_cls
+        super(ParserTestCase, self).setUp()
 
     def tearDown(self):
         settings.COMPRESS_PARSER = self.old_parser
-LxmlCompressorTestCase = skipIf(lxml is None, 'lxml not found')(LxmlCompressorTestCase)
 
 
-class Html5LibCompressorTesCase(CompressorTestCase):
+class LxmlParserTests(ParserTestCase, CompressorTestCase):
+    parser_cls = 'compressor.parser.LxmlParser'
+LxmlParserTests = skipIf(lxml is None, 'lxml not found')(LxmlParserTests)
+
+
+class Html5LibParserTests(ParserTestCase, CompressorTestCase):
+    parser_cls = 'compressor.parser.Html5LibParser'
 
     def test_css_split(self):
         out = [
@@ -178,14 +180,19 @@ class Html5LibCompressorTesCase(CompressorTestCase):
         split = [(x[0], x[1], self.js_node.parser.elem_str(x[2])) for x in split]
         self.assertEqual(out, split)
 
-    def setUp(self):
-        self.old_parser = settings.COMPRESS_PARSER
-        settings.COMPRESS_PARSER = 'compressor.parser.Html5LibParser'
-        super(Html5LibCompressorTesCase, self).setUp()
+Html5LibParserTests = skipIf(
+    html5lib is None, 'html5lib not found')(Html5LibParserTests)
 
-    def tearDown(self):
-        settings.COMPRESS_PARSER = self.old_parser
-Html5LibCompressorTesCase = skipIf(html5lib is None, 'html5lib not found')(Html5LibCompressorTesCase)
+
+class BeautifulSoupParserTests(ParserTestCase, CompressorTestCase):
+    parser_cls = 'compressor.parser.BeautifulSoupParser'
+
+BeautifulSoupParserTests = skipIf(
+    BeautifulSoup is None, 'BeautifulSoup not found')(BeautifulSoupParserTests)
+
+
+class HtmlParserTests(ParserTestCase, CompressorTestCase):
+    parser_cls = 'compressor.parser.HtmlParser'
 
 
 class CssAbsolutizingTestCase(TestCase):

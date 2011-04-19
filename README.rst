@@ -29,9 +29,10 @@ Configurability & Extendibility
 -------------------------------
 
 Django Compressor is highly configurable and extendible. The HTML parsing
-is done using BeautifulSoup_ by default. As an alternative Django Compressor
-provides an lxml_ and a html5lib_ based parser, as well as an abstract base
-class that makes it easy to write a custom parser.
+is done using lxml_ or if it's not available Python's built-in HTMLParser by
+default. As an alternative Django Compressor provides a BeautifulSoup_ and a
+html5lib_ based parser, as well as an abstract base class that makes it easy to
+write a custom parser.
 
 Django Compressor also comes with built-in support for `CSS Tidy`_,
 `YUI CSS and JS`_ compressor, the Google's `Closure Compiler`_, a Python

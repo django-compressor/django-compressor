@@ -88,8 +88,6 @@ class Compressor(object):
     def hunks(self):
         for kind, value, elem in self.split_contents():
             if kind == "hunk":
-                # Let's cast BeautifulSoup element to unicode here since
-                # it will try to encode using ascii internally later
                 yield unicode(self.filter(
                     value, method="input", elem=elem, kind=kind))
             elif kind == "file":
