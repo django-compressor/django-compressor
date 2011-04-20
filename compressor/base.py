@@ -1,10 +1,7 @@
-import fnmatch
 import os
 import socket
-from itertools import chain
 
 from django.core.files.base import ContentFile
-from django.core.exceptions import ImproperlyConfigured
 from django.template.loader import render_to_string
 
 from compressor.cache import get_hexdigest, get_mtime
