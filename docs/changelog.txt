@@ -1,10 +1,17 @@
 Changelog
 =========
 
+HEAD
+----
+
+- Use unittest2 for testing goodness.
+
+- Fixed YUI JavaScript filter argument handling.
+
 0.6.4
 -----
 
-- Fixed Closure compiler arguments.
+- Fixed Closure filter argument handling.
 
 0.6.3
 -----
