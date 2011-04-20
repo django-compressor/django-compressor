@@ -1,8 +1,13 @@
 Changelog
 =========
 
-HEAD
-----
+0.7
+---
+
+- Created new parser, HtmlParser, based on the stdlib HTMLParser module.
+
+- Added a new default AutoSelectParser, which picks the LxmlParser if lxml
+  is available and falls back to HtmlParser.
 
 - Use unittest2 for testing goodness.
 
