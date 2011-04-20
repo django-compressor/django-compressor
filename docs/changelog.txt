@@ -1,10 +1,24 @@
 Changelog
 =========
 
+0.7
+---
+
+- Created new parser, HtmlParser, based on the stdlib HTMLParser module.
+
+- Added a new default AutoSelectParser, which picks the LxmlParser if lxml
+  is available and falls back to HtmlParser.
+
+- Use unittest2 for testing goodness.
+
+- Fixed YUI JavaScript filter argument handling.
+
+- Updated bundled jsmin to use version by Dave St.Germain that was refactored for speed.
+
 0.6.4
 -----
 
-- Fixed Closure compiler arguments.
+- Fixed Closure filter argument handling.
 
 0.6.3
 -----

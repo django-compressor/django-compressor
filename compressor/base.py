@@ -1,10 +1,7 @@
-import fnmatch
 import os
 import socket
-from itertools import chain
 
 from django.core.files.base import ContentFile
-from django.core.exceptions import ImproperlyConfigured
 from django.template.loader import render_to_string
 
 from compressor.cache import get_hexdigest, get_mtime
@@ -91,8 +88,6 @@ class Compressor(object):
     def hunks(self):
         for kind, value, elem in self.split_contents():
             if kind == "hunk":
-                # Let's cast BeautifulSoup element to unicode here since
-                # it will try to encode using ascii internally later
                 yield unicode(self.filter(
                     value, method="input", elem=elem, kind=kind))
             elif kind == "file":

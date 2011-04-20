@@ -47,4 +47,7 @@ class Html5LibParser(ParserBase):
         return elem.name
 
     def elem_str(self, elem):
+        # This method serializes HTML in a way that does not pass all tests.
+        # However, this method is only called in tests anyway, so it doesn't
+        # really matter.
         return smart_unicode(self._serialize(elem))

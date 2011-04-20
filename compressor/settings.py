@@ -12,7 +12,7 @@ class CompressorSettings(AppSettings):
     # GET variable that disables compressor e.g. "nocompress"
     DEBUG_TOGGLE = "None"
     # the backend to use when parsing the JavaScript or Stylesheet files
-    PARSER = 'compressor.parser.BeautifulSoupParser'
+    PARSER = 'compressor.parser.AutoSelectParser'
     OUTPUT_DIR = 'CACHE'
     STORAGE = 'compressor.storage.CompressorFileStorage'
 

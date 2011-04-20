@@ -164,13 +164,25 @@ Django Compressor ships with one additional storage backend:
 COMPRESS_PARSER
 ^^^^^^^^^^^^^^^
 
-:Default: ``'compressor.parser.BeautifulSoupParser'``
+:Default: ``'compressor.parser.AutoSelectParser'``
 
-The backend to use when parsing the JavaScript or Stylesheet files.
+The backend to use when parsing the JavaScript or Stylesheet files. The
+``AutoSelectParser`` picks the ``lxml`` based parser when available, and falls
+back to ``HtmlParser`` if ``lxml`` is not available.
+
+``LxmlParser`` is the fastest available parser, but ``HtmlParser`` is not much
+slower. ``AutoSelectParser`` adds a slight overhead, but in most cases it
+won't be necesarry to change the default parser.
+
+The other two included parsers are considerably slower and should only be
+used if absolutely necessary.
+
 The backends included in Django Compressor:
 
-- ``compressor.parser.BeautifulSoupParser``
+- ``compressor.parser.AutoSelectParser``
 - ``compressor.parser.LxmlParser``
+- ``compressor.parser.HtmlParser``
+- ``compressor.parser.BeautifulSoupParser``
 - ``compressor.parser.Html5LibParser``
 
 See :ref:`dependencies` for more info about the packages you need

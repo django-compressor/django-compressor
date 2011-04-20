@@ -24,5 +24,5 @@ class YUIJSFilter(YUICompressorFilter):
     type = 'js'
     options = {
         "binary": settings.COMPRESS_YUI_BINARY,
-        "args": settings.COMPRESS_YUI_CSS_ARGUMENTS,
+        "args": settings.COMPRESS_YUI_JS_ARGUMENTS,
     }

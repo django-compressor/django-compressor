@@ -35,10 +35,10 @@ Installation
 Dependencies
 ------------
 
-BeautifulSoup_
-^^^^^^^^^^^^^^
+BeautifulSoup_ (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-for the default :ref:`parser <compress_parser>`
+for the :ref:`parser <compress_parser>`
 ``compressor.parser.BeautifulSoupParser``::
 
     pip install BeautifulSoup
@@ -46,16 +46,15 @@ for the default :ref:`parser <compress_parser>`
 lxml_ (optional)
 ^^^^^^^^^^^^^^^^
 
-for the optional :ref:`parser <compress_parser>`
-``compressor.parser.LxmlParser``, also requires libxml2_::
+for the :ref:`parser <compress_parser>` ``compressor.parser.LxmlParser``,
+also requires libxml2_::
 
     STATIC_DEPS=true pip install lxml
 
 html5lib_ (optional)
 ^^^^^^^^^^^^^^^^^^^^
 
-for the optional :ref:`parser <compress_parser>`
-``compressor.parser.Html5LibParser``::
+for the :ref:`parser <compress_parser>` ``compressor.parser.Html5LibParser``::
 
     pip install html5lib
 
@@ -63,10 +62,3 @@ for the optional :ref:`parser <compress_parser>`
 .. _lxml: http://codespeak.net/lxml/
 .. _libxml2: http://xmlsoft.org/
 .. _html5lib: http://code.google.com/p/html5lib/
-
-Deprecation
------------
-
-This section lists features and settings that are deprecated or removed
-in newer versions of Django Compressor.
-
