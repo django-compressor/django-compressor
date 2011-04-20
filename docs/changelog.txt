@@ -13,6 +13,8 @@ Changelog
 
 - Fixed YUI JavaScript filter argument handling.
 
+- Updated bundled jsmin to use version by Dave St.Germain that was refactored for speed.
+
 0.6.4
 -----
 
