@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.7.1
+-----
+
+- Fixed import error when using the standalone django-staticfiles app.
+
 0.7
 ---
 
