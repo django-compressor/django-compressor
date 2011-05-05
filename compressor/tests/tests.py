@@ -55,12 +55,12 @@ class CompressorTestCase(TestCase):
 
     def test_css_split(self):
         out = [
-            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />'),
-            ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
-            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
+            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'css/one.css', u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />'),
+            ('hunk', u'p { border:5px solid green;}', None, u'<style type="text/css">p { border:5px solid green;}</style>'),
+            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'css/two.css', u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
         ]
         split = self.css_node.split_contents()
-        split = [(x[0], x[1], self.css_node.parser.elem_str(x[2])) for x in split]
+        split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3])) for x in split]
         self.assertEqual(out, split)
 
     def test_css_hunks(self):
@@ -93,11 +93,11 @@ class CompressorTestCase(TestCase):
         self.assertEqual(output, self.css_node.output().strip())
 
     def test_js_split(self):
-        out = [('file', os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), '<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>'),
-         ('hunk', u'obj.value = "value";', '<script type="text/javascript" charset="utf-8">obj.value = "value";</script>')
+        out = [('file', os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), u'js/one.js', '<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>'),
+         ('hunk', u'obj.value = "value";', None, '<script type="text/javascript" charset="utf-8">obj.value = "value";</script>')
          ]
         split = self.js_node.split_contents()
-        split = [(x[0], x[1], self.js_node.parser.elem_str(x[2])) for x in split]
+        split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3])) for x in split]
         self.assertEqual(out, split)
 
     def test_js_hunks(self):
@@ -164,20 +164,20 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
 
     def test_css_split(self):
         out = [
-            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'<link charset="utf-8" href="/media/css/one.css" rel="stylesheet" type="text/css">'),
-            ('hunk', u'p { border:5px solid green;}', u'<style type="text/css">p { border:5px solid green;}</style>'),
-            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'<link charset="utf-8" href="/media/css/two.css" rel="stylesheet" type="text/css">'),
+            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'css/one.css', u'<link charset="utf-8" href="/media/css/one.css" rel="stylesheet" type="text/css">'),
+            ('hunk', u'p { border:5px solid green;}', None, u'<style type="text/css">p { border:5px solid green;}</style>'),
+            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'css/two.css', u'<link charset="utf-8" href="/media/css/two.css" rel="stylesheet" type="text/css">'),
         ]
         split = self.css_node.split_contents()
-        split = [(x[0], x[1], self.css_node.parser.elem_str(x[2])) for x in split]
+        split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3])) for x in split]
         self.assertEqual(out, split)
 
     def test_js_split(self):
-        out = [('file', os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), u'<script charset="utf-8" src="/media/js/one.js" type="text/javascript"></script>'),
-         ('hunk', u'obj.value = "value";', u'<script charset="utf-8" type="text/javascript">obj.value = "value";</script>')
+        out = [('file', os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), u'js/one.js', u'<script charset="utf-8" src="/media/js/one.js" type="text/javascript"></script>'),
+         ('hunk', u'obj.value = "value";', None, u'<script charset="utf-8" type="text/javascript">obj.value = "value";</script>')
          ]
         split = self.js_node.split_contents()
-        split = [(x[0], x[1], self.js_node.parser.elem_str(x[2])) for x in split]
+        split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3])) for x in split]
         self.assertEqual(out, split)
 
 Html5LibParserTests = skipIf(
@@ -211,11 +211,11 @@ class CssAbsolutizingTestCase(TestCase):
         content = "p { background: url('../../images/image.gif') }"
         output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
-        self.assertEqual(output, filter.input(filename=filename))
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
         settings.COMPRESS_URL = 'http://media.example.com/'
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
         output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
-        self.assertEqual(output, filter.input(filename=filename))
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
     def test_css_absolute_filter_https(self):
         from compressor.filters.css_default import CssAbsoluteFilter
@@ -223,11 +223,11 @@ class CssAbsolutizingTestCase(TestCase):
         content = "p { background: url('../../images/image.gif') }"
         output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
-        self.assertEqual(output, filter.input(filename=filename))
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
         settings.COMPRESS_URL = 'https://media.example.com/'
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
         output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
-        self.assertEqual(output, filter.input(filename=filename))
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
     def test_css_absolute_filter_relative_path(self):
         from compressor.filters.css_default import CssAbsoluteFilter
@@ -235,10 +235,10 @@ class CssAbsolutizingTestCase(TestCase):
         content = "p { background: url('../../images/image.gif') }"
         output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         filter = CssAbsoluteFilter(content)
-        self.assertEqual(output, filter.input(filename=filename))
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
         settings.COMPRESS_URL = 'https://media.example.com/'
         output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
-        self.assertEqual(output, filter.input(filename=filename))
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
     def test_css_hunks(self):
         hash_dict = {
