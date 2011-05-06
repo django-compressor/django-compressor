@@ -36,7 +36,7 @@ class Compressor(object):
         """
         raise NotImplementedError
 
-    def get_filename(self, url):
+    def get_basename(self, url):
         try:
             base_url = self.storage.base_url
         except AttributeError:
@@ -48,6 +48,9 @@ class Compressor(object):
         basename = url.replace(base_url, "", 1)
         # drop the querystring, which is used for non-compressed cache-busting.
         basename = basename.split("?", 1)[0]
+        return basename
+
+    def get_filename(self, basename):
         # first try to find it with staticfiles (in debug mode)
         filename = None
         if settings.DEBUG and self.finders:
@@ -76,7 +79,8 @@ class Compressor(object):
     @cached_property
     def mtimes(self):
         return [str(get_mtime(value))
-                for kind, value, _ in self.split_contents() if kind == 'file']
+                for kind, value, _, _ in self.split_contents()
+                if kind == 'file']
 
     @cached_property
     def cachekey(self):
@@ -86,10 +90,11 @@ class Compressor(object):
 
     @cached_property
     def hunks(self):
-        for kind, value, elem in self.split_contents():
+        for kind, value, basename, elem in self.split_contents():
             if kind == "hunk":
                 yield unicode(self.filter(
-                    value, method="input", elem=elem, kind=kind))
+                    value, basename=basename, method="input", elem=elem,
+                    kind=kind))
             elif kind == "file":
                 content = ""
                 fd = open(value, 'rb')
@@ -101,7 +106,8 @@ class Compressor(object):
                 finally:
                     fd.close()
                 content = self.filter(content,
-                    method="input", filename=value, elem=elem, kind=kind)
+                    method="input", filename=value, basename=basename,
+                    elem=elem, kind=kind)
                 attribs = self.parser.elem_attribs(elem)
                 charset = attribs.get("charset", self.charset)
                 yield unicode(content, charset)
