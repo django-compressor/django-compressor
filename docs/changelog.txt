@@ -1,8 +1,8 @@
 Changelog
 =========
 
-HEAD
-----
+0.8
+---
 
 - Replace naive jsmin.py with rJSmin (http://opensource.perlig.de/rjsmin/)
   and fixed a few problems with JavaScript comments.
