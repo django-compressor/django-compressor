@@ -5,18 +5,20 @@ import posixpath
 from compressor.cache import get_hashed_mtime
 from compressor.conf import settings
 from compressor.filters import FilterBase
+from compressor.utils import staticfiles
 
 URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 
 
 class CssAbsoluteFilter(FilterBase):
-    def input(self, filename=None, **kwargs):
+    def input(self, filename=None, basename=None, **kwargs):
         self.root = os.path.normcase(os.path.abspath(settings.COMPRESS_ROOT))
         if filename is not None:
             filename = os.path.normcase(os.path.abspath(filename))
-        if not filename or not filename.startswith(self.root):
+        if (not (filename and filename.startswith(self.root)) and
+                not self.find(basename)):
             return self.content
-        self.path = filename[len(self.root):].replace(os.sep, '/')
+        self.path = basename.replace(os.sep, '/')
         self.path = self.path.lstrip('/')
         self.url = settings.COMPRESS_URL.rstrip('/')
         self.url_path = self.url
@@ -35,6 +37,10 @@ class CssAbsoluteFilter(FilterBase):
         self.directory_name = '/'.join([self.url, os.path.dirname(self.path)])
         output = URL_PATTERN.sub(self.url_converter, self.content)
         return output
+
+    def find(self, basename):
+        if settings.DEBUG and basename and staticfiles.finders:
+            return staticfiles.finders.find(basename)
 
     def guess_filename(self, url):
         local_path = url

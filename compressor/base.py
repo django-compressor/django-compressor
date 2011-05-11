@@ -32,11 +32,11 @@ class Compressor(object):
     def split_contents(self):
         """
         To be implemented in a subclass, should return an
-        iterable with three values: kind, value, element
+        iterable with four values: kind, value, basename, element
         """
         raise NotImplementedError
 
-    def get_filename(self, url):
+    def get_basename(self, url):
         try:
             base_url = self.storage.base_url
         except AttributeError:
@@ -47,7 +47,9 @@ class Compressor(object):
                 " compressed" % (url, base_url))
         basename = url.replace(base_url, "", 1)
         # drop the querystring, which is used for non-compressed cache-busting.
-        basename = basename.split("?", 1)[0]
+        return basename.split("?", 1)[0]
+
+    def get_filename(self, basename):
         # first try to find it with staticfiles (in debug mode)
         filename = None
         if settings.DEBUG and self.finders:
@@ -76,7 +78,8 @@ class Compressor(object):
     @cached_property
     def mtimes(self):
         return [str(get_mtime(value))
-                for kind, value, _ in self.split_contents() if kind == 'file']
+                for kind, value, basename, elem in self.split_contents()
+                if kind == 'file']
 
     @cached_property
     def cachekey(self):
@@ -86,10 +89,11 @@ class Compressor(object):
 
     @cached_property
     def hunks(self):
-        for kind, value, elem in self.split_contents():
+        for kind, value, basename, elem in self.split_contents():
             if kind == "hunk":
-                yield unicode(self.filter(
-                    value, method="input", elem=elem, kind=kind))
+                content = self.filter(value, "input",
+                    elem=elem, kind=kind, basename=basename)
+                yield unicode(content)
             elif kind == "file":
                 content = ""
                 fd = open(value, 'rb')
@@ -100,8 +104,8 @@ class Compressor(object):
                         "IOError while processing '%s': %s" % (value, e))
                 finally:
                     fd.close()
-                content = self.filter(content,
-                    method="input", filename=value, elem=elem, kind=kind)
+                content = self.filter(content, "input",
+                    filename=value, basename=basename, elem=elem, kind=kind)
                 attribs = self.parser.elem_attribs(elem)
                 charset = attribs.get("charset", self.charset)
                 yield unicode(content, charset)
