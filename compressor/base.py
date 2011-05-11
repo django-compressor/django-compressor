@@ -47,8 +47,7 @@ class Compressor(object):
                 " compressed" % (url, base_url))
         basename = url.replace(base_url, "", 1)
         # drop the querystring, which is used for non-compressed cache-busting.
-        basename = basename.split("?", 1)[0]
-        return basename
+        return basename.split("?", 1)[0]
 
     def get_filename(self, basename):
         # first try to find it with staticfiles (in debug mode)
@@ -79,7 +78,7 @@ class Compressor(object):
     @cached_property
     def mtimes(self):
         return [str(get_mtime(value))
-                for kind, value, _, _ in self.split_contents()
+                for kind, value, basename, elem in self.split_contents()
                 if kind == 'file']
 
     @cached_property
@@ -92,9 +91,9 @@ class Compressor(object):
     def hunks(self):
         for kind, value, basename, elem in self.split_contents():
             if kind == "hunk":
-                yield unicode(self.filter(
-                    value, basename=basename, method="input", elem=elem,
-                    kind=kind))
+                content = self.filter(value, "input",
+                    elem=elem, kind=kind, basename=basename)
+                yield unicode(content)
             elif kind == "file":
                 content = ""
                 fd = open(value, 'rb')
@@ -105,9 +104,8 @@ class Compressor(object):
                         "IOError while processing '%s': %s" % (value, e))
                 finally:
                     fd.close()
-                content = self.filter(content,
-                    method="input", filename=value, basename=basename,
-                    elem=elem, kind=kind)
+                content = self.filter(content, "input",
+                    filename=value, basename=basename, elem=elem, kind=kind)
                 attribs = self.parser.elem_attribs(elem)
                 charset = attribs.get("charset", self.charset)
                 yield unicode(content, charset)

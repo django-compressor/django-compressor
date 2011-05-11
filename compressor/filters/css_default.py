@@ -15,8 +15,8 @@ class CssAbsoluteFilter(FilterBase):
         self.root = os.path.normcase(os.path.abspath(settings.COMPRESS_ROOT))
         if filename is not None:
             filename = os.path.normcase(os.path.abspath(filename))
-        if not (filename and filename.startswith(self.root)) and \
-           not self.find(basename):
+        if (not (filename and filename.startswith(self.root)) and
+                not self.find(basename)):
             return self.content
         self.path = basename.replace(os.sep, '/')
         self.path = self.path.lstrip('/')
