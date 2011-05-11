@@ -1,3 +1,5 @@
+import os
+
 from compressor.conf import settings
 from compressor.base import Compressor
 from compressor.exceptions import UncompressableFileError
@@ -22,13 +24,14 @@ class CssCompressor(Compressor):
             elem_attribs = self.parser.elem_attribs(elem)
             if elem_name == 'link' and elem_attribs['rel'] == 'stylesheet':
                 try:
-                    filename = self.get_filename(elem_attribs['href'])
-                    data = ('file', filename, elem)
+                    basename = self.get_basename(elem_attribs['href'])
+                    filename = self.get_filename(basename)
+                    data = ('file', filename, basename, elem)
                 except UncompressableFileError:
                     if settings.DEBUG:
                         raise
             elif elem_name == 'style':
-                data = ('hunk', self.parser.elem_content(elem), elem)
+                data = ('hunk', self.parser.elem_content(elem), None, elem)
             if data:
                 self.split_content.append(data)
                 media = elem_attribs.get('media', None)
