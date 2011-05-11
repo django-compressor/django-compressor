@@ -4,8 +4,16 @@ Changelog
 HEAD
 ----
 
-- Replace naive jsmin.py with rJSmin (http://opensource.perlig.de/rjsmin/) and
-  fix a few problems with JavaScript comments.
+- Replace naive jsmin.py with rJSmin (http://opensource.perlig.de/rjsmin/)
+  and fixed a few problems with JavaScript comments.
+
+- Fixed converting relative URLs in CSS files when running in debug mode.
+
+.. note::
+
+    If you relied on the ``split_contents`` method of ``Compressor`` classes,
+    please make sure a fourth item is returned in the iterable that denotes
+    the base name of the file that is compressed.
 
 0.7.1
 -----

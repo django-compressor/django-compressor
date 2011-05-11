@@ -32,7 +32,7 @@ class Compressor(object):
     def split_contents(self):
         """
         To be implemented in a subclass, should return an
-        iterable with three values: kind, value, element
+        iterable with four values: kind, value, basename, element
         """
         raise NotImplementedError
 
