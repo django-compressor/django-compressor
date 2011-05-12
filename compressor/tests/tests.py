@@ -481,3 +481,17 @@ CssTidyTestCase = skipIf(
     find_command(settings.COMPRESS_CSSTIDY_BINARY) is None,
     'CSStidy binary %r not found' % settings.COMPRESS_CSSTIDY_BINARY
 )(CssTidyTestCase)
+
+class PrecompilerTestCase(TestCase):
+    
+    def setUp(self):
+        self.command = 'python %s/precompiler.py {infile} {outfile}' % os.path.dirname(__file__)
+        self.filename = os.path.join(os.path.dirname(__file__), 'media/css/one.css')
+        f = open(self.filename, 'r')
+        self.content = f.read()
+        f.close()
+
+    def test_precompiler(self):
+        from compressor.filters.base import CompilerFilter
+        output = CompilerFilter(content=self.content, filename=self.filename, command=self.command).output()
+        self.assertEqual(u"body { color:#990; }", output)

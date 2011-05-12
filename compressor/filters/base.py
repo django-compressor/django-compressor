@@ -55,9 +55,9 @@ class CompilerFilter(FilterBase):
                     infile = tempfile.NamedTemporaryFile(mode='w')
                     infile.write(self.content)
                     infile.flush()
+                    self.options["infile"] = infile.name
                 else:
-                    infile = open(self.filename)
-                self.options["infile"] = infile.name
+                    self.options["infile"] = self.filename
             if "{outfile}" in self.command:
                 ext = ".%s" % self.type and self.type or ""
                 outfile = tempfile.NamedTemporaryFile(mode='w', suffix=ext)
@@ -65,7 +65,7 @@ class CompilerFilter(FilterBase):
             cmd = stringformat.FormattableString(self.command).format(**self.options)
             proc = subprocess.Popen(cmd_split(cmd),
                 stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
-            if infile is not None:
+            if infile is not None or self.filename is not None:
                 filtered, err = proc.communicate()
             else:
                 filtered, err = proc.communicate(self.content)
