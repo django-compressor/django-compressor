@@ -1,4 +1,3 @@
-import os
 import logging
 import subprocess
 import tempfile
@@ -31,15 +30,18 @@ class CompilerFilter(FilterBase):
     external commands.
     """
     command = None
+    filename = None
     options = {}
 
-    def __init__(self, content, filter_type=None, verbose=0, command=None, **kwargs):
+    def __init__(self, content, filter_type=None, verbose=0, command=None, filename=None, **kwargs):
         super(CompilerFilter, self).__init__(content, filter_type, verbose)
         if command:
             self.command = command
         self.options.update(kwargs)
         if self.command is None:
             raise FilterError("Required command attribute not set")
+        if filename:
+            self.filename = filename
         self.stdout = subprocess.PIPE
         self.stdin = subprocess.PIPE
         self.stderr = subprocess.PIPE
@@ -49,9 +51,12 @@ class CompilerFilter(FilterBase):
         outfile = None
         try:
             if "{infile}" in self.command:
-                infile = tempfile.NamedTemporaryFile(mode='w')
-                infile.write(self.content)
-                infile.flush()
+                if not self.filename:
+                    infile = tempfile.NamedTemporaryFile(mode='w')
+                    infile.write(self.content)
+                    infile.flush()
+                else:
+                    infile = open(self.filename)
                 self.options["infile"] = infile.name
             if "{outfile}" in self.command:
                 ext = ".%s" % self.type and self.type or ""
