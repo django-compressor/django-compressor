@@ -12,6 +12,10 @@ from compressor.storage import default_storage
 from compressor.utils import get_class, staticfiles
 from compressor.utils.decorators import cached_property
 
+# Some constants for nicer handling.
+SOURCE_HUNK, SOURCE_FILE = 1, 2
+
+
 class Compressor(object):
     """
     Base compressor object to be subclassed for content type
@@ -90,11 +94,11 @@ class Compressor(object):
     @cached_property
     def hunks(self):
         for kind, value, basename, elem in self.split_contents():
-            if kind == "hunk":
+            if kind == SOURCE_HUNK:
                 content = self.filter(value, "input",
                     elem=elem, kind=kind, basename=basename)
                 yield unicode(content)
-            elif kind == "file":
+            elif kind == SOURCE_FILE:
                 content = ""
                 fd = open(value, 'rb')
                 try:

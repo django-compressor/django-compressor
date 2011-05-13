@@ -1,7 +1,7 @@
 import os
 
 from compressor.conf import settings
-from compressor.base import Compressor
+from compressor.base import Compressor, SOURCE_HUNK, SOURCE_FILE
 from compressor.exceptions import UncompressableFileError
 
 
@@ -24,11 +24,11 @@ class JsCompressor(Compressor):
                     basename = self.get_basename(attribs['src'])
                     filename = self.get_filename(basename)
                     self.split_content.append(
-                        ('file', filename, basename, elem))
+                        (SOURCE_FILE, filename, basename, elem))
                 except UncompressableFileError:
                     if settings.DEBUG:
                         raise
             else:
                 content = self.parser.elem_content(elem)
-                self.split_content.append(('hunk', content, None, elem))
+                self.split_content.append((SOURCE_HUNK, content, None, elem))
         return self.split_content

@@ -28,6 +28,7 @@ from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
 
 from compressor import base
+from compressor.base import SOURCE_HUNK, SOURCE_FILE
 from compressor.cache import get_hashed_mtime
 from compressor.conf import settings
 from compressor.css import CssCompressor
@@ -59,9 +60,9 @@ class CompressorTestCase(TestCase):
 
     def test_css_split(self):
         out = [
-            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'css/one.css', u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />'),
-            ('hunk', u'p { border:5px solid green;}', None, u'<style type="text/css">p { border:5px solid green;}</style>'),
-            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'css/two.css', u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
+            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'css/one.css', u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />'),
+            (SOURCE_HUNK, u'p { border:5px solid green;}', None, u'<style type="text/css">p { border:5px solid green;}</style>'),
+            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'css/two.css', u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
         ]
         split = self.css_node.split_contents()
         split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3])) for x in split]
@@ -97,8 +98,8 @@ class CompressorTestCase(TestCase):
         self.assertEqual(output, self.css_node.output().strip())
 
     def test_js_split(self):
-        out = [('file', os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), u'js/one.js', '<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>'),
-         ('hunk', u'obj.value = "value";', None, '<script type="text/javascript" charset="utf-8">obj.value = "value";</script>')
+        out = [(SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), u'js/one.js', '<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>'),
+         (SOURCE_HUNK, u'obj.value = "value";', None, '<script type="text/javascript" charset="utf-8">obj.value = "value";</script>')
          ]
         split = self.js_node.split_contents()
         split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3])) for x in split]
@@ -168,17 +169,17 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
 
     def test_css_split(self):
         out = [
-            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'css/one.css', u'<link charset="utf-8" href="/media/css/one.css" rel="stylesheet" type="text/css">'),
-            ('hunk', u'p { border:5px solid green;}', None, u'<style type="text/css">p { border:5px solid green;}</style>'),
-            ('file', os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'css/two.css', u'<link charset="utf-8" href="/media/css/two.css" rel="stylesheet" type="text/css">'),
+            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'css/one.css', u'<link charset="utf-8" href="/media/css/one.css" rel="stylesheet" type="text/css">'),
+            (SOURCE_HUNK, u'p { border:5px solid green;}', None, u'<style type="text/css">p { border:5px solid green;}</style>'),
+            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'css/two.css', u'<link charset="utf-8" href="/media/css/two.css" rel="stylesheet" type="text/css">'),
         ]
         split = self.css_node.split_contents()
         split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3])) for x in split]
         self.assertEqual(out, split)
 
     def test_js_split(self):
-        out = [('file', os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), u'js/one.js', u'<script charset="utf-8" src="/media/js/one.js" type="text/javascript"></script>'),
-         ('hunk', u'obj.value = "value";', None, u'<script charset="utf-8" type="text/javascript">obj.value = "value";</script>')
+        out = [(SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), u'js/one.js', u'<script charset="utf-8" src="/media/js/one.js" type="text/javascript"></script>'),
+         (SOURCE_HUNK, u'obj.value = "value";', None, u'<script charset="utf-8" type="text/javascript">obj.value = "value";</script>')
          ]
         split = self.js_node.split_contents()
         split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3])) for x in split]
