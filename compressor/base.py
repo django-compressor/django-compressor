@@ -129,7 +129,7 @@ class Compressor(object):
                     raise CompressorError(error)
             else:
                 content = CompilerFilter(content, filter_type=self.type,
-                                         command=command).output(**kwargs)
+                                         command=command, filename=filename).output(**kwargs)
         return content
 
     def filter(self, content, method, **kwargs):

@@ -1,4 +1,3 @@
-import os
 import logging
 import subprocess
 import tempfile
@@ -31,15 +30,18 @@ class CompilerFilter(FilterBase):
     external commands.
     """
     command = None
+    filename = None
     options = {}
 
-    def __init__(self, content, filter_type=None, verbose=0, command=None, **kwargs):
+    def __init__(self, content, filter_type=None, verbose=0, command=None, filename=None, **kwargs):
         super(CompilerFilter, self).__init__(content, filter_type, verbose)
         if command:
             self.command = command
         self.options.update(kwargs)
         if self.command is None:
             raise FilterError("Required command attribute not set")
+        if filename:
+            self.filename = filename
         self.stdout = subprocess.PIPE
         self.stdin = subprocess.PIPE
         self.stderr = subprocess.PIPE
@@ -49,10 +51,13 @@ class CompilerFilter(FilterBase):
         outfile = None
         try:
             if "{infile}" in self.command:
-                infile = tempfile.NamedTemporaryFile(mode='w')
-                infile.write(self.content)
-                infile.flush()
-                self.options["infile"] = infile.name
+                if not self.filename:
+                    infile = tempfile.NamedTemporaryFile(mode='w')
+                    infile.write(self.content)
+                    infile.flush()
+                    self.options["infile"] = infile.name
+                else:
+                    self.options["infile"] = self.filename
             if "{outfile}" in self.command:
                 ext = ".%s" % self.type and self.type or ""
                 outfile = tempfile.NamedTemporaryFile(mode='w', suffix=ext)
@@ -60,7 +65,7 @@ class CompilerFilter(FilterBase):
             cmd = stringformat.FormattableString(self.command).format(**self.options)
             proc = subprocess.Popen(cmd_split(cmd),
                 stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
-            if infile is not None:
+            if infile is not None or self.filename is not None:
                 filtered, err = proc.communicate()
             else:
                 filtered, err = proc.communicate(self.content)
