@@ -60,10 +60,8 @@ class Compressor(object):
         if settings.DEBUG and self.finders:
             filename = self.finders.find(basename)
         # secondly try finding the file in the root
-        else:
-            root_filename = os.path.join(settings.COMPRESS_ROOT, basename)
-            if os.path.exists(root_filename):
-                filename = root_filename
+        elif self.storage.exists(basename):
+            filename = self.storage.path(basename)
         if filename:
             return filename
         # or just raise an exception as the last resort
