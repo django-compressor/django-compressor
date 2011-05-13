@@ -9,3 +9,5 @@ MANIFEST
 .tox/
 *.egg
 docs/_build/
+.coverage
+htmlcov
