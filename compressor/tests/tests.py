@@ -219,6 +219,7 @@ class CssAbsolutizingTestCase(TestCase):
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
         settings.COMPRESS_URL = 'http://media.example.com/'
+        filter = CssAbsoluteFilter(content)
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
         output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
@@ -231,6 +232,7 @@ class CssAbsolutizingTestCase(TestCase):
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
         settings.COMPRESS_URL = 'https://media.example.com/'
+        filter = CssAbsoluteFilter(content)
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
         output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
@@ -243,6 +245,7 @@ class CssAbsolutizingTestCase(TestCase):
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
         settings.COMPRESS_URL = 'https://media.example.com/'
+        filter = CssAbsoluteFilter(content)
         output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
