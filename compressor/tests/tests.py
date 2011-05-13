@@ -485,13 +485,35 @@ CssTidyTestCase = skipIf(
 class PrecompilerTestCase(TestCase):
     
     def setUp(self):
-        self.command = 'python %s/precompiler.py {infile} {outfile}' % os.path.dirname(__file__)
         self.filename = os.path.join(os.path.dirname(__file__), 'media/css/one.css')
         f = open(self.filename, 'r')
         self.content = f.read()
         f.close()
 
-    def test_precompiler(self):
+    def test_precompiler_infile_outfile(self):
         from compressor.filters.base import CompilerFilter
-        output = CompilerFilter(content=self.content, filename=self.filename, command=self.command).output()
+        command = 'python %s/precompiler.py -f {infile} -o {outfile}' % os.path.dirname(__file__)
+        output = CompilerFilter(content=self.content, filename=self.filename, command=command).output()
         self.assertEqual(u"body { color:#990; }", output)
+        
+    def test_precompiler_stdin_outfile(self):
+        from compressor.filters.base import CompilerFilter
+        command = 'python %s/precompiler.py -o {outfile}' % os.path.dirname(__file__)
+        output = CompilerFilter(content=self.content, filename=None, command=command).output()
+        self.assertEqual(u"body { color:#990; }", output)
+        
+    def test_precompiler_stdin_stdout(self):
+        from compressor.filters.base import CompilerFilter
+        command = 'python %s/precompiler.py' % os.path.dirname(__file__)
+        output = CompilerFilter(content=self.content, filename=None, command=command).output()
+        self.assertEqual(u"body { color:#990; }\n", output)
+        
+    def test_precompiler_infile_stdout(self):
+        from compressor.filters.base import CompilerFilter
+        command = 'python %s/precompiler.py -f {infile}' % os.path.dirname(__file__)
+        output = CompilerFilter(content=self.content, filename=None, command=command).output()
+        self.assertEqual(u"body { color:#990; }\n", output)
+        
+        
+        
+        

@@ -1,17 +1,33 @@
 #!/usr/bin/env python
 import optparse
+import sys
 
 def main():
     p = optparse.OptionParser()
+    p.add_option('-f', '--file', action="store", 
+                type="string", dest="filename", 
+                help="File to read from, defaults to stdin", default=None)
+    p.add_option('-o', '--output', action="store",
+                type="string", dest="outfile", 
+                help="File to write to, defaults to stdout", default=None)
+                
     options, arguments = p.parse_args()
     
-    f = open(arguments[0])
-    content = f.read()
-    f.close()
+    if options.filename:
+        f = open(options.filename)
+        content = f.read()
+        f.close()
+    else:
+        content = sys.stdin.read()
     
-    f = open(arguments[1], 'w')
-    f.write(content.replace('background:', 'color:'))
-    f.close()
+    content = content.replace('background:', 'color:')
+    
+    if options.outfile:
+        f = open(options.outfile, 'w')
+        f.write(content)
+        f.close()
+    else:
+        print content
 
  
 if __name__ == '__main__':
