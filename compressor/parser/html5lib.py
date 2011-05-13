@@ -4,7 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
-from compressor.utils.cache import cached_property
+from compressor.utils.decorators import cached_property
 
 
 class Html5LibParser(ParserBase):
