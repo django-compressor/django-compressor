@@ -86,9 +86,9 @@ class CompressorTestCase(TestCase):
         self.assertEqual(self.css, self.css_node.output())
 
     def test_cachekey(self):
-        host_name = socket.gethostname()
-        is_cachekey = re.compile(r'django_compressor\.%s\.\w{12}' % host_name)
-        self.assert_(is_cachekey.match(self.css_node.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.%s\.\w{12}'" % host_name)
+        is_cachekey = re.compile(r'\w{12}')
+        self.assertTrue(is_cachekey.match(self.css_node.cachekey),
+            "cachekey is returning something that doesn't look like r'\w{12}'")
 
     def test_css_hash(self):
         self.assertEqual('c618e6846d04', get_hexdigest(self.css, 12))

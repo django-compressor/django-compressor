@@ -86,9 +86,8 @@ class Compressor(object):
 
     @cached_property
     def cachekey(self):
-        key = get_hexdigest(''.join(
+        return get_hexdigest(''.join(
             [self.content] + self.mtimes).encode(self.charset), 12)
-        return "django_compressor.%s.%s" % (socket.gethostname(), key)
 
     @cached_property
     def hunks(self):
