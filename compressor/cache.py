@@ -3,13 +3,13 @@ import socket
 
 from django.core.cache import get_cache
 from django.utils.encoding import smart_str
-from django.utils.hashcompat import sha_constructor
+from django.utils.hashcompat import md5_constructor
 
 from compressor.conf import settings
 
 
 def get_hexdigest(plaintext, length=None):
-    digest = sha_constructor(smart_str(plaintext)).hexdigest()
+    digest = md5_constructor(smart_str(plaintext)).hexdigest()
     if length:
         return digest[:length]
     return digest
