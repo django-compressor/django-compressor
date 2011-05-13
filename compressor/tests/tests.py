@@ -29,7 +29,7 @@ from django.test import TestCase
 
 from compressor import base
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
-from compressor.cache import get_hashed_mtime
+from compressor.cache import get_hashed_mtime, get_hexdigest
 from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
@@ -91,7 +91,7 @@ class CompressorTestCase(TestCase):
         self.assert_(is_cachekey.match(self.css_node.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.%s\.\w{12}'" % host_name)
 
     def test_css_hash(self):
-        self.assertEqual('666f3aa8eacd', self.css_node.hash(self.css))
+        self.assertEqual('666f3aa8eacd', get_hexdigest(self.css, 12))
 
     def test_css_return_if_on(self):
         output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css">'

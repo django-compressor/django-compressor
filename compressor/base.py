@@ -151,14 +151,11 @@ class Compressor(object):
 
     @cached_property
     def combined(self):
-
-    def hash(self, content):
-        return get_hexdigest(content)[:12]
         return self.filter(self.concat, method=METHOD_OUTPUT)
 
     def filepath(self, content):
         return os.path.join(settings.COMPRESS_OUTPUT_DIR.strip(os.sep),
-            self.output_prefix, "%s.%s" % (self.hash(content), self.type))
+            self.output_prefix, "%s.%s" % (get_hexdigest(content, 12), self.type))
 
     def output(self, mode='file', forced=False):
         """
