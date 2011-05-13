@@ -12,7 +12,7 @@ URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 
 class CssAbsoluteFilter(FilterBase):
     def input(self, filename=None, basename=None, **kwargs):
-        self.root = os.path.normcase(os.path.abspath(settings.COMPRESS_ROOT))
+        self.root = settings.COMPRESS_ROOT
         if filename is not None:
             filename = os.path.normcase(os.path.abspath(filename))
         if (not (filename and filename.startswith(self.root)) and
