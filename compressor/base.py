@@ -122,17 +122,16 @@ class Compressor(object):
             return content
         attrs = self.parser.elem_attribs(elem)
         mimetype = attrs.get("type", None)
-        if mimetype is not None:
+        if mimetype:
             command = self.all_mimetypes.get(mimetype)
             if command is None:
                 if mimetype not in ("text/css", "text/javascript"):
-                    error = ("Couldn't find any precompiler in "
-                             "COMPRESS_PRECOMPILERS setting for "
-                             "mimetype '%s'." % mimetype)
-                    raise CompressorError(error)
+                    raise CompressorError("Couldn't find any precompiler in "
+                                          "COMPRESS_PRECOMPILERS setting for "
+                                          "mimetype '%s'." % mimetype)
             else:
-                content = CompilerFilter(content, filter_type=self.type,
-                                         command=command, filename=filename).output(**kwargs)
+                return CompilerFilter(content, filter_type=self.type,
+                    command=command, filename=filename).output(**kwargs)
         return content
 
     def filter(self, content, method, **kwargs):
