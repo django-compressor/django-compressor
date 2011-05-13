@@ -7,6 +7,8 @@ from compressor.cache import cache, get_offline_cachekey
 from compressor.conf import settings
 from compressor.utils import get_class
 
+register = template.Library()
+
 OUTPUT_FILE = 'file'
 OUTPUT_INLINE = 'inline'
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
@@ -15,9 +17,8 @@ COMPRESSORS = {
     "js": settings.COMPRESS_JS_COMPRESSOR,
 }
 
-register = template.Library()
-
 class CompressorNode(template.Node):
+
     def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE):
         self.nodelist = nodelist
         self.kind = kind
@@ -104,6 +105,7 @@ class CompressorNode(template.Node):
 
         # 5. Or don't do anything in production
         return self.nodelist.render(context)
+
 
 @register.tag
 def compress(parser, token):

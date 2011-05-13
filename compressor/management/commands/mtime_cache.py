@@ -8,6 +8,7 @@ from compressor.cache import cache, get_mtime, get_mtime_cachekey
 from compressor.conf import settings
 from compressor.utils import walk
 
+
 class Command(NoArgsCommand):
     help = "Add or remove all mtime values from the cache"
     option_list = NoArgsCommand.option_list + (
