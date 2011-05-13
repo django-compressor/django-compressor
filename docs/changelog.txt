@@ -9,7 +9,7 @@ HEAD
 
 - Enabled test coverage.
 
-- Refactored caching und other utility code.
+- Refactored caching and other utility code.
 
 - Switched from SHA1 to MD5 for hash generation to lower the computational impact.
 
