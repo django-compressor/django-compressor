@@ -1,6 +1,8 @@
+from __future__ import with_statement
 import os
 import re
 import socket
+import sys
 from unittest2 import skipIf
 
 from BeautifulSoup import BeautifulSoup
@@ -32,6 +34,8 @@ from compressor.css import CssCompressor
 from compressor.js import JsCompressor
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.utils import find_command
+from compressor.filters.base import CompilerFilter
+
 
 class CompressorTestCase(TestCase):
 
@@ -483,37 +487,30 @@ CssTidyTestCase = skipIf(
 )(CssTidyTestCase)
 
 class PrecompilerTestCase(TestCase):
-    
+
     def setUp(self):
-        self.filename = os.path.join(os.path.dirname(__file__), 'media/css/one.css')
-        f = open(self.filename, 'r')
-        self.content = f.read()
-        f.close()
+        self.this_dir = os.path.dirname(__file__)
+        self.filename = os.path.join(self.this_dir, 'media/css/one.css')
+        self.test_precompiler =  os.path.join(self.this_dir, 'precompiler.py')
+        with open(self.filename, 'r') as f:
+            self.content = f.read()
 
     def test_precompiler_infile_outfile(self):
-        from compressor.filters.base import CompilerFilter
-        command = 'python %s/precompiler.py -f {infile} -o {outfile}' % os.path.dirname(__file__)
-        output = CompilerFilter(content=self.content, filename=self.filename, command=command).output()
-        self.assertEqual(u"body { color:#990; }", output)
-        
+        command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
+        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
+        self.assertEqual(u"body { color:#990; }", compiler.output())
+
     def test_precompiler_stdin_outfile(self):
-        from compressor.filters.base import CompilerFilter
-        command = 'python %s/precompiler.py -o {outfile}' % os.path.dirname(__file__)
-        output = CompilerFilter(content=self.content, filename=None, command=command).output()
-        self.assertEqual(u"body { color:#990; }", output)
-        
+        command = '%s %s -o {outfile}' %  (sys.executable, self.test_precompiler)
+        compiler = CompilerFilter(content=self.content, filename=None, command=command)
+        self.assertEqual(u"body { color:#990; }", compiler.output())
+
     def test_precompiler_stdin_stdout(self):
-        from compressor.filters.base import CompilerFilter
-        command = 'python %s/precompiler.py' % os.path.dirname(__file__)
-        output = CompilerFilter(content=self.content, filename=None, command=command).output()
-        self.assertEqual(u"body { color:#990; }\n", output)
-        
+        command = '%s %s' %  (sys.executable, self.test_precompiler)
+        compiler = CompilerFilter(content=self.content, filename=None, command=command)
+        self.assertEqual(u"body { color:#990; }\n", compiler.output())
+
     def test_precompiler_infile_stdout(self):
-        from compressor.filters.base import CompilerFilter
-        command = 'python %s/precompiler.py -f {infile}' % os.path.dirname(__file__)
-        output = CompilerFilter(content=self.content, filename=None, command=command).output()
-        self.assertEqual(u"body { color:#990; }\n", output)
-        
-        
-        
-        
+        command = '%s %s -f {infile}' %  (sys.executable, self.test_precompiler)
+        compiler = CompilerFilter(content=self.content, filename=None, command=command)
+        self.assertEqual(u"body { color:#990; }\n", compiler.output())
