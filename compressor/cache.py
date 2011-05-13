@@ -38,8 +38,11 @@ def get_mtime(filename):
 
 
 def get_hashed_mtime(filename, length=12):
-    filename = os.path.realpath(filename)
-    mtime = str(int(get_mtime(filename)))
+    try:
+        filename = os.path.realpath(filename)
+        mtime = str(int(get_mtime(filename)))
+    except OSError:
+        return None
     return get_hexdigest(mtime, length)
 
 

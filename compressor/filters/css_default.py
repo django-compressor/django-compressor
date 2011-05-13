@@ -22,10 +22,7 @@ class CssAbsoluteFilter(FilterBase):
         self.path = self.path.lstrip('/')
         self.url = settings.COMPRESS_URL.rstrip('/')
         self.url_path = self.url
-        try:
-            self.mtime = get_hashed_mtime(filename)
-        except OSError:
-            self.mtime = None
+        self.mtime = get_hashed_mtime(filename)
         self.has_http = False
         if self.url.startswith('http://') or self.url.startswith('https://'):
             self.has_http = True
