@@ -36,6 +36,7 @@ class Command(NoArgsCommand):
                 "can lead to infinite recursion if a link points to a parent "
                 "directory of itself.", dest='follow_links'),
     )
+
     def get_loaders(self):
         from django.template.loader import template_source_loaders
         if template_source_loaders is None:
@@ -113,11 +114,11 @@ class Command(NoArgsCommand):
                                         settings.FILE_CHARSET))
                 finally:
                     template_file.close()
-            except IOError: # unreadable file -> ignore
+            except IOError:  # unreadable file -> ignore
                 if verbosity > 0:
                     log.write("Unreadable template at: %s\n" % template_name)
                 continue
-            except TemplateSyntaxError: # broken template -> ignore
+            except TemplateSyntaxError:  # broken template -> ignore
                 if verbosity > 0:
                     log.write("Invalid template at: %s\n" % template_name)
                 continue
@@ -159,7 +160,7 @@ class Command(NoArgsCommand):
     def walk_nodes(self, node):
         for node in getattr(node, "nodelist", []):
             if (isinstance(node, CompressorNode) or
-                    node.__class__.__name__ == "CompressorNode"): # for 1.1.X
+                    node.__class__.__name__ == "CompressorNode"):  # for 1.1.X
                 yield node
             else:
                 for node in self.walk_nodes(node):
@@ -180,7 +181,7 @@ class Command(NoArgsCommand):
         """
         ext_list = []
         for ext in extensions:
-            ext_list.extend(ext.replace(' ','').split(','))
+            ext_list.extend(ext.replace(' ', '').split(','))
         for i, ext in enumerate(ext_list):
             if not ext.startswith('.'):
                 ext_list[i] = '.%s' % ext_list[i]

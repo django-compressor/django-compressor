@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import os
 import sys
+import coverage
+from os.path import join
 
 from django.conf import settings
 
@@ -28,9 +30,23 @@ from django.test.simple import run_tests
 def runtests(*test_args):
     if not test_args:
         test_args = ['tests']
-    parent = os.path.join(TEST_DIR, "..", "..")
-    sys.path.insert(0, parent)
+    parent_dir = os.path.join(TEST_DIR, "..", "..")
+    sys.path.insert(0, parent_dir)
+    cov = coverage.coverage(branch=True,
+        include=[
+            os.path.join(parent_dir, 'compressor', '*.py')
+            ],
+        omit=[
+            join(parent_dir, 'compressor', 'tests', '*.py'),
+            join(parent_dir, 'compressor', 'utils', 'stringformat.py'),
+            join(parent_dir, 'compressor', 'filters', 'jsmin', 'rjsmin.py'),
+            join(parent_dir, 'compressor', 'filters', 'cssmin', 'cssmin.py'),
+        ])
+    cov.load()
+    cov.start()
     failures = run_tests(test_args, verbosity=1, interactive=True)
+    cov.stop()
+    cov.save()
     sys.exit(failures)
 
 

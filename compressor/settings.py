@@ -1,3 +1,4 @@
+import os
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -66,7 +67,7 @@ class CompressorSettings(AppSettings):
         if not value:
             raise ImproperlyConfigured(
                 "The COMPRESS_ROOT setting must be set.")
-        return value
+        return os.path.normcase(os.path.abspath(value))
 
     def configure_url(self, value):
         # Uses Django 1.3's STATIC_URL by default or falls back to MEDIA_URL

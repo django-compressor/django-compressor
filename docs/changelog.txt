@@ -1,6 +1,18 @@
 Changelog
 =========
 
+0.9
+---
+
+- Fixed the precompiler support to also use the full file path instead of a
+  temporarily created file.
+
+- Enabled test coverage.
+
+- Refactored caching and other utility code.
+
+- Switched from SHA1 to MD5 for hash generation to lower the computational impact.
+
 0.8
 ---
 

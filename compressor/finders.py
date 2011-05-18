@@ -1,6 +1,7 @@
 from compressor.utils import staticfiles
 from compressor.storage import CompressorFileStorage
 
+
 class CompressorFinder(staticfiles.finders.BaseStorageFinder):
     """
     A staticfiles finder that looks in COMPRESS_ROOT

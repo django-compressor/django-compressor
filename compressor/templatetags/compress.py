@@ -1,11 +1,12 @@
-import time
-
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 
-from compressor.cache import cache, get_offline_cachekey
+from compressor.cache import (cache, cache_get, cache_set,
+                              get_offline_cachekey, get_templatetag_cachekey)
 from compressor.conf import settings
 from compressor.utils import get_class
+
+register = template.Library()
 
 OUTPUT_FILE = 'file'
 OUTPUT_INLINE = 'inline'
@@ -15,38 +16,14 @@ COMPRESSORS = {
     "js": settings.COMPRESS_JS_COMPRESSOR,
 }
 
-register = template.Library()
-
 class CompressorNode(template.Node):
+
     def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE):
         self.nodelist = nodelist
         self.kind = kind
         self.mode = mode
         self.compressor_cls = get_class(
             COMPRESSORS.get(self.kind), exception=ImproperlyConfigured)
-
-    def cache_get(self, key):
-        packed_val = cache.get(key)
-        if packed_val is None:
-            return None
-        val, refresh_time, refreshed = packed_val
-        if (time.time() > refresh_time) and not refreshed:
-            # Store the stale value while the cache
-            # revalidates for another MINT_DELAY seconds.
-            self.cache_set(key, val, refreshed=True,
-                timeout=settings.COMPRESS_MINT_DELAY)
-            return None
-        return val
-
-    def cache_set(self, key, val, refreshed=False,
-            timeout=settings.COMPRESS_REBUILD_TIMEOUT):
-        refresh_time = timeout + time.time()
-        real_timeout = timeout + settings.COMPRESS_MINT_DELAY
-        packed_val = (val, refresh_time, refreshed)
-        return cache.set(key, packed_val, real_timeout)
-
-    def cache_key(self, compressor):
-        return "%s.%s.%s" % (compressor.cachekey, self.mode, self.kind)
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
@@ -71,8 +48,9 @@ class CompressorNode(template.Node):
         and return a tuple of cache key and output
         """
         if settings.COMPRESS_ENABLED and not forced:
-            cache_key = self.cache_key(compressor)
-            cache_content = self.cache_get(cache_key)
+            cache_key = get_templatetag_cachekey(
+                compressor, self.mode, self.kind)
+            cache_content = cache_get(cache_key)
             return cache_key, cache_content
         return None, None
 
@@ -96,7 +74,7 @@ class CompressorNode(template.Node):
         try:
             rendered_output = compressor.output(self.mode, forced=forced)
             if cache_key:
-                self.cache_set(cache_key, rendered_output)
+                cache_set(cache_key, rendered_output)
             return rendered_output
         except Exception, e:
             if settings.DEBUG or forced:
@@ -104,6 +82,7 @@ class CompressorNode(template.Node):
 
         # 5. Or don't do anything in production
         return self.nodelist.render(context)
+
 
 @register.tag
 def compress(parser, token):
