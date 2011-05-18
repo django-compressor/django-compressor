@@ -1,6 +1,5 @@
 from HTMLParser import HTMLParser
 from django.utils.encoding import smart_unicode
-from django.utils.datastructures import SortedDict
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 

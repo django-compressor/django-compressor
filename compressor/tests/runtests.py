@@ -5,7 +5,6 @@ import coverage
 from os.path import join
 
 from django.conf import settings
-from django.core.management import call_command
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 

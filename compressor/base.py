@@ -1,5 +1,4 @@
 import os
-import socket
 
 from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
