@@ -109,7 +109,11 @@ class Compressor(object):
                     filename=value, basename=basename, elem=elem, kind=kind)
                 attribs = self.parser.elem_attribs(elem)
                 charset = attribs.get("charset", self.charset)
-                yield unicode(content, charset)
+                
+                if type(content) == unicode:
+                    yield content
+                else:
+                    yield unicode(content, charset)
 
     @cached_property
     def concat(self):
