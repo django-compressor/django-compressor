@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.9.1
+-----
+
+- Fixed encoding related issue.
+
+- Minor cleanups.
+
 0.9
 ---
 
