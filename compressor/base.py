@@ -2,6 +2,7 @@ import os
 
 from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
+from django.utils.encoding import smart_unicode
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
@@ -94,7 +95,7 @@ class Compressor(object):
             if kind == SOURCE_HUNK:
                 content = self.filter(value, METHOD_INPUT,
                     elem=elem, kind=kind, basename=basename)
-                yield unicode(content)
+                yield smart_unicode(content)
             elif kind == SOURCE_FILE:
                 content = ""
                 fd = open(value, 'rb')
@@ -109,7 +110,7 @@ class Compressor(object):
                     filename=value, basename=basename, elem=elem, kind=kind)
                 attribs = self.parser.elem_attribs(elem)
                 charset = attribs.get("charset", self.charset)
-                yield unicode(content, charset)
+                yield smart_unicode(content, charset.lower())
 
     @cached_property
     def concat(self):
