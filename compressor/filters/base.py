@@ -47,10 +47,10 @@ class CompilerFilter(FilterBase):
         self.stderr = subprocess.PIPE
 
     def output(self, **kwargs):
-        infile = None
-        outfile = None
+        infile = True if "{infile}" in self.command else None
+        outfile = True if "{outfile}" in self.command else None
         try:
-            if "{infile}" in self.command:
+            if infile:
                 if not self.filename:
                     infile = tempfile.NamedTemporaryFile(mode='w')
                     infile.write(self.content)
@@ -58,7 +58,7 @@ class CompilerFilter(FilterBase):
                     self.options["infile"] = infile.name
                 else:
                     self.options["infile"] = self.filename
-            if "{outfile}" in self.command:
+            if outfile:
                 ext = ".%s" % self.type and self.type or ""
                 outfile = tempfile.NamedTemporaryFile(mode='w', suffix=ext)
                 self.options["outfile"] = outfile.name
@@ -73,8 +73,10 @@ class CompilerFilter(FilterBase):
             raise FilterError('Unable to apply %s (%r): %s' % (
                 self.__class__.__name__, self.command, e))
         finally:
-            if infile:
+            try:
                 infile.close()
+            except:
+                pass
         if proc.wait() != 0:
             if not err:
                 err = 'Unable to apply %s (%s)' % (
