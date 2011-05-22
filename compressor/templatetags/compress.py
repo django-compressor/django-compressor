@@ -44,10 +44,10 @@ class CompressorNode(template.Node):
 
     def render_cached(self, compressor, forced):
         """
-        If enabled checks the cache for the given compressor's cache key
+        Checks the cache for the given compressor's cache key
         and return a tuple of cache key and output
         """
-        if settings.COMPRESS_ENABLED and not forced:
+        if not forced:
             cache_key = get_templatetag_cachekey(
                 compressor, self.mode, self.kind)
             cache_content = cache_get(cache_key)
