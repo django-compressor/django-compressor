@@ -90,6 +90,11 @@ class CompressorTestCase(TestCase):
         self.assertTrue(is_cachekey.match(self.css_node.cachekey),
             "cachekey is returning something that doesn't look like r'\w{12}'")
 
+        # should still work with COMPRESS disabled
+        settings.COMPRESS_ENABLED = False
+        self.assertTrue(is_cachekey.match(self.css_node.cachekey),
+            "cachekey is returning something that doesn't look like r'\w{12}'")
+
     def test_css_hash(self):
         self.assertEqual('c618e6846d04', get_hexdigest(self.css, 12))
 
