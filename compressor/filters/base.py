@@ -65,7 +65,7 @@ class CompilerFilter(FilterBase):
             cmd = stringformat.FormattableString(self.command).format(**self.options)
             proc = subprocess.Popen(cmd_split(cmd),
                 stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
-            if infile is not None or self.filename is not None:
+            if infile is not None:
                 filtered, err = proc.communicate()
             else:
                 filtered, err = proc.communicate(self.content)
