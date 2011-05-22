@@ -514,6 +514,10 @@ class PrecompilerTestCase(TestCase):
         compiler = CompilerFilter(content=self.content, filename=None, command=command)
         self.assertEqual(u"body { color:#990; }\n", compiler.output())
 
+        # test stdin when filename is entered
+        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
+        self.assertEqual(u"body { color:#990; }\n", compiler.output())
+
     def test_precompiler_infile_stdout(self):
         command = '%s %s -f {infile}' %  (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=None, command=command)
