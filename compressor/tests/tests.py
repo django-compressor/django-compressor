@@ -496,7 +496,7 @@ class PrecompilerTestCase(TestCase):
         self.this_dir = os.path.dirname(__file__)
         self.filename = os.path.join(self.this_dir, 'media/css/one.css')
         self.test_precompiler =  os.path.join(self.this_dir, 'precompiler.py')
-        with open(self.filename, 'r') as f:
+        with open(self.filename) as f:
             self.content = f.read()
 
     def test_precompiler_infile_outfile(self):
@@ -512,6 +512,11 @@ class PrecompilerTestCase(TestCase):
     def test_precompiler_stdin_stdout(self):
         command = '%s %s' %  (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=None, command=command)
+        self.assertEqual(u"body { color:#990; }\n", compiler.output())
+
+    def test_precompiler_stdin_stdout_filename(self):
+        command = '%s %s' %  (sys.executable, self.test_precompiler)
+        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
         self.assertEqual(u"body { color:#990; }\n", compiler.output())
 
     def test_precompiler_infile_stdout(self):
