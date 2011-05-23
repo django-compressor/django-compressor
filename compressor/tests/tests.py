@@ -90,6 +90,11 @@ class CompressorTestCase(TestCase):
         self.assertTrue(is_cachekey.match(self.css_node.cachekey),
             "cachekey is returning something that doesn't look like r'\w{12}'")
 
+        # should still work with COMPRESS disabled
+        settings.COMPRESS_ENABLED = False
+        self.assertTrue(is_cachekey.match(self.css_node.cachekey),
+            "cachekey is returning something that doesn't look like r'\w{12}'")
+
     def test_css_hash(self):
         self.assertEqual('c618e6846d04', get_hexdigest(self.css, 12))
 
@@ -512,6 +517,10 @@ class PrecompilerTestCase(TestCase):
     def test_precompiler_stdin_stdout(self):
         command = '%s %s' %  (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=None, command=command)
+        self.assertEqual(u"body { color:#990; }\n", compiler.output())
+
+        # test stdin when filename is entered
+        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
         self.assertEqual(u"body { color:#990; }\n", compiler.output())
 
     def test_precompiler_infile_stdout(self):
