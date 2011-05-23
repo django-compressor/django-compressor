@@ -33,15 +33,13 @@ class CompilerFilter(FilterBase):
     filename = None
     options = {}
 
-    def __init__(self, content, filter_type=None, verbose=0, command=None, filename=None, **kwargs):
-        super(CompilerFilter, self).__init__(content, filter_type, verbose)
+    def __init__(self, content, command=None, filename=None, *args, **kwargs):
+        super(CompilerFilter, self).__init__(content, *args, **kwargs)
         if command:
             self.command = command
-        self.options.update(kwargs)
         if self.command is None:
-            raise FilterError("Required command attribute not set")
-        if filename:
-            self.filename = filename
+            raise FilterError("Required attribute 'command' not given")
+        self.filename = filename
         self.stdout = subprocess.PIPE
         self.stdin = subprocess.PIPE
         self.stderr = subprocess.PIPE
@@ -51,41 +49,37 @@ class CompilerFilter(FilterBase):
         outfile = None
         try:
             if "{infile}" in self.command:
-                if not self.filename:
-                    infile = tempfile.NamedTemporaryFile(mode='w')
-                    infile.write(self.content)
-                    infile.flush()
-                    self.options["infile"] = infile.name
-                else:
-                    self.options["infile"] = self.filename
+                infile = tempfile.NamedTemporaryFile(mode='w')
+                infile.write(self.content)
+                infile.flush()
+                self.options["infile"] = self.filename or infile.name
             if "{outfile}" in self.command:
                 ext = ".%s" % self.type and self.type or ""
-                outfile = tempfile.NamedTemporaryFile(mode='w', suffix=ext)
+                outfile = tempfile.NamedTemporaryFile(mode='rw', suffix=ext)
                 self.options["outfile"] = outfile.name
-            cmd = stringformat.FormattableString(self.command).format(**self.options)
-            proc = subprocess.Popen(cmd_split(cmd),
+            command = stringformat.FormattableString(self.command)
+            proc = subprocess.Popen(cmd_split(command.format(**self.options)),
                 stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
-            if infile is not None or self.filename is not None:
+            if infile is not None:
                 filtered, err = proc.communicate()
             else:
                 filtered, err = proc.communicate(self.content)
         except (IOError, OSError), e:
-            raise FilterError('Unable to apply %s (%r): %s' % (
-                self.__class__.__name__, self.command, e))
+            raise FilterError('Unable to apply %s (%r): %s' %
+                              (self.__class__.__name__, self.command, e))
+        else:
+            if proc.wait() != 0:
+                if not err:
+                    err = ('Unable to apply %s (%s)' %
+                           (self.__class__.__name__, self.command))
+                raise FilterError(err)
+            if self.verbose:
+                self.logger.debug(err)
+            if outfile is not None:
+                filtered = outfile.read()
         finally:
-            if infile:
+            if infile is not None:
                 infile.close()
-        if proc.wait() != 0:
-            if not err:
-                err = 'Unable to apply %s (%s)' % (
-                    self.__class__.__name__, self.command)
-            raise FilterError(err)
-        if self.verbose:
-            self.logger.debug(err)
-        if outfile is not None:
-            try:
-                outfile_obj = open(outfile.name)
-                filtered = outfile_obj.read()
-            finally:
-                outfile_obj.close()
+            if outfile is not None:
+                outfile.close()
         return filtered
