@@ -55,7 +55,7 @@ class CompilerFilter(FilterBase):
                 self.options["infile"] = self.filename or infile.name
             if "{outfile}" in self.command:
                 ext = ".%s" % self.type and self.type or ""
-                outfile = tempfile.NamedTemporaryFile(mode='rw', suffix=ext)
+                outfile = tempfile.NamedTemporaryFile(mode='w', suffix=ext)
                 self.options["outfile"] = outfile.name
             command = stringformat.FormattableString(self.command)
             proc = subprocess.Popen(cmd_split(command.format(**self.options)),
