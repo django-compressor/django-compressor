@@ -130,7 +130,7 @@ class Compressor(object):
                                           "mimetype '%s'." % mimetype)
             else:
                 return CompilerFilter(content, filter_type=self.type,
-                    command=command, filename=filename).output(**kwargs)
+                    command=command, filename=filename).input(**kwargs)
         return content
 
     def filter(self, content, method, **kwargs):

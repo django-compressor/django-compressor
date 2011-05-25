@@ -40,6 +40,10 @@ class CompressorSettings(AppSettings):
     YUI_JS_ARGUMENTS = ''
     DATA_URI_MIN_SIZE = 1024
 
+    COMPASS_BINARY = 'compass'
+    COMPASS_ARGUMENTS = ' --no-line-comments --output-style expanded'
+    COMPASS_PLUGINS = []
+
     # the cache backend to use
     CACHE_BACKEND = None
     # rebuilds the cache every 30 days if nothing has changed.

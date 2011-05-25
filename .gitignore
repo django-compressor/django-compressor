@@ -11,3 +11,4 @@ MANIFEST
 docs/_build/
 .coverage
 htmlcov
+.sass-cache
