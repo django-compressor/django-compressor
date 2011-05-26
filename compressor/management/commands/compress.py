@@ -10,9 +10,13 @@ except ImportError:
 
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
-from django.template.loaders.cached import Loader as CachedLoader
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
+
+try:
+    from django.template.loaders.cached import Loader as CachedLoader
+except ImportError:
+    CachedLoader = None
 
 from compressor.cache import cache, get_offline_cachekey
 from compressor.conf import settings
@@ -64,7 +68,7 @@ class Command(NoArgsCommand):
         # The loaders will return django.template.loaders.filesystem.Loader
         # and django.template.loaders.app_directories.Loader
         for loader in template_source_loaders:
-            if isinstance(loader, CachedLoader):
+            if CachedLoader is not None and isinstance(loader, CachedLoader):
                 loaders.extend(loader.loaders)
             else:
                 loaders.append(loader)

@@ -22,12 +22,6 @@ if not settings.configured:
             os.path.join(TEST_DIR, 'templates'),
         ),
         TEST_DIR = TEST_DIR,
-        TEMPLATE_LOADERS = (
-            ('django.template.loaders.cached.Loader', (
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
-            )),
-        )
     )
 
 from django.test.simple import run_tests
