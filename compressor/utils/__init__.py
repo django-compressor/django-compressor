@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-from shlex import split as cmd_split
 
 from compressor.exceptions import FilterError
 

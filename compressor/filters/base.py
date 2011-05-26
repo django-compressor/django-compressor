@@ -6,7 +6,6 @@ from django.utils.datastructures import SortedDict
 
 from compressor.conf import settings
 from compressor.exceptions import FilterError
-from compressor.utils import cmd_split
 from compressor.utils.stringformat import FormattableString as fstr
 
 logger = logging.getLogger("compressor.filters")
@@ -75,8 +74,8 @@ class CompilerFilter(FilterBase):
             options["outfile"] = self.outfile.name
         try:
             command = fstr(self.command).format(**options)
-            proc = subprocess.Popen(cmd_split(command), shell=os.name=='nt',
-                stdout=self.stdout, stdin=self.stdin, stderr=self.stderr, cwd=self.cwd)
+            proc = subprocess.Popen(command, shell=True, cwd=self.cwd,
+                stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
             if self.infile is None:
                 filtered, err = proc.communicate(self.content)
             else:
