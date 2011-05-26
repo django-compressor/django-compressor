@@ -1,6 +1,17 @@
 Changelog
 =========
 
+HEAD
+----
+
+- Added Compass filter (beta).
+
+- Fixed compiler filters on Windows.
+
+- Handle new-style cached template loaders in the compress management command.
+
+- Documented included filters.
+
 0.9.2
 -----
 
