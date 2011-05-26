@@ -24,6 +24,8 @@ except ImportError:
 from django.core.cache.backends import dummy
 from django.core.files.storage import get_storage_class
 from django.template import Template, Context, TemplateSyntaxError
+from django.template.loaders.filesystem import Loader as FileSystemLoader
+from django.template.loaders.app_directories import Loader as AppDirectoriesLoader
 from django.test import TestCase
 
 from compressor import base
@@ -471,6 +473,18 @@ class OfflineGenerationTestCase(TestCase):
             u'<script type="text/javascript" src="/media/CACHE/js/0a2bb9a287c0.js" charset="utf-8"></script>',
         ], result)
         settings.COMPRESS_OFFLINE_CONTEXT = self._old_offline_context
+    
+    def test_get_loaders(self):
+        template_loaders = (
+            ('django.template.loaders.cached.Loader', (
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            )),
+        )
+        self.assertEqual(template_loaders, settings.TEMPLATE_LOADERS)
+        loaders = CompressCommand().get_loaders()
+        self.assertIsInstance(loaders[0], FileSystemLoader)
+        self.assertIsInstance(loaders[1], AppDirectoriesLoader)
 
 
 class CssTidyTestCase(TestCase):

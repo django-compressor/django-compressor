@@ -10,6 +10,7 @@ except ImportError:
 
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
+from django.template.loaders.cached import Loader as CachedLoader
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
 
@@ -51,7 +52,23 @@ class Command(NoArgsCommand):
             except TemplateDoesNotExist:
                 pass
             from django.template.loader import template_source_loaders
-        return template_source_loaders or []
+        loaders = []
+        # If template loader is CachedTemplateLoader, return the loaders
+        # that it wraps around. So if we have 
+        # TEMPLATE_LOADERS = (
+        #    ('django.template.loaders.cached.Loader', (
+        #        'django.template.loaders.filesystem.Loader',
+        #        'django.template.loaders.app_directories.Loader',
+        #    )),
+        # )
+        # The loaders will return django.template.loaders.filesystem.Loader
+        # and django.template.loaders.app_directories.Loader
+        for loader in template_source_loaders:
+            if isinstance(loader, CachedLoader):
+                loaders.extend(loader.loaders)
+            else:
+                loaders.append(loader)
+        return loaders
 
     def compress(self, log=None, **options):
         """
