@@ -22,7 +22,7 @@ Everything stops here if the cache entry exists.
 Second step: parsing and file list
 ----------------------------------
 
-A compressor instance is created, which in turns instanciates the HTML parser.
+A compressor instance is created, which in turns instantiates the HTML parser.
 The parser is used to determine a file or code hunk list. Each file mtime is
 checked, first in cache and then on disk/storage, and this is used to
 determine an unique cache key.
