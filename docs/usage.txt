@@ -46,14 +46,14 @@ Which would be rendered something like:
 
     <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
-Linked files **must** be accesible via :ref:`COMPRESS_URL <compress_url>`.
+Linked files **must** be accessible via :ref:`COMPRESS_URL <compress_url>`.
 
 If the :ref:`COMPRESS <compress>` setting is ``False`` (defaults to the
 opposite of DEBUG) the ``compress`` template tag does nothing and simply returns
 exactly what it was given.
 
-If both DEBUG and :ref:`COMPRESS <compress>` are set to ``True``, uncompressable
-files (off-site or non existent) will throw and exception. If DEBUG is ``False``
+If both DEBUG and :ref:`COMPRESS <compress>` are set to ``True``, incompressible
+files (off-site or non existent) will throw an exception. If DEBUG is ``False``
 these files will be silently stripped.
 
 .. warning::
@@ -64,7 +64,7 @@ these files will be silently stripped.
     :ref:`COMPRESS_CACHE_BACKEND <compress_cache_backend>` and
     Django's `caching documentation`_).
 
-The compress template tag supports a second arguemnt specifying the output
+The compress template tag supports a second argument specifying the output
 mode and defaults to saving the result in a file. Alternatively you can
 pass '``inline``' to the template tag to return the content directly to the
 rendered page, e.g.:
@@ -93,7 +93,7 @@ would be rendered something like::
 Pre-compression
 ---------------
 
-Django Compressor comes with an optional ``compress`` mangement command to
+Django Compressor comes with an optional ``compress`` management command to
 run the compression outside of the request/response loop -- independent
 from user requests. This allows to pre-compress CSS and JavaScript files and
 works just like the automatic compression with the ``{% compress %}`` tag.
