@@ -130,7 +130,7 @@ A list of filters that will be applied to javascript. Possible options are:
 ``compressor.filters.jsmin.JSMinFilter``
 """""""""""""""""""""""""""""""""""""""""
 
-A filter that uses the jsmin implementation rJSmin_ to compess JavaScript code.
+A filter that uses the jsmin implementation rJSmin_ to compress JavaScript code.
 
 ``compressor.filters.closure.ClosureCompilerFilter``
 """"""""""""""""""""""""""""""""""""""""""""""""""""
@@ -257,7 +257,7 @@ back to ``HtmlParser`` if ``lxml`` is not available.
 
 ``LxmlParser`` is the fastest available parser, but ``HtmlParser`` is not much
 slower. ``AutoSelectParser`` adds a slight overhead, but in most cases it
-won't be necesarry to change the default parser.
+won't be necessary to change the default parser.
 
 The other two included parsers are considerably slower and should only be
 used if absolutely necessary.
