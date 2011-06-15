@@ -422,7 +422,7 @@ class StorageTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.COMPRESS_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/1d4424458f88.css.gz" type="text/css">'
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/1d4424458f88.css" type="text/css">'
         self.assertEqual(out, render(template, context))
 
 
