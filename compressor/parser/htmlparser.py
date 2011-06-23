@@ -1,4 +1,4 @@
-from HTMLParser import HTMLParser
+from ..HTMLParser import HTMLParser
 from django.utils.encoding import smart_unicode
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
