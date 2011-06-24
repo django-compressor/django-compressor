@@ -541,6 +541,17 @@ class CompassTestCase(TestCase):
         out = u'<link rel="stylesheet" href="/media/CACHE/css/3f807af2259c.css" type="text/css">'
         self.assertEqual(out, render(template, context))
 
+    def test_compass_with_css_file(self):
+        template = u"""{% load compress %}{% compress css %}
+        <link rel="stylesheet" href="{{ MEDIA_URL }}sass/screen.scss" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}sass/print.scss" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}css/one.css" type="text/css" charset="utf-8">
+        {% endcompress %}
+        """
+        context = {'MEDIA_URL': settings.COMPRESS_URL}
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/624314c2c82f.css" type="text/css">'
+        self.assertEqual(out, render(template, context))
+
 CompassTestCase = skipIf(
     find_command(settings.COMPRESS_COMPASS_BINARY) is None,
     'Compass binary %r not found' % settings.COMPRESS_COMPASS_BINARY
