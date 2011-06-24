@@ -12,6 +12,8 @@ from compressor.storage import default_storage
 from compressor.utils import get_class, staticfiles
 from compressor.utils.decorators import cached_property
 
+import re
+
 # Some constants for nicer handling.
 SOURCE_HUNK, SOURCE_FILE = 1, 2
 METHOD_INPUT, METHOD_OUTPUT = 'input', 'output'
@@ -98,6 +100,13 @@ class Compressor(object):
                 yield smart_unicode(content)
             elif kind == SOURCE_FILE:
                 content = ""
+                
+                if settings.COMPRESS_COMPILE_ALWAYS:
+                    if not settings.COMPRESS_ENABLED and not settings.COMPRESS_PRECOMPILERS:
+                        extension = value[-4:]
+                        if extension not in settings.COMPRESS_COMPILE_ALWAYS:
+                            continue
+
                 fd = open(value, 'rb')
                 try:
                     content = fd.read()
@@ -156,6 +165,10 @@ class Compressor(object):
         return os.path.join(settings.COMPRESS_OUTPUT_DIR.strip(os.sep),
             self.output_prefix, "%s.%s" % (get_hexdigest(content, 12), self.type))
 
+    @cached_property
+    def compiled_content(self):
+        return '\n'.join((hunk.encode(self.charset) for hunk in self.hunks))
+
     def output(self, mode='file', forced=False):
         """
         The general output method, override in subclass if you need to do
@@ -169,6 +182,22 @@ class Compressor(object):
         elif settings.COMPRESS_PRECOMPILERS:
             # or concatting it, if pre-compilation is enabled
             content = self.concat
+        elif settings.COMPRESS_COMPILE_ALWAYS:
+            compiled_output = ''
+            compiled_content = self.compiled_content
+
+            if compiled_content:
+                output_func = getattr(self, "output_%s" % mode, None)
+                if callable(output_func):
+                    compiled_output = output_func(mode, compiled_content, forced)
+
+            replaced_content = re.sub(
+                    '.*\.scss".*',
+                    '',
+                    self.content)
+            output = compiled_output + replaced_content
+            return output
+
         else:
             # or just doing nothing, when neither
             # compression nor compilation is enabled

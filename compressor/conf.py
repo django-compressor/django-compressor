@@ -59,6 +59,11 @@ class CompressorSettings(AppSettings):
     OFFLINE_TIMEOUT = 60 * 60 * 24 * 365  # 1 year
     # The context to be used when compressing the files "offline"
     OFFLINE_CONTEXT = {}
+    # COMPILE_ALWAYS
+    COMPILE_ALWAYS = (
+            'scss',
+            'sass',
+            )
 
     def configure_enabled(self, value):
         return value or getattr(global_settings, 'COMPRESS', value)
