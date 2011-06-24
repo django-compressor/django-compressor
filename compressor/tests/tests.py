@@ -147,7 +147,6 @@ class CompressorTestCase(TestCase):
         finally:
             settings.COMPRESS_OUTPUT_DIR = old_output_dir
 
-
 class ParserTestCase(object):
 
     def setUp(self):
@@ -550,6 +549,23 @@ class CompassTestCase(TestCase):
         """
         context = {'MEDIA_URL': settings.COMPRESS_URL}
         out = u'<link rel="stylesheet" href="/media/CACHE/css/624314c2c82f.css" type="text/css">'
+        self.assertEqual(out, render(template, context))
+
+    def test_compass_with_css_file_if_off(self):
+        settings.COMPRESS_ENABLED = False
+        template = u"""{% load compress %}{% compress css %}
+        <link rel="stylesheet" href="{{ MEDIA_URL }}sass/screen.scss" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}sass/print.scss" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}css/one.css" type="text/css" charset="utf-8">
+        {% endcompress %}
+        """
+        context = {'MEDIA_URL': settings.COMPRESS_URL}
+        render_node = render(template,context)
+        out = """<link rel="stylesheet" href="/media/CACHE/css/3f807af2259c.css" type="text/css">
+
+
+
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">"""
         self.assertEqual(out, render(template, context))
 
 CompassTestCase = skipIf(
