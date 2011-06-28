@@ -4,7 +4,7 @@ from django.utils.importlib import import_module
 # support legacy parser module usage
 from compressor.parser.base import ParserBase
 from compressor.parser.lxml import LxmlParser
-from compressor.parser.htmlparser import HtmlParser
+from compressor.parser.default_htmlparser import DefaultHtmlParser as HtmlParser
 from compressor.parser.beautifulsoup import BeautifulSoupParser
 from compressor.parser.html5lib import Html5LibParser
 
