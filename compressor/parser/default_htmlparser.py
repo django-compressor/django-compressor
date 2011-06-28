@@ -1,9 +1,9 @@
-from ..HTMLParser import HTMLParser
+from HTMLParser import HTMLParser
 from django.utils.encoding import smart_unicode
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 
-class HtmlParser(ParserBase, HTMLParser):
+class DefaultHtmlParser(ParserBase, HTMLParser):
 
     def __init__(self, content):
         HTMLParser.__init__(self)
