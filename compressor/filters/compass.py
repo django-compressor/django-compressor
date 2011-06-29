@@ -18,6 +18,11 @@ class CompassFilter(CompilerFilter):
     def input(self, *args, **kwargs):
         if self.filename is None:
             self.filename = kwargs.pop('filename')
+
+        extension = self.filename[-4:]
+        if extension not in ['scss', 'sass']:
+            return self.content
+
         tmpdir = tempfile.mkdtemp()
         parentdir = path.abspath(path.dirname(self.filename))
         self.cwd = path.dirname(parentdir)
