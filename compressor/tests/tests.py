@@ -36,7 +36,10 @@ from compressor.management.commands.compress import Command as CompressCommand
 from compressor.utils import find_command
 from compressor.filters.base import CompilerFilter
 
-
+def css_tag(href, **kwargs):
+    return u'<link rel="stylesheet" href="{0}" type="text/css" {attrs}/>'.format(
+        href, attrs=''.join(['{0}="{1}" '.format(k, v) for k, v in kwargs.items()])
+    )
 class CompressorTestCase(TestCase):
 
     def setUp(self):
@@ -94,7 +97,7 @@ class CompressorTestCase(TestCase):
         self.assertEqual('c618e6846d04', get_hexdigest(self.css, 12))
 
     def test_css_return_if_on(self):
-        output = u'<link rel="stylesheet" href="/media/CACHE/css/e41ba2cc6982.css" type="text/css">'
+        output = css_tag('/media/CACHE/css/e41ba2cc6982.css')
         self.assertEqual(output, self.css_node.output().strip())
 
     def test_js_split(self):
@@ -343,7 +346,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.COMPRESS_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/e41ba2cc6982.css" type="text/css">'
+        out = css_tag("/media/CACHE/css/e41ba2cc6982.css")
         self.assertEqual(out, render(template, context))
 
     def test_nonascii_css_tag(self):
@@ -353,7 +356,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.COMPRESS_URL }
-        out = '<link rel="stylesheet" href="/media/CACHE/css/799f6defe43c.css" type="text/css">'
+        out = css_tag("/media/CACHE/css/799f6defe43c.css")
         self.assertEqual(out, render(template, context))
 
     def test_js_tag(self):
@@ -422,7 +425,7 @@ class StorageTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.COMPRESS_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/1d4424458f88.css" type="text/css">'
+        out = css_tag("/media/CACHE/css/1d4424458f88.css")
         self.assertEqual(out, render(template, context))
 
 
@@ -455,7 +458,7 @@ class OfflineGenerationTestCase(TestCase):
         count, result = CompressCommand().compress()
         self.assertEqual(2, count)
         self.assertEqual([
-            u'<link rel="stylesheet" href="/media/CACHE/css/cd579b7deb7d.css" type="text/css">\n',
+            css_tag('/media/CACHE/css/cd579b7deb7d.css')+'\n',
             u'<script type="text/javascript" src="/media/CACHE/js/0a2bb9a287c0.js" charset="utf-8"></script>',
         ], result)
 
@@ -466,8 +469,8 @@ class OfflineGenerationTestCase(TestCase):
         }
         count, result = CompressCommand().compress()
         self.assertEqual(2, count)
-        self.assertEqual([
-            u'<link rel="stylesheet" href="/media/CACHE/css/ee62fbfd116a.css" type="text/css">\n',
+        self.assertEqual([      
+            css_tag('/media/CACHE/css/ee62fbfd116a.css')+'\n',
             u'<script type="text/javascript" src="/media/CACHE/js/0a2bb9a287c0.js" charset="utf-8"></script>',
         ], result)
         settings.COMPRESS_OFFLINE_CONTEXT = self._old_offline_context
@@ -538,7 +541,7 @@ class CompassTestCase(TestCase):
         {% endcompress %}
         """
         context = {'MEDIA_URL': settings.COMPRESS_URL}
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/3f807af2259c.css" type="text/css">'
+        out = css_tag("/media/CACHE/css/3f807af2259c.css")
         self.assertEqual(out, render(template, context))
 
 CompassTestCase = skipIf(
