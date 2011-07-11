@@ -14,6 +14,7 @@ OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
 COMPRESSORS = {
     "css": settings.COMPRESS_CSS_COMPRESSOR,
     "js": settings.COMPRESS_JS_COMPRESSOR,
+    "compass": settings.COMPRESS_CSS_COMPRESSOR,
 }
 
 class CompressorNode(template.Node):
@@ -84,6 +85,13 @@ class CompressorNode(template.Node):
         # 5. Or don't do anything in production
         return self.nodelist.render(context)
 
+class CompassNode(template.Node):
+    def render(self, context):
+        return 'compass_rendered'
+
+@register.tag
+def compass(parser, token):
+    return CompassNode()
 
 @register.tag
 def compress(parser, token):
@@ -124,6 +132,7 @@ def compress(parser, token):
     they will be silently stripped.
     """
 
+    import ipdb; ipdb.set_trace()
     nodelist = parser.parse(('endcompress',))
     parser.delete_first_token()
 
