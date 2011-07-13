@@ -35,6 +35,7 @@ from compressor.js import JsCompressor
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.utils import find_command
 from compressor.filters.base import CompilerFilter
+from compressor.compass.conf import settings as compass_settings
 
 def css_tag(href, **kwargs):
     return u'<link rel="stylesheet" href="{0}" type="text/css" {attrs}/>'.format(
@@ -583,3 +584,33 @@ class PrecompilerTestCase(TestCase):
         command = '%s %s' %  (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
         self.assertEqual(u"body { color:#990; }\n", compiler.input())
+
+class CompassWrapperTest(TestCase):
+
+    def setUp(self):
+        self.css_dir = os.path.join(os.path.dirname(__file__), 'media/stylesheets')
+        for file in os.listdir(self.css_dir):
+            os.remove(os.path.join(self.css_dir, file))
+
+        self.template = u"""{% load compress %}{% comprass %}
+        <link rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/screen.css" type="text/css" />
+        <link rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/print.css" type="text/css" />
+        {% endcomprass %}
+        """
+        self.context = {'MEDIA_URL': settings.COMPRESS_URL}
+
+    def test_compile(self):
+        compass_settings.COMPASS_ENABLED = True
+        settings.COMPRESS_ENABLED = False
+        render(self.template, self.context)
+        self.assertEqual(os.listdir(self.css_dir), ['screen.css', 'print.css', 'ie.css'])
+
+    def test_compile_and_compress(self):
+        settings.COMPRESS_ENABLED = True
+        out = css_tag('/media/CACHE/css/7155360fb834.css')
+        self.assertEqual(out, render(self.template, self.context))
+
+CompassWrapperTest= skipIf(
+    find_command(compass_settings.COMPASS_BINARY) is None,
+    'Compass binary %r not found' % compass_settings.COMPASS_BINARY
+)(CompassWrapperTest)

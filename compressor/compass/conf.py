@@ -1,4 +1,5 @@
 import os
+from compressor.conf import settings as compressor_settings
 from django.conf import settings as global_settings
 from django.core.exceptions import ImproperlyConfigured
 
@@ -12,7 +13,7 @@ class CompassSettings(AppSettings):
     BINARY = 'compass'
 
     def configure_config(self, value):
-        config_path = os.path.join(global_settings.STATIC_ROOT, value)
+        config_path = os.path.join(compressor_settings.COMPRESS_ROOT, value)
         if not os.path.isfile(config_path):
             raise ImproperlyConfigured("COMPASS_CONFIG setting is not a config \
                 file to compass: %s" % config_path)
