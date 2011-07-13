@@ -1,5 +1,4 @@
 import os
-from django import VERSION as DJANGO_VERSION
 from django.conf import settings as global_settings
 from django.core.exceptions import ImproperlyConfigured
 
