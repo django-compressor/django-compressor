@@ -88,6 +88,8 @@ class CompilerFilter(FilterBase):
                 if not err:
                     err = ('Unable to apply %s (%s)' %
                            (self.__class__.__name__, self.command))
+                    if filtered:
+                        err += '\n%s' % filtered
                 raise FilterError(err)
             if self.verbose:
                 self.logger.debug(err)
