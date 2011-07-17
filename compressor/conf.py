@@ -43,6 +43,7 @@ class CompressorSettings(AppSettings):
     COMPASS_BINARY = 'compass'
     COMPASS_ARGUMENTS = ' --no-line-comments --output-style expanded'
     COMPASS_PLUGINS = []
+    COMPASS_IMAGES_DIR = 'images/'
 
     # the cache backend to use
     CACHE_BACKEND = None
@@ -114,5 +115,8 @@ class CompressorSettings(AppSettings):
             raise ImproperlyConfigured("The COMPRESS_PRECOMPILERS setting "
                 "must be a list or tuple. Check for missing commas.")
         return value
+
+    def configure_compass_images_dir(self, value):
+        return self.configure_url(value)
 
 settings = CompressorSettings(prefix="COMPRESS")
