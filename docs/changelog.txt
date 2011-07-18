@@ -16,6 +16,10 @@ HEAD
   To revert to the previous way simply set the ``COMPRESS_CACHE_KEY_FUNCTION``
   to ``'django_compressor.cache.socket_cachekey'``.
 
+- Added support for ``{{ block.super }}`` to ``compress`` management command.
+
+- Dropped Django 1.1.X support.
+
 - Added Compass filter (beta).
 
 - Fixed compiler filters on Windows.

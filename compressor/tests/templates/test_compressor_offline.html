@@ -1,5 +1,7 @@
+{% extends "base.html" %}
 {% load compress %}
-{% spaceless %}
+
+{% block content %}{% spaceless %}
 {% compress css%}
     <style type="text/css">
         body {
@@ -19,4 +21,22 @@
         alert("test 2");
     </script>
 {% endcompress %}
-{% endspaceless %}
+{% endspaceless %}{% endblock %}
+
+{% block js %}{% spaceless %}
+	{% compress js %}
+		{{ block.super }}
+		    <script type="text/javascript">
+		        alert("test 4");
+		    </script>
+	{% endcompress %}
+{% endspaceless %}{% endblock %}
+
+{% block css %}{% spaceless %}
+	{% compress css %}
+		{{ block.super }}
+		<style type="text/css">
+		body { color: orange ; }
+		</style>
+	{% endcompress %}
+{% endspaceless %}{% endblock %}
