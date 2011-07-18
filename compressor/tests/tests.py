@@ -21,7 +21,7 @@ try:
 except ImportError:
     BeautifulSoup = None
 
-from django.core.cache.backends import dummy
+from django.core.cache.backends import locmem
 from django.core.files.storage import get_storage_class
 from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
@@ -442,7 +442,7 @@ class CacheBackendTestCase(CompressorTestCase):
 
     def test_correct_backend(self):
         from compressor.cache import cache
-        self.assertEqual(cache.__class__, dummy.CacheClass)
+        self.assertEqual(cache.__class__, locmem.CacheClass)
 
 
 class OfflineGenerationTestCase(TestCase):
@@ -451,18 +451,28 @@ class OfflineGenerationTestCase(TestCase):
 
     def setUp(self):
         self._old_compress = settings.COMPRESS_ENABLED
+        self._old_compress_offline = settings.COMPRESS_OFFLINE
         settings.COMPRESS_ENABLED = True
+        settings.COMPRESS_OFFLINE = True
+        self.template_file = open("templates/test_compressor_offline.html")
+        self.template = Template(self.template_file.read().decode(settings.FILE_CHARSET))
 
     def tearDown(self):
         settings.COMPRESS_ENABLED = self._old_compress
+        settings.COMPRESS_OFFLINE = self._old_compress_offline
 
     def test_offline(self):
         count, result = CompressCommand().compress()
-        self.assertEqual(2, count)
+        self.assertEqual(3, count)
         self.assertEqual([
             css_tag('/media/CACHE/css/cd579b7deb7d.css')+'\n',
             u'<script type="text/javascript" src="/media/CACHE/js/0a2bb9a287c0.js" charset="utf-8"></script>',
+            u'<script type="text/javascript" src="/media/CACHE/js/fb1736ad48b7.js" charset="utf-8"></script>',            
         ], result)
+        # Template rendering should use the cache. FIXME: how to make sure of it ? Should we test the cache
+        # key<->values ourselves?
+        rendered_template = self.template.render(Context({})).replace("\n", "")
+        self.assertEqual(rendered_template, "".join(result).replace("\n", ""))
 
     def test_offline_with_context(self):
         self._old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
@@ -470,11 +480,16 @@ class OfflineGenerationTestCase(TestCase):
             'color': 'blue',
         }
         count, result = CompressCommand().compress()
-        self.assertEqual(2, count)
+        self.assertEqual(3, count)
         self.assertEqual([
             css_tag('/media/CACHE/css/ee62fbfd116a.css')+'\n',
             u'<script type="text/javascript" src="/media/CACHE/js/0a2bb9a287c0.js" charset="utf-8"></script>',
+            u'<script type="text/javascript" src="/media/CACHE/js/fb1736ad48b7.js" charset="utf-8"></script>',
         ], result)
+        # Template rendering should use the cache. FIXME: how to make sure of it ? Should we test the cache
+        # key<->values ourselves?        
+        rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT)).replace("\n", "")
+        self.assertEqual(rendered_template, "".join(result).replace("\n", ""))
         settings.COMPRESS_OFFLINE_CONTEXT = self._old_offline_context
 
     def test_get_loaders(self):

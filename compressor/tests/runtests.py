@@ -10,7 +10,7 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
 if not settings.configured:
     settings.configure(
-        COMPRESS_CACHE_BACKEND = 'dummy://',
+        COMPRESS_CACHE_BACKEND = 'locmem://',
         DATABASE_ENGINE='sqlite3',
         INSTALLED_APPS=[
             'compressor',

@@ -25,8 +25,8 @@ def get_mtime_cachekey(filename):
 
 
 def get_offline_cachekey(source):
-    return get_cachekey(
-        "offline.%s" % get_hexdigest("".join(smart_str(s) for s in source)))
+    to_hexdigest = [smart_str(getattr(s, 's', s)) for s in source]
+    return get_cachekey("offline.%s" % get_hexdigest(to_hexdigest))
 
 
 def get_templatetag_cachekey(compressor, mode, kind):

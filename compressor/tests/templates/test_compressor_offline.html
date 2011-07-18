@@ -1,4 +1,5 @@
 {% load compress %}
+{% spaceless %}
 {% compress css%}
     <style type="text/css">
         body {
@@ -12,3 +13,10 @@
         alert("test");
     </script>
 {% endcompress %}
+
+{% compress js%}
+    <script type="text/javascript">
+        alert("test 2");
+    </script>
+{% endcompress %}
+{% endspaceless %}
