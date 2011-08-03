@@ -60,7 +60,7 @@ class CompilerFilter(FilterBase):
             if "{infile}" in self.command:
                 if self.filename is None:
                     self.infile, options["infile"] = tempfile.mkstemp()
-                    self.infile = os.fdopen(self.infile, "w+b")
+                    self.infile = os.fdopen(self.infile, "wb")
                     self.infile.write(self.content)
                     self.infile.flush()
                     os.fsync(self.infile)
@@ -71,7 +71,7 @@ class CompilerFilter(FilterBase):
         if "{outfile}" in self.command and not "outfile" in options:
             ext = ".%s" % self.type and self.type or ""
             self.outfile, options["outfile"] = tempfile.mkstemp()
-            self.outfile = os.fdopen(self.outfile, "rb")
+            self.outfile = os.fdopen(self.outfile, "r+b")
         try:
             command = fstr(self.command).format(**options)
             proc = subprocess.Popen(command, shell=True, cwd=self.cwd,
