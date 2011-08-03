@@ -59,19 +59,19 @@ class CompilerFilter(FilterBase):
         if self.infile is None:
             if "{infile}" in self.command:
                 if self.filename is None:
-                    self.infile = tempfile.NamedTemporaryFile(mode="w")
+                    self.infile, options["infile"] = tempfile.mkstemp()
+                    self.infile = os.fdopen(self.infile, "w+b")
                     self.infile.write(self.content)
                     self.infile.flush()
                     os.fsync(self.infile)
-                    options["infile"] = self.infile.name
                 else:
                     self.infile = open(self.filename)
                     options["infile"] = self.filename
 
         if "{outfile}" in self.command and not "outfile" in options:
             ext = ".%s" % self.type and self.type or ""
-            self.outfile = tempfile.NamedTemporaryFile(mode='r+', suffix=ext)
-            options["outfile"] = self.outfile.name
+            self.outfile, options["outfile"] = tempfile.mkstemp()
+            self.outfile = os.fdopen(self.outfile, "rb")
         try:
             command = fstr(self.command).format(**options)
             proc = subprocess.Popen(command, shell=True, cwd=self.cwd,
@@ -99,7 +99,9 @@ class CompilerFilter(FilterBase):
         finally:
             if self.infile is not None:
                 self.infile.close()
+                os.remove(options["infile"])
             if self.outfile is not None:
                 filtered = self.outfile.read()
                 self.outfile.close()
+                os.remove(options["outfile"])
         return filtered
