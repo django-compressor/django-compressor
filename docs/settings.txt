@@ -14,7 +14,7 @@ COMPRESS_ENABLED
 :Default: the opposite of ``DEBUG``
 
 Boolean that decides if compression will happen. In order to test compression
-when ``DEBUG`` is enabled COMPRESS_ENABLED needs to explicitly be set to
+when ``DEBUG`` is enabled COMPRESS_ENABLED_ needs to explicitly be set to
 ``True``.
 
 .. _compress_url:
