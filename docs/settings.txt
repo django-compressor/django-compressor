@@ -6,15 +6,16 @@ Settings
 Django Compressor has a number of settings that control its behavior.
 They've been given sensible defaults.
 
-.. _compress:
+.. _compress_enabled:
 
-COMPRESS
-^^^^^^^^
+COMPRESS_ENABLED
+^^^^^^^^^^^^^^^^
 
 :Default: the opposite of ``DEBUG``
 
 Boolean that decides if compression will happen. In order to test compression
-when ``DEBUG`` is enabled COMPRESS needs to explicitly be set to ``True``.
+when ``DEBUG`` is enabled COMPRESS_ENABLED needs to explicitly be set to
+``True``.
 
 .. _compress_url:
 
