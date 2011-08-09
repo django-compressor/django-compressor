@@ -9,6 +9,13 @@ HEAD
   has the potential to breaking lots of apps but on the other hand
   will help find bugs.
 
+- **BACKWARDS-INCOMPATIBLE** The default function to create the cache
+  key stopped containing the server hostname. Instead the cache key
+  now only has the form ``'django_compressor.<KEY>'``.
+
+  To revert to the previous way simply set the ``COMPRESS_CACHE_KEY_FUNCTION``
+  to ``'django_compressor.cache.socket_cachekey'``.
+
 - Added Compass filter (beta).
 
 - Fixed compiler filters on Windows.

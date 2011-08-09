@@ -5,8 +5,10 @@ import time
 from django.core.cache import get_cache
 from django.utils.encoding import smart_str
 from django.utils.hashcompat import md5_constructor
+from django.utils.importlib import import_module
 
 from compressor.conf import settings
+from compressor.utils import get_mod_func
 
 
 def get_hexdigest(plaintext, length=None):
@@ -15,10 +17,18 @@ def get_hexdigest(plaintext, length=None):
         return digest[:length]
     return digest
 
+def simple_cachekey(key):
+    return 'django_compressor.%s' % smart_str(key)
 
-def get_cachekey(key):
-    return ("django_compressor.%s.%s" % (socket.gethostname(), key))
+def socket_cachekey(key):
+    return "django_compressor.%s.%s" % (socket.gethostname(), smart_str(key))
 
+try:
+    mod_name, func_name = get_mod_func(settings.COMPRESS_CACHE_KEY_FUNCTION)
+    get_cachekey = getattr(import_module(mod_name), func_name)
+except (AttributeError, ImportError), e:
+    raise ImportError("Couldn't import cache key function %s: %s" %
+                      (settings.COMPRESS_CACHE_KEY_FUNCTION, e))
 
 def get_mtime_cachekey(filename):
     return get_cachekey("mtime.%s" % get_hexdigest(filename))
