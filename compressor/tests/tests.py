@@ -543,7 +543,7 @@ class CompassTestCase(TestCase):
         {% endcompress %}
         """
         context = {'MEDIA_URL': settings.COMPRESS_URL}
-        out = css_tag("/media/CACHE/css/3f807af2259c.css")
+        out = css_tag("/media/CACHE/css/8ff1cfd8787d.css")
         self.assertEqual(out, render(template, context))
 
 CompassTestCase = skipIf(
