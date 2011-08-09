@@ -4,6 +4,11 @@ Changelog
 HEAD
 ----
 
+- **BACKWARDS-INCOMPATIBLE** Stopped swallowing exceptions raised by
+  rendering the template tag in production (``DEBUG = False``). This
+  has the potential to breaking lots of apps but on the other hand
+  will help find bugs.
+
 - Added Compass filter (beta).
 
 - Fixed compiler filters on Windows.
@@ -16,6 +21,7 @@ HEAD
 
 - Added new CallbackOutputFilter to ease the implementation of Python-based
   callback filters that only need to pass the content to a callable.
+
 
 .. _`Slim It`: http://slimit.org/
 
