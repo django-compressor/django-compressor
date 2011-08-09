@@ -1,11 +1,14 @@
+from __future__ import absolute_import
 import os
 import logging
 import subprocess
 import tempfile
-from django.utils.datastructures import SortedDict
+from django.core.exceptions import ImproperlyConfigured
+from django.utils.importlib import import_module
 
 from compressor.conf import settings
 from compressor.exceptions import FilterError
+from compressor.utils import get_mod_func
 from compressor.utils.stringformat import FormattableString as fstr
 
 logger = logging.getLogger("compressor.filters")
@@ -25,6 +28,42 @@ class FilterBase(object):
 
     def output(self, **kwargs):
         raise NotImplementedError
+
+
+class CallbackOutputFilter(FilterBase):
+    callback = None
+    args = []
+    kwargs = {}
+    dependencies = []
+
+    def __init__(self, *args, **kwargs):
+        super(CallbackOutputFilter, self).__init__(*args, **kwargs)
+        if self.callback is None:
+            raise ImproperlyConfigured("The callback filter %s must define"
+                                       "a 'callback' attribute." % self)
+        try:
+            mod_name, func_name = get_mod_func(self.callback)
+            func = getattr(import_module(mod_name), func_name)
+        except ImportError, e:
+            if self.dependencies:
+                if len(self.dependencies) == 1:
+                    warning = "dependency (%s) is" % self.dependencies[0]
+                else:
+                    warning = ("dependencies (%s) are" %
+                               ", ".join([dep for dep in self.dependencies]))
+            else:
+                warning = ""
+            raise ImproperlyConfigured("The callback %s couldn't be imported. "
+                                       "Make sure the %s correctly installed."
+                                       % (self.callback, warning))
+        except AttributeError, e:
+            raise ImproperlyConfigured("An error occured while importing the "
+                                       "callback filter %s: %s" % (self, e))
+        else:
+            self._callback_func = func
+
+    def output(self, **kwargs):
+        return self._callback_func(self.content, *self.args, **self.kwargs)
 
 
 class CompilerFilter(FilterBase):
