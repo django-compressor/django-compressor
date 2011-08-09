@@ -7,7 +7,7 @@ from compressor.utils.settings import AppSettings
 
 class CompressorSettings(AppSettings):
     # Main switch
-    ENABLED = not global_settings.DEBUG
+    ENABLED = False
     # Allows changing verbosity from the settings.
     VERBOSE = False
     # GET variable that disables compressor e.g. "nocompress"
@@ -61,7 +61,7 @@ class CompressorSettings(AppSettings):
     OFFLINE_CONTEXT = {}
 
     def configure_enabled(self, value):
-        return value or getattr(global_settings, 'COMPRESS_ENABLED', value)
+        return value or not global_settings.DEBUG
 
     def configure_root(self, value):
         if value is None:
