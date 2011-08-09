@@ -37,9 +37,11 @@ from compressor.utils import find_command
 from compressor.filters.base import CompilerFilter
 
 def css_tag(href, **kwargs):
-    return u'<link rel="stylesheet" href="{0}" type="text/css" {attrs}/>'.format(
-        href, attrs=''.join(['{0}="{1}" '.format(k, v) for k, v in kwargs.items()])
-    )
+    rendered_attrs = ''.join(['%s="%s" ' % (k, v) for k, v in kwargs.items()])
+    template = u'<link rel="stylesheet" href="%s" type="text/css" %s/>'
+    return template % (href, rendered_attrs)
+
+
 class CompressorTestCase(TestCase):
 
     def setUp(self):
@@ -469,7 +471,7 @@ class OfflineGenerationTestCase(TestCase):
         }
         count, result = CompressCommand().compress()
         self.assertEqual(2, count)
-        self.assertEqual([      
+        self.assertEqual([
             css_tag('/media/CACHE/css/ee62fbfd116a.css')+'\n',
             u'<script type="text/javascript" src="/media/CACHE/js/0a2bb9a287c0.js" charset="utf-8"></script>',
         ], result)
