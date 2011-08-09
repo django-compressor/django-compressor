@@ -37,7 +37,10 @@ def get_templatetag_cachekey(compressor, mode, kind):
 def get_mtime(filename):
     if settings.COMPRESS_MTIME_DELAY:
         key = get_mtime_cachekey(filename)
-        mtime = cache.get(key)
+        try:
+            mtime = cache.get(key)
+        except TypeError:
+            mtime = None
         if mtime is None:
             mtime = os.path.getmtime(filename)
             cache.set(key, mtime, settings.COMPRESS_MTIME_DELAY)
