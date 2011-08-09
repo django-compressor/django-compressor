@@ -291,7 +291,8 @@ def _make_jsmin(extended=True, python_only=False):
             ).strip()
     return jsmin
 
-jsmin = _make_jsmin()
+# forcing python_only here since we don't ship the C extension anyway
+jsmin = _make_jsmin(python_only=True)
 
 
 def jsmin_for_posers(script):

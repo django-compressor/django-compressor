@@ -1,10 +1,8 @@
-from compressor.filters import FilterBase
-from compressor.filters.cssmin.cssmin import cssmin
+from compressor.filters import CallbackOutputFilter
 
-class CSSMinFilter(FilterBase):
+class CSSMinFilter(CallbackOutputFilter):
     """
     A filter that utilizes Zachary Voase's Python port of
     the YUI CSS compression algorithm: http://pypi.python.org/pypi/cssmin/
     """
-    def output(self, **kwargs):
-        return cssmin(self.content)
+    callback = "compressor.filters.cssmin.cssmin.cssmin"
