@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from compressor.filters import CallbackOutputFilter
+from compressor.filters.jsmin.slimit import SlimItFilter
 
 class rJSMinFilter(CallbackOutputFilter):
     callback = "compressor.filters.jsmin.rjsmin.jsmin"

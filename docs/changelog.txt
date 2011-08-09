@@ -12,6 +12,13 @@ HEAD
 
 - Documented included filters.
 
+- Added `Slim It`_ filter.
+
+- Added new CallbackOutputFilter to ease the implementation of Python-based
+  callback filters that only need to pass the content to a callable.
+
+.. _`Slim It`: http://slimit.org/
+
 0.9.2
 -----
 

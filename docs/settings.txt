@@ -133,6 +133,13 @@ A list of filters that will be applied to javascript. Possible options are:
 
 A filter that uses the jsmin implementation rJSmin_ to compress JavaScript code.
 
+.. _slimit_filter:
+
+``compressor.filters.jsmin.SlimItFilter``
+"""""""""""""""""""""""""""""""""""""""""
+
+A filter that uses the jsmin implementation `Slim It`_ to compress JavaScript code.
+
 ``compressor.filters.closure.ClosureCompilerFilter``
 """"""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -154,6 +161,7 @@ A filter that passes the JavaScript code to the `YUI compressor`_.
 .. _rJSmin: http://opensource.perlig.de/rjsmin/
 .. _`Google Closure compiler`: http://code.google.com/closure/compiler/
 .. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
+.. _`Slim It`: http://slimit.org/
 
 .. _compress_precompilers:
 
