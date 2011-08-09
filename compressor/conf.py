@@ -61,7 +61,7 @@ class CompressorSettings(AppSettings):
     OFFLINE_CONTEXT = {}
 
     def configure_enabled(self, value):
-        return value or getattr(global_settings, 'COMPRESS', value)
+        return value or getattr(global_settings, 'COMPRESS_ENABLED', value)
 
     def configure_root(self, value):
         if value is None:

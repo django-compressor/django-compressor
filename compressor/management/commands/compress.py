@@ -33,8 +33,8 @@ class Command(NoArgsCommand):
                 'separate multiple extensions with commas, or use -e '
                 'multiple times)'),
         make_option('-f', '--force', default=False, action='store_true',
-            help="Force generation of compressor content even if "
-                "COMPRESS setting is not True.", dest='force'),
+            help="Force the generation of compressed content even if the "
+                "COMPRESS_ENABLED setting is not True.", dest='force'),
         make_option('--follow-links', default=False, action='store_true',
             help="Follow symlinks when traversing the COMPRESS_ROOT "
                 "(which defaults to MEDIA_ROOT). Be aware that using this "
@@ -58,7 +58,7 @@ class Command(NoArgsCommand):
             from django.template.loader import template_source_loaders
         loaders = []
         # If template loader is CachedTemplateLoader, return the loaders
-        # that it wraps around. So if we have 
+        # that it wraps around. So if we have
         # TEMPLATE_LOADERS = (
         #    ('django.template.loaders.cached.Loader', (
         #        'django.template.loaders.filesystem.Loader',
@@ -211,7 +211,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         if not settings.COMPRESS_ENABLED and not options.get("force"):
             raise CommandError(
-                "Compressor is disabled. Set COMPRESS "
+                "Compressor is disabled. Set the COMPRESS_ENABLED "
                 "settting or use --force to override.")
         if not settings.COMPRESS_OFFLINE:
             if not options.get("force"):
