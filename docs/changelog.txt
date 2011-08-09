@@ -14,7 +14,7 @@ HEAD
   now only has the form ``'django_compressor.<KEY>'``.
 
   To revert to the previous way simply set the ``COMPRESS_CACHE_KEY_FUNCTION``
-  to ``'django_compressor.cache.socket_cachekey'``.
+  to ``'compressor.cache.socket_cachekey'``.
 
 - Added support for ``{{ block.super }}`` to ``compress`` management command.
 
