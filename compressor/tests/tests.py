@@ -42,6 +42,8 @@ def css_tag(href, **kwargs):
     return template % (href, rendered_attrs)
 
 
+here = os.path.abspath(os.path.dirname(__file__))
+
 class CompressorTestCase(TestCase):
 
     def setUp(self):
@@ -454,12 +456,13 @@ class OfflineGenerationTestCase(TestCase):
         self._old_compress_offline = settings.COMPRESS_OFFLINE
         settings.COMPRESS_ENABLED = True
         settings.COMPRESS_OFFLINE = True
-        self.template_file = open("templates/test_compressor_offline.html")
+        self.template_file = open(os.path.join(here, "templates/test_compressor_offline.html"))
         self.template = Template(self.template_file.read().decode(settings.FILE_CHARSET))
 
     def tearDown(self):
         settings.COMPRESS_ENABLED = self._old_compress
         settings.COMPRESS_OFFLINE = self._old_compress_offline
+        self.template_file.close()
 
     def test_offline(self):
         count, result = CompressCommand().compress()
@@ -467,7 +470,7 @@ class OfflineGenerationTestCase(TestCase):
         self.assertEqual([
             css_tag('/media/CACHE/css/cd579b7deb7d.css')+'\n',
             u'<script type="text/javascript" src="/media/CACHE/js/0a2bb9a287c0.js" charset="utf-8"></script>',
-            u'<script type="text/javascript" src="/media/CACHE/js/fb1736ad48b7.js" charset="utf-8"></script>',            
+            u'<script type="text/javascript" src="/media/CACHE/js/fb1736ad48b7.js" charset="utf-8"></script>',
         ], result)
         # Template rendering should use the cache. FIXME: how to make sure of it ? Should we test the cache
         # key<->values ourselves?
@@ -487,7 +490,7 @@ class OfflineGenerationTestCase(TestCase):
             u'<script type="text/javascript" src="/media/CACHE/js/fb1736ad48b7.js" charset="utf-8"></script>',
         ], result)
         # Template rendering should use the cache. FIXME: how to make sure of it ? Should we test the cache
-        # key<->values ourselves?        
+        # key<->values ourselves?
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT)).replace("\n", "")
         self.assertEqual(rendered_template, "".join(result).replace("\n", ""))
         settings.COMPRESS_OFFLINE_CONTEXT = self._old_offline_context
