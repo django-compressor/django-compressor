@@ -2,7 +2,6 @@ import os
 import logging
 import subprocess
 import tempfile
-from django.utils.datastructures import SortedDict
 
 from compressor.conf import settings
 from compressor.exceptions import FilterError
@@ -72,7 +71,6 @@ class CompilerFilter(FilterBase):
                     options["infile"] = self.filename
 
         if "{outfile}" in self.command and not "outfile" in options:
-            ext = ".%s" % self.type and self.type or ""
             self.outfile, options["outfile"] = tempfile.mkstemp()
             self.outfile = os.fdopen(self.outfile, "r+b")
         try:
