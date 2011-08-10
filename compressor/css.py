@@ -10,7 +10,7 @@ class CssCompressor(Compressor):
     def __init__(self, content=None, output_prefix="css"):
         super(CssCompressor, self).__init__(content, output_prefix)
         self.filters = list(settings.COMPRESS_CSS_FILTERS)
-        self.type = 'css'
+        self.type = output_prefix
 
     def split_contents(self):
         if self.split_content:
@@ -21,13 +21,9 @@ class CssCompressor(Compressor):
             elem_name = self.parser.elem_name(elem)
             elem_attribs = self.parser.elem_attribs(elem)
             if elem_name == 'link' and elem_attribs['rel'] == 'stylesheet':
-                try:
-                    basename = self.get_basename(elem_attribs['href'])
-                    filename = self.get_filename(basename)
-                    data = (SOURCE_FILE, filename, basename, elem)
-                except UncompressableFileError:
-                    if settings.DEBUG:
-                        raise
+                basename = self.get_basename(elem_attribs['href'])
+                filename = self.get_filename(basename)
+                data = (SOURCE_FILE, filename, basename, elem)
             elif elem_name == 'style':
                 data = (SOURCE_HUNK, self.parser.elem_content(elem), None, elem)
             if data:
@@ -38,15 +34,15 @@ class CssCompressor(Compressor):
                 if self.media_nodes and self.media_nodes[-1][0] == media:
                     self.media_nodes[-1][1].split_content.append(data)
                 else:
-                    node = CssCompressor(str(elem))
+                    node = CssCompressor(self.parser.elem_str(elem))
                     node.split_content.append(data)
                     self.media_nodes.append((media, node))
         return self.split_content
 
     def output(self, *args, **kwargs):
-        # Populate self.split_content
         if (settings.COMPRESS_ENABLED or settings.COMPRESS_PRECOMPILERS or
                 kwargs.get('forced', False)):
+            # Populate self.split_content
             self.split_contents()
             if hasattr(self, 'media_nodes'):
                 ret = []
