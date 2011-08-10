@@ -66,11 +66,11 @@ class CompilerFilter(FilterBase):
                     self.infile.flush()
                     os.fsync(self.infile)
                 else:
-                    delete_temp_out = True
                     self.infile = open(self.filename)
                     options["infile"] = self.filename
 
         if "{outfile}" in self.command and not "outfile" in options:
+            delete_temp_out = True
             self.outfile, options["outfile"] = tempfile.mkstemp()
             self.outfile = os.fdopen(self.outfile, "r+b")
         try:
