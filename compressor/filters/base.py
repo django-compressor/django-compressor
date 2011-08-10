@@ -56,15 +56,18 @@ class CompilerFilter(FilterBase):
 
     def input(self, **kwargs):
         options = dict(self.options)
+        delete_temp_in, delete_temp_out = False, False
         if self.infile is None:
             if "{infile}" in self.command:
                 if self.filename is None:
+                    delete_temp_in = True
                     self.infile, options["infile"] = tempfile.mkstemp()
                     self.infile = os.fdopen(self.infile, "wb")
                     self.infile.write(self.content)
                     self.infile.flush()
                     os.fsync(self.infile)
                 else:
+                    delete_temp_out = True
                     self.infile = open(self.filename)
                     options["infile"] = self.filename
 
@@ -99,9 +102,11 @@ class CompilerFilter(FilterBase):
         finally:
             if self.infile is not None:
                 self.infile.close()
-                os.remove(options["infile"])
+                if delete_temp_in:
+                    os.remove(options["infile"])
             if self.outfile is not None:
                 filtered = self.outfile.read()
                 self.outfile.close()
-                os.remove(options["outfile"])
+                if delete_temp_out:
+                    os.remove(options["outfile"])
         return filtered
