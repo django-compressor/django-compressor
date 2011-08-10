@@ -16,6 +16,11 @@ HEAD
   To revert to the previous way simply set the ``COMPRESS_CACHE_KEY_FUNCTION``
   to ``'compressor.cache.socket_cachekey'``.
 
+- **BACKWARDS-INCOMPATIBLE** Renamed ambigously named
+  ``COMPRESS_DATA_URI_MAX_SIZE`` setting to ``COMPRESS_DATA_URI_MAX_SIZE``.
+  It's the maximum size the ``compressor.filters.datauri.DataUriFilter``
+  filter will embed files as data: URIs.
+
 - Added support for ``{{ block.super }}`` to ``compress`` management command.
 
 - Dropped Django 1.1.X support.

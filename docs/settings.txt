@@ -84,7 +84,7 @@ A filter that passes the CSS content to the CSSTidy_ tool.
 
 A filter for embedding media as `data: URIs`_ in the CSS.
 
-- ``COMPRESS_DATA_URI_MIN_SIZE`` -- Only files that are smaller than
+- ``COMPRESS_DATA_URI_MAX_SIZE`` -- Only files that are smaller than
   this value will be embedded. In bytes.
 
 ``compressor.filters.yui.YUICSSFilter``

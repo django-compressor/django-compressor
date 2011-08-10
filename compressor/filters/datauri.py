@@ -11,7 +11,7 @@ class DataUriFilter(FilterBase):
     """Filter for embedding media as data: URIs.
 
     Settings:
-         COMPRESS_DATA_URI_MIN_SIZE: Only files that are smaller than this
+         COMPRESS_DATA_URI_MAX_SIZE: Only files that are smaller than this
                                      value will be embedded. Unit; bytes.
 
 
@@ -36,7 +36,7 @@ class DataUriFilter(FilterBase):
         url = matchobj.group(1).strip(' \'"')
         if not url.startswith('data:'):
             path = self.get_file_path(url)
-            if os.stat(path).st_size <= settings.COMPRESS_DATA_URI_MIN_SIZE:
+            if os.stat(path).st_size <= settings.COMPRESS_DATA_URI_MAX_SIZE:
                 data = b64encode(open(path, 'rb').read())
                 return 'url("data:%s;base64,%s")' % (
                     mimetypes.guess_type(path)[0], data)

@@ -38,7 +38,7 @@ class CompressorSettings(AppSettings):
     YUI_BINARY = 'java -jar yuicompressor.jar'
     YUI_CSS_ARGUMENTS = ''
     YUI_JS_ARGUMENTS = ''
-    DATA_URI_MIN_SIZE = 1024
+    DATA_URI_MAX_SIZE = 1024
 
     COMPASS_BINARY = 'compass'
     COMPASS_ARGUMENTS = ' --no-line-comments --output-style expanded'
