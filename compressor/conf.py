@@ -62,6 +62,8 @@ class CompressorSettings(AppSettings):
     # The context to be used when compressing the files "offline"
     OFFLINE_CONTEXT = {}
 
+    IMAGES_DIR = ''
+
     def configure_enabled(self, value):
         return value or not global_settings.DEBUG
 
@@ -114,5 +116,8 @@ class CompressorSettings(AppSettings):
             raise ImproperlyConfigured("The COMPRESS_PRECOMPILERS setting "
                 "must be a list or tuple. Check for missing commas.")
         return value
+
+    def configure_images_dir(self, value):
+        return self.configure_url(value)
 
 settings = CompressorSettings(prefix="COMPRESS")
