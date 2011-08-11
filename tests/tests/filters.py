@@ -86,60 +86,86 @@ class CssAbsolutizingTestCase(TestCase):
     def setUp(self):
         settings.COMPRESS_ENABLED = True
         settings.COMPRESS_URL = '/media/'
+        settings.COMPRESS_CSS_HASHING_METHOD = 'mtime'
         self.css = """
         <link rel="stylesheet" href="/media/css/url/url1.css" type="text/css">
         <link rel="stylesheet" href="/media/css/url/2/url2.css" type="text/css">
         """
         self.css_node = CssCompressor(self.css)
 
+    def suffix_method(self, filename):
+        return get_hashed_mtime(filename)
+
     def test_css_absolute_filter(self):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
-        content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
+        imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
+        content = "p { background: url('../../img/python.png') }"
+        output = "p { background: url('%simg/python.png?%s') }" % (settings.COMPRESS_URL, self.suffix_method(imagefilename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
         settings.COMPRESS_URL = 'http://media.example.com/'
         filter = CssAbsoluteFilter(content)
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
+        output = "p { background: url('%simg/python.png?%s') }" % (settings.COMPRESS_URL, self.suffix_method(imagefilename))
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
     def test_css_absolute_filter_https(self):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
-        content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
+        imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
+        content = "p { background: url('../../img/python.png') }"
+        output = "p { background: url('%simg/python.png?%s') }" % (settings.COMPRESS_URL, self.suffix_method(imagefilename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
         settings.COMPRESS_URL = 'https://media.example.com/'
         filter = CssAbsoluteFilter(content)
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
+        output = "p { background: url('%simg/python.png?%s') }" % (settings.COMPRESS_URL, self.suffix_method(imagefilename))
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
     def test_css_absolute_filter_relative_path(self):
         from compressor.filters.css_default import CssAbsoluteFilter
         filename = os.path.join(settings.TEST_DIR, 'whatever', '..', 'media', 'whatever/../css/url/test.css')
-        content = "p { background: url('../../images/image.gif') }"
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
+        imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
+        content = "p { background: url('../../img/python.png') }"
+        output = "p { background: url('%simg/python.png?%s') }" % (settings.COMPRESS_URL, self.suffix_method(imagefilename))
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
         settings.COMPRESS_URL = 'https://media.example.com/'
         filter = CssAbsoluteFilter(content)
-        output = "p { background: url('%simages/image.gif?%s') }" % (settings.COMPRESS_URL, get_hashed_mtime(filename))
+        output = "p { background: url('%simg/python.png?%s') }" % (settings.COMPRESS_URL, self.suffix_method(imagefilename))
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
     def test_css_hunks(self):
         hash_dict = {
-            'hash1': get_hashed_mtime(os.path.join(settings.COMPRESS_ROOT, 'css/url/url1.css')),
-            'hash2': get_hashed_mtime(os.path.join(settings.COMPRESS_ROOT, 'css/url/2/url2.css')),
+            'hash1': self.suffix_method(os.path.join(settings.COMPRESS_ROOT, 'img/python.png')),
+            'hash2': self.suffix_method(os.path.join(settings.COMPRESS_ROOT, 'img/add.png')),
         }
-        out = [u"p { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\np { background: url('/media/images/test.png?%(hash1)s'); }\n" % hash_dict,
-               u"p { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\np { background: url('/media/images/test.png?%(hash2)s'); }\n" % hash_dict]
+        out = [u"p { background: url('/media/img/python.png?%(hash1)s'); }\np { background: url('/media/img/python.png?%(hash1)s'); }\np { background: url('/media/img/python.png?%(hash1)s'); }\np { background: url('/media/img/python.png?%(hash1)s'); }\n" % hash_dict,
+               u"p { background: url('/media/img/add.png?%(hash2)s'); }\np { background: url('/media/img/add.png?%(hash2)s'); }\np { background: url('/media/img/add.png?%(hash2)s'); }\np { background: url('/media/img/add.png?%(hash2)s'); }\n" % hash_dict]
         hunks = [h for m, h in self.css_node.hunks()]
         self.assertEqual(out, hunks)
 
+
+
+class CssAbsolutizingTestCaseWithHash(CssAbsolutizingTestCase):
+
+    def setUp(self):
+        settings.COMPRESS_ENABLED = True
+        settings.COMPRESS_URL = '/media/'
+        settings.COMPRESS_CSS_HASHING_METHOD = 'hash'
+        self.css = """
+        <link rel="stylesheet" href="/media/css/url/url1.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/url/2/url2.css" type="text/css" charset="utf-8">
+        """
+        self.css_node = CssCompressor(self.css)
+
+    def suffix_method(self, filename):
+        f = open(filename)
+        suffix = "H%s" % (get_hexdigest(f.read(), 12), )
+        f.close()
+        return suffix
 
 
 class CssDataUriTestCase(TestCase):
@@ -150,6 +176,7 @@ class CssDataUriTestCase(TestCase):
             'compressor.filters.datauri.CssDataUriFilter',
         ]
         settings.COMPRESS_URL = '/media/'
+        settings.COMPRESS_CSS_HASHING_METHOD = 'mtime'
         self.css = """
         <link rel="stylesheet" href="/media/css/datauri.css" type="text/css">
         """
