@@ -197,7 +197,7 @@ class Command(NoArgsCommand):
                 try:
                     result = node.render(context, forced=True)
                 except Exception, e:
-                    raise CommandError("An error occured during rending: "
+                    raise CommandError("An error occured during rendering: "
                                        "%s" % e)
                 cache.set(key, result, settings.COMPRESS_OFFLINE_TIMEOUT)
                 context.pop()
