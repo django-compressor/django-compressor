@@ -86,7 +86,7 @@ class PrecompilerTestCase(TestCase):
     def test_precompiler_infile_stdout(self):
         command = '%s %s -f {infile}' %  (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=None, command=command)
-        self.assertEqual(u"body { color:#990; }\n", compiler.input())
+        self.assertEqual(u"body { color:#990; }\n", compiler.input().replace('\r\n', '\n'))
 
     def test_precompiler_stdin_outfile(self):
         command = '%s %s -o {outfile}' %  (sys.executable, self.test_precompiler)
@@ -96,12 +96,12 @@ class PrecompilerTestCase(TestCase):
     def test_precompiler_stdin_stdout(self):
         command = '%s %s' %  (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=None, command=command)
-        self.assertEqual(u"body { color:#990; }\n", compiler.input())
+        self.assertEqual(u"body { color:#990; }\n", compiler.input().replace('\r\n', '\n'))
 
     def test_precompiler_stdin_stdout_filename(self):
         command = '%s %s' %  (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
-        self.assertEqual(u"body { color:#990; }\n", compiler.input())
+        self.assertEqual(u"body { color:#990; }\n", compiler.input().replace('\r\n', '\n'))
 
 
 class CssMinTestCase(TestCase):

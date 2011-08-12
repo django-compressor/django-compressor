@@ -6,6 +6,10 @@ from os.path import join
 
 from django.conf import settings
 
+# Fix for 2.7 and Windows http://bugs.python.org/issue10551
+import mimetypes
+mimetypes.init([])
+
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
 if not settings.configured:
