@@ -95,22 +95,24 @@ class CompilerFilter(FilterBase):
 
     def input(self, **kwargs):
         options = dict(self.options)
+        delete_temp_in, delete_temp_out = False, False
         if self.infile is None:
             if "{infile}" in self.command:
                 if self.filename is None:
-                    self.infile = tempfile.NamedTemporaryFile(mode="w")
+                    delete_temp_in = True
+                    self.infile, options["infile"] = tempfile.mkstemp()
+                    self.infile = os.fdopen(self.infile, "wb")
                     self.infile.write(self.content)
                     self.infile.flush()
                     os.fsync(self.infile)
-                    options["infile"] = self.infile.name
                 else:
                     self.infile = open(self.filename)
                     options["infile"] = self.filename
 
         if "{outfile}" in self.command and not "outfile" in options:
-            ext = ".%s" % self.type and self.type or ""
-            self.outfile = tempfile.NamedTemporaryFile(mode='r+', suffix=ext)
-            options["outfile"] = self.outfile.name
+            delete_temp_out = True
+            self.outfile, options["outfile"] = tempfile.mkstemp()
+            self.outfile = os.fdopen(self.outfile, "r+b")
         try:
             command = fstr(self.command).format(**options)
             proc = subprocess.Popen(command, shell=True, cwd=self.cwd,
@@ -138,7 +140,11 @@ class CompilerFilter(FilterBase):
         finally:
             if self.infile is not None:
                 self.infile.close()
+                if delete_temp_in:
+                    os.remove(options["infile"])
             if self.outfile is not None:
                 filtered = self.outfile.read()
                 self.outfile.close()
+                if delete_temp_out:
+                    os.remove(options["outfile"])
         return filtered
