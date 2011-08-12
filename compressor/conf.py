@@ -7,7 +7,7 @@ from compressor.utils.settings import AppSettings
 
 class CompressorSettings(AppSettings):
     # Main switch
-    ENABLED = not global_settings.DEBUG
+    ENABLED = False
     # Allows changing verbosity from the settings.
     VERBOSE = False
     # GET variable that disables compressor e.g. "nocompress"
@@ -38,14 +38,17 @@ class CompressorSettings(AppSettings):
     YUI_BINARY = 'java -jar yuicompressor.jar'
     YUI_CSS_ARGUMENTS = ''
     YUI_JS_ARGUMENTS = ''
-    DATA_URI_MIN_SIZE = 1024
+    DATA_URI_MAX_SIZE = 1024
 
     COMPASS_BINARY = 'compass'
     COMPASS_ARGUMENTS = ' --no-line-comments --output-style expanded'
     COMPASS_PLUGINS = []
+    COMPASS_IMAGES_DIR = 'images/'
 
     # the cache backend to use
     CACHE_BACKEND = None
+    # the dotted path to the function that creates the cache key
+    CACHE_KEY_FUNCTION = 'compressor.cache.simple_cachekey'
     # rebuilds the cache every 30 days if nothing has changed.
     REBUILD_TIMEOUT = 60 * 60 * 24 * 30  # 30 days
     # the upper bound on how long any compression should take to be generated
@@ -61,7 +64,7 @@ class CompressorSettings(AppSettings):
     OFFLINE_CONTEXT = {}
 
     def configure_enabled(self, value):
-        return value or getattr(global_settings, 'COMPRESS', value)
+        return value or not global_settings.DEBUG
 
     def configure_root(self, value):
         if value is None:
@@ -112,5 +115,8 @@ class CompressorSettings(AppSettings):
             raise ImproperlyConfigured("The COMPRESS_PRECOMPILERS setting "
                 "must be a list or tuple. Check for missing commas.")
         return value
+
+    def configure_compass_images_dir(self, value):
+        return self.configure_url(value)
 
 settings = CompressorSettings(prefix="COMPRESS")

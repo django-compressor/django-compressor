@@ -109,7 +109,7 @@ setup(
     long_description = README,
     author = 'Jannis Leidel',
     author_email = 'jannis@leidel.info',
-    packages = find_packages(),
+    packages = find_packages(exclude=['tests', 'tests.*']),
     package_data = find_package_data('compressor', only_in_packages=False),
     classifiers = [
         'Development Status :: 4 - Beta',

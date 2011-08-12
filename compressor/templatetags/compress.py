@@ -72,17 +72,9 @@ class CompressorNode(template.Node):
 
         # 4. call compressor output method and handle exceptions
         rendered_output = compressor.output(self.mode, forced=forced)
-        try:
-            rendered_output = compressor.output(self.mode, forced=forced)
-            if cache_key:
-                cache_set(cache_key, rendered_output)
-            return rendered_output
-        except Exception, e:
-            if settings.DEBUG or forced:
-                raise e
-
-        # 5. Or don't do anything in production
-        return self.nodelist.render(context)
+        if cache_key:
+            cache_set(cache_key, rendered_output)
+        return rendered_output
 
 
 @register.tag

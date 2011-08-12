@@ -18,6 +18,9 @@ class CompassFilter(CompilerFilter):
     def input(self, *args, **kwargs):
         if self.filename is None:
             self.filename = kwargs.pop('filename')
+        if not (self.filename.lower().endswith('scss') or
+                self.filename.lower().endswith('sass')):
+            return ''
         tmpdir = tempfile.mkdtemp()
         parentdir = path.abspath(path.dirname(self.filename))
         self.cwd = path.dirname(parentdir)
@@ -28,10 +31,10 @@ class CompassFilter(CompilerFilter):
             ('tmpdir', tmpdir),
             ('sassdir', parentdir),
             ('outfile', path.join(tmpdir, outfile_name)),
-            ('imagedir', settings.COMPRESS_URL),
+            ('imagesdir', settings.COMPRESS_COMPASS_IMAGES_DIR),
         )
         for plugin in settings.COMPRESS_COMPASS_PLUGINS:
-            self.command += ' --require %s'% plugin
+            self.command += ' --require %s' % plugin
         self.command += (' --sass-dir {sassdir} --css-dir {tmpdir}'
-                         ' --image-dir {imagedir} {infile}')
+                         ' --images-dir {imagesdir} {infile}')
         return super(CompassFilter, self).input(*args, **kwargs)

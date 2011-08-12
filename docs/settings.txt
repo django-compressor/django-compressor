@@ -6,15 +6,16 @@ Settings
 Django Compressor has a number of settings that control its behavior.
 They've been given sensible defaults.
 
-.. _compress:
+.. _compress_enabled:
 
-COMPRESS
-^^^^^^^^
+COMPRESS_ENABLED
+^^^^^^^^^^^^^^^^
 
 :Default: the opposite of ``DEBUG``
 
 Boolean that decides if compression will happen. In order to test compression
-when ``DEBUG`` is enabled COMPRESS needs to explicitly be set to ``True``.
+when ``DEBUG`` is enabled COMPRESS_ENABLED_ needs to explicitly be set to
+``True``.
 
 .. _compress_url:
 
@@ -83,7 +84,7 @@ A filter that passes the CSS content to the CSSTidy_ tool.
 
 A filter for embedding media as `data: URIs`_ in the CSS.
 
-- ``COMPRESS_DATA_URI_MIN_SIZE`` -- Only files that are smaller than
+- ``COMPRESS_DATA_URI_MAX_SIZE`` -- Only files that are smaller than
   this value will be embedded. In bytes.
 
 ``compressor.filters.yui.YUICSSFilter``
@@ -114,6 +115,9 @@ A filter that runs Compass_'s compile command. **(BETA)**
   compass' require option e.g. ``['my_plugin']`` leads to passing
   ``--require my_plugin``.
 
+- ``COMPRESS_COMPASS_IMAGES_DIR`` -- The directory where you keep your images,
+  pass as ``--images-dir`` to the compass compiler. Defaults to ``'images/'``.
+
 .. _CSSTidy: http://csstidy.sourceforge.net/
 .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
 .. _cssmin: http://pypi.python.org/pypi/cssmin/
@@ -131,6 +135,13 @@ A list of filters that will be applied to javascript. Possible options are:
 """""""""""""""""""""""""""""""""""""""""
 
 A filter that uses the jsmin implementation rJSmin_ to compress JavaScript code.
+
+.. _slimit_filter:
+
+``compressor.filters.jsmin.SlimItFilter``
+"""""""""""""""""""""""""""""""""""""""""
+
+A filter that uses the jsmin implementation `Slim It`_ to compress JavaScript code.
 
 ``compressor.filters.closure.ClosureCompilerFilter``
 """"""""""""""""""""""""""""""""""""""""""""""""""""
@@ -153,6 +164,7 @@ A filter that passes the JavaScript code to the `YUI compressor`_.
 .. _rJSmin: http://opensource.perlig.de/rjsmin/
 .. _`Google Closure compiler`: http://code.google.com/closure/compiler/
 .. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
+.. _`Slim It`: http://slimit.org/
 
 .. _compress_precompilers:
 

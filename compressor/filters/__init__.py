@@ -1,1 +1,1 @@
-from compressor.filters.base import FilterBase, CompilerFilter, FilterError
+from compressor.filters.base import (FilterBase, CallbackOutputFilter, CompilerFilter, FilterError)

@@ -68,6 +68,9 @@ integrated.
             self.local_storage._save(name, content)
             return name
 
+        def path(self, name):
+            return self.local_storage.path(name)
+
 #. Set your :ref:`COMPRESS_STORAGE <compress_storage>` and STATICFILES_STORAGE_
    settings to the dotted path of your custom cached storage backend, e.g.
    ``'mysite.storage.CachedS3BotoStorage'``.

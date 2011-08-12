@@ -4,6 +4,27 @@ Changelog
 HEAD
 ----
 
+- **BACKWARDS-INCOMPATIBLE** Stopped swallowing exceptions raised by
+  rendering the template tag in production (``DEBUG = False``). This
+  has the potential to breaking lots of apps but on the other hand
+  will help find bugs.
+
+- **BACKWARDS-INCOMPATIBLE** The default function to create the cache
+  key stopped containing the server hostname. Instead the cache key
+  now only has the form ``'django_compressor.<KEY>'``.
+
+  To revert to the previous way simply set the ``COMPRESS_CACHE_KEY_FUNCTION``
+  to ``'compressor.cache.socket_cachekey'``.
+
+- **BACKWARDS-INCOMPATIBLE** Renamed ambigously named
+  ``COMPRESS_DATA_URI_MAX_SIZE`` setting to ``COMPRESS_DATA_URI_MAX_SIZE``.
+  It's the maximum size the ``compressor.filters.datauri.DataUriFilter``
+  filter will embed files as data: URIs.
+
+- Added support for ``{{ block.super }}`` to ``compress`` management command.
+
+- Dropped Django 1.1.X support.
+
 - Added Compass filter (beta).
 
 - Fixed compiler filters on Windows.
@@ -11,6 +32,14 @@ HEAD
 - Handle new-style cached template loaders in the compress management command.
 
 - Documented included filters.
+
+- Added `Slim It`_ filter.
+
+- Added new CallbackOutputFilter to ease the implementation of Python-based
+  callback filters that only need to pass the content to a callable.
+
+
+.. _`Slim It`: http://slimit.org/
 
 0.9.2
 -----

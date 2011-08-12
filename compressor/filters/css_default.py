@@ -71,7 +71,7 @@ class CssAbsoluteFilter(FilterBase):
         url = url.strip(' \'"')
         if url.startswith(('http://', 'https://', '/', 'data:')):
             return "url('%s')" % self.add_mtime(url)
-        full_url = posixpath.normpath('/'.join([self.directory_name, url]))
+        full_url = posixpath.normpath('/'.join([str(self.directory_name), url]))
         if self.has_scheme:
             full_url = "%s%s" % (self.protocol, full_url)
         return "url('%s')" % self.add_mtime(full_url)

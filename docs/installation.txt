@@ -58,7 +58,16 @@ for the :ref:`parser <compress_parser>` ``compressor.parser.Html5LibParser``::
 
     pip install html5lib
 
+`Slim It`_ (optional)
+^^^^^^^^^^^^^^^^^^^^^
+
+for the :ref:`Slim It filter <slimit_filter>` ``compressor.filters.jsmin.SlimItFilter``::
+
+    pip install slimit
+
+
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://codespeak.net/lxml/
 .. _libxml2: http://xmlsoft.org/
 .. _html5lib: http://code.google.com/p/html5lib/
+.. _`Slim It`: http://slimit.org/
