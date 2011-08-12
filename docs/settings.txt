@@ -102,26 +102,9 @@ A filter that passes the CSS content to the `YUI compressor`_.
 A filter that uses Zachary Voase's Python port of the YUI CSS compression
 algorithm cssmin_.
 
-``compressor.filters.compass.CompassFilter``
-""""""""""""""""""""""""""""""""""""""""""""
-
-A filter that runs Compass_'s compile command. **(BETA)**
-
-- ``COMPRESS_COMPASS_BINARY`` -- The compass CLI tool filesystem path.
-
-- ``COMPRESS_COMPASS_ARGUMENTS`` -- The arguments passed to the compass CLI tool.
-
-- ``COMPRESS_COMPASS_PLUGINS`` -- A list of plugins names that are passed to
-  compass' require option e.g. ``['my_plugin']`` leads to passing
-  ``--require my_plugin``.
-
-- ``COMPRESS_COMPASS_IMAGES_DIR`` -- The directory where you keep your images,
-  pass as ``--images-dir`` to the compass compiler. Defaults to ``'images/'``.
-
 .. _CSSTidy: http://csstidy.sourceforge.net/
 .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
 .. _cssmin: http://pypi.python.org/pypi/cssmin/
-.. _Compass: http://compass-style.org/
 
 
 COMPRESS_JS_FILTERS

@@ -33,43 +33,6 @@ CssTidyTestCase = skipIf(
 )(CssTidyTestCase)
 
 
-class CompassTestCase(TestCase):
-
-    def setUp(self):
-        self.old_debug = settings.DEBUG
-        self.old_compress_css_filters = settings.COMPRESS_CSS_FILTERS
-        self.old_compress_url = settings.COMPRESS_URL
-        self.old_enabled = settings.COMPRESS_ENABLED
-        settings.DEBUG = True
-        settings.COMPRESS_ENABLED = True
-        settings.COMPRESS_CSS_FILTERS = [
-            'compressor.filters.compass.CompassFilter',
-            'compressor.filters.css_default.CssAbsoluteFilter',
-        ]
-        settings.COMPRESS_URL = '/media/'
-
-    def tearDown(self):
-        settings.DEBUG = self.old_debug
-        settings.COMPRESS_URL = self.old_compress_url
-        settings.COMPRESS_ENABLED = self.old_enabled
-        settings.COMPRESS_CSS_FILTERS = self.old_compress_css_filters
-
-    def test_compass(self):
-        template = u"""{% load compress %}{% compress css %}
-        <link rel="stylesheet" href="{{ MEDIA_URL }}sass/screen.scss" type="text/css">
-        <link rel="stylesheet" href="{{ MEDIA_URL }}sass/print.scss" type="text/css">
-        {% endcompress %}
-        """
-        context = {'MEDIA_URL': settings.COMPRESS_URL}
-        out = css_tag("/media/CACHE/css/8ff1cfd8787d.css")
-        self.assertEqual(out, render(template, context))
-
-CompassTestCase = skipIf(
-    find_command(settings.COMPRESS_COMPASS_BINARY) is None,
-    'Compass binary %r not found' % settings.COMPRESS_COMPASS_BINARY
-)(CompassTestCase)
-
-
 class PrecompilerTestCase(TestCase):
 
     def setUp(self):

@@ -40,11 +40,6 @@ class CompressorSettings(AppSettings):
     YUI_JS_ARGUMENTS = ''
     DATA_URI_MAX_SIZE = 1024
 
-    COMPASS_BINARY = 'compass'
-    COMPASS_ARGUMENTS = ' --no-line-comments --output-style expanded'
-    COMPASS_PLUGINS = []
-    COMPASS_IMAGES_DIR = 'images/'
-
     # the cache backend to use
     CACHE_BACKEND = None
     # the dotted path to the function that creates the cache key
@@ -115,8 +110,5 @@ class CompressorSettings(AppSettings):
             raise ImproperlyConfigured("The COMPRESS_PRECOMPILERS setting "
                 "must be a list or tuple. Check for missing commas.")
         return value
-
-    def configure_compass_images_dir(self, value):
-        return self.configure_url(value)
 
 settings = CompressorSettings(prefix="COMPRESS")
