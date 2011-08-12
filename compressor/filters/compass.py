@@ -27,11 +27,11 @@ class CompassFilter(CompilerFilter):
         self.infile = open(self.filename)
         outfile_name = path.splitext(path.split(self.filename)[1])[0] + '.css'
         self.options += (
-            ('infile', self.filename),
-            ('tmpdir', tmpdir),
-            ('sassdir', parentdir),
-            ('outfile', path.join(tmpdir, outfile_name)),
-            ('imagesdir', settings.COMPRESS_COMPASS_IMAGES_DIR),
+            ('infile', self.filename.replace('\\', '/')),
+            ('tmpdir', tmpdir.replace('\\', '/')),
+            ('sassdir', parentdir.replace('\\', '/')),
+            ('outfile', path.join(tmpdir, outfile_name).replace('\\', '/')),
+            ('imagesdir', settings.COMPRESS_COMPASS_IMAGES_DIR.replace('\\', '/')),
         )
         for plugin in settings.COMPRESS_COMPASS_PLUGINS:
             self.command += ' --require %s' % plugin
