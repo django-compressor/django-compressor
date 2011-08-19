@@ -21,6 +21,10 @@ HEAD
   It's the maximum size the ``compressor.filters.datauri.DataUriFilter``
   filter will embed files as data: URIs.
 
+- Added ``COMPRESS_CSS_HASHING_METHOD`` setting with the options ``'mtime'``
+  (default) and ``'hash'`` for the ``CssAbsoluteFilter`` filter. The latter
+  uses the content of the file to calculate the cache-busting hash.
+
 - Added support for ``{{ block.super }}`` to ``compress`` management command.
 
 - Dropped Django 1.1.X support.
