@@ -4,6 +4,7 @@ import logging
 import subprocess
 import tempfile
 from django.core.exceptions import ImproperlyConfigured
+from django.core.files.temp import NamedTemporaryFile
 from django.utils.importlib import import_module
 
 from compressor.conf import settings
@@ -98,7 +99,7 @@ class CompilerFilter(FilterBase):
         if self.infile is None:
             if "{infile}" in self.command:
                 if self.filename is None:
-                    self.infile = tempfile.NamedTemporaryFile(mode="w")
+                    self.infile = NamedTemporaryFile(mode="w")
                     self.infile.write(self.content)
                     self.infile.flush()
                     os.fsync(self.infile)
@@ -108,8 +109,8 @@ class CompilerFilter(FilterBase):
                     options["infile"] = self.filename
 
         if "{outfile}" in self.command and not "outfile" in options:
-            ext = ".%s" % self.type and self.type or ""
-            self.outfile = tempfile.NamedTemporaryFile(mode='r+', suffix=ext)
+            ext = self.type and ".%s" % self.type or ""
+            self.outfile = NamedTemporaryFile(mode='r+', suffix=ext)
             options["outfile"] = self.outfile.name
         try:
             command = fstr(self.command).format(**options)
