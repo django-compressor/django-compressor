@@ -102,7 +102,7 @@ VERSION = __import__("compressor").__version__
 
 setup(
     name = "django_compressor",
-    version = VERSION,
+    version = ":versiontools:compressor:",
     url = 'http://django_compressor.readthedocs.org/',
     license = 'BSD',
     description = "Compresses linked and inline JavaScript or CSS into single cached files.",
@@ -123,5 +123,8 @@ setup(
     zip_safe = False,
     install_requires=[
         'django-appconf >= 0.4',
+    ],
+    setup_requires=[
+        'versiontools >= 1.6',
     ],
 )
