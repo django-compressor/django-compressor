@@ -121,4 +121,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
     ],
     zip_safe = False,
+    install_requires=[
+        'django-appconf >= 0.4',
+    ],
 )

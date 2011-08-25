@@ -2,10 +2,9 @@ import gzip
 from os import path
 from datetime import datetime
 
+from django.conf import settings
 from django.core.files.storage import FileSystemStorage, get_storage_class
 from django.utils.functional import LazyObject
-
-from compressor.conf import settings
 
 
 class CompressorFileStorage(FileSystemStorage):

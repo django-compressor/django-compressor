@@ -2,12 +2,13 @@ from __future__ import with_statement
 import os
 import codecs
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_unicode
 
 from compressor.cache import get_hexdigest, get_mtime
-from compressor.conf import settings
+
 from compressor.exceptions import CompressorError, UncompressableFileError
 from compressor.filters import CompilerFilter
 from compressor.storage import default_storage

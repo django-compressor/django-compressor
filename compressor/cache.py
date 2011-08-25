@@ -2,12 +2,12 @@ import os
 import socket
 import time
 
+from django.conf import settings
 from django.core.cache import get_cache
 from django.utils.encoding import smart_str
 from django.utils.hashcompat import md5_constructor
 from django.utils.importlib import import_module
 
-from compressor.conf import settings
 from compressor.utils import get_mod_func
 
 

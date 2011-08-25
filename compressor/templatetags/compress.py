@@ -1,9 +1,9 @@
 from django import template
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 from compressor.cache import (cache, cache_get, cache_set,
                               get_offline_cachekey, get_templatetag_cachekey)
-from compressor.conf import settings
 from compressor.utils import get_class
 
 register = template.Library()
