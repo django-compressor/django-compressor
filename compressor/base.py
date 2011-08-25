@@ -26,7 +26,7 @@ class Compressor(object):
     """
     type = None
 
-    def __init__(self, content=None, output_prefix="compressed"):
+    def __init__(self, content=None, output_prefix="compressed", block_name=None):
         self.content = content or ""
         self.output_prefix = output_prefix
         self.output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
@@ -36,6 +36,7 @@ class Compressor(object):
         self.extra_context = {}
         self.all_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
         self.finders = staticfiles.finders
+        self.block_name = block_name
 
     def split_contents(self):
         """

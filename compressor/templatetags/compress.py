@@ -18,10 +18,11 @@ COMPRESSORS = {
 
 class CompressorNode(template.Node):
 
-    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE):
+    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE, name=None):
         self.nodelist = nodelist
         self.kind = kind
         self.mode = mode
+        self.name = name
         self.compressor_cls = get_class(
             COMPRESSORS.get(self.kind), exception=ImproperlyConfigured)
 
@@ -65,7 +66,7 @@ class CompressorNode(template.Node):
             return cached_offline
 
         # 3. Prepare the actual compressor and check cache
-        compressor = self.compressor_cls(self.nodelist.render(context))
+        compressor = self.compressor_cls(self.nodelist.render(context), block_name=self.name)
         cache_key, cache_content = self.render_cached(compressor, forced)
         if cache_content is not None:
             return cache_content

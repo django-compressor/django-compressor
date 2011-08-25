@@ -7,8 +7,8 @@ class CssCompressor(Compressor):
     template_name = "compressor/css.html"
     template_name_inline = "compressor/css_inline.html"
 
-    def __init__(self, content=None, output_prefix="css"):
-        super(CssCompressor, self).__init__(content, output_prefix)
+    def __init__(self, content=None, output_prefix="css", block_name=None):
+        super(CssCompressor, self).__init__(content, output_prefix, block_name)
         self.filters = list(settings.COMPRESS_CSS_FILTERS)
         self.type = output_prefix
 
@@ -34,7 +34,7 @@ class CssCompressor(Compressor):
                 if self.media_nodes and self.media_nodes[-1][0] == media:
                     self.media_nodes[-1][1].split_content.append(data)
                 else:
-                    node = CssCompressor(self.parser.elem_str(elem))
+                    node = CssCompressor(self.parser.elem_str(elem), block_name=self.block_name)
                     node.split_content.append(data)
                     self.media_nodes.append((media, node))
         return self.split_content
