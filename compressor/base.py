@@ -85,6 +85,11 @@ class Compressor(object):
             except IOError, e:
                 raise UncompressableFileError("IOError while processing "
                                                "'%s': %s" % (filename, e))
+            except UnicodeDecodeError, e:
+                raise UncompressableFileError("UnicodeDecodeError while "
+                                              "processing '%s' with "
+                                              "charset %s: %s" %
+                                              (filename, charset, e))
 
     @cached_property
     def parser(self):
