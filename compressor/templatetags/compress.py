@@ -18,12 +18,16 @@ class CompressorNode(template.Node):
         self.nodelist = nodelist
         self.kind = kind
         self.mode = mode
-        self.compressors = {
+        self.compressor_cls = get_class(
+            CompressorNode.compressors().get(self.kind),
+            exception=ImproperlyConfigured)
+
+    @classmethod
+    def compressors(cls):
+        return {
             "css": settings.COMPRESS_CSS_COMPRESSOR,
             "js": settings.COMPRESS_JS_COMPRESSOR,
         }
-        self.compressor_cls = get_class(
-            self.compressors.get(self.kind), exception=ImproperlyConfigured)
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
@@ -126,7 +130,7 @@ def compress(parser, token):
             "%r tag requires either one or two arguments." % args[0])
 
     kind = args[1]
-    if not kind in self.compressors.keys():
+    if not kind in CompressorNode.compressors():
         raise template.TemplateSyntaxError(
             "%r's argument must be 'js' or 'css'." % args[0])
 
