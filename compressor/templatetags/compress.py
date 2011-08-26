@@ -11,10 +11,6 @@ register = template.Library()
 OUTPUT_FILE = 'file'
 OUTPUT_INLINE = 'inline'
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
-COMPRESSORS = {
-    "css": settings.COMPRESS_CSS_COMPRESSOR,
-    "js": settings.COMPRESS_JS_COMPRESSOR,
-}
 
 class CompressorNode(template.Node):
 
@@ -22,8 +18,12 @@ class CompressorNode(template.Node):
         self.nodelist = nodelist
         self.kind = kind
         self.mode = mode
+        self.compressors = {
+            "css": settings.COMPRESS_CSS_COMPRESSOR,
+            "js": settings.COMPRESS_JS_COMPRESSOR,
+        }
         self.compressor_cls = get_class(
-            COMPRESSORS.get(self.kind), exception=ImproperlyConfigured)
+            self.compressors.get(self.kind), exception=ImproperlyConfigured)
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
@@ -126,7 +126,7 @@ def compress(parser, token):
             "%r tag requires either one or two arguments." % args[0])
 
     kind = args[1]
-    if not kind in COMPRESSORS.keys():
+    if not kind in self.compressors.keys():
         raise template.TemplateSyntaxError(
             "%r's argument must be 'js' or 'css'." % args[0])
 
