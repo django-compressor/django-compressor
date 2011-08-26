@@ -89,8 +89,9 @@ def cache_get(key):
     return val
 
 
-def cache_set(key, val, refreshed=False,
-        timeout=settings.COMPRESS_REBUILD_TIMEOUT):
+def cache_set(key, val, refreshed=False, timeout=None):
+    if timeout is None:
+        timeout = settings.COMPRESS_REBUILD_TIMEOUT
     refresh_time = timeout + time.time()
     real_timeout = timeout + settings.COMPRESS_MINT_DELAY
     packed_val = (val, refresh_time, refreshed)
