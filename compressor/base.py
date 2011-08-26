@@ -4,6 +4,7 @@ import codecs
 
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.template import Context
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_unicode
 
@@ -27,13 +28,14 @@ class Compressor(object):
     """
     type = None
 
-    def __init__(self, content=None, output_prefix="compressed"):
+    def __init__(self, content=None, output_prefix=None, context=None, *args, **kwargs):
         self.content = content or ""
-        self.output_prefix = output_prefix
+        self.output_prefix = output_prefix or "compressed"
         self.output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
         self.charset = settings.DEFAULT_CHARSET
         self.storage = default_storage
         self.split_content = []
+        self.context = context or {}
         self.extra_context = {}
         self.all_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
         self.finders = staticfiles.finders
@@ -254,6 +256,9 @@ class Compressor(object):
         """
         if context is None:
             context = {}
-        context.update(self.extra_context)
-        return render_to_string(
-            "compressor/%s_%s.html" % (self.type, mode), context)
+        final_context = Context()
+        final_context.update(context)
+        final_context.update(self.context)
+        final_context.update(self.extra_context)
+        return render_to_string("compressor/%s_%s.html" %
+                                (self.type, mode), final_context)

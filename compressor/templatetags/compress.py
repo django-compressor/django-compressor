@@ -70,7 +70,8 @@ class CompressorNode(template.Node):
             return cached_offline
 
         # 3. Prepare the actual compressor and check cache
-        compressor = self.compressor_cls(self.nodelist.render(context))
+        compressor = self.compressor_cls(content=self.nodelist.render(context),
+                                         context=context)
         cache_key, cache_content = self.render_cached(compressor, forced)
         if cache_content is not None:
             return cache_content

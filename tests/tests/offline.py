@@ -30,11 +30,11 @@ class OfflineGenerationTestCase(TestCase):
         count, result = CompressCommand().compress()
         self.assertEqual(5, count)
         self.assertEqual([
-            css_tag('/media/CACHE/css/cd579b7deb7d.css')+'\n',
+            css_tag('/media/CACHE/css/cd579b7deb7d.css'),
             u'<script type="text/javascript" src="/media/CACHE/js/0a2bb9a287c0.js"></script>',
             u'<script type="text/javascript" src="/media/CACHE/js/fb1736ad48b7.js"></script>',
             u'<script type="text/javascript" src="/media/CACHE/js/770a7311729e.js"></script>',
-            u'<link rel="stylesheet" href="/media/CACHE/css/67ed6aff7f7b.css" type="text/css" />\n',
+            u'<link rel="stylesheet" href="/media/CACHE/css/67ed6aff7f7b.css" type="text/css" />',
         ], result)
         # Template rendering should use the cache. FIXME: how to make sure of it ? Should we test the cache
         # key<->values ourselves?
@@ -49,11 +49,11 @@ class OfflineGenerationTestCase(TestCase):
         count, result = CompressCommand().compress()
         self.assertEqual(5, count)
         self.assertEqual([
-            css_tag('/media/CACHE/css/ee62fbfd116a.css')+'\n',
+            css_tag('/media/CACHE/css/ee62fbfd116a.css'),
             u'<script type="text/javascript" src="/media/CACHE/js/0a2bb9a287c0.js"></script>',
             u'<script type="text/javascript" src="/media/CACHE/js/fb1736ad48b7.js"></script>',
             u'<script type="text/javascript" src="/media/CACHE/js/770a7311729e.js"></script>',
-            u'<link rel="stylesheet" href="/media/CACHE/css/73e015f740c6.css" type="text/css" />\n',
+            u'<link rel="stylesheet" href="/media/CACHE/css/73e015f740c6.css" type="text/css" />',
         ], result)
         # Template rendering should use the cache. FIXME: how to make sure of it ? Should we test the cache
         # key<->values ourselves?
