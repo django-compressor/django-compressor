@@ -5,10 +5,13 @@ import time
 from django.conf import settings
 from django.core.cache import get_cache
 from django.utils.encoding import smart_str
+from django.utils.functional import SimpleLazyObject
 from django.utils.hashcompat import md5_constructor
 from django.utils.importlib import import_module
 
 from compressor.utils import get_mod_func
+
+_cachekey_func = None
 
 
 def get_hexdigest(plaintext, length=None):
@@ -17,18 +20,26 @@ def get_hexdigest(plaintext, length=None):
         return digest[:length]
     return digest
 
+
 def simple_cachekey(key):
     return 'django_compressor.%s' % smart_str(key)
+
 
 def socket_cachekey(key):
     return "django_compressor.%s.%s" % (socket.gethostname(), smart_str(key))
 
-try:
-    mod_name, func_name = get_mod_func(settings.COMPRESS_CACHE_KEY_FUNCTION)
-    get_cachekey = getattr(import_module(mod_name), func_name)
-except (AttributeError, ImportError), e:
-    raise ImportError("Couldn't import cache key function %s: %s" %
-                      (settings.COMPRESS_CACHE_KEY_FUNCTION, e))
+
+def get_cachekey(*args, **kwargs):
+    global _cachekey_func
+    if _cachekey_func is None:
+        try:
+            mod_name, func_name = get_mod_func(settings.COMPRESS_CACHE_KEY_FUNCTION)
+            _cachekey_func = getattr(import_module(mod_name), func_name)
+        except (AttributeError, ImportError), e:
+            raise ImportError("Couldn't import cache key function %s: %s" %
+                              (settings.COMPRESS_CACHE_KEY_FUNCTION, e))
+    return _cachekey_func(*args, **kwargs)
+
 
 def get_mtime_cachekey(filename):
     return get_cachekey("mtime.%s" % get_hexdigest(filename))
@@ -86,4 +97,4 @@ def cache_set(key, val, refreshed=False,
     return cache.set(key, packed_val, real_timeout)
 
 
-cache = get_cache(settings.COMPRESS_CACHE_BACKEND)
+cache = SimpleLazyObject(lambda: get_cache(settings.COMPRESS_CACHE_BACKEND))
