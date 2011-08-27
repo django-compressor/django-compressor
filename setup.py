@@ -1,11 +1,12 @@
 import os
 import sys
+import codecs
 from fnmatch import fnmatchcase
 from distutils.util import convert_path
 from setuptools import setup, find_packages
 
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    return codecs.open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
@@ -97,16 +98,13 @@ def find_package_data(
     return out
 
 
-README = read('README.rst')
-VERSION = __import__("compressor").__version__
-
 setup(
     name = "django_compressor",
-    version = VERSION,
+    version = ":versiontools:compressor:",
     url = 'http://django_compressor.readthedocs.org/',
-    license = 'BSD',
+    license = 'MIT',
     description = "Compresses linked and inline JavaScript or CSS into single cached files.",
-    long_description = README,
+    long_description = read('README.rst'),
     author = 'Jannis Leidel',
     author_email = 'jannis@leidel.info',
     packages = find_packages(exclude=['tests', 'tests.*']),
@@ -115,10 +113,19 @@ setup(
         'Development Status :: 4 - Beta',
         'Framework :: Django',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2.5',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
         'Topic :: Internet :: WWW/HTTP',
     ],
     zip_safe = False,
+    install_requires=[
+        'django-appconf >= 0.4',
+    ],
+    setup_requires=[
+        'versiontools >= 1.6',
+    ],
 )

@@ -3,10 +3,10 @@ import os
 import sys
 from unittest2 import skipIf
 
+from django.conf import settings
 from django.test import TestCase
 
 from compressor.cache import get_hashed_mtime
-from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.utils import find_command
 from compressor.filters.base import CompilerFilter

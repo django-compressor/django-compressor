@@ -2,8 +2,6 @@ from __future__ import with_statement
 import os
 from unittest2 import skipIf
 
-from BeautifulSoup import BeautifulSoup
-
 try:
     import lxml
 except ImportError:
@@ -20,7 +18,8 @@ except ImportError:
     BeautifulSoup = None
 
 
-from compressor.conf import settings
+from django.conf import settings
+
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
 
 from .base import CompressorTestCase

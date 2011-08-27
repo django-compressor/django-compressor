@@ -4,12 +4,11 @@ import re
 
 from BeautifulSoup import BeautifulSoup
 
+from django.conf import settings
 from django.core.cache.backends import locmem
 from django.test import TestCase
 
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
-from compressor.cache import get_hexdigest
-from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
 
@@ -21,6 +20,7 @@ def css_tag(href, **kwargs):
 
 
 test_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
 
 class CompressorTestCase(TestCase):
 
@@ -81,7 +81,7 @@ class CompressorTestCase(TestCase):
     def test_js_split(self):
         out = [
             (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), u'js/one.js', '<script src="/media/js/one.js" type="text/javascript"></script>'),
-            (SOURCE_HUNK, u'obj.value = "value";', None, '<script type="text/javascript">obj.value = "value";</script>')
+            (SOURCE_HUNK, u'obj.value = "value";', None, '<script type="text/javascript">obj.value = "value";</script>'),
         ]
         split = self.js_node.split_contents()
         split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3])) for x in split]
@@ -127,7 +127,6 @@ class CompressorTestCase(TestCase):
             settings.COMPRESS_OUTPUT_DIR = old_output_dir
 
 
-
 class CssMediaTestCase(TestCase):
     def setUp(self):
         self.css = """\
@@ -151,8 +150,6 @@ class CssMediaTestCase(TestCase):
         self.assertEqual(media, [l.get('media', None) for l in links])
 
 
-
-
 class VerboseTestCase(CompressorTestCase):
 
     def setUp(self):
@@ -165,5 +162,3 @@ class CacheBackendTestCase(CompressorTestCase):
     def test_correct_backend(self):
         from compressor.cache import cache
         self.assertEqual(cache.__class__, locmem.CacheClass)
-
-
