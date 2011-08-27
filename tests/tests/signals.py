@@ -17,12 +17,12 @@ class PostCompressSignalTestCase(TestCase):
 <link rel="stylesheet" href="/media/css/one.css" type="text/css" />
 <style type="text/css">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="/media/css/two.css" type="text/css" />"""
-        self.css_node = CssCompressor(self.css, block_name='foo')
+        self.css_node = CssCompressor(self.css)
 
         self.js = """\
 <script src="/media/js/one.js" type="text/javascript"></script>
 <script type="text/javascript">obj.value = "value";</script>"""
-        self.js_node = JsCompressor(self.js, block_name='foo')
+        self.js_node = JsCompressor(self.js)
 
     def tearDown(self):
         post_compress.disconnect()
@@ -35,7 +35,6 @@ class PostCompressSignalTestCase(TestCase):
         self.js_node.output()
         args, kwargs = callback.call_args
         self.assertEquals('django-compressor', kwargs['sender'])
-        self.assertEquals('foo', kwargs['name'])
         self.assertEquals('js', kwargs['type'])
         self.assertEquals('file', kwargs['mode'])
         context = kwargs['context']
@@ -49,7 +48,6 @@ class PostCompressSignalTestCase(TestCase):
         self.css_node.output()
         args, kwargs = callback.call_args
         self.assertEquals('django-compressor', kwargs['sender'])
-        self.assertEquals('foo', kwargs['name'])
         self.assertEquals('css', kwargs['type'])
         self.assertEquals('file', kwargs['mode'])
         context = kwargs['context']
@@ -60,7 +58,7 @@ class PostCompressSignalTestCase(TestCase):
 <link rel="stylesheet" href="/media/css/one.css" media="handheld" type="text/css" />
 <style type="text/css" media="print">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="/media/css/two.css" type="text/css" />"""
-        css_node = CssCompressor(css, block_name='foo')
+        css_node = CssCompressor(css)
         def listener(sender, **kwargs):
             pass
         callback = Mock(wraps=listener)

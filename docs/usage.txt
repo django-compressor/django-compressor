@@ -86,8 +86,8 @@ would be rendered something like::
     </script>
 
 The compress template tag also supports a third argument for naming the output
-of that particular compress tag.  This is then passed as an argument to the
-`post_compress signal <signals>`.
+of that particular compress tag.  This is then added to the context so you can
+access it in the `post_compress signal <signals>`.
 
 .. _memcached: http://memcached.org/
 .. _caching documentation: http://docs.djangoproject.com/en/1.2/topics/cache/#memcached
@@ -159,10 +159,6 @@ sends the following arguments:
 ``sender``
     Always "django-compressor".
 
-``name``
-    The value provided in the 3rd positional argument to the template tag, or
-    ``None`` if no 3rd positional argument was provided.
-
 ``type``
     Either "``js``" or "``css``".
 
@@ -171,11 +167,17 @@ sends the following arguments:
 
 ``context``
     The context dictionary used to render the output of the compress template
-    tag.  If ``mode`` is "``file``", this will contain a "``url``" key that maps to
-    the relative URL for the compressed asset.  If ``type`` is "``css``", the
-    context will additionally contain a "``media``" key with a value of ``None`` if
-    no media attribute is specified on the link/style tag and equal to that
-    attribute if one is specified.
+    tag.
+
+    If ``mode`` is "``file``", this will contain a "``url``" key that maps to
+    the relative URL for the compressed asset.  
+
+    If ``type`` is "``css``", the context will additionally contain a
+    "``media``" key with a value of ``None`` if no media attribute is specified on
+    the link/style tag and equal to that attribute if one is specified.  
+
+    Additionally, ``context['name']`` will be the third positional argument to
+    the template tag, if provided.
 
 .. note::
 

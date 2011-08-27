@@ -18,6 +18,7 @@ class CompressorNode(template.Node):
         self.nodelist = nodelist
         self.kind = kind
         self.mode = mode
+        self.name = name
 
     def compressor_cls(self, *args, **kwargs):
         compressors =  {
@@ -70,6 +71,7 @@ class CompressorNode(template.Node):
             return cached_offline
 
         # 3. Prepare the actual compressor and check cache
+        context.update({'name': self.name}) 
         compressor = self.compressor_cls(content=self.nodelist.render(context),
                                          context=context)
         cache_key, cache_content = self.render_cached(compressor, forced)
@@ -127,13 +129,13 @@ def compress(parser, token):
 
     args = token.split_contents()
 
-    if not len(args) in (2, 3):
+    if not len(args) in (2, 3, 4):
         raise template.TemplateSyntaxError(
-            "%r tag requires either one or two arguments." % args[0])
+            "%r tag requires either one, two or three arguments." % args[0])
 
     kind = args[1]
 
-    if len(args) == 3:
+    if len(args) >= 3:
         mode = args[2]
         if not mode in OUTPUT_MODES:
             raise template.TemplateSyntaxError(
@@ -141,4 +143,8 @@ def compress(parser, token):
                 (args[0], OUTPUT_FILE, OUTPUT_INLINE))
     else:
         mode = OUTPUT_FILE
-    return CompressorNode(nodelist, kind, mode)
+    if len(args) == 4:
+        name = args[3]
+    else:
+        name = None
+    return CompressorNode(nodelist, kind, mode, name)

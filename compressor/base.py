@@ -40,7 +40,6 @@ class Compressor(object):
         self.extra_context = {}
         self.all_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
         self.finders = staticfiles.finders
-        self.block_name = block_name
 
     def split_contents(self):
         """
@@ -262,6 +261,6 @@ class Compressor(object):
         final_context.update(context)
         final_context.update(self.context)
         final_context.update(self.extra_context)
-        post_compress.send(sender='django-compressor', name=self.block_name, type=self.type, mode=mode, context=final_context) 
+        post_compress.send(sender='django-compressor', type=self.type, mode=mode, context=final_context) 
         return render_to_string("compressor/%s_%s.html" %
                                 (self.type, mode), final_context)
