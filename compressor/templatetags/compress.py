@@ -5,6 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 from compressor.cache import (cache, cache_get, cache_set,
                               get_offline_cachekey, get_templatetag_cachekey)
 from compressor.utils import get_class
+from compressor.models import CompressorConf
 
 register = template.Library()
 
