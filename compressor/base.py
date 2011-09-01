@@ -13,6 +13,7 @@ from compressor.cache import get_hexdigest, get_mtime
 from compressor.exceptions import CompressorError, UncompressableFileError
 from compressor.filters import CompilerFilter
 from compressor.storage import default_storage
+from compressor.signals import post_compress
 from compressor.utils import get_class, staticfiles
 from compressor.utils.decorators import cached_property, memoize
 
@@ -260,5 +261,6 @@ class Compressor(object):
         final_context.update(context)
         final_context.update(self.context)
         final_context.update(self.extra_context)
+        post_compress.send(sender='django-compressor', type=self.type, mode=mode, context=final_context) 
         return render_to_string("compressor/%s_%s.html" %
                                 (self.type, mode), final_context)
