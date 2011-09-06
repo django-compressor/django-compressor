@@ -1,10 +1,10 @@
 from __future__ import with_statement
 import os
 
-from django.conf import settings
 from django.template import Template, Context
 from django.test import TestCase
 
+from compressor.conf import settings
 from compressor.management.commands.compress import Command as CompressCommand
 
 from .base import test_dir, css_tag

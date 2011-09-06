@@ -1,10 +1,10 @@
 from __future__ import with_statement
 
-from django.conf import settings
 from django.core.files.storage import get_storage_class
 from django.test import TestCase
 
 from compressor import base
+from compressor.conf import settings
 
 from .base import css_tag
 from .templatetags import render

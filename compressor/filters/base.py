@@ -3,11 +3,11 @@ import os
 import logging
 import subprocess
 import tempfile
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 from django.utils.importlib import import_module
 
+from compressor.conf import settings
 from compressor.exceptions import FilterError
 from compressor.utils import get_mod_func
 from compressor.utils.stringformat import FormattableString as fstr

@@ -9,7 +9,6 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-from django.conf import settings
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
 from django.utils.datastructures import SortedDict
@@ -23,6 +22,7 @@ except ImportError:
     CachedLoader = None
 
 from compressor.cache import cache, get_offline_cachekey
+from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
 from compressor.utils import walk, any

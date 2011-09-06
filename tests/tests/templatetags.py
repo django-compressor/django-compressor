@@ -1,11 +1,11 @@
 from __future__ import with_statement
 
-from django.conf import settings
 from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
 
-from .base import css_tag
+from compressor.conf import settings
 
+from .base import css_tag
 
 def render(template_string, context_dict=None):
     """

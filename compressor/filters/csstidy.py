@@ -1,5 +1,4 @@
-from django.conf import settings
-
+from compressor.conf import settings
 from compressor.filters import CompilerFilter
 
 

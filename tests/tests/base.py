@@ -4,11 +4,11 @@ import re
 
 from BeautifulSoup import BeautifulSoup
 
-from django.conf import settings
 from django.core.cache.backends import locmem
 from django.test import TestCase
 
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
+from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
 

@@ -3,8 +3,7 @@ import re
 import mimetypes
 from base64 import b64encode
 
-from django.conf import settings
-
+from compressor.conf import settings
 from compressor.filters import FilterBase
 
 
