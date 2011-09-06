@@ -1,11 +1,15 @@
 from __future__ import with_statement
 
+from mock import Mock
+
 from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
 
 from compressor.conf import settings
+from compressor.signals import post_compress
 
 from .base import css_tag
+
 
 def render(template_string, context_dict=None):
     """
@@ -96,3 +100,16 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">obj.value = "value";</script>"""
         self.assertEqual(out, render(template, context))
 
+    def test_named_compress_tag(self):
+        template = u"""{% load compress %}{% compress js inline foo %}
+        <script type="text/javascript">obj.value = "value";</script>
+        {% endcompress %}
+        """
+        def listener(sender, **kwargs):
+            pass
+        callback = Mock(wraps=listener)
+        post_compress.connect(callback)
+        render(template)
+        args, kwargs = callback.call_args
+        context = kwargs['context']
+        self.assertEqual('foo', context['name'])
