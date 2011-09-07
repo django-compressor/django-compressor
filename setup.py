@@ -110,7 +110,7 @@ setup(
     packages = find_packages(exclude=['tests', 'tests.*']),
     package_data = find_package_data('compressor', only_in_packages=False),
     classifiers = [
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
@@ -122,10 +122,10 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
     ],
     zip_safe = False,
-    install_requires=[
+    install_requires = [
         'django-appconf >= 0.4',
     ],
-    setup_requires=[
+    setup_requires = [
         'versiontools >= 1.6',
     ],
 )
