@@ -7,9 +7,6 @@ from compressor.conf import settings
 INSTALLED = ("staticfiles" in settings.INSTALLED_APPS or
     "django.contrib.staticfiles" in settings.INSTALLED_APPS)
 
-finders = None
-settings = None
-
 if INSTALLED:
     if "django.contrib.staticfiles" in settings.INSTALLED_APPS:
         from django.contrib.staticfiles import finders
