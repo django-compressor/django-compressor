@@ -148,8 +148,7 @@ for the number of seconds defined in the
 Signals
 -------
 
-.. attribute:: compressor.signals.post_compress
-   :module:
+.. function:: compressor.signals.post_compress(sender, type, mode, context)
 
 Django Compressor includes a ``post_compress`` signal that enables you to
 listen for changes to your compressed CSS/JS.  This is useful, for example, if

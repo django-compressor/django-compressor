@@ -45,6 +45,8 @@ HEAD
 
 - Uses the current context when rendering the render templates.
 
+- Added :func:`post_compress<compressor.signals.post_compress>` signal.
+
 .. _`Slim It`: http://slimit.org/
 .. _`django-appconf`: http://django-appconf.rtfd.org/
 .. _`versiontools`: http://pypi.python.org/pypi/versiontools
