@@ -12,14 +12,14 @@ class CompressorConf(AppConf):
     # Allows changing verbosity from the settings.
     VERBOSE = False
     # GET variable that disables compressor e.g. "nocompress"
-    DEBUG_TOGGLE = "None"
+    DEBUG_TOGGLE = 'None'
     # the backend to use when parsing the JavaScript or Stylesheet files
     PARSER = 'compressor.parser.AutoSelectParser'
     OUTPUT_DIR = 'CACHE'
     STORAGE = 'compressor.storage.CompressorFileStorage'
 
-    CSS_COMPRESSOR = "compressor.css.CssCompressor"
-    JS_COMPRESSOR = "compressor.js.JsCompressor"
+    CSS_COMPRESSOR = 'compressor.css.CssCompressor'
+    JS_COMPRESSOR = 'compressor.js.JsCompressor'
 
     URL = None
     ROOT = None
@@ -73,46 +73,44 @@ class CompressorConf(AppConf):
             if not value:
                 value = settings.MEDIA_ROOT
         if not value:
-            raise ImproperlyConfigured(
-                "The COMPRESS_ROOT setting must be set.")
+            raise ImproperlyConfigured("COMPRESS_ROOT setting must be set")
         return os.path.normcase(os.path.abspath(value))
 
     def configure_url(self, value):
         # Uses Django 1.3's STATIC_URL by default or falls back to MEDIA_URL
         if value is None:
-            value = getattr(settings, "STATIC_URL", None)
+            value = getattr(settings, 'STATIC_URL', None)
             if not value:
                 value = settings.MEDIA_URL
-        if not value.endswith("/"):
-            raise ImproperlyConfigured("The URL settings (e.g. COMPRESS_URL) "
-                                       "must have a trailing slash.")
+        if not value.endswith('/'):
+            raise ImproperlyConfigured("URL settings (e.g. COMPRESS_URL) "
+                                       "must have a trailing slash")
         return value
 
     def configure_cache_backend(self, value):
         if value is None:
             # If we are on Django 1.3 AND using the new CACHES setting...
-            if DJANGO_VERSION[:2] >= (1, 3) and hasattr(settings, "CACHES"):
-                value = "default"
+            if DJANGO_VERSION[:2] >= (1, 3) and hasattr(settings, 'CACHES'):
+                value = 'default'
             else:
                 # falling back to the old CACHE_BACKEND setting
-                value = getattr(settings, "CACHE_BACKEND", None)
+                value = getattr(settings, 'CACHE_BACKEND', None)
                 if not value:
-                    raise ImproperlyConfigured(
-                        "Please specify a cache backend in your settings.")
+                    raise ImproperlyConfigured("Please specify a cache "
+                                               "backend in your settings.")
         return value
 
     def configure_offline_context(self, value):
         if not value:
-            value = {
-                "MEDIA_URL": settings.MEDIA_URL,
-            }
+            value = {'MEDIA_URL': settings.MEDIA_URL}
             # Adds the 1.3 STATIC_URL setting to the context if available
-            if getattr(settings, "STATIC_URL", None):
-                value["STATIC_URL"] = settings.STATIC_URL
+            if getattr(settings, 'STATIC_URL', None):
+                value['STATIC_URL'] = settings.STATIC_URL
         return value
 
     def configure_precompilers(self, value):
         if not isinstance(value, (list, tuple)):
             raise ImproperlyConfigured("The COMPRESS_PRECOMPILERS setting "
-                "must be a list or tuple. Check for missing commas.")
+                                       "must be a list or tuple. Check for "
+                                       "missing commas.")
         return value
