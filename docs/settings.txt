@@ -265,6 +265,13 @@ won't be necessary to change the default parser.
 The other two included parsers are considerably slower and should only be
 used if absolutely necessary.
 
+.. warning::
+
+    In some cases the ``compressor.parser.HtmlParser`` parser isn't able to
+    parse invalid HTML in JavaScript or CSS content. As a workaround you
+    should use one of the more forgiving parsers, e.g. the
+    ``BeautifulSoupParser``.
+
 The backends included in Django Compressor:
 
 - ``compressor.parser.AutoSelectParser``
