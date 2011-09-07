@@ -14,15 +14,15 @@ class YUICompressorFilter(CompilerFilter):
 
 class YUICSSFilter(YUICompressorFilter):
     type = 'css'
-    options = {
-        "binary": settings.COMPRESS_YUI_BINARY,
-        "args": settings.COMPRESS_YUI_CSS_ARGUMENTS,
-    }
+    options = (
+        ("binary", settings.COMPRESS_YUI_BINARY),
+        ("args", settings.COMPRESS_YUI_CSS_ARGUMENTS),
+    )
 
 
 class YUIJSFilter(YUICompressorFilter):
     type = 'js'
-    options = {
-        "binary": settings.COMPRESS_YUI_BINARY,
-        "args": settings.COMPRESS_YUI_JS_ARGUMENTS,
-    }
+    options = (
+        ("binary", settings.COMPRESS_YUI_BINARY),
+        ("args", settings.COMPRESS_YUI_JS_ARGUMENTS),
+    )

@@ -1,5 +1,6 @@
 import os
 import sys
+from types import MethodType
 from fnmatch import fnmatch
 from optparse import make_option
 
@@ -12,12 +13,27 @@ from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
+from django.template.loader import get_template
+from django.template.loader_tags import ExtendsNode, BlockNode, BLOCK_CONTEXT_KEY
+
+try:
+    from django.template.loaders.cached import Loader as CachedLoader
+except ImportError:
+    CachedLoader = None
 
 from compressor.cache import cache, get_offline_cachekey
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
 from compressor.utils import walk, any
+
+
+def patched_get_parent(self, context):
+    # Patch template returned by get_parent to make sure their _render method is
+    # just returning the context instead of actually rendering stuff.
+    compiled_template = self._old_get_parent(context)
+    compiled_template._render = MethodType(lambda self, c: c, compiled_template)
+    return compiled_template
 
 
 class Command(NoArgsCommand):
@@ -28,8 +44,8 @@ class Command(NoArgsCommand):
                 'separate multiple extensions with commas, or use -e '
                 'multiple times)'),
         make_option('-f', '--force', default=False, action='store_true',
-            help="Force generation of compressor content even if "
-                "COMPRESS setting is not True.", dest='force'),
+            help="Force the generation of compressed content even if the "
+                "COMPRESS_ENABLED setting is not True.", dest='force'),
         make_option('--follow-links', default=False, action='store_true',
             help="Follow symlinks when traversing the COMPRESS_ROOT "
                 "(which defaults to MEDIA_ROOT). Be aware that using this "
@@ -51,7 +67,23 @@ class Command(NoArgsCommand):
             except TemplateDoesNotExist:
                 pass
             from django.template.loader import template_source_loaders
-        return template_source_loaders or []
+        loaders = []
+        # If template loader is CachedTemplateLoader, return the loaders
+        # that it wraps around. So if we have
+        # TEMPLATE_LOADERS = (
+        #    ('django.template.loaders.cached.Loader', (
+        #        'django.template.loaders.filesystem.Loader',
+        #        'django.template.loaders.app_directories.Loader',
+        #    )),
+        # )
+        # The loaders will return django.template.loaders.filesystem.Loader
+        # and django.template.loaders.app_directories.Loader
+        for loader in template_source_loaders:
+            if CachedLoader is not None and isinstance(loader, CachedLoader):
+                loaders.extend(loader.loaders)
+            else:
+                loaders.append(loader)
+        return loaders
 
     def compress(self, log=None, **options):
         """
@@ -128,7 +160,8 @@ class Command(NoArgsCommand):
                               "template %s\n" % template_name)
             nodes = list(self.walk_nodes(template))
             if nodes:
-                compressor_nodes.setdefault(template_name, []).extend(nodes)
+                template.template_name = template_name
+                compressor_nodes.setdefault(template, []).extend(nodes)
 
         if not compressor_nodes:
             raise OfflineGenerationError(
@@ -136,34 +169,53 @@ class Command(NoArgsCommand):
 
         if verbosity > 0:
             log.write("Found 'compress' tags in:\n\t" +
-                      "\n\t".join(compressor_nodes.keys()) + "\n")
+                      "\n\t".join((t.template_name for t in compressor_nodes.keys())) + "\n")
 
         log.write("Compressing... ")
         count = 0
         results = []
-        context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
-        for nodes in compressor_nodes.values():
+        for template, nodes in compressor_nodes.iteritems():
+            context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
+            extra_context = {}
+            firstnode = template.nodelist[0]
+            if isinstance(firstnode, ExtendsNode):
+                # If this template has a ExtendsNode, we apply our patch to
+                # generate the necessary context, and then use it for all the
+                # nodes in it, just in case (we don't know which nodes were
+                # in a block)
+                firstnode._old_get_parent = firstnode.get_parent
+                firstnode.get_parent = MethodType(patched_get_parent, firstnode)
+                extra_context = firstnode.render(context)
+                context.render_context = extra_context.render_context
             for node in nodes:
+                context.push()
+                if extra_context and node._block_name:
+                    context['block'] = context.render_context[BLOCK_CONTEXT_KEY].pop(node._block_name)
+                    if context['block']:
+                        context['block'].context = context
                 key = get_offline_cachekey(node.nodelist)
                 try:
                     result = node.render(context, forced=True)
                 except Exception, e:
-                    raise CommandError("An error occured during rending: "
+                    raise CommandError("An error occured during rendering: "
                                        "%s" % e)
                 cache.set(key, result, settings.COMPRESS_OFFLINE_TIMEOUT)
+                context.pop()
                 results.append(result)
                 count += 1
         log.write("done\nCompressed %d block(s) from %d template(s).\n" %
                   (count, len(compressor_nodes)))
         return count, results
 
-    def walk_nodes(self, node):
+    def walk_nodes(self, node, block_name=None):
         for node in getattr(node, "nodelist", []):
-            if (isinstance(node, CompressorNode) or
-                    node.__class__.__name__ == "CompressorNode"):  # for 1.1.X
+            if isinstance(node, BlockNode):
+                block_name = node.name
+            if isinstance(node, CompressorNode):
+                node._block_name = block_name
                 yield node
             else:
-                for node in self.walk_nodes(node):
+                for node in self.walk_nodes(node, block_name=block_name):
                     yield node
 
     def handle_extensions(self, extensions=('html',)):
@@ -190,7 +242,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         if not settings.COMPRESS_ENABLED and not options.get("force"):
             raise CommandError(
-                "Compressor is disabled. Set COMPRESS "
+                "Compressor is disabled. Set the COMPRESS_ENABLED "
                 "settting or use --force to override.")
         if not settings.COMPRESS_OFFLINE:
             if not options.get("force"):

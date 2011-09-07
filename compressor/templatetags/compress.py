@@ -11,19 +11,25 @@ register = template.Library()
 OUTPUT_FILE = 'file'
 OUTPUT_INLINE = 'inline'
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
-COMPRESSORS = {
-    "css": settings.COMPRESS_CSS_COMPRESSOR,
-    "js": settings.COMPRESS_JS_COMPRESSOR,
-}
 
 class CompressorNode(template.Node):
 
-    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE):
+    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE, name=None):
         self.nodelist = nodelist
         self.kind = kind
         self.mode = mode
-        self.compressor_cls = get_class(
-            COMPRESSORS.get(self.kind), exception=ImproperlyConfigured)
+        self.name = name
+
+    def compressor_cls(self, *args, **kwargs):
+        compressors =  {
+            "css": settings.COMPRESS_CSS_COMPRESSOR,
+            "js": settings.COMPRESS_JS_COMPRESSOR,
+        }
+        if self.kind not in compressors.keys():
+            raise template.TemplateSyntaxError(
+                "The compress tag's argument must be 'js' or 'css'.")
+        return get_class(compressors.get(self.kind),
+                         exception=ImproperlyConfigured)(*args, **kwargs)
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
@@ -65,23 +71,18 @@ class CompressorNode(template.Node):
             return cached_offline
 
         # 3. Prepare the actual compressor and check cache
-        compressor = self.compressor_cls(self.nodelist.render(context))
+        context.update({'name': self.name}) 
+        compressor = self.compressor_cls(content=self.nodelist.render(context),
+                                         context=context)
         cache_key, cache_content = self.render_cached(compressor, forced)
         if cache_content is not None:
             return cache_content
 
         # 4. call compressor output method and handle exceptions
-        try:
-            rendered_output = compressor.output(self.mode, forced=forced)
-            if cache_key:
-                cache_set(cache_key, rendered_output)
-            return rendered_output
-        except Exception, e:
-            if settings.DEBUG or forced:
-                raise e
-
-        # 5. Or don't do anything in production
-        return self.nodelist.render(context)
+        rendered_output = compressor.output(self.mode, forced=forced)
+        if cache_key:
+            cache_set(cache_key, rendered_output)
+        return rendered_output
 
 
 @register.tag
@@ -128,16 +129,13 @@ def compress(parser, token):
 
     args = token.split_contents()
 
-    if not len(args) in (2, 3):
+    if not len(args) in (2, 3, 4):
         raise template.TemplateSyntaxError(
-            "%r tag requires either one or two arguments." % args[0])
+            "%r tag requires either one, two or three arguments." % args[0])
 
     kind = args[1]
-    if not kind in COMPRESSORS.keys():
-        raise template.TemplateSyntaxError(
-            "%r's argument must be 'js' or 'css'." % args[0])
 
-    if len(args) == 3:
+    if len(args) >= 3:
         mode = args[2]
         if not mode in OUTPUT_MODES:
             raise template.TemplateSyntaxError(
@@ -145,4 +143,8 @@ def compress(parser, token):
                 (args[0], OUTPUT_FILE, OUTPUT_INLINE))
     else:
         mode = OUTPUT_FILE
-    return CompressorNode(nodelist, kind, mode)
+    if len(args) == 4:
+        name = args[3]
+    else:
+        name = None
+    return CompressorNode(nodelist, kind, mode, name)

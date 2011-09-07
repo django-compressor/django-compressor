@@ -1,6 +1,56 @@
 Changelog
 =========
 
+HEAD
+----
+
+- **BACKWARDS-INCOMPATIBLE** Stopped swallowing exceptions raised by
+  rendering the template tag in production (``DEBUG = False``). This
+  has the potential to breaking lots of apps but on the other hand
+  will help find bugs.
+
+- **BACKWARDS-INCOMPATIBLE** The default function to create the cache
+  key stopped containing the server hostname. Instead the cache key
+  now only has the form ``'django_compressor.<KEY>'``.
+
+  To revert to the previous way simply set the ``COMPRESS_CACHE_KEY_FUNCTION``
+  to ``'compressor.cache.socket_cachekey'``.
+
+- **BACKWARDS-INCOMPATIBLE** Renamed ambigously named
+  ``COMPRESS_DATA_URI_MAX_SIZE`` setting to ``COMPRESS_DATA_URI_MAX_SIZE``.
+  It's the maximum size the ``compressor.filters.datauri.DataUriFilter``
+  filter will embed files as data: URIs.
+
+- Added ``COMPRESS_CSS_HASHING_METHOD`` setting with the options ``'mtime'``
+  (default) and ``'hash'`` for the ``CssAbsoluteFilter`` filter. The latter
+  uses the content of the file to calculate the cache-busting hash.
+
+- Added support for ``{{ block.super }}`` to ``compress`` management command.
+
+- Dropped Django 1.1.X support.
+
+- Fixed compiler filters on Windows.
+
+- Handle new-style cached template loaders in the compress management command.
+
+- Documented included filters.
+
+- Added `Slim It`_ filter.
+
+- Added new CallbackOutputFilter to ease the implementation of Python-based
+  callback filters that only need to pass the content to a callable.
+
+- Make use of `django-appconf`_ for settings handling and `versiontools`_
+  for versions.
+
+- Uses the current context when rendering the render templates.
+
+- Added :func:`post_compress<compressor.signals.post_compress>` signal.
+
+.. _`Slim It`: http://slimit.org/
+.. _`django-appconf`: http://django-appconf.rtfd.org/
+.. _`versiontools`: http://pypi.python.org/pypi/versiontools
+
 0.9.2
 -----
 

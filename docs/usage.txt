@@ -6,7 +6,7 @@ Usage
 .. code-block:: django
 
     {% load compress %}
-    {% compress <js/css> [<file/infile>] %}
+    {% compress <js/css> [<file/infile> [block_name]] %}
     <html of inline or linked JS/CSS>
     {% endcompress %}
 
@@ -46,15 +46,23 @@ Which would be rendered something like:
 
     <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
-Linked files **must** be accesible via :ref:`COMPRESS_URL <compress_url>`.
+Linked files **must** be accessible via :ref:`COMPRESS_URL <compress_url>`.
 
-If the :ref:`COMPRESS <compress>` setting is ``False`` (defaults to the
-opposite of DEBUG) the ``compress`` template tag does nothing and simply returns
-exactly what it was given.
+If the :ref:`COMPRESS_ENABLED <compress_enabled>` setting is ``False``
+(defaults to the opposite of DEBUG) the ``compress`` template tag does nothing
+and simply returns exactly what it was given.
 
-If both DEBUG and :ref:`COMPRESS <compress>` are set to ``True``, uncompressable
-files (off-site or non existent) will throw and exception. If DEBUG is ``False``
-these files will be silently stripped.
+.. note::
+
+    If you've configured any :ref:`precompilers <compress_precompilers>`
+    setting :ref:`COMPRESS_ENABLED <compress_enabled>` to ``False`` won't
+    affect the processing of those files. Only the
+    :ref:`CSS <compress_css_filters>` and
+    :ref:`JavaScript filters <compress_js_filters>` will be disabled.
+
+If both DEBUG and :ref:`COMPRESS_ENABLED <compress_enabled>` are set to
+``True``, incompressible files (off-site or non existent) will throw an
+exception. If DEBUG is ``False`` these files will be silently stripped.
 
 .. warning::
 
@@ -64,7 +72,7 @@ these files will be silently stripped.
     :ref:`COMPRESS_CACHE_BACKEND <compress_cache_backend>` and
     Django's `caching documentation`_).
 
-The compress template tag supports a second arguemnt specifying the output
+The compress template tag supports a second argument specifying the output
 mode and defaults to saving the result in a file. Alternatively you can
 pass '``inline``' to the template tag to return the content directly to the
 rendered page, e.g.:
@@ -85,15 +93,20 @@ would be rendered something like::
     obj.value = "value";
     </script>
 
+The compress template tag also supports a third argument for naming the output
+of that particular compress tag.  This is then added to the context so you can
+access it in the `post_compress signal <signals>`.
+
 .. _memcached: http://memcached.org/
 .. _caching documentation: http://docs.djangoproject.com/en/1.2/topics/cache/#memcached
 
 .. _pre-compression:
+.. _signals:
 
 Pre-compression
 ---------------
 
-Django Compressor comes with an optional ``compress`` mangement command to
+Django Compressor comes with an optional ``compress`` management command to
 run the compression outside of the request/response loop -- independent
 from user requests. This allows to pre-compress CSS and JavaScript files and
 works just like the automatic compression with the ``{% compress %}`` tag.
@@ -139,6 +152,45 @@ for the number of seconds defined in the
 :ref:`COMPRESS_OFFLINE_TIMEOUT <compress_offline_timeout>` setting.
 
 .. _TEMPLATE_LOADERS: http://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
+
+Signals
+-------
+
+.. function:: compressor.signals.post_compress(sender, type, mode, context)
+
+Django Compressor includes a ``post_compress`` signal that enables you to
+listen for changes to your compressed CSS/JS.  This is useful, for example, if
+you need the exact filenames for use in an HTML5 manifest file.  The signal
+sends the following arguments:
+
+``sender``
+    Always "django-compressor".
+
+``type``
+    Either "``js``" or "``css``".
+
+``mode``
+    Either "``file``" or "``inline``".
+
+``context``
+    The context dictionary used to render the output of the compress template
+    tag.
+
+    If ``mode`` is "``file``", this will contain a "``url``" key that maps to
+    the relative URL for the compressed asset.  
+
+    If ``type`` is "``css``", the context will additionally contain a
+    "``media``" key with a value of ``None`` if no media attribute is specified on
+    the link/style tag and equal to that attribute if one is specified.  
+
+    Additionally, ``context['name']`` will be the third positional argument to
+    the template tag, if provided.
+
+.. note::
+
+    When compressing CSS, the ``post_compress`` signal will be called once for
+    every different media attribute on the tags within the ``{% compress %}`` tag
+    in question.
 
 CSS Notes
 ---------

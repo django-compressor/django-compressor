@@ -2,7 +2,7 @@ import os
 import re
 import posixpath
 
-from compressor.cache import get_hashed_mtime
+from compressor.cache import get_hexdigest, get_hashed_mtime
 from compressor.conf import settings
 from compressor.filters import FilterBase
 from compressor.utils import staticfiles
@@ -27,7 +27,6 @@ class CssAbsoluteFilter(FilterBase):
             return self.content
         self.path = basename.replace(os.sep, '/')
         self.path = self.path.lstrip('/')
-        self.mtime = get_hashed_mtime(filename)
         if self.url.startswith(('http://', 'https://')):
             self.has_scheme = True
             parts = self.url.split('/')
@@ -54,24 +53,36 @@ class CssAbsoluteFilter(FilterBase):
         filename = os.path.join(self.root, local_path.lstrip(os.sep))
         return os.path.exists(filename) and filename
 
-    def add_mtime(self, url):
+    def add_suffix(self, url):
         filename = self.guess_filename(url)
-        mtime = filename and get_hashed_mtime(filename) or self.mtime
-        if mtime is None:
+        suffix = None
+        if filename:
+            if settings.COMPRESS_CSS_HASHING_METHOD == "mtime":
+                suffix = get_hashed_mtime(filename)
+            elif settings.COMPRESS_CSS_HASHING_METHOD == "hash":
+                hash_file = open(filename)
+                try:
+                    suffix = get_hexdigest(hash_file.read(), 12)
+                finally:
+                    hash_file.close()
+            else:
+                raise FilterError('COMPRESS_CSS_HASHING_METHOD is configured '
+                                  'with an unknown method (%s).')
+        if suffix is None:
             return url
         if url.startswith(('http://', 'https://', '/')):
             if "?" in url:
-                url = "%s&%s" % (url, mtime)
+                url = "%s&%s" % (url, suffix)
             else:
-                url = "%s?%s" % (url, mtime)
+                url = "%s?%s" % (url, suffix)
         return url
 
     def url_converter(self, matchobj):
         url = matchobj.group(1)
         url = url.strip(' \'"')
         if url.startswith(('http://', 'https://', '/', 'data:')):
-            return "url('%s')" % self.add_mtime(url)
-        full_url = posixpath.normpath('/'.join([self.directory_name, url]))
+            return "url('%s')" % self.add_suffix(url)
+        full_url = posixpath.normpath('/'.join([str(self.directory_name), url]))
         if self.has_scheme:
             full_url = "%s%s" % (self.protocol, full_url)
-        return "url('%s')" % self.add_mtime(full_url)
+        return "url('%s')" % self.add_suffix(full_url)

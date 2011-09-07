@@ -1,3 +1,29 @@
+import functools
+
+class memoize(object):
+
+    def __init__ (self, func):
+        self.func = func
+
+    def __call__ (self, *args, **kwargs):
+        if (args, str(kwargs)) in self.__dict__:
+            value = self.__dict__[args, str(kwargs)]
+        else:
+            value = self.func(*args, **kwargs)
+            self.__dict__[args, str(kwargs)] = value
+        return value
+
+    def __repr__(self):
+       """
+       Return the function's docstring.
+       """
+       return self.func.__doc__ or ''
+
+    def __get__(self, obj, objtype):
+       """
+       Support instance methods.
+       """
+       return functools.partial(self.__call__, obj)
 
 
 class cached_property(object):

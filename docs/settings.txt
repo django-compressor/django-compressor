@@ -6,15 +6,16 @@ Settings
 Django Compressor has a number of settings that control its behavior.
 They've been given sensible defaults.
 
-.. _compress:
+.. _compress_enabled:
 
-COMPRESS
-^^^^^^^^
+COMPRESS_ENABLED
+^^^^^^^^^^^^^^^^
 
 :Default: the opposite of ``DEBUG``
 
 Boolean that decides if compression will happen. In order to test compression
-when ``DEBUG`` is enabled COMPRESS needs to explicitly be set to ``True``.
+when ``DEBUG`` is enabled COMPRESS_ENABLED_ needs to explicitly be set to
+``True``.
 
 .. _compress_url:
 
@@ -55,6 +56,8 @@ COMPRESS_OUTPUT_DIR
 Controls the directory inside COMPRESS_ROOT_ that compressed files will
 be written to.
 
+.. _compress_css_filters:
+
 COMPRESS_CSS_FILTERS
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -62,12 +65,97 @@ COMPRESS_CSS_FILTERS
 
 A list of filters that will be applied to CSS.
 
+Possible options are:
+
+``compressor.filters.css_default.CssAbsoluteFilter``
+""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+A filter that normalizes the URLs used in ``url()`` CSS statements.
+
+- ``COMPRESS_CSS_HASHING_METHOD`` -- The method to use when calculating
+  the hash to append to processed URLs. Either ``'mtime'`` (default) or
+  ``'hash'``. Use the latter in case you're using multiple server to serve
+  your static files.
+
+``compressor.filters.csstidy.CSSTidyFilter``
+""""""""""""""""""""""""""""""""""""""""""""
+
+A filter that passes the CSS content to the CSSTidy_ tool.
+
+- ``COMPRESS_CSSTIDY_BINARY`` -- The CSSTidy binary filesystem path.
+
+- ``COMPRESS_CSSTIDY_ARGUMENTS`` -- The arguments passed to CSSTidy.
+
+``compressor.filters.datauri.DataUriFilter``
+""""""""""""""""""""""""""""""""""""""""""""
+
+A filter for embedding media as `data: URIs`_ in the CSS.
+
+- ``COMPRESS_DATA_URI_MAX_SIZE`` -- Only files that are smaller than
+  this value will be embedded. In bytes.
+
+``compressor.filters.yui.YUICSSFilter``
+"""""""""""""""""""""""""""""""""""""""
+
+A filter that passes the CSS content to the `YUI compressor`_.
+
+- ``COMPRESS_YUI_BINARY`` -- The YUI compressor filesystem path.
+
+- ``COMPRESS_YUI_CSS_ARGUMENTS``-- The arguments passed to the compressor.
+
+``compressor.filters.cssmin.CSSMinFilter``
+""""""""""""""""""""""""""""""""""""""""""
+
+A filter that uses Zachary Voase's Python port of the YUI CSS compression
+algorithm cssmin_.
+
+.. _CSSTidy: http://csstidy.sourceforge.net/
+.. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
+.. _cssmin: http://pypi.python.org/pypi/cssmin/
+
+.. _compress_js_filters:
+
 COMPRESS_JS_FILTERS
 ^^^^^^^^^^^^^^^^^^^
 
 :Default: ``['compressor.filters.jsmin.JSMinFilter']``
 
-A list of filters that will be applied to javascript.
+A list of filters that will be applied to javascript. Possible options are:
+
+``compressor.filters.jsmin.JSMinFilter``
+"""""""""""""""""""""""""""""""""""""""""
+
+A filter that uses the jsmin implementation rJSmin_ to compress JavaScript code.
+
+.. _slimit_filter:
+
+``compressor.filters.jsmin.SlimItFilter``
+"""""""""""""""""""""""""""""""""""""""""
+
+A filter that uses the jsmin implementation `Slim It`_ to compress JavaScript code.
+
+``compressor.filters.closure.ClosureCompilerFilter``
+""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+A filter that uses `Google Closure compiler`_.
+
+- ``COMPRESS_CLOSURE_COMPILER_BINARY`` -- The Closure compiler filesystem path.
+
+- ``COMPRESS_CLOSURE_COMPILER_ARGUMENTS`` -- The arguments passed to the compiler.
+
+``compressor.filters.yui.YUIJSFilter``
+""""""""""""""""""""""""""""""""""""""
+
+A filter that passes the JavaScript code to the `YUI compressor`_.
+
+- ``COMPRESS_YUI_BINARY`` -- The YUI compressor filesystem path.
+
+- ``COMPRESS_YUI_JS_ARGUMENTS`` -- The arguments passed to the compressor.
+
+.. _rJSmin: http://opensource.perlig.de/rjsmin/
+.. _`Google Closure compiler`: http://code.google.com/closure/compiler/
+.. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
+.. _`Slim It`: http://slimit.org/
 
 .. _compress_precompilers:
 
@@ -172,10 +260,17 @@ back to ``HtmlParser`` if ``lxml`` is not available.
 
 ``LxmlParser`` is the fastest available parser, but ``HtmlParser`` is not much
 slower. ``AutoSelectParser`` adds a slight overhead, but in most cases it
-won't be necesarry to change the default parser.
+won't be necessary to change the default parser.
 
 The other two included parsers are considerably slower and should only be
 used if absolutely necessary.
+
+.. warning::
+
+    In some cases the ``compressor.parser.HtmlParser`` parser isn't able to
+    parse invalid HTML in JavaScript or CSS content. As a workaround you
+    should use one of the more forgiving parsers, e.g. the
+    ``BeautifulSoupParser``.
 
 The backends included in Django Compressor:
 
@@ -288,3 +383,5 @@ COMPRESS_OFFLINE_CONTEXT
 The context to be used by the ``compress`` management command when rendering
 the contents of ``{% compress %}`` template tags and saving the result in the
 offline cache.
+
+If available, the ``STATIC_URL`` setting is also added to the context.

@@ -4,8 +4,8 @@ from optparse import make_option
 
 from django.core.management.base import NoArgsCommand, CommandError
 
-from compressor.cache import cache, get_mtime, get_mtime_cachekey
 from compressor.conf import settings
+from compressor.cache import cache, get_mtime, get_mtime_cachekey
 from compressor.utils import walk
 
 

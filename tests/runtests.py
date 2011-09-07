@@ -10,11 +10,11 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
 if not settings.configured:
     settings.configure(
-        COMPRESS_CACHE_BACKEND = 'dummy://',
+        COMPRESS_CACHE_BACKEND = 'locmem://',
         DATABASE_ENGINE='sqlite3',
         INSTALLED_APPS=[
             'compressor',
-            'compressor.tests',
+            'tests',
         ],
         MEDIA_URL = '/media/',
         MEDIA_ROOT = os.path.join(TEST_DIR, 'media'),
@@ -30,14 +30,13 @@ from django.test.simple import run_tests
 def runtests(*test_args):
     if not test_args:
         test_args = ['tests']
-    parent_dir = os.path.join(TEST_DIR, "..", "..")
+    parent_dir = os.path.join(TEST_DIR, "..")
     sys.path.insert(0, parent_dir)
     cov = coverage.coverage(branch=True,
         include=[
             os.path.join(parent_dir, 'compressor', '*.py')
             ],
         omit=[
-            join(parent_dir, 'compressor', 'tests', '*.py'),
             join(parent_dir, 'compressor', 'utils', 'stringformat.py'),
             join(parent_dir, 'compressor', 'filters', 'jsmin', 'rjsmin.py'),
             join(parent_dir, 'compressor', 'filters', 'cssmin', 'cssmin.py'),

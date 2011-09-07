@@ -4,9 +4,14 @@ import time
 
 from django.core.cache import get_cache
 from django.utils.encoding import smart_str
+from django.utils.functional import SimpleLazyObject
 from django.utils.hashcompat import md5_constructor
+from django.utils.importlib import import_module
 
 from compressor.conf import settings
+from compressor.utils import get_mod_func
+
+_cachekey_func = None
 
 
 def get_hexdigest(plaintext, length=None):
@@ -16,8 +21,24 @@ def get_hexdigest(plaintext, length=None):
     return digest
 
 
-def get_cachekey(key):
-    return ("django_compressor.%s.%s" % (socket.gethostname(), key))
+def simple_cachekey(key):
+    return 'django_compressor.%s' % smart_str(key)
+
+
+def socket_cachekey(key):
+    return "django_compressor.%s.%s" % (socket.gethostname(), smart_str(key))
+
+
+def get_cachekey(*args, **kwargs):
+    global _cachekey_func
+    if _cachekey_func is None:
+        try:
+            mod_name, func_name = get_mod_func(settings.COMPRESS_CACHE_KEY_FUNCTION)
+            _cachekey_func = getattr(import_module(mod_name), func_name)
+        except (AttributeError, ImportError), e:
+            raise ImportError("Couldn't import cache key function %s: %s" %
+                              (settings.COMPRESS_CACHE_KEY_FUNCTION, e))
+    return _cachekey_func(*args, **kwargs)
 
 
 def get_mtime_cachekey(filename):
@@ -25,8 +46,8 @@ def get_mtime_cachekey(filename):
 
 
 def get_offline_cachekey(source):
-    return get_cachekey(
-        "offline.%s" % get_hexdigest("".join(smart_str(s) for s in source)))
+    to_hexdigest = [smart_str(getattr(s, 's', s)) for s in source]
+    return get_cachekey("offline.%s" % get_hexdigest(to_hexdigest))
 
 
 def get_templatetag_cachekey(compressor, mode, kind):
@@ -68,12 +89,13 @@ def cache_get(key):
     return val
 
 
-def cache_set(key, val, refreshed=False,
-        timeout=settings.COMPRESS_REBUILD_TIMEOUT):
+def cache_set(key, val, refreshed=False, timeout=None):
+    if timeout is None:
+        timeout = settings.COMPRESS_REBUILD_TIMEOUT
     refresh_time = timeout + time.time()
     real_timeout = timeout + settings.COMPRESS_MINT_DELAY
     packed_val = (val, refresh_time, refreshed)
     return cache.set(key, packed_val, real_timeout)
 
 
-cache = get_cache(settings.COMPRESS_CACHE_BACKEND)
+cache = SimpleLazyObject(lambda: get_cache(settings.COMPRESS_CACHE_BACKEND))

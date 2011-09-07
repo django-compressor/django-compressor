@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import with_statement
 import optparse
 import sys
 
@@ -23,9 +24,8 @@ def main():
     content = content.replace('background:', 'color:')
 
     if options.outfile:
-        f = open(options.outfile, 'w')
-        f.write(content)
-        f.close()
+        with open(options.outfile, 'w') as f:
+            f.write(content)
     else:
         print content
 

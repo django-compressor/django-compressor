@@ -1,19 +1,24 @@
+from __future__ import with_statement
 import os
+import codecs
 
 from django.core.files.base import ContentFile
+from django.template import Context
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_unicode
 
 from compressor.cache import get_hexdigest, get_mtime
+
 from compressor.conf import settings
 from compressor.exceptions import CompressorError, UncompressableFileError
 from compressor.filters import CompilerFilter
 from compressor.storage import default_storage
+from compressor.signals import post_compress
 from compressor.utils import get_class, staticfiles
-from compressor.utils.decorators import cached_property
+from compressor.utils.decorators import cached_property, memoize
 
 # Some constants for nicer handling.
-SOURCE_HUNK, SOURCE_FILE = 1, 2
+SOURCE_HUNK, SOURCE_FILE = 'inline', 'file'
 METHOD_INPUT, METHOD_OUTPUT = 'input', 'output'
 
 
@@ -24,12 +29,14 @@ class Compressor(object):
     """
     type = None
 
-    def __init__(self, content=None, output_prefix="compressed"):
+    def __init__(self, content=None, output_prefix=None, context=None, *args, **kwargs):
         self.content = content or ""
-        self.output_prefix = output_prefix
+        self.output_prefix = output_prefix or "compressed"
+        self.output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
         self.charset = settings.DEFAULT_CHARSET
         self.storage = default_storage
         self.split_content = []
+        self.context = context or {}
         self.extra_context = {}
         self.all_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
         self.finders = staticfiles.finders
@@ -47,28 +54,45 @@ class Compressor(object):
         except AttributeError:
             base_url = settings.COMPRESS_URL
         if not url.startswith(base_url):
-            raise UncompressableFileError(
-                "'%s' isn't accesible via COMPRESS_URL ('%s') and can't be"
-                " compressed" % (url, base_url))
+            raise UncompressableFileError("'%s' isn't accesible via "
+                                          "COMPRESS_URL ('%s') and can't be "
+                                          "compressed" % (url, base_url))
         basename = url.replace(base_url, "", 1)
         # drop the querystring, which is used for non-compressed cache-busting.
         return basename.split("?", 1)[0]
 
+    def get_filepath(self, content):
+        filename = "%s.%s" % (get_hexdigest(content, 12), self.type)
+        return os.path.join(self.output_dir, self.output_prefix, filename)
+
     def get_filename(self, basename):
         # first try to find it with staticfiles (in debug mode)
         filename = None
-        if settings.DEBUG and self.finders:
-            filename = self.finders.find(basename)
-        # secondly try finding the file in the root
-        elif self.storage.exists(basename):
+        if self.storage.exists(basename):
             filename = self.storage.path(basename)
+        # secondly try finding the file in the root
+        elif self.finders:
+            filename = self.finders.find(basename)
         if filename:
             return filename
         # or just raise an exception as the last resort
         raise UncompressableFileError(
-            "'%s' could not be found in the COMPRESS_ROOT '%s'%s" % (
-                basename, settings.COMPRESS_ROOT,
-                self.finders and " or with staticfiles." or "."))
+            "'%s' could not be found in the COMPRESS_ROOT '%s'%s" %
+            (basename, settings.COMPRESS_ROOT,
+             self.finders and " or with staticfiles." or "."))
+
+    def get_filecontent(self, filename, charset):
+        with codecs.open(filename, 'rb', charset) as fd:
+            try:
+                return fd.read()
+            except IOError, e:
+                raise UncompressableFileError("IOError while processing "
+                                               "'%s': %s" % (filename, e))
+            except UnicodeDecodeError, e:
+                raise UncompressableFileError("UnicodeDecodeError while "
+                                              "processing '%s' with "
+                                              "charset %s: %s" %
+                                              (filename, charset, e))
 
     @cached_property
     def parser(self):
@@ -89,36 +113,70 @@ class Compressor(object):
         return get_hexdigest(''.join(
             [self.content] + self.mtimes).encode(self.charset), 12)
 
-    @cached_property
-    def hunks(self):
-        for kind, value, basename, elem in self.split_contents():
-            if kind == SOURCE_HUNK:
-                content = self.filter(value, METHOD_INPUT,
-                    elem=elem, kind=kind, basename=basename)
-                yield smart_unicode(content)
-            elif kind == SOURCE_FILE:
-                content = ""
-                fd = open(value, 'rb')
-                try:
-                    content = fd.read()
-                except IOError, e:
-                    raise UncompressableFileError(
-                        "IOError while processing '%s': %s" % (value, e))
-                finally:
-                    fd.close()
-                content = self.filter(content, METHOD_INPUT,
-                    filename=value, basename=basename, elem=elem, kind=kind)
-                attribs = self.parser.elem_attribs(elem)
-                charset = attribs.get("charset", self.charset)
-                yield smart_unicode(content, charset.lower())
+    @memoize
+    def hunks(self, mode='file'):
+        """
+        The heart of content parsing, iterates of the
+        list of split contents and looks at its kind
+        to decide what to do with it. Should yield a
+        bunch of precompiled and/or rendered hunks.
+        """
+        enabled = settings.COMPRESS_ENABLED
 
-    @cached_property
-    def concat(self):
-        return '\n'.join((hunk.encode(self.charset) for hunk in self.hunks))
+        for kind, value, basename, elem in self.split_contents():
+            precompiled = False
+            attribs = self.parser.elem_attribs(elem)
+            charset = attribs.get("charset", self.charset)
+            options = {
+                'method': METHOD_INPUT,
+                'elem': elem,
+                'kind': kind,
+                'basename': basename,
+            }
+
+            if kind == SOURCE_FILE:
+                options = dict(options, filename=value)
+                value = self.get_filecontent(value, charset)
+
+            if self.all_mimetypes:
+                precompiled, value = self.precompile(value, **options)
+
+            if enabled:
+                value = self.filter(value, **options)
+                yield mode, smart_unicode(value, charset.lower())
+            else:
+                if precompiled:
+                    value = self.handle_output(kind, value, forced=True)
+                    yield "verbatim", smart_unicode(value, charset.lower())
+                else:
+                    yield mode, self.parser.elem_str(elem)
+
+    @memoize
+    def filtered_output(self, content):
+        """
+        Passes the concatenated content to the 'output' methods
+        of the compressor filters.
+        """
+        return self.filter(content, method=METHOD_OUTPUT)
+
+    @memoize
+    def filtered_input(self, mode='file'):
+        """
+        Passes each hunk (file or code) to the 'input' methods
+        of the compressor filters.
+        """
+        verbatim_content = []
+        rendered_content = []
+        for mode, hunk in self.hunks(mode):
+            if mode == 'verbatim':
+                verbatim_content.append(hunk)
+            else:
+                rendered_content.append(hunk)
+        return verbatim_content, rendered_content
 
     def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
         if not kind:
-            return content
+            return False, content
         attrs = self.parser.elem_attribs(elem)
         mimetype = attrs.get("type", None)
         if mimetype:
@@ -129,15 +187,11 @@ class Compressor(object):
                                           "COMPRESS_PRECOMPILERS setting for "
                                           "mimetype '%s'." % mimetype)
             else:
-                return CompilerFilter(content, filter_type=self.type,
-                    command=command, filename=filename).output(**kwargs)
-        return content
+                return True, CompilerFilter(content, filter_type=self.type,
+                    command=command, filename=filename).input(**kwargs)
+        return False, content
 
     def filter(self, content, method, **kwargs):
-        # run compiler
-        if method == METHOD_INPUT:
-            content = self.precompile(content, **kwargs)
-
         for filter_cls in self.cached_filters:
             filter_func = getattr(
                 filter_cls(content, filter_type=self.type), method)
@@ -148,34 +202,28 @@ class Compressor(object):
                 pass
         return content
 
-    @cached_property
-    def combined(self):
-        return self.filter(self.concat, method=METHOD_OUTPUT)
-
-    def filepath(self, content):
-        return os.path.join(settings.COMPRESS_OUTPUT_DIR.strip(os.sep),
-            self.output_prefix, "%s.%s" % (get_hexdigest(content, 12), self.type))
-
     def output(self, mode='file', forced=False):
         """
         The general output method, override in subclass if you need to do
         any custom modification. Calls other mode specific methods or simply
         returns the content directly.
         """
-        # First check whether we should do the full compression,
-        # including precompilation (or if it's forced)
-        if settings.COMPRESS_ENABLED or forced:
-            content = self.combined
-        elif settings.COMPRESS_PRECOMPILERS:
-            # or concatting it, if pre-compilation is enabled
-            content = self.concat
-        else:
-            # or just doing nothing, when neither
-            # compression nor compilation is enabled
-            return self.content
-        # Shortcurcuit in case the content is empty.
-        if not content:
+        verbatim_content, rendered_content = self.filtered_input(mode)
+        if not verbatim_content and not rendered_content:
             return ''
+
+        if settings.COMPRESS_ENABLED or forced:
+            filtered_content = self.filtered_output(
+                '\n'.join((c.encode(self.charset) for c in rendered_content)))
+            finished_content = self.handle_output(mode, filtered_content, forced)
+            verbatim_content.append(finished_content)
+
+        if verbatim_content:
+            return '\n'.join(verbatim_content)
+
+        return self.content
+
+    def handle_output(self, mode, content, forced):
         # Then check for the appropriate output method and call it
         output_func = getattr(self, "output_%s" % mode, None)
         if callable(output_func):
@@ -189,7 +237,7 @@ class Compressor(object):
         The output method that saves the content to a file and renders
         the appropriate template with the file's URL.
         """
-        new_filepath = self.filepath(content)
+        new_filepath = self.get_filepath(content)
         if not self.storage.exists(new_filepath) or forced:
             self.storage.save(new_filepath, ContentFile(content))
         url = self.storage.url(new_filepath)
@@ -209,6 +257,10 @@ class Compressor(object):
         """
         if context is None:
             context = {}
-        context.update(self.extra_context)
-        return render_to_string(
-            "compressor/%s_%s.html" % (self.type, mode), context)
+        final_context = Context()
+        final_context.update(context)
+        final_context.update(self.context)
+        final_context.update(self.extra_context)
+        post_compress.send(sender='django-compressor', type=self.type, mode=mode, context=final_context) 
+        return render_to_string("compressor/%s_%s.html" %
+                                (self.type, mode), final_context)

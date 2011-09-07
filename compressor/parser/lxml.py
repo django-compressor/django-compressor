@@ -9,24 +9,28 @@ from compressor.utils.decorators import cached_property
 
 class LxmlParser(ParserBase):
 
-    @cached_property
-    def tree(self):
-        content = '<root>%s</root>' % self.content
+    def __init__(self, content):
         try:
             from lxml.html import fromstring, soupparser
             from lxml.etree import tostring
+            self.fromstring = fromstring
+            self.soupparser = soupparser
             self.tostring = tostring
-            tree = fromstring(content)
-            try:
-                ignore = tostring(tree, encoding=unicode)
-            except UnicodeDecodeError:
-                tree = soupparser.fromstring(content)
         except ImportError, err:
             raise ImproperlyConfigured("Error while importing lxml: %s" % err)
         except Exception, err:
             raise ParserError("Error while initializing Parser: %s" % err)
-        else:
-            return tree
+        super(LxmlParser, self).__init__(content)
+
+    @cached_property
+    def tree(self):
+        content = '<root>%s</root>' % self.content
+        tree = self.fromstring(content)
+        try:
+            ignore = self.tostring(tree, encoding=unicode)
+        except UnicodeDecodeError:
+            tree = self.soupparser.fromstring(content)
+        return tree
 
     def css_elems(self):
         return self.tree.xpath('link[@rel="stylesheet"]|style')
