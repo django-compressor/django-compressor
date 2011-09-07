@@ -100,7 +100,7 @@ class CompilerFilter(FilterBase):
             if "{infile}" in self.command:
                 if self.filename is None:
                     self.infile = NamedTemporaryFile(mode="w")
-                    self.infile.write(self.content)
+                    self.infile.write(self.content.encode('utf8'))
                     self.infile.flush()
                     os.fsync(self.infile)
                     options["infile"] = self.infile.name
@@ -117,7 +117,7 @@ class CompilerFilter(FilterBase):
             proc = subprocess.Popen(command, shell=True, cwd=self.cwd,
                 stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
             if self.infile is None:
-                filtered, err = proc.communicate(self.content)
+                filtered, err = proc.communicate(self.content.encode('utf8'))
             else:
                 filtered, err = proc.communicate()
         except (IOError, OSError), e:
