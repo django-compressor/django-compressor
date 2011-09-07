@@ -52,6 +52,14 @@ If the :ref:`COMPRESS_ENABLED <compress_enabled>` setting is ``False``
 (defaults to the opposite of DEBUG) the ``compress`` template tag does nothing
 and simply returns exactly what it was given.
 
+.. note::
+
+    If you've configured any :ref:`precompilers <compress_precompilers>`
+    setting :ref:`COMPRESS_ENABLED <compress_enabled>` to ``False`` won't
+    affect the processing of those files. Only the
+    :ref:`CSS <compress_css_filters>` and
+    :ref:`JavaScript filters <compress_js_filters>` will be disabled.
+
 If both DEBUG and :ref:`COMPRESS_ENABLED <compress_enabled>` are set to
 ``True``, incompressible files (off-site or non existent) will throw an
 exception. If DEBUG is ``False`` these files will be silently stripped.

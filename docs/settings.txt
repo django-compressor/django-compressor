@@ -56,6 +56,8 @@ COMPRESS_OUTPUT_DIR
 Controls the directory inside COMPRESS_ROOT_ that compressed files will
 be written to.
 
+.. _compress_css_filters:
+
 COMPRESS_CSS_FILTERS
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -111,6 +113,7 @@ algorithm cssmin_.
 .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
 .. _cssmin: http://pypi.python.org/pypi/cssmin/
 
+.. _compress_js_filters:
 
 COMPRESS_JS_FILTERS
 ^^^^^^^^^^^^^^^^^^^
