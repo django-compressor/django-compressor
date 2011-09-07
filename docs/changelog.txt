@@ -1,8 +1,14 @@
 Changelog
 =========
 
-1.0
----
+v1.0.1
+------
+
+- Fixed regression in ``compressor.utils.staticfiles`` compatibility
+  module.
+
+v1.0
+----
 
 - **BACKWARDS-INCOMPATIBLE** Stopped swallowing exceptions raised by
   rendering the template tag in production (``DEBUG = False``). This
@@ -51,20 +57,20 @@ Changelog
 .. _`django-appconf`: http://django-appconf.rtfd.org/
 .. _`versiontools`: http://pypi.python.org/pypi/versiontools
 
-0.9.2
------
+v0.9.2
+------
 
 - Fixed stdin handling of precompiler filter.
 
-0.9.1
------
+v0.9.1
+------
 
 - Fixed encoding related issue.
 
 - Minor cleanups.
 
-0.9
----
+v0.9
+----
 
 - Fixed the precompiler support to also use the full file path instead of a
   temporarily created file.
@@ -75,8 +81,8 @@ Changelog
 
 - Switched from SHA1 to MD5 for hash generation to lower the computational impact.
 
-0.8
----
+v0.8
+----
 
 - Replace naive jsmin.py with rJSmin (http://opensource.perlig.de/rjsmin/)
   and fixed a few problems with JavaScript comments.
@@ -89,13 +95,13 @@ Changelog
     please make sure a fourth item is returned in the iterable that denotes
     the base name of the file that is compressed.
 
-0.7.1
------
+v0.7.1
+------
 
 - Fixed import error when using the standalone django-staticfiles app.
 
-0.7
----
+v0.7
+----
 
 - Created new parser, HtmlParser, based on the stdlib HTMLParser module.
 
@@ -108,13 +114,13 @@ Changelog
 
 - Updated bundled jsmin to use version by Dave St.Germain that was refactored for speed.
 
-0.6.4
------
+v0.6.4
+------
 
 - Fixed Closure filter argument handling.
 
-0.6.3
------
+v0.6.3
+------
 
 - Fixed options mangling in CompilerFilter initialization.
 
@@ -128,14 +134,14 @@ Changelog
 
 - Restructered parsers and added a html5lib based parser.
 
-0.6.2
------
+v0.6.2
+------
 
 - Minor bugfixes that caused the compression not working reliably in
   development mode (e.g. updated files didn't trigger a new compression).
 
-0.6.1
------
+v0.6.1
+------
 
 - Fixed staticfiles support to also use its finder API to find files during
   developement -- when the static files haven't been collected in
@@ -144,8 +150,8 @@ Changelog
 - Fixed regression with the ``COMPRESS`` setting, pre-compilation and
   staticfiles.
 
-0.6
----
+v0.6
+----
 
 Major improvements and a lot of bugfixes, some of which are:
 
