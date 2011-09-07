@@ -1,8 +1,8 @@
 Changelog
 =========
 
-HEAD
-----
+1.0
+---
 
 - **BACKWARDS-INCOMPATIBLE** Stopped swallowing exceptions raised by
   rendering the template tag in production (``DEBUG = False``). This
