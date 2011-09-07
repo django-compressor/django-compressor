@@ -5,10 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 from compressor.conf import settings
 
 INSTALLED = ("staticfiles" in settings.INSTALLED_APPS or
-    "django.contrib.staticfiles" in settings.INSTALLED_APPS)
-
-finders = None
-settings = None
+             "django.contrib.staticfiles" in settings.INSTALLED_APPS)
 
 if INSTALLED:
     if "django.contrib.staticfiles" in settings.INSTALLED_APPS:
@@ -26,3 +23,5 @@ if INSTALLED:
             "When using Django Compressor together with staticfiles, "
             "please add 'compressor.finders.CompressorFinder' to the "
             "STATICFILES_FINDERS setting.")
+else:
+    finders = None
