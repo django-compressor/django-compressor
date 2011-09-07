@@ -376,3 +376,5 @@ COMPRESS_OFFLINE_CONTEXT
 The context to be used by the ``compress`` management command when rendering
 the contents of ``{% compress %}`` template tags and saving the result in the
 offline cache.
+
+If available, the ``STATIC_URL`` setting is also added to the context.
