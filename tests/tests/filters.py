@@ -49,7 +49,7 @@ class PrecompilerTestCase(TestCase):
     def test_precompiler_infile_stdout(self):
         command = '%s %s -f {infile}' %  (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=None, command=command)
-        self.assertEqual(u"body { color:#990; }\n", compiler.input())
+        self.assertEqual(u"body { color:#990; }%s" % os.linesep, compiler.input())
 
     def test_precompiler_stdin_outfile(self):
         command = '%s %s -o {outfile}' %  (sys.executable, self.test_precompiler)
@@ -59,12 +59,12 @@ class PrecompilerTestCase(TestCase):
     def test_precompiler_stdin_stdout(self):
         command = '%s %s' %  (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=None, command=command)
-        self.assertEqual(u"body { color:#990; }\n", compiler.input())
+        self.assertEqual(u"body { color:#990; }%s" % os.linesep, compiler.input())
 
     def test_precompiler_stdin_stdout_filename(self):
         command = '%s %s' %  (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
-        self.assertEqual(u"body { color:#990; }\n", compiler.input())
+        self.assertEqual(u"body { color:#990; }%s" % os.linesep, compiler.input())
 
 
 class CssMinTestCase(TestCase):
@@ -147,7 +147,16 @@ class CssAbsolutizingTestCase(TestCase):
         hunks = [h for m, h in self.css_node.hunks()]
         self.assertEqual(out, hunks)
 
-
+    def test_guess_filename(self):
+        import urllib
+        from compressor.filters.css_default import CssAbsoluteFilter
+        for base_url in ('/media/', 'http://media.example.com/'):
+            settings.COMPRESS_URL = base_url
+            url = '%s/img/python.png' % settings.COMPRESS_URL.rstrip('/')
+            path = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
+            content = "p { background: url('%s') }" % url
+            filter = CssAbsoluteFilter(content)
+            self.assertEqual(path, filter.guess_filename(url))
 
 class CssAbsolutizingTestCaseWithHash(CssAbsolutizingTestCase):
 
