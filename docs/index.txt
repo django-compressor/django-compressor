@@ -40,4 +40,5 @@ Contents
  settings
  remote-storages
  behind-the-scenes
+ jinja2
  changelog

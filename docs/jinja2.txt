@@ -1,0 +1,42 @@
+Jinja2 Support
+==============
+
+Django Compressor comes with support for Jinja2_ via an extension.
+
+
+Plain Jinja2
+------------
+
+In order to use Django Compressor's Jinja2 extension we would need to pass
+``compressor.contrib.jinja2ext.CompressorExtension`` into environment::
+
+    import jinja2
+    from compressor.contrib.jinja2ext import CompressorExtension
+
+    env = jinja2.environment(extensions=[CompressorExtension])
+
+From now on, you can use same code you'd normally use within Django templates::
+
+    from django.conf import settings
+    template = env.from_string('\n'.join([
+        '{% compress css %}',
+        '<link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css" charset="utf-8">',
+        '{% endcompress %}',
+    ]))
+    template.render({'STATIC_URL': settings.STATIC_URL})
+
+For coffin users
+----------------
+
+Coffin_ makes it very easy to include additional Jinja2_ extensions as it
+only requires to add extension to ``JINJA2_EXTENSIONS`` at main settings
+module::
+
+    JINJA2_EXTENSIONS = [
+        'compressor.contrib.jinja2ext',
+    ]
+
+And that's it - our extension is loaded and ready to be used.
+
+.. _Jinja2: http://jinja.pocoo.org/docs/
+.. _Coffin: http://pypi.python.org/pypi/Coffin
