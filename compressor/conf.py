@@ -8,7 +8,7 @@ from appconf import AppConf
 
 class CompressorConf(AppConf):
     # Main switch
-    ENABLED = False
+    ENABLED = not settings.DEBUG
     # Allows changing verbosity from the settings.
     VERBOSE = False
     # GET variable that disables compressor e.g. "nocompress"
@@ -63,9 +63,6 @@ class CompressorConf(AppConf):
 
     class Meta:
         prefix = 'compress'
-
-    def configure_enabled(self, value):
-        return value or not settings.DEBUG
 
     def configure_root(self, value):
         if value is None:
