@@ -258,8 +258,8 @@ class Compressor(object):
         if context is None:
             context = {}
         final_context = Context()
-        final_context.update(context)
         final_context.update(self.context)
+        final_context.update(context)
         final_context.update(self.extra_context)
         post_compress.send(sender='django-compressor', type=self.type, mode=mode, context=final_context) 
         return render_to_string("compressor/%s_%s.html" %
