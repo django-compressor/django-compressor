@@ -96,6 +96,16 @@ class CompressorTestCase(TestCase):
         out = u'<script type="text/javascript" src="/media/CACHE/js/066cd253eada.js"></script>'
         self.assertEqual(out, self.js_node.output())
 
+    def test_js_override_url(self):
+        self.js_node.context.update({'url': u'This is not a url, just a text'})
+        out = u'<script type="text/javascript" src="/media/CACHE/js/066cd253eada.js"></script>'
+        self.assertEqual(out, self.js_node.output())
+
+    def test_css_override_url(self):
+        self.css_node.context.update({'url': u'This is not a url, just a text'})
+        output = css_tag('/media/CACHE/css/e41ba2cc6982.css')
+        self.assertEqual(output, self.css_node.output().strip())
+
     def test_js_return_if_off(self):
         try:
             enabled = settings.COMPRESS_ENABLED
