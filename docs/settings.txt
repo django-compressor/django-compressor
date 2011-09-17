@@ -109,11 +109,18 @@ A filter that passes the CSS content to the `YUI compressor`_.
 A filter that uses Zachary Voase's Python port of the YUI CSS compression
 algorithm cssmin_.
 
+``compressor.filters.scss.PyScssFilter``
+""""""""""""""""""""""""""""""""""""""""
+
+A filter that compiles .scss files into css with `PyScss`_.
+
 .. _CSSTidy: http://csstidy.sourceforge.net/
 .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
 .. _cssmin: http://pypi.python.org/pypi/cssmin/
+.. _PyScss: https://github.com/Kronuz/pyScss
 
 .. _compress_js_filters:
+
 
 COMPRESS_JS_FILTERS
 ^^^^^^^^^^^^^^^^^^^
