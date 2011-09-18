@@ -4,7 +4,7 @@ from jinja2.exceptions import TemplateSyntaxError
 from django.core.exceptions import ImproperlyConfigured
 from compressor.conf import settings
 from compressor.utils import get_class
-from compressor.templatetags.compress import COMPRESSORS, OUTPUT_FILE
+from compressor.templatetags.compress import OUTPUT_FILE
 from compressor.cache import (cache_get, cache_set,
                               get_templatetag_cachekey)
 
@@ -13,6 +13,13 @@ class CompressorExtension(Extension):
 
     tags = set(['compress'])
 
+    @property
+    def compressors(self):
+        return {
+            'js': settings.COMPRESS_JS_COMPRESSOR,
+            'css': settings.COMPRESS_CSS_COMPRESSOR,
+        }
+
     def parse(self, parser):
         lineno = parser.stream.next().lineno
         kindarg = parser.parse_expression()
@@ -20,9 +27,9 @@ class CompressorExtension(Extension):
         if isinstance(kindarg, nodes.Name):
             kindarg = nodes.Const(kindarg.name)
         args = [kindarg]
-        if args[0].value not in COMPRESSORS:
-            raise TemplateSyntaxError('compress kind may be "css" or "js"',
-                lineno)
+        if args[0].value not in self.compressors:
+            raise TemplateSyntaxError('compress kind may be one of: %s'
+                % (', '.join(self.compressors.keys())), lineno)
         if parser.stream.skip_if('comma'):
             modearg = parser.parse_expression()
             # Allow mode to be defined as jinja2 name node
@@ -37,7 +44,7 @@ class CompressorExtension(Extension):
 
     def _compress(self, kind, mode, caller):
         mode = mode or OUTPUT_FILE
-        Compressor = get_class(COMPRESSORS.get(kind),
+        Compressor = get_class(self.compressors.get(kind),
             exception=ImproperlyConfigured)
         original_content = caller()
         compressor = Compressor(original_content)
