@@ -21,7 +21,7 @@ try:
 except ImportError:
     CachedLoader = None
 
-from compressor.cache import cache, get_offline_cachekey
+from compressor.cache import cache, get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
@@ -176,6 +176,7 @@ class Command(NoArgsCommand):
         log.write("Compressing... ")
         count = 0
         results = []
+        offline_manifest = {}
         for template, nodes in compressor_nodes.iteritems():
             context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
             extra_context = {}
@@ -195,16 +196,19 @@ class Command(NoArgsCommand):
                     context['block'] = context.render_context[BLOCK_CONTEXT_KEY].pop(node._block_name)
                     if context['block']:
                         context['block'].context = context
-                key = get_offline_cachekey(node.nodelist)
+                key = get_offline_hexdigest(node.nodelist)
                 try:
                     result = node.render(context, forced=True)
                 except Exception, e:
                     raise CommandError("An error occured during rendering: "
                                        "%s" % e)
-                cache.set(key, result, settings.COMPRESS_OFFLINE_TIMEOUT)
+                offline_manifest[key] = result
                 context.pop()
                 results.append(result)
                 count += 1
+
+        write_offline_manifest(offline_manifest)
+
         log.write("done\nCompressed %d block(s) from %d template(s).\n" %
                   (count, len(compressor_nodes)))
         return count, results
@@ -252,3 +256,4 @@ class Command(NoArgsCommand):
                     "Offline compressiong is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
         self.compress(sys.stdout, **options)
+
