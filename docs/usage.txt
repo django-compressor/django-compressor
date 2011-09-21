@@ -6,7 +6,7 @@ Usage
 .. code-block:: django
 
     {% load compress %}
-    {% compress <js/css> [<file/infile> [block_name]] %}
+    {% compress <js/css> [<file/inline> [block_name]] %}
     <html of inline or linked JS/CSS>
     {% endcompress %}
 
