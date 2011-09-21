@@ -1,6 +1,19 @@
 Changelog
 =========
 
+v1.1
+----
+
+- Updated installation instructions to properly mention all dependencies,
+  even those internally used.
+
+- Fixed a bug introduced in 1.0 which would prevent the proper deactivation
+  of the compression in production.
+
+- Added a Jinja2_ contrib extension.
+
+.. _Jinja2: http://jinja.pocoo.org/2/
+
 v1.0.1
 ------
 
