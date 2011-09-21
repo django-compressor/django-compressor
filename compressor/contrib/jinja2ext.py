@@ -1,7 +1,9 @@
+from django.core.exceptions import ImproperlyConfigured
+
 from jinja2 import nodes
 from jinja2.ext import Extension
 from jinja2.exceptions import TemplateSyntaxError
-from django.core.exceptions import ImproperlyConfigured
+
 from compressor.conf import settings
 from compressor.utils import get_class
 from compressor.templatetags.compress import OUTPUT_FILE
@@ -28,8 +30,9 @@ class CompressorExtension(Extension):
             kindarg = nodes.Const(kindarg.name)
         args = [kindarg]
         if args[0].value not in self.compressors:
-            raise TemplateSyntaxError('compress kind may be one of: %s'
-                % (', '.join(self.compressors.keys())), lineno)
+            raise TemplateSyntaxError('compress kind may be one of: %s' %
+                                      (', '.join(self.compressors.keys())),
+                                       lineno)
         if parser.stream.skip_if('comma'):
             modearg = parser.parse_expression()
             # Allow mode to be defined as jinja2 name node
@@ -76,10 +79,7 @@ class CompressorExtension(Extension):
         and return a tuple of cache key and output
         """
         if settings.COMPRESS_ENABLED and not forced:
-            cache_key = get_templatetag_cachekey(
-                compressor, mode, kind)
+            cache_key = get_templatetag_cachekey(compressor, mode, kind)
             cache_content = cache_get(cache_key)
             return cache_key, cache_content
         return None, None
-
-

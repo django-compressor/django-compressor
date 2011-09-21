@@ -3,7 +3,6 @@ Jinja2 Support
 
 Django Compressor comes with support for Jinja2_ via an extension.
 
-
 Plain Jinja2
 ------------
 

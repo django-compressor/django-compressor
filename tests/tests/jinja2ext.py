@@ -1,13 +1,12 @@
+from __future__ import with_statement
+
 from django.test import TestCase
+
+import jinja2
+
 from compressor.conf import settings
-from unittest2 import skipIf
+
 from .base import css_tag
-
-
-try:
-    import jinja2
-except ImportError:
-    jinja2 = None
 
 
 class TestJinja2CompressorExtension(TestCase):
@@ -29,18 +28,16 @@ class TestJinja2CompressorExtension(TestCase):
         self.env = jinja2.Environment(extensions=[CompressorExtension])
 
     def test_error_raised_if_no_arguments_given(self):
-        with self.assertRaises(jinja2.exceptions.TemplateSyntaxError):
-            self.env.from_string('{% compress %}Foobar{% endcompress %}')
+        self.assertRaises(jinja2.exceptions.TemplateSyntaxError,
+            self.env.from_string, '{% compress %}Foobar{% endcompress %}')
 
     def test_error_raised_if_wrong_kind_given(self):
-        with self.assertRaises(jinja2.exceptions.TemplateSyntaxError):
-            self.env.from_string('{% compress foo %}Foobar{% endcompress %}'
-                ).render()
+        self.assertRaises(jinja2.exceptions.TemplateSyntaxError,
+            self.env.from_string, '{% compress foo %}Foobar{% endcompress %}')
 
     def test_error_raised_if_wrong_mode_given(self):
-        with self.assertRaises(jinja2.exceptions.TemplateSyntaxError):
-            self.env.from_string('{% compress css foo %}Foobar{% endcompress %}'
-                ).render()
+        self.assertRaises(jinja2.exceptions.TemplateSyntaxError,
+            self.env.from_string, '{% compress css foo %}Foobar{% endcompress %}')
 
     def test_compress_is_disabled(self):
         org_COMPRESS_ENABLED = settings.COMPRESS_ENABLED
@@ -58,7 +55,7 @@ class TestJinja2CompressorExtension(TestCase):
     def test_empty_tag(self):
         template = self.env.from_string(u"""{% compress js %}{% block js %}
         {% endblock %}{% endcompress %}""")
-        context = {'MEDIA_URL': settings.COMPRESS_URL }
+        context = {'MEDIA_URL': settings.COMPRESS_URL}
         self.assertEqual(u'', template.render(context))
 
     def test_css_tag(self):
@@ -66,8 +63,8 @@ class TestJinja2CompressorExtension(TestCase):
         <link rel="stylesheet" href="{{ MEDIA_URL }}css/one.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
         <link rel="stylesheet" href="{{ MEDIA_URL }}css/two.css" type="text/css" charset="utf-8">
-        {%- endcompress %}""")
-        context = {'MEDIA_URL': settings.COMPRESS_URL }
+        {% endcompress %}""")
+        context = {'MEDIA_URL': settings.COMPRESS_URL}
         out = css_tag("/media/CACHE/css/e41ba2cc6982.css")
         self.assertEqual(out, template.render(context))
 
@@ -75,8 +72,8 @@ class TestJinja2CompressorExtension(TestCase):
         template = self.env.from_string(u"""{% compress css -%}
         <link rel="stylesheet" href="{{ MEDIA_URL }}css/nonasc.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
-        {%- endcompress %}""")
-        context = {'MEDIA_URL': settings.COMPRESS_URL }
+        {% endcompress %}""")
+        context = {'MEDIA_URL': settings.COMPRESS_URL}
         out = css_tag("/media/CACHE/css/799f6defe43c.css")
         self.assertEqual(out, template.render(context))
 
@@ -84,8 +81,8 @@ class TestJinja2CompressorExtension(TestCase):
         template = self.env.from_string(u"""{% compress js -%}
         <script src="{{ MEDIA_URL }}js/one.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
-        {%- endcompress %}""")
-        context = {'MEDIA_URL': settings.COMPRESS_URL }
+        {% endcompress %}""")
+        context = {'MEDIA_URL': settings.COMPRESS_URL}
         out = u'<script type="text/javascript" src="/media/CACHE/js/066cd253eada.js"></script>'
         self.assertEqual(out, template.render(context))
 
@@ -93,8 +90,8 @@ class TestJinja2CompressorExtension(TestCase):
         template = self.env.from_string(u"""{% compress js -%}
         <script src="{{ MEDIA_URL }}js/nonasc.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">var test_value = "\u2014";</script>
-        {%- endcompress %}""")
-        context = {'MEDIA_URL': settings.COMPRESS_URL }
+        {% endcompress %}""")
+        context = {'MEDIA_URL': settings.COMPRESS_URL}
         out = u'<script type="text/javascript" src="/media/CACHE/js/e214fe629b28.js"></script>'
         self.assertEqual(out, template.render(context))
 
@@ -102,8 +99,8 @@ class TestJinja2CompressorExtension(TestCase):
         template = self.env.from_string(u"""{% compress js -%}
         <script src="{{ MEDIA_URL }}js/nonasc-latin1.js" type="text/javascript" charset="latin-1"></script>
         <script type="text/javascript">var test_value = "\u2014";</script>
-        {%- endcompress %}""")
-        context = {'MEDIA_URL': settings.COMPRESS_URL }
+        {% endcompress %}""")
+        context = {'MEDIA_URL': settings.COMPRESS_URL}
         out = u'<script type="text/javascript" src="/media/CACHE/js/be9e078b5ca7.js"></script>'
         self.assertEqual(out, template.render(context))
 
@@ -111,8 +108,8 @@ class TestJinja2CompressorExtension(TestCase):
         template = self.env.from_string(u"""{% compress css, inline -%}
         <link rel="stylesheet" href="{{ MEDIA_URL }}css/one.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
-        {%- endcompress %}""")
-        context = {'MEDIA_URL': settings.COMPRESS_URL }
+        {% endcompress %}""")
+        context = {'MEDIA_URL': settings.COMPRESS_URL}
         out = '\n'.join([
             '<style type="text/css">body { background:#990; }',
             'p { border:5px solid green;}</style>',
@@ -123,11 +120,7 @@ class TestJinja2CompressorExtension(TestCase):
         template = self.env.from_string(u"""{% compress js, inline -%}
         <script src="{{ MEDIA_URL }}js/one.js" type="text/css" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
-        {%- endcompress %}""")
-        context = {'MEDIA_URL': settings.COMPRESS_URL }
+        {% endcompress %}""")
+        context = {'MEDIA_URL': settings.COMPRESS_URL}
         out = '<script type="text/javascript">obj={};obj.value="value";</script>'
         self.assertEqual(out, template.render(context))
-
-TestJinja2CompressorExtension = skipIf(jinja2 is None, 'jinja2 not found')(
-    TestJinja2CompressorExtension)
-
