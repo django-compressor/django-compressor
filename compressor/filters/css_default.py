@@ -9,6 +9,7 @@ from compressor.filters import FilterBase, FilterError
 from compressor.utils import staticfiles
 
 URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
+SRC_PATTERN = re.compile(r'src=([\'"])(.+?)\1')
 
 
 class CssAbsoluteFilter(FilterBase):
@@ -36,7 +37,8 @@ class CssAbsoluteFilter(FilterBase):
             self.protocol = '%s/' % '/'.join(parts[:2])
             self.host = parts[2]
         self.directory_name = '/'.join((self.url, os.path.dirname(self.path)))
-        return URL_PATTERN.sub(self.url_converter, self.content)
+        return SRC_PATTERN.sub(self.src_converter,
+            URL_PATTERN.sub(self.url_converter, self.content))
 
     def find(self, basename):
         if settings.DEBUG and basename and staticfiles.finders:
@@ -86,3 +88,13 @@ class CssAbsoluteFilter(FilterBase):
         if self.has_scheme:
             full_url = "%s%s" % (self.protocol, full_url)
         return "url('%s')" % self.add_suffix(full_url)
+
+    def src_converter(self, matchobj):
+        url = matchobj.group(2)
+        url = url.strip(' \'"')
+        if url.startswith(('http://', 'https://', '/', 'data:')):
+            return "src='%s'" % self.add_suffix(url)
+        full_url = posixpath.normpath('/'.join([str(self.directory_name), url]))
+        if self.has_scheme:
+            full_url = "%s%s" % (self.protocol, full_url)
+        return "src='%s'" % self.add_suffix(full_url)
