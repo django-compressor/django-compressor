@@ -4,7 +4,7 @@ import posixpath
 
 from compressor.cache import get_hexdigest, get_hashed_mtime
 from compressor.conf import settings
-from compressor.filters import FilterBase
+from compressor.filters import FilterBase, FilterError
 from compressor.utils import staticfiles
 
 URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
