@@ -26,6 +26,9 @@ class OfflineGenerationTestCase(TestCase):
         settings.COMPRESS_OFFLINE = self._old_compress_offline
         self.template_file.close()
 
+    def test_requires_model_validation(self):
+        self.assertFalse(CompressCommand.requires_model_validation)
+
     def test_offline(self):
         count, result = CompressCommand().compress()
         self.assertEqual(5, count)

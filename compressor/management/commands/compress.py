@@ -53,6 +53,8 @@ class Command(NoArgsCommand):
                 "directory of itself.", dest='follow_links'),
     )
 
+    requires_model_validation = False
+
     def get_loaders(self):
         from django.template.loader import template_source_loaders
         if template_source_loaders is None:
