@@ -18,7 +18,7 @@ from compressor.utils import get_class, staticfiles
 from compressor.utils.decorators import cached_property, memoize
 
 # Some constants for nicer handling.
-SOURCE_HUNK, SOURCE_FILE = 'inline', 'file'
+SOURCE_HUNK, SOURCE_FILE, PASS_THROUGH = 'inline', 'file', 'pass_through'
 METHOD_INPUT, METHOD_OUTPUT = 'input', 'output'
 
 
@@ -141,7 +141,9 @@ class Compressor(object):
             if self.all_mimetypes:
                 precompiled, value = self.precompile(value, **options)
 
-            if enabled:
+            if kind == PASS_THROUGH:
+                yield "verbatim", value
+            elif enabled:
                 value = self.filter(value, **options)
                 yield mode, smart_unicode(value, charset.lower())
             else:

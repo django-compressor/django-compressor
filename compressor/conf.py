@@ -61,6 +61,10 @@ class CompressorConf(AppConf):
     # The context to be used when compressing the files "offline"
     OFFLINE_CONTEXT = {}
 
+    # Pass javascript tags with sources matching this regular expression untouched.
+    # Eg COMPRESS_JS_IGNORE = re.compile('/admin/jsi18n/')
+    COMPRESS_JS_IGNORE = False
+
     class Meta:
         prefix = 'compress'
 

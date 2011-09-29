@@ -136,6 +136,21 @@ class CompressorTestCase(TestCase):
         finally:
             settings.COMPRESS_OUTPUT_DIR = old_output_dir
 
+    def test_passthrough(self):
+        import re
+        fake_url = 'not-a-real-url'
+
+        settings.COMPRESS_JS_IGNORE = re.compile(fake_url)
+
+        found_it = False
+        extra_js = '<script src="not-a-real-url"></script>'
+        for hunk in JsCompressor(self.js + extra_js).hunks():
+            # better way to test this? can't check for extra_js verbatim
+            # because the closing tag may be mangled -- <script></script> ==> <script/>
+            if 'script src="%s"' % fake_url in hunk[1]:
+                found_it = True
+        self.assertTrue(found_it)
+
 
 class CssMediaTestCase(TestCase):
     def setUp(self):
