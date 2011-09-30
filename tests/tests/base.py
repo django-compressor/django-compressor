@@ -152,6 +152,11 @@ class CompressorTestCase(TestCase):
         self.assertTrue(found_it)
 
 
+        settings.COMPRESS_ENABLED = False
+        self.assertTrue('one.js' in ''.join([val for type, val in JsCompressor(self.js + extra_js).hunks()]))
+
+
+
 class CssMediaTestCase(TestCase):
     def setUp(self):
         self.css = """\

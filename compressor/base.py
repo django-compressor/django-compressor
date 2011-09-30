@@ -141,11 +141,12 @@ class Compressor(object):
             if self.all_mimetypes:
                 precompiled, value = self.precompile(value, **options)
 
-            if kind == PASS_THROUGH:
-                yield "verbatim", value
-            elif enabled:
-                value = self.filter(value, **options)
-                yield mode, smart_unicode(value, charset.lower())
+            if enabled:
+                if kind == PASS_THROUGH:
+                    yield "verbatim", value
+                else:
+                    value = self.filter(value, **options)
+                    yield mode, smart_unicode(value, charset.lower())
             else:
                 if precompiled:
                     value = self.handle_output(kind, value, forced=True)
