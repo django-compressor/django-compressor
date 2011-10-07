@@ -1,5 +1,5 @@
 from compressor.conf import settings
-from compressor.base import Compressor, SOURCE_HUNK, SOURCE_FILE
+from compressor.base import Compressor, SOURCE_HUNK, SOURCE_FILE, PASS_THROUGH
 from compressor.exceptions import UncompressableFileError
 
 
@@ -17,7 +17,9 @@ class JsCompressor(Compressor):
             return self.split_content
         for elem in self.parser.js_elems():
             attribs = self.parser.elem_attribs(elem)
-            if 'src' in attribs:
+            if 'src' in attribs and settings.COMPRESS_JS_IGNORE and settings.COMPRESS_JS_IGNORE.match(attribs['src']):
+                self.split_content.append((PASS_THROUGH, self.parser.elem_str(elem), None, elem))
+            elif 'src' in attribs:
                 basename = self.get_basename(attribs['src'])
                 filename = self.get_filename(basename)
                 content = (SOURCE_FILE, filename, basename, elem)
