@@ -31,8 +31,8 @@ class OfflineGenerationTestCase(TestCase):
             default_storage.delete('CACHE/manifest.json')
 
     def test_rendering_without_compressing_raises_exception(self):
-        with self.assertRaises(OfflineGenerationError):
-            self.template.render(Context({}))
+        self.assertRaises(OfflineGenerationError,
+                          self.template.render, Context({}))
 
     def test_requires_model_validation(self):
         self.assertFalse(CompressCommand.requires_model_validation)
