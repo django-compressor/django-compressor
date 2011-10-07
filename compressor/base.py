@@ -114,14 +114,14 @@ class Compressor(object):
             [self.content] + self.mtimes).encode(self.charset), 12)
 
     @memoize
-    def hunks(self, mode='file'):
+    def hunks(self, mode='file', forced=False):
         """
         The heart of content parsing, iterates of the
         list of split contents and looks at its kind
         to decide what to do with it. Should yield a
         bunch of precompiled and/or rendered hunks.
         """
-        enabled = settings.COMPRESS_ENABLED
+        enabled = settings.COMPRESS_ENABLED or forced
 
         for kind, value, basename, elem in self.split_contents():
             precompiled = False
@@ -160,14 +160,14 @@ class Compressor(object):
         return self.filter(content, method=METHOD_OUTPUT)
 
     @memoize
-    def filtered_input(self, mode='file'):
+    def filtered_input(self, mode='file', forced=False):
         """
         Passes each hunk (file or code) to the 'input' methods
         of the compressor filters.
         """
         verbatim_content = []
         rendered_content = []
-        for mode, hunk in self.hunks(mode):
+        for mode, hunk in self.hunks(mode, forced):
             if mode == 'verbatim':
                 verbatim_content.append(hunk)
             else:
@@ -208,7 +208,7 @@ class Compressor(object):
         any custom modification. Calls other mode specific methods or simply
         returns the content directly.
         """
-        verbatim_content, rendered_content = self.filtered_input(mode)
+        verbatim_content, rendered_content = self.filtered_input(mode, forced)
         if not verbatim_content and not rendered_content:
             return ''
 
@@ -258,8 +258,8 @@ class Compressor(object):
         if context is None:
             context = {}
         final_context = Context()
-        final_context.update(context)
         final_context.update(self.context)
+        final_context.update(context)
         final_context.update(self.extra_context)
         post_compress.send(sender='django-compressor', type=self.type, mode=mode, context=final_context) 
         return render_to_string("compressor/%s_%s.html" %

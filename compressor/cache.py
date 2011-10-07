@@ -3,12 +3,15 @@ import socket
 import time
 
 from django.core.cache import get_cache
+from django.core.files.base import ContentFile
+from django.utils import simplejson
 from django.utils.encoding import smart_str
 from django.utils.functional import SimpleLazyObject
 from django.utils.hashcompat import md5_constructor
 from django.utils.importlib import import_module
 
 from compressor.conf import settings
+from compressor.storage import default_storage
 from compressor.utils import get_mod_func
 
 _cachekey_func = None
@@ -33,7 +36,8 @@ def get_cachekey(*args, **kwargs):
     global _cachekey_func
     if _cachekey_func is None:
         try:
-            mod_name, func_name = get_mod_func(settings.COMPRESS_CACHE_KEY_FUNCTION)
+            mod_name, func_name = get_mod_func(
+                settings.COMPRESS_CACHE_KEY_FUNCTION)
             _cachekey_func = getattr(import_module(mod_name), func_name)
         except (AttributeError, ImportError), e:
             raise ImportError("Couldn't import cache key function %s: %s" %
@@ -45,9 +49,31 @@ def get_mtime_cachekey(filename):
     return get_cachekey("mtime.%s" % get_hexdigest(filename))
 
 
+def get_offline_hexdigest(source):
+    return get_hexdigest([smart_str(getattr(s, 's', s)) for s in source])
+
+
 def get_offline_cachekey(source):
-    to_hexdigest = [smart_str(getattr(s, 's', s)) for s in source]
-    return get_cachekey("offline.%s" % get_hexdigest(to_hexdigest))
+    return get_cachekey("offline.%s" % get_offline_hexdigest(source))
+
+
+def get_offline_manifest_filename():
+    output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
+    return os.path.join(output_dir, 'manifest.json')
+
+
+def get_offline_manifest():
+    filename = get_offline_manifest_filename()
+    if default_storage.exists(filename):
+        return simplejson.load(default_storage.open(filename))
+    else:
+        return {}
+
+
+def write_offline_manifest(manifest):
+    filename = get_offline_manifest_filename()
+    default_storage.save(filename,
+                         ContentFile(simplejson.dumps(manifest, indent=2)))
 
 
 def get_templatetag_cachekey(compressor, mode, kind):

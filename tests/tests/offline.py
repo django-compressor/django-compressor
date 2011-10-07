@@ -5,7 +5,9 @@ from django.template import Template, Context
 from django.test import TestCase
 
 from compressor.conf import settings
+from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
+from compressor.storage import default_storage
 
 from .base import test_dir, css_tag
 
@@ -25,6 +27,15 @@ class OfflineGenerationTestCase(TestCase):
         settings.COMPRESS_ENABLED = self._old_compress
         settings.COMPRESS_OFFLINE = self._old_compress_offline
         self.template_file.close()
+        if default_storage.exists('CACHE/manifest.json'):
+            default_storage.delete('CACHE/manifest.json')
+
+    def test_rendering_without_compressing_raises_exception(self):
+        self.assertRaises(OfflineGenerationError,
+                          self.template.render, Context({}))
+
+    def test_requires_model_validation(self):
+        self.assertFalse(CompressCommand.requires_model_validation)
 
     def test_offline(self):
         count, result = CompressCommand().compress()

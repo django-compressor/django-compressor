@@ -6,7 +6,7 @@ Usage
 .. code-block:: django
 
     {% load compress %}
-    {% compress <js/css> [<file/infile> [block_name]] %}
+    {% compress <js/css> [<file/inline> [block_name]] %}
     <html of inline or linked JS/CSS>
     {% endcompress %}
 
@@ -101,7 +101,6 @@ access it in the `post_compress signal <signals>`.
 .. _caching documentation: http://docs.djangoproject.com/en/1.2/topics/cache/#memcached
 
 .. _pre-compression:
-.. _signals:
 
 Pre-compression
 ---------------
@@ -146,12 +145,14 @@ If not specified, the ``COMPRESS_OFFLINE_CONTEXT`` will by default contain
 the commonly used setting to refer to saved files ``MEDIA_URL`` and
 ``STATIC_URL`` (if specified in the settings).
 
-The result of running the ``compress`` management command will be saved
-in the cache defined in :ref:`COMPRESS_CACHE_BACKEND <compress_cache_backend>`
-for the number of seconds defined in the
-:ref:`COMPRESS_OFFLINE_TIMEOUT <compress_offline_timeout>` setting.
+The result of running the ``compress`` management command will be cached
+in a file called ``manifest.json`` using the :ref:`configured storage
+<compress_storage>` to be able to be transfered from your developement
+computer to the server easily.
 
 .. _TEMPLATE_LOADERS: http://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
+
+.. _signals:
 
 Signals
 -------

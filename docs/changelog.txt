@@ -1,6 +1,34 @@
 Changelog
 =========
 
+v1.1
+----
+
+- Made offline compression completely independent from cache (by writing a
+  manifest.json file).
+
+  You can now easily run the :ref:`compress <pre-compression>` management
+  command locally and transfer the :ref:`COMPRESS_ROOT <compress_root>` dir
+  to your server.
+
+- Updated installation instructions to properly mention all dependencies,
+  even those internally used.
+
+- Fixed a bug introduced in 1.0 which would prevent the proper deactivation
+  of the compression in production.
+
+- Added a Jinja2_ :doc:`contrib extension </jinja2>`.
+
+- Made sure the rel attribute of link tags can be mixed case.
+
+- Avoid overwriting context variables needed for compressor to work.
+
+- Stopped the compress management command to require model validation.
+
+- Added missing imports and fixed a few :pep:`8` issues.
+
+.. _Jinja2: http://jinja.pocoo.org/2/
+
 v1.0.1
 ------
 

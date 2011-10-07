@@ -41,9 +41,9 @@ class CompressorTestCase(TestCase):
 
     def test_css_split(self):
         out = [
-            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css/one.css'), u'css/one.css', u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" />'),
+            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css', u'one.css'), u'css/one.css', u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" />'),
             (SOURCE_HUNK, u'p { border:5px solid green;}', None, u'<style type="text/css">p { border:5px solid green;}</style>'),
-            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css/two.css'), u'css/two.css', u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" />'),
+            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css', u'two.css'), u'css/two.css', u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" />'),
         ]
         split = self.css_node.split_contents()
         split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3])) for x in split]
@@ -80,7 +80,7 @@ class CompressorTestCase(TestCase):
 
     def test_js_split(self):
         out = [
-            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'js/one.js'), u'js/one.js', '<script src="/media/js/one.js" type="text/javascript"></script>'),
+            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'js', u'one.js'), u'js/one.js', '<script src="/media/js/one.js" type="text/javascript"></script>'),
             (SOURCE_HUNK, u'obj.value = "value";', None, '<script type="text/javascript">obj.value = "value";</script>'),
         ]
         split = self.js_node.split_contents()
@@ -95,6 +95,16 @@ class CompressorTestCase(TestCase):
     def test_js_output(self):
         out = u'<script type="text/javascript" src="/media/CACHE/js/066cd253eada.js"></script>'
         self.assertEqual(out, self.js_node.output())
+
+    def test_js_override_url(self):
+        self.js_node.context.update({'url': u'This is not a url, just a text'})
+        out = u'<script type="text/javascript" src="/media/CACHE/js/066cd253eada.js"></script>'
+        self.assertEqual(out, self.js_node.output())
+
+    def test_css_override_url(self):
+        self.css_node.context.update({'url': u'This is not a url, just a text'})
+        output = css_tag('/media/CACHE/css/e41ba2cc6982.css')
+        self.assertEqual(output, self.css_node.output().strip())
 
     def test_js_return_if_off(self):
         try:

@@ -13,7 +13,6 @@ from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
-from django.template.loader import get_template
 from django.template.loader_tags import ExtendsNode, BlockNode, BLOCK_CONTEXT_KEY
 
 try:
@@ -21,7 +20,7 @@ try:
 except ImportError:
     CachedLoader = None
 
-from compressor.cache import cache, get_offline_cachekey
+from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
@@ -52,6 +51,8 @@ class Command(NoArgsCommand):
                 "can lead to infinite recursion if a link points to a parent "
                 "directory of itself.", dest='follow_links'),
     )
+
+    requires_model_validation = False
 
     def get_loaders(self):
         from django.template.loader import template_source_loaders
@@ -174,6 +175,7 @@ class Command(NoArgsCommand):
         log.write("Compressing... ")
         count = 0
         results = []
+        offline_manifest = {}
         for template, nodes in compressor_nodes.iteritems():
             context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
             extra_context = {}
@@ -193,16 +195,19 @@ class Command(NoArgsCommand):
                     context['block'] = context.render_context[BLOCK_CONTEXT_KEY].pop(node._block_name)
                     if context['block']:
                         context['block'].context = context
-                key = get_offline_cachekey(node.nodelist)
+                key = get_offline_hexdigest(node.nodelist)
                 try:
                     result = node.render(context, forced=True)
                 except Exception, e:
                     raise CommandError("An error occured during rendering: "
                                        "%s" % e)
-                cache.set(key, result, settings.COMPRESS_OFFLINE_TIMEOUT)
+                offline_manifest[key] = result
                 context.pop()
                 results.append(result)
                 count += 1
+
+        write_offline_manifest(offline_manifest)
+
         log.write("done\nCompressed %d block(s) from %d template(s).\n" %
                   (count, len(compressor_nodes)))
         return count, results

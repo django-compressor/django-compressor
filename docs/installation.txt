@@ -35,13 +35,36 @@ Installation
 Dependencies
 ------------
 
+django-appconf_ (required)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Used internally to handle Django's settings, this is
+automatically installed when following the above
+installation instructions. In case you're installing
+Django Compressor differently, make sure to install
+it, e.g.::
+
+    pip install django-appconf
+
+versiontools_ (required)
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Used internally to handle versions better, this is
+automatically installed when following the above
+installation instructions. In case you're installing
+Django Compressor differently, make sure to install
+it, e.g.::
+
+    pip install versiontools
+
 BeautifulSoup_ (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 for the :ref:`parser <compress_parser>`
-``compressor.parser.BeautifulSoupParser``::
+``compressor.parser.BeautifulSoupParser`` and
+``compressor.parser.LxmlParser``::
 
-    pip install BeautifulSoup
+    pip install BeautifulSoup<=4.0
 
 lxml_ (optional)
 ^^^^^^^^^^^^^^^^
@@ -71,3 +94,5 @@ for the :ref:`Slim It filter <slimit_filter>` ``compressor.filters.jsmin.SlimItF
 .. _libxml2: http://xmlsoft.org/
 .. _html5lib: http://code.google.com/p/html5lib/
 .. _`Slim It`: http://slimit.org/
+.. _django-appconf: http://pypi.python.org/pypi/django-appconf/
+.. _versiontools: http://pypi.python.org/pypi/versiontools/
