@@ -4,6 +4,13 @@ Changelog
 v1.1
 ----
 
+- Made offline compression completely independent from cache (by writing a
+  manifest.json file).
+
+  You can now easily run the :ref:`compress <pre-compression>` management
+  command locally and transfer the :ref:`COMPRESS_ROOT <compress_root>` dir
+  to your server.
+
 - Updated installation instructions to properly mention all dependencies,
   even those internally used.
 
@@ -18,7 +25,7 @@ v1.1
 
 - Stopped the compress management command to require model validation.
 
-- Added a missing imports.
+- Added missing imports and fixed a few :pep:`8` issues.
 
 .. _Jinja2: http://jinja.pocoo.org/2/
 
