@@ -1,9 +1,8 @@
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 
-from compressor.cache import (cache, cache_get, cache_set,
-                              get_offline_hexdigest, get_offline_manifest,
-                              get_templatetag_cachekey)
+from compressor.cache import (cache_get, cache_set, get_offline_hexdigest,
+                              get_offline_manifest, get_templatetag_cachekey)
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.utils import get_class
@@ -14,6 +13,7 @@ OUTPUT_FILE = 'file'
 OUTPUT_INLINE = 'inline'
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
 
+
 class CompressorNode(template.Node):
 
     def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE, name=None):
@@ -23,7 +23,7 @@ class CompressorNode(template.Node):
         self.name = name
 
     def compressor_cls(self, *args, **kwargs):
-        compressors =  {
+        compressors = {
             "css": settings.COMPRESS_CSS_COMPRESSOR,
             "js": settings.COMPRESS_JS_COMPRESSOR,
         }
@@ -55,7 +55,6 @@ class CompressorNode(template.Node):
             else:
                 raise OfflineGenerationError('You have offline compression enabled but key "%s" is missing from offline manifest. You may need to run "python manage.py compress".' % key)
 
-
     def render_cached(self, compressor, forced):
         """
         If enabled checks the cache for the given compressor's cache key
@@ -74,7 +73,7 @@ class CompressorNode(template.Node):
             return self.nodelist.render(context)
 
         # Prepare the compressor
-        context.update({'name': self.name}) 
+        context.update({'name': self.name})
         compressor = self.compressor_cls(content=self.nodelist.render(context),
                                          context=context)
 
@@ -82,7 +81,7 @@ class CompressorNode(template.Node):
         cached_offline = self.render_offline(compressor, forced)
         if cached_offline:
             return cached_offline
-        
+
         # Check cache
         cache_key, cache_content = self.render_cached(compressor, forced)
         if cache_content is not None:

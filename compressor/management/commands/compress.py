@@ -13,7 +13,6 @@ from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
-from django.template.loader import get_template
 from django.template.loader_tags import ExtendsNode, BlockNode, BLOCK_CONTEXT_KEY
 
 try:
@@ -21,7 +20,7 @@ try:
 except ImportError:
     CachedLoader = None
 
-from compressor.cache import cache, get_offline_hexdigest, write_offline_manifest
+from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
@@ -256,4 +255,3 @@ class Command(NoArgsCommand):
                     "Offline compressiong is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
         self.compress(sys.stdout, **options)
-
