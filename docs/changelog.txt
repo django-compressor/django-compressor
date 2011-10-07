@@ -10,7 +10,15 @@ v1.1
 - Fixed a bug introduced in 1.0 which would prevent the proper deactivation
   of the compression in production.
 
-- Added a Jinja2_ contrib extension.
+- Added a Jinja2_ :doc:`contrib extension </jinja2>`.
+
+- Made sure the rel attribute of link tags can be mixed case.
+
+- Avoid overwriting context variables needed for compressor to work.
+
+- Stopped the compress management command to require model validation.
+
+- Added a missing imports.
 
 .. _Jinja2: http://jinja.pocoo.org/2/
 
