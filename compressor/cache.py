@@ -67,7 +67,8 @@ def get_offline_manifest():
 
 def write_offline_manifest(manifest):
     filename = get_offline_manifest_filename()
-    default_storage.save(filename, ContentFile(simplejson.dumps(manifest)))
+    default_storage.save(filename,
+                         ContentFile(simplejson.dumps(manifest, indent=2)))
 
 def get_templatetag_cachekey(compressor, mode, kind):
     return get_cachekey(
