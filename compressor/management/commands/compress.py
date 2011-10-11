@@ -13,6 +13,7 @@ from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
+from django.template.loader import get_template
 from django.template.loader_tags import ExtendsNode, BlockNode, BLOCK_CONTEXT_KEY
 
 try:
