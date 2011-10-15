@@ -14,6 +14,7 @@ from django.template import Context, Template, TemplateDoesNotExist, TemplateSyn
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
 from django.template.loader import get_template
+from django.template.defaulttags import IfNode
 from django.template.loader_tags import ExtendsNode, BlockNode, BLOCK_CONTEXT_KEY
 
 try:
@@ -226,8 +227,14 @@ class Command(NoArgsCommand):
                   (count, len(compressor_nodes)))
         return count, results
 
+    def get_nodelist(self, node):
+        if isinstance(node, IfNode):
+            return node.nodelist_true + node.nodelist_false
+        else:
+            return getattr(node, "nodelist", [])
+
     def walk_nodes(self, node, block_name=None):
-        for node in getattr(node, "nodelist", []):
+        for node in self.get_nodelist(node):
             if isinstance(node, BlockNode):
                 block_name = node.name
             if isinstance(node, CompressorNode):
