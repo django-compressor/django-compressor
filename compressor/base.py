@@ -209,6 +209,7 @@ class Compressor(object):
         returns the content directly.
         """
         verbatim_content, rendered_content = self.filtered_input(mode, forced)
+        verbatim_content = []
         if not verbatim_content and not rendered_content:
             return ''
 
