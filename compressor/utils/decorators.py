@@ -5,12 +5,12 @@ class memoize(object):
     def __init__ (self, func):
         self.func = func
 
-    def __call__ (self, *args, **kwargs):
-        if (args, str(kwargs)) in self.__dict__:
-            value = self.__dict__[args, str(kwargs)]
+    def __call__ (self, *args):
+        if args[0].cachekey in self.__dict__:
+            value = self.__dict__[args[0].cachekey]
         else:
-            value = self.func(*args, **kwargs)
-            self.__dict__[args, str(kwargs)] = value
+            value = self.func(*args)
+            self.__dict__[args[0].cachekey] = value
         return value
 
     def __repr__(self):
