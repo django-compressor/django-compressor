@@ -66,13 +66,14 @@ class Compressor(object):
         return os.path.join(self.output_dir, self.output_prefix, filename)
 
     def get_filename(self, basename):
-        # first try to find it with staticfiles (in debug mode)
         filename = None
+        # first try finding the file in the root
         if self.storage.exists(basename):
             filename = self.storage.path(basename)
-        # secondly try finding the file in the root
+        # secondly try to find it with staticfiles (in debug mode)
         elif self.finders:
-            filename = self.finders.find(basename)
+            import urllib
+            filename = self.finders.find(urllib.url2pathname(basename))
         if filename:
             return filename
         # or just raise an exception as the last resort
