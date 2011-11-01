@@ -3,6 +3,7 @@ import os
 import codecs
 
 from django.core.files.base import ContentFile
+from django.core.files.storage import get_storage_class
 from django.template import Context
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_unicode
@@ -69,7 +70,12 @@ class Compressor(object):
         # first try to find it with staticfiles (in debug mode)
         filename = None
         if self.storage.exists(basename):
-            filename = self.storage.path(basename)
+            try:
+                filename = self.storage.path(basename)
+            except NotImplementedError:
+                # remote storages don't implement path, access the file locally
+                local_storage = get_storage_class('compressor.storage.CompressorFileStorage')()
+                filename = local_storage.path(basename)
         # secondly try finding the file in the root
         elif self.finders:
             filename = self.finders.find(basename)
@@ -261,6 +267,6 @@ class Compressor(object):
         final_context.update(self.context)
         final_context.update(context)
         final_context.update(self.extra_context)
-        post_compress.send(sender='django-compressor', type=self.type, mode=mode, context=final_context) 
+        post_compress.send(sender='django-compressor', type=self.type, mode=mode, context=final_context)
         return render_to_string("compressor/%s_%s.html" %
                                 (self.type, mode), final_context)
