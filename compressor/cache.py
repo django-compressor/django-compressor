@@ -59,7 +59,7 @@ def get_offline_cachekey(source):
 
 def get_offline_manifest_filename():
     output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
-    return os.path.join(output_dir, 'manifest.json')
+    return os.path.join(output_dir, settings.COMPRESS_OFFLINE_MANIFEST)
 
 
 def get_offline_manifest():

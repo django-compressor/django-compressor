@@ -385,3 +385,13 @@ the contents of ``{% compress %}`` template tags and saving the result in the
 offline cache.
 
 If available, the ``STATIC_URL`` setting is also added to the context.
+
+.. _compress_offline_manifest:
+
+COMPRESS_OFFLINE_MANIFEST
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:Default: ``manifest.json``
+
+The name of the file to be used for saving the names of the files compressed
+offline.
