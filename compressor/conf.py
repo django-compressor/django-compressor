@@ -60,6 +60,8 @@ class CompressorConf(AppConf):
     OFFLINE_TIMEOUT = 60 * 60 * 24 * 365  # 1 year
     # The context to be used when compressing the files "offline"
     OFFLINE_CONTEXT = {}
+    # The name of the manifest file (e.g. filename.ext)
+    OFFLINE_MANIFEST = 'manifest.json'
 
     class Meta:
         prefix = 'compress'

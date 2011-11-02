@@ -32,7 +32,7 @@ only requires to add extension to ``JINJA2_EXTENSIONS`` at main settings
 module::
 
     JINJA2_EXTENSIONS = [
-        'compressor.contrib.jinja2ext',
+        'compressor.contrib.jinja2ext.CompressorExtension',
     ]
 
 And that's it - our extension is loaded and ready to be used.
