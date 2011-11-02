@@ -13,7 +13,7 @@ from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
 from compressor.exceptions import CompressorError, UncompressableFileError
 from compressor.filters import CompilerFilter
-from compressor.storage import default_storage
+from compressor.storage import default_storage, compressor_file_storage
 from compressor.signals import post_compress
 from compressor.utils import get_class, staticfiles
 from compressor.utils.decorators import cached_property, memoize
@@ -74,8 +74,7 @@ class Compressor(object):
                 filename = self.storage.path(basename)
             except NotImplementedError:
                 # remote storages don't implement path, access the file locally
-                local_storage = get_storage_class('compressor.storage.CompressorFileStorage')()
-                filename = local_storage.path(basename)
+                filename = compressor_file_storage.path(basename)
         # secondly try finding the file in the root
         elif self.finders:
             filename = self.finders.find(basename)
