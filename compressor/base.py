@@ -1,6 +1,7 @@
 from __future__ import with_statement
 import os
 import codecs
+import urllib
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import get_storage_class
@@ -67,17 +68,17 @@ class Compressor(object):
         return os.path.join(self.output_dir, self.output_prefix, filename)
 
     def get_filename(self, basename):
-        # first try to find it with staticfiles (in debug mode)
         filename = None
+        # first try finding the file in the root
         if self.storage.exists(basename):
             try:
                 filename = self.storage.path(basename)
             except NotImplementedError:
                 # remote storages don't implement path, access the file locally
                 filename = compressor_file_storage.path(basename)
-        # secondly try finding the file in the root
+        # secondly try to find it with staticfiles (in debug mode)
         elif self.finders:
-            filename = self.finders.find(basename)
+            filename = self.finders.find(urllib.url2pathname(basename))
         if filename:
             return filename
         # or just raise an exception as the last resort
