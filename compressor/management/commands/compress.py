@@ -195,7 +195,7 @@ class Command(NoArgsCommand):
                 try:
                     extra_context = firstnode.render(context)
                     context.render_context = extra_context.render_context
-                except TemplateSyntaxError:
+                except (IOError, TemplateSyntaxError, TemplateDoesNotExist):
                     # That first node we are trying to render might cause more errors
                     # that we didn't catch when simply creating a Template instance 
                     # above, so we need to catch that (and ignore it, just like above)
