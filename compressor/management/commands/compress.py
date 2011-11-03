@@ -200,8 +200,8 @@ class Command(NoArgsCommand):
                 try:
                     result = node.render(context, forced=True)
                 except Exception, e:
-                    raise CommandError("An error occured during rendering: "
-                                       "%s" % e)
+                    raise CommandError("An error occured during rendering %s: "
+                                       "%s" % (template.template_name, e))
                 offline_manifest[key] = result
                 context.pop()
                 results.append(result)
