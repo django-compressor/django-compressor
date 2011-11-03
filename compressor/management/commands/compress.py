@@ -192,8 +192,17 @@ class Command(NoArgsCommand):
                 # in a block)
                 firstnode._old_get_parent = firstnode.get_parent
                 firstnode.get_parent = MethodType(patched_get_parent, firstnode)
-                extra_context = firstnode.render(context)
-                context.render_context = extra_context.render_context
+                try:
+                    extra_context = firstnode.render(context)
+                    context.render_context = extra_context.render_context
+                except TemplateSyntaxError:
+                    # That first node we are trying to render might cause more errors
+                    # that we didn't catch when simply creating a Template instance 
+                    # above, so we need to catch that (and ignore it, just like above)
+                    # as well.
+                    if verbosity > 0:
+                        log.write("Caught error when rendering extend node from template %s\n" % template.template_name)
+                    continue
             for node in nodes:
                 context.push()
                 if extra_context and node._block_name:
