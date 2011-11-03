@@ -41,7 +41,7 @@ class CompressorNode(template.Node):
             if request is not None:
                 return settings.COMPRESS_DEBUG_TOGGLE in request.GET
 
-    def render_offline(self, compressor, forced):
+    def render_offline(self, forced):
         """
         If enabled and in offline mode, and not forced or in debug mode
         check the offline cache and return the result if given
@@ -72,15 +72,15 @@ class CompressorNode(template.Node):
         if self.debug_mode(context):
             return self.nodelist.render(context)
 
+        # See if it has been rendered offline
+        cached_offline = self.render_offline(forced)
+        if cached_offline:
+            return cached_offline
+
         # Prepare the compressor
         context.update({'name': self.name})
         compressor = self.compressor_cls(content=self.nodelist.render(context),
                                          context=context)
-
-        # See if it has been rendered offline
-        cached_offline = self.render_offline(compressor, forced)
-        if cached_offline:
-            return cached_offline
 
         # Check cache
         cache_key, cache_content = self.render_cached(compressor, forced)
