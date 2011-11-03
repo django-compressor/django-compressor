@@ -156,6 +156,10 @@ class Command(NoArgsCommand):
                 if verbosity > 0:
                     log.write("Invalid template at: %s\n" % template_name)
                 continue
+            except TemplateDoesNotExist:  # non existent template -> ignore
+                if verbosity > 0:
+                    log.write("Non-existent template at: %s\n" % template_name)
+                continue
             except UnicodeDecodeError:
                 if verbosity > 0:
                     log.write("UnicodeDecodeError while trying to read "
