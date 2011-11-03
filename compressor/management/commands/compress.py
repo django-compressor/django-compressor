@@ -253,6 +253,6 @@ class Command(NoArgsCommand):
         if not settings.COMPRESS_OFFLINE:
             if not options.get("force"):
                 raise CommandError(
-                    "Offline compressiong is disabled. Set "
+                    "Offline compression is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
         self.compress(sys.stdout, **options)
