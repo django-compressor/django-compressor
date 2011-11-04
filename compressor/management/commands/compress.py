@@ -156,6 +156,10 @@ class Command(NoArgsCommand):
                 if verbosity > 0:
                     log.write("Invalid template at: %s\n" % template_name)
                 continue
+            except TemplateDoesNotExist:  # non existent template -> ignore
+                if verbosity > 0:
+                    log.write("Non-existent template at: %s\n" % template_name)
+                continue
             except UnicodeDecodeError:
                 if verbosity > 0:
                     log.write("UnicodeDecodeError while trying to read "
@@ -188,8 +192,17 @@ class Command(NoArgsCommand):
                 # in a block)
                 firstnode._old_get_parent = firstnode.get_parent
                 firstnode.get_parent = MethodType(patched_get_parent, firstnode)
-                extra_context = firstnode.render(context)
-                context.render_context = extra_context.render_context
+                try:
+                    extra_context = firstnode.render(context)
+                    context.render_context = extra_context.render_context
+                except (IOError, TemplateSyntaxError, TemplateDoesNotExist):
+                    # That first node we are trying to render might cause more errors
+                    # that we didn't catch when simply creating a Template instance 
+                    # above, so we need to catch that (and ignore it, just like above)
+                    # as well.
+                    if verbosity > 0:
+                        log.write("Caught error when rendering extend node from template %s\n" % template.template_name)
+                    continue
             for node in nodes:
                 context.push()
                 if extra_context and node._block_name:
@@ -200,8 +213,8 @@ class Command(NoArgsCommand):
                 try:
                     result = node.render(context, forced=True)
                 except Exception, e:
-                    raise CommandError("An error occured during rendering: "
-                                       "%s" % e)
+                    raise CommandError("An error occured during rendering %s: "
+                                       "%s" % (template.template_name, e))
                 offline_manifest[key] = result
                 context.pop()
                 results.append(result)
@@ -253,6 +266,6 @@ class Command(NoArgsCommand):
         if not settings.COMPRESS_OFFLINE:
             if not options.get("force"):
                 raise CommandError(
-                    "Offline compressiong is disabled. Set "
+                    "Offline compression is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
         self.compress(sys.stdout, **options)
