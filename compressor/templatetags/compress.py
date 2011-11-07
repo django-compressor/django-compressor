@@ -41,14 +41,14 @@ class CompressorNode(template.Node):
             if request is not None:
                 return settings.COMPRESS_DEBUG_TOGGLE in request.GET
 
-    def render_offline(self, forced):
+    def render_offline(self, context, forced):
         """
         If enabled and in offline mode, and not forced or in debug mode
         check the offline cache and return the result if given
         """
         if (settings.COMPRESS_ENABLED and
                 settings.COMPRESS_OFFLINE) and not forced:
-            key = get_offline_hexdigest(self.nodelist)
+            key = get_offline_hexdigest(self.nodelist.render(context))
             offline_manifest = get_offline_manifest()
             if key in offline_manifest:
                 return offline_manifest[key]
@@ -68,12 +68,13 @@ class CompressorNode(template.Node):
         return None, None
 
     def render(self, context, forced=False):
+
         # Check if in debug mode
         if self.debug_mode(context):
             return self.nodelist.render(context)
 
         # See if it has been rendered offline
-        cached_offline = self.render_offline(forced)
+        cached_offline = self.render_offline(context, forced)
         if cached_offline:
             return cached_offline
 

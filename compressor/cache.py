@@ -49,8 +49,8 @@ def get_mtime_cachekey(filename):
     return get_cachekey("mtime.%s" % get_hexdigest(filename))
 
 
-def get_offline_hexdigest(source):
-    return get_hexdigest([smart_str(getattr(s, 's', s)) for s in source])
+def get_offline_hexdigest(render_template_string):
+    return get_hexdigest(render_template_string)
 
 
 def get_offline_cachekey(source):
