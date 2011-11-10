@@ -63,8 +63,13 @@ class Compressor(object):
         # drop the querystring, which is used for non-compressed cache-busting.
         return basename.split("?", 1)[0]
 
-    def get_filepath(self, content):
+    def get_filepath(self, content, basename=None):
         filename = "%s.%s" % (get_hexdigest(content, 12), self.type)
+        if basename is not None:
+            filename = '.'.join([
+                os.path.splitext(os.path.split(basename)[1])[0],
+                filename
+            ])
         return os.path.join(self.output_dir, self.output_prefix, filename)
 
     def get_filename(self, basename):
@@ -83,7 +88,7 @@ class Compressor(object):
             return filename
         # or just raise an exception as the last resort
         raise UncompressableFileError(
-            "'%s' could not be found in the COMPRESS_ROOT '%s'%s" %
+            "'%s' could not be found in the COMPRESS_ROOT '%s'%s" % 
             (basename, settings.COMPRESS_ROOT,
              self.finders and " or with staticfiles." or "."))
 
@@ -97,7 +102,7 @@ class Compressor(object):
             except UnicodeDecodeError, e:
                 raise UncompressableFileError("UnicodeDecodeError while "
                                               "processing '%s' with "
-                                              "charset %s: %s" %
+                                              "charset %s: %s" % 
                                               (filename, charset, e))
 
     @cached_property
@@ -151,7 +156,7 @@ class Compressor(object):
                 yield mode, smart_unicode(value, charset.lower())
             else:
                 if precompiled:
-                    value = self.handle_output(kind, value, forced=True)
+                    value = self.handle_output(kind, value, forced=True, basename=basename)
                     yield "verbatim", smart_unicode(value, charset.lower())
                 else:
                     yield mode, self.parser.elem_str(elem)
@@ -227,27 +232,27 @@ class Compressor(object):
     def _exclude_mode(self, content, mode):
         return filter(lambda x: x[0] != mode, content)
 
-    def handle_output(self, mode, content, forced):
+    def handle_output(self, mode, content, forced, basename=None):
         # Then check for the appropriate output method and call it
         output_func = getattr(self, "output_%s" % mode, None)
         if callable(output_func):
-            return output_func(mode, content, forced)
+            return output_func(mode, content, forced, basename)
         # Total failure, raise a general exception
         raise CompressorError(
             "Couldn't find output method for mode '%s'" % mode)
 
-    def output_file(self, mode, content, forced=False):
+    def output_file(self, mode, content, forced=False, basename=None):
         """
         The output method that saves the content to a file and renders
         the appropriate template with the file's URL.
         """
-        new_filepath = self.get_filepath(content)
+        new_filepath = self.get_filepath(content, basename=basename)
         if not self.storage.exists(new_filepath) or forced:
             self.storage.save(new_filepath, ContentFile(content))
         url = self.storage.url(new_filepath)
         return self.render_output(mode, {"url": url})
 
-    def output_inline(self, mode, content, forced=False):
+    def output_inline(self, mode, content, forced=False, basename=None):
         """
         The output method that directly returns the content for inline
         display.
@@ -269,5 +274,5 @@ class Compressor(object):
         final_context = Context(self.context)
         post_compress.send(sender=self.__class__, type=self.type,
                            mode=mode, context=final_context)
-        return render_to_string("compressor/%s_%s.html" %
+        return render_to_string("compressor/%s_%s.html" % 
                                 (self.type, mode), final_context)
