@@ -41,4 +41,5 @@ Contents
  remote-storages
  behind-the-scenes
  jinja2
+ contributing
  changelog

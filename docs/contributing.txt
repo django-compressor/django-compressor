@@ -1,0 +1,170 @@
+Contributing
+============
+
+Like every open-source project, Django Compressor is always looking for
+motivated individuals to contribute to it's source code.
+However, to ensure the highest code quality and keep the repository nice and
+tidy, everybody has to follow a few rules (nothing major, I promise :) )
+
+Community
+---------
+
+People interested in developing for the Django Compressor should head
+over to #django-compressor on the `freenode`_ IRC network for help and to
+discuss the development.
+
+You may also be interested in following `@jezdez`_ on Twitter.
+
+In a nutshell
+-------------
+
+Here's what the contribution process looks like, in a bullet-points fashion,
+and only for the stuff we host on GitHub:
+
+#. Django Compressor is hosted on `GitHub`_, at https://github.com/jezdez/django_compressor
+#. The best method to contribute back is to create a Github account, then fork
+   the project. You can use this fork as if it was your own project, and should
+   push your changes to it.
+#. When you feel your code is good enough for inclusion, "send us a `pull
+   request`_", by using the nice GitHub web interface.
+
+Contributing Code
+-----------------
+
+Getting the source code
+^^^^^^^^^^^^^^^^^^^^^^^
+
+If you're interested in developing a new feature for Compressor, it is
+recommended that you first discuss it on IRC not to do any work that will
+not get merged in anyway.
+
+- Code will be reviewed and tested by at least one core developer, preferably
+  by several. Other community members are welcome to give feedback.
+- Code *must* be tested. Your pull request should include unit-tests (that
+  cover the piece of code you're submitting, obviously)
+- Documentation should reflect your changes if relevant. There is nothing
+  worse than invalid documentation.
+- Usually, if unit tests are written, pass, and your change is relevant, then
+  it'll be merged.
+
+Since it's hosted on GitHub, Django Compressor uses `git`_ as a version
+control system.
+
+The `GitHub help`_ is very well written and will get you started on using git
+and GitHub in a jiffy. It is an invaluable resource for newbies and old timers
+alike.
+
+Syntax and conventions
+^^^^^^^^^^^^^^^^^^^^^^
+
+We try to conform to `PEP8`_ as much as possible. A few highlights:
+
+- Indentation should be exactly 4 spaces. Not 2, not 6, not 8. **4**. Also,
+  tabs are evil.
+- We try (loosely) to keep the line length at 79 characters. Generally the
+  rule is "it should look good in a terminal-base editor" (eg vim), but we
+  try not be [Godwin's law] about it.
+
+Process
+^^^^^^^
+
+This is how you fix a bug or add a feature:
+
+#. `Fork`_ us on GitHub.
+#. Checkout your fork.
+#. Hack hack hack, test test test, commit commit commit, test again.
+#. Push to your fork.
+#. Open a pull request.
+
+Tests
+^^^^^
+
+Having a wide and comprehensive library of unit-tests and integration tests is
+of exceeding importance. Contributing tests is widely regarded as a very
+prestigious contribution (you're making everybody's future work much easier by
+doing so). Good karma for you. Cookie points. Maybe even a beer if we meet in
+person :)
+
+Generally tests should be:
+
+- Unitary (as much as possible). I.E. should test as much as possible only one
+  function/method/class. That's the very definition of unit tests.
+
+- Integration tests are interesting too obviously, but require more time to
+  maintain since they have a higher probability of breaking.
+
+- Short running. No hard numbers here, but if your one test doubles the time
+  it takes for everybody to run them, it's probably an indication that you're
+  doing it wrong.
+
+In a similar way to code, pull requests will be reviewed before pulling
+(obviously), and we encourage discussion via code review (everybody learns
+something this way) or IRC discussions.
+
+Running the tests
+^^^^^^^^^^^^^^^^^
+
+To run the tests simply install tox_, change your working directory to
+the ``tests`` directory and run ``tox`` in your shell. This will run the tests
+in Python 2.5, 2.6 and 2.7 (if appropriate binaries are found on the ``PATH``)
+with Django 1.2.X and 1.3.X. The docs will be automatically built, too.
+If you only want to run a specific environment, pass the ``-e`` option to
+``tox``, e.g. ``tox -e py25``. For more information see the `tox docs`_. An
+example:
+
+.. code-block:: console
+
+  $ sudo pip install tox
+  ...
+  $ cd path/to/my/django_compressor/tests
+  $ tox
+
+Contributing Documentation
+--------------------------
+
+Perhaps considered "boring" by hard-core coders, documentation is sometimes
+even more important than code! This is what brings fresh blood to a project,
+and serves as a reference for old timers. On top of this, documentation is
+the one area where less technical people can help most - you just need to
+write a semi-decent English. People need to understand you.
+
+Documentation should be:
+
+- We use `Sphinx`_/`restructuredText`_. So obviously this is the format you
+  should use :) File extensions should be ``.txt``.
+
+- Written in English. We can discuss how it would bring more people to the
+  project to have a Klingon translation or anything, but that's a problem we
+  will ask ourselves when we already have a good documentation in English.
+
+- Accessible. You should assume the reader to be moderately familiar with
+  Python and Django, but not anything else. Link to documentation of libraries
+  you use, for example, even if they are "obvious" to you. A brief
+  description of what it does is also welcome. 
+
+Pulling of documentation is pretty fast and painless. Usually somebody goes
+over your text and merges it, since there are no "breaks" and that GitHub
+parses rst files automagically it's really convenient to work with.
+
+Also, contributing to the documentation will earn you great respect from the
+core developers. You get good karma just like a test contributor, but you get
+double cookie points. Seriously. You rock.
+
+.. note::
+
+  This very document is based on the contributing docs of the
+  `Django Compressor`_ project. Many thanks for allowing to steal it!
+
+.. _Fork: http://github.com/jezdez/django_compressor
+.. _Sphinx: http://sphinx.pocoo.org/
+.. _PEP8: http://www.python.org/dev/peps/pep-0008/
+.. _GitHub : http://www.github.com
+.. _GitHub help : http://help.github.com
+.. _freenode : http://freenode.net/
+.. _@jezdez : https://twitter.com/jezdez
+.. _pull request : http://help.github.com/send-pull-requests/
+.. _git : http://git-scm.com/
+.. _restructuredText: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
+.. _`Django Compressor`: http://django_compressor.rtfd.org/
+.. _tox: http://pypi.python.org/pypi/tox
+.. _`tox docs`: http://codespeak.net/~hpk/tox/example/basic.html
