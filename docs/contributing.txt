@@ -19,14 +19,14 @@ In a nutshell
 -------------
 
 Here's what the contribution process looks like, in a bullet-points fashion,
-and only for the stuff we host on GitHub:
+and only for the stuff we host on github:
 
-#. Django Compressor is hosted on `GitHub`_, at https://github.com/jezdez/django_compressor
-#. The best method to contribute back is to create a Github account, then fork
+#. Django Compressor is hosted on `github`_, at https://github.com/jezdez/django_compressor
+#. The best method to contribute back is to create a github account, then fork
    the project. You can use this fork as if it was your own project, and should
    push your changes to it.
 #. When you feel your code is good enough for inclusion, "send us a `pull
-   request`_", by using the nice GitHub web interface.
+   request`_", by using the nice github web interface.
 
 Contributing Code
 -----------------
@@ -47,11 +47,11 @@ not get merged in anyway.
 - Usually, if unit tests are written, pass, and your change is relevant, then
   it'll be merged.
 
-Since it's hosted on GitHub, Django Compressor uses `git`_ as a version
+Since it's hosted on github, Django Compressor uses `git`_ as a version
 control system.
 
-The `GitHub help`_ is very well written and will get you started on using git
-and GitHub in a jiffy. It is an invaluable resource for newbies and old timers
+The `github help`_ is very well written and will get you started on using git
+and github in a jiffy. It is an invaluable resource for newbies and old timers
 alike.
 
 Syntax and conventions
@@ -70,7 +70,7 @@ Process
 
 This is how you fix a bug or add a feature:
 
-#. `Fork`_ us on GitHub.
+#. `Fork`_ us on github.
 #. Checkout your fork.
 #. Hack hack hack, test test test, commit commit commit, test again.
 #. Push to your fork.
@@ -143,7 +143,7 @@ Documentation should be:
   description of what it does is also welcome. 
 
 Pulling of documentation is pretty fast and painless. Usually somebody goes
-over your text and merges it, since there are no "breaks" and that GitHub
+over your text and merges it, since there are no "breaks" and that github
 parses rst files automagically it's really convenient to work with.
 
 Also, contributing to the documentation will earn you great respect from the
@@ -153,18 +153,18 @@ double cookie points. Seriously. You rock.
 .. note::
 
   This very document is based on the contributing docs of the
-  `Django Compressor`_ project. Many thanks for allowing to steal it!
+  `django CMS`_ project. Many thanks for allowing to steal it!
 
 .. _Fork: http://github.com/jezdez/django_compressor
 .. _Sphinx: http://sphinx.pocoo.org/
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
-.. _GitHub : http://www.github.com
-.. _GitHub help : http://help.github.com
+.. _github : http://www.github.com
+.. _github help : http://help.github.com
 .. _freenode : http://freenode.net/
 .. _@jezdez : https://twitter.com/jezdez
 .. _pull request : http://help.github.com/send-pull-requests/
 .. _git : http://git-scm.com/
 .. _restructuredText: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
-.. _`Django Compressor`: http://django_compressor.rtfd.org/
+.. _`django CMS`: http://www.django-cms.org/
 .. _tox: http://pypi.python.org/pypi/tox
 .. _`tox docs`: http://codespeak.net/~hpk/tox/example/basic.html
