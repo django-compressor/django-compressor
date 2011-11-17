@@ -12,7 +12,7 @@
 
 {% compress js%}
     <script type="text/javascript">
-        alert("test");
+        alert("{% firstof "test" %}");
     </script>
 {% endcompress %}
 
