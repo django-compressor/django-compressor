@@ -153,7 +153,7 @@ double cookie points. Seriously. You rock.
 .. note::
 
   This very document is based on the contributing docs of the
-  `django CMS`_ project. Many thanks for allowing to steal it!
+  `django CMS`_ project. Many thanks for allowing us to steal it!
 
 .. _Fork: http://github.com/jezdez/django_compressor
 .. _Sphinx: http://sphinx.pocoo.org/
