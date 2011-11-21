@@ -1,5 +1,8 @@
 from __future__ import with_statement
+import errno
+import os
 
+from django.core.files.base import ContentFile
 from django.core.files.storage import get_storage_class
 from django.test import TestCase
 
@@ -31,3 +34,20 @@ class StorageTestCase(TestCase):
         out = css_tag("/media/CACHE/css/1d4424458f88.css")
         self.assertEqual(out, render(template, context))
 
+    def test_race_condition_handling(self):
+        # Hold on to original os.remove
+        original_remove = os.remove
+
+        def race_remove(path):
+            "Patched os.remove to raise ENOENT (No such file or directory)"
+            original_remove(path)
+            raise OSError(errno.ENOENT, u'Fake ENOENT')
+
+        try:
+            os.remove = race_remove
+            self._storage.save('race.file', ContentFile('Fake ENOENT'))
+            self._storage.delete('race.file')
+            self.assertFalse(self._storage.exists('race.file'))
+        finally:
+            # Restore os.remove
+            os.remove = original_remove
