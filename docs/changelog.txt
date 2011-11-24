@@ -1,6 +1,14 @@
 Changelog
 =========
 
+v1.1.2
+------
+
+- Reverted an unfortunate change to the YUI filter that prepended
+  ``'java -jar'`` to the binary name, which doesn't alway work, e.g.
+  if the YUI compressor is shipped as a script like
+  ``/usr/bin/yui-compressor``.
+
 v1.1.1
 ------
 

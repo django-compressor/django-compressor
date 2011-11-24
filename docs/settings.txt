@@ -99,7 +99,9 @@ A filter for embedding media as `data: URIs`_ in the CSS.
 
 A filter that passes the CSS content to the `YUI compressor`_.
 
-- ``COMPRESS_YUI_BINARY`` -- The YUI compressor filesystem path.
+- ``COMPRESS_YUI_BINARY`` -- The YUI compressor filesystem path. Make sure
+  to also prepend this setting with ``java -jar`` if you use that kind of
+  distribution.
 
 - ``COMPRESS_YUI_CSS_ARGUMENTS``-- The arguments passed to the compressor.
 
@@ -139,7 +141,9 @@ A filter that uses the jsmin implementation `Slim It`_ to compress JavaScript co
 
 A filter that uses `Google Closure compiler`_.
 
-- ``COMPRESS_CLOSURE_COMPILER_BINARY`` -- The Closure compiler filesystem path.
+- ``COMPRESS_CLOSURE_COMPILER_BINARY`` -- The Closure compiler filesystem
+  path. Make sure to also prepend this setting with ``java -jar`` if you
+  use that kind of distribution.
 
 - ``COMPRESS_CLOSURE_COMPILER_ARGUMENTS`` -- The arguments passed to the compiler.
 
