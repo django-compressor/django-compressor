@@ -81,10 +81,6 @@ class CompressorNode(template.Node):
             return cached_offline
 
         # Prepare the compressor
-        if 'compressed' in context:
-            raise template.TemplateSyntaxError("A context variable named "
-                "'compresse' was found in the context. Make sure to name "
-                "it differently as this name is reserved to Compressor.")
         context['compressed'] = {'name': self.name}
         compressor = self.compressor_cls(content=self.nodelist.render(context),
                                          context=context)
