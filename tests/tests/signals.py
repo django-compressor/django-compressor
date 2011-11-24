@@ -38,7 +38,7 @@ class PostCompressSignalTestCase(TestCase):
         self.assertEquals('js', kwargs['type'])
         self.assertEquals('file', kwargs['mode'])
         context = kwargs['context']
-        assert 'url' in context
+        assert 'url' in context['compressed']
 
     def test_css_signal_sent(self):
         def listener(sender, **kwargs):
@@ -51,7 +51,7 @@ class PostCompressSignalTestCase(TestCase):
         self.assertEquals('css', kwargs['type'])
         self.assertEquals('file', kwargs['mode'])
         context = kwargs['context']
-        assert 'url' in context
+        assert 'url' in context['compressed']
 
     def test_css_signal_multiple_media_attributes(self):
         css = """\

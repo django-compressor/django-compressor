@@ -258,13 +258,14 @@ class Compressor(object):
         Renders the compressor output with the appropriate template for
         the given mode and template context.
         """
-        if context is None:
-            context = {}
-        final_context = Context()
-        final_context.update(self.context)
-        final_context.update(context)
-        final_context.update(self.extra_context)
-        post_compress.send(sender='django-compressor', type=self.type,
+        # Just in case someone renders the compressor outside
+        # the usual template rendering cycle
+        if 'compressed' not in self.context:
+            self.context['compressed'] = {}
+
+        self.context['compressed'].update(context or {})
+        self.context['compressed'].update(self.extra_context)
+        final_context = Context(self.context)
                            mode=mode, context=final_context)
         return render_to_string("compressor/%s_%s.html" %
                                 (self.type, mode), final_context)

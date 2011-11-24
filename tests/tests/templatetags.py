@@ -121,4 +121,4 @@ class TemplatetagTestCase(TestCase):
         render(template)
         args, kwargs = callback.call_args
         context = kwargs['context']
-        self.assertEqual('foo', context['name'])
+        self.assertEqual('foo', context['compressed']['name'])

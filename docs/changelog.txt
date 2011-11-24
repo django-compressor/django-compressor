@@ -1,8 +1,37 @@
 Changelog
 =========
 
-v1.1.2
+v1.2.0
 ------
+
+- Introduced a new ``compressed`` context dictionary that is passed to
+  the templates that are responsible for rendering the compressed snippets.
+
+  This is a **backwards-incompatible change** if you've overridden any of
+  the included templates:
+
+  - ``compressor/css_file.html``
+  - ``compressor/css_inline.html``
+  - ``compressor/js_file.html``
+  - ``compressor/js_inline.html``
+
+  The variables passed to those templates have been namespaced in a
+  dictionary, so it's easy to fix your own templates.
+
+  For example, the old ``compressor/js_file.html``::
+
+    <script type="text/javascript" src="{{ url }}"></script>
+
+  The new ``compressor/js_file.html``::
+
+    <script type="text/javascript" src="{{ compressed.url }}"></script>
+
+- Removed old templates named ``compressor/css.html`` and
+  ``compressor/js.html`` that were originally left for backwards
+  compatibility. If you've overridden them, just rename them to
+  ``compressor/css_file.html`` or ``compressor/js_file.html`` and
+  make sure you've accounted for the backwards incompatible change
+  of the template context mentioned above.
 
 - Reverted an unfortunate change to the YUI filter that prepended
   ``'java -jar'`` to the binary name, which doesn't alway work, e.g.
