@@ -215,13 +215,17 @@ class Compressor(object):
         if not verbatim_content and not rendered_content:
             return ''
 
+
+        rendered_output = '\n'.join(c.encode(self.charset)
+                                    for c in rendered_content)
         if settings.COMPRESS_ENABLED or forced:
-            filtered_content = self.filtered_output(
-                '\n'.join((c.encode(self.charset) for c in rendered_content)))
+            filtered_content = self.filtered_output(rendered_output)
             finished_content = self.handle_output(mode, filtered_content, forced)
             verbatim_content.append(finished_content)
 
         if verbatim_content:
+            if not settings.COMPRESS_ENABLED and rendered_output:
+                verbatim_content.append(rendered_output)
             return '\n'.join(verbatim_content)
 
         return self.content

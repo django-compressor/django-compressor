@@ -1,5 +1,8 @@
 from __future__ import with_statement
 
+import os
+import sys
+
 from mock import Mock
 
 from django.template import Template, Context, TemplateSyntaxError
@@ -8,7 +11,7 @@ from django.test import TestCase
 from compressor.conf import settings
 from compressor.signals import post_compress
 
-from .base import css_tag
+from .base import css_tag, test_dir
 
 
 def render(template_string, context_dict=None):
@@ -122,3 +125,82 @@ class TemplatetagTestCase(TestCase):
         args, kwargs = callback.call_args
         context = kwargs['context']
         self.assertEqual('foo', context['name'])
+
+class PrecompilerTemplatetagTestCase(TestCase):
+    def setUp(self):
+        self.old_enabled = settings.COMPRESS_ENABLED
+        self.old_precompil = settings.COMPRESS_PRECOMPILERS
+
+        precompiler = os.path.join(test_dir, 'precompiler.py')
+        python = sys.executable
+
+        settings.COMPRESS_ENABLED = True
+        settings.COMPRESS_PRECOMPILERS = (
+            ('text/coffeescript', '%s %s' % (python, precompiler)),)
+
+        self.context = {'MEDIA_URL': settings.COMPRESS_URL}
+
+    def tearDown(self):
+        settings.COMPRESS_ENABLED = self.old_enabled
+        settings.COMPRESS_PRECOMPILERS = self.old_precompil
+
+    def test_compress_coffeescript_tag(self):
+        template = u"""{% load compress %}{% compress js %}
+            <script type="text/coffeescript"># this is a comment.</script>
+            {% endcompress %}"""
+        out = script(src="/media/CACHE/js/e920d58f166d.js")
+        self.assertEqual(out, render(template, self.context))
+
+    def test_compress_coffeescript_tag_and_javascript_tag(self):
+        template = u"""{% load compress %}{% compress js %}
+            <script type="text/coffeescript"># this is a comment.</script>
+            <script type="text/javascript"># this too is a comment.</script>
+            {% endcompress %}"""
+        out = script(src="/media/CACHE/js/ef6b32a54575.js")
+        self.assertEqual(out, render(template, self.context))
+
+    def test_coffeescript_and_js_tag_with_compress_enabled_equals_false(self):
+        settings.COMPRESS_ENABLED = False
+
+        template = u"""{% load compress %}{% compress js %}
+            <script type="text/coffeescript"># this is a comment.</script>
+            <script type="text/javascript"># this too is a comment.</script>
+            {% endcompress %}"""
+        out = (script('# this is a comment.\n') + '\n' +
+               script('# this too is a comment.'))
+        self.assertEqual(out, render(template, self.context))
+
+    def test_compress_coffeescript_tag_compress_enabled_is_false(self):
+        settings.COMPRESS_ENABLED = False
+
+        template = u"""{% load compress %}{% compress js %}
+            <script type="text/coffeescript"># this is a comment.</script>
+            {% endcompress %}"""
+        out = script("# this is a comment.\n")
+        self.assertEqual(out, render(template, self.context))
+
+    def test_compress_coffeescript_file_tag_compress_enabled_is_false(self):
+        settings.COMPRESS_ENABLED = False
+
+        template = u"""
+        {% load compress %}{% compress js %}
+        <script type="text/coffeescript" src="{{ MEDIA_URL }}js/one.coffee">
+        </script>
+        {% endcompress %}"""
+        out = script(src="/media/CACHE/js/95cfb869eead.js")
+        self.assertEqual(out, render(template, self.context))
+
+def script(content="", src="", scripttype="text/javascript"):
+    """
+    returns a unicode text html script element.
+
+    >>> script('#this is a comment', scripttype="text/applescript")
+    '<script type="text/applescript">#this is a comment</script>'
+    """
+    out_script = u'<script '
+    if scripttype:
+        out_script += u'type="%s" ' % scripttype
+    if src:
+        out_script += u'src="%s" ' % src
+    return out_script[:-1] + u'>%s</script>' % content
+

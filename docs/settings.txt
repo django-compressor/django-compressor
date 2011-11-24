@@ -13,9 +13,32 @@ COMPRESS_ENABLED
 
 :Default: the opposite of ``DEBUG``
 
-Boolean that decides if compression will happen. In order to test compression
-when ``DEBUG`` is enabled COMPRESS_ENABLED_ needs to explicitly be set to
-``True``.
+Boolean that decides if compression will happen. To test compression
+when ``DEBUG`` is ``True`` COMPRESS_ENABLED_ must also be set to ``True``.
+
+When COMPRESS_ENABLED_ is ``False`` the input will be rendered without any
+compression except for code with a mimetype matching one listed in the
+COMPRESS_PRECOMPILERS_ setting. These matching files are still passed to the
+precompiler before rendering. 
+
+An example for some javascript and coffeescript.
+
+.. code-block:: django
+
+    {% load compress %}
+
+    {% compress js %}
+    <script type="text/javascript" src="/static/js/site-base.js" />
+    <script type="text/coffeescript" charset="utf-8" src="/static/js/awesome.coffee" />
+    {% endcompress %}
+
+With COMPRESS_ENABLED_ set to ``False`` this would give you something like
+this::
+
+    <script type="text/javascript" src="/static/js/site-base.js"></script>
+    <script type="text/javascript" src="/static/CACHE/js/8dd1a2872443.js" charset="utf-8"></script>
+
+
 
 .. _compress_url:
 
