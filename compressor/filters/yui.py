@@ -3,7 +3,7 @@ from compressor.filters import CompilerFilter
 
 
 class YUICompressorFilter(CompilerFilter):
-    command = "java -jar {binary} {args}"
+    command = "{binary} {args}"
 
     def __init__(self, *args, **kwargs):
         super(YUICompressorFilter, self).__init__(*args, **kwargs)
