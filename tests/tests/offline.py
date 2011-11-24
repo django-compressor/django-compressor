@@ -40,30 +40,29 @@ class OfflineGenerationTestCase(TestCase):
 
     def test_offline(self):
         count, result = CompressCommand().compress()
-        self.assertEqual(5, count)
+        self.assertEqual(6, count)
         self.assertEqual([
             css_tag('/media/CACHE/css/cd579b7deb7d.css'),
             u'<script type="text/javascript" src="/media/CACHE/js/0a2bb9a287c0.js"></script>',
             u'<script type="text/javascript" src="/media/CACHE/js/fb1736ad48b7.js"></script>',
+            u'<script type="text/javascript" src="/media/CACHE/js/1a63aacfe9de.js"></script>',
             u'<script type="text/javascript" src="/media/CACHE/js/770a7311729e.js"></script>',
             u'<link rel="stylesheet" href="/media/CACHE/css/67ed6aff7f7b.css" type="text/css" />',
         ], result)
-        # Template rendering should use the cache. FIXME: how to make sure of it ? Should we test the cache
-        # key<->values ourselves?
-        rendered_template = self.template.render(Context({})).replace("\n", "")
-        self.assertEqual(rendered_template, "".join(result).replace("\n", ""))
 
     def test_offline_with_context(self):
         self._old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
         settings.COMPRESS_OFFLINE_CONTEXT = {
             'color': 'blue',
+            'condition': 'red',
         }
         count, result = CompressCommand().compress()
-        self.assertEqual(5, count)
+        self.assertEqual(6, count)
         self.assertEqual([
             css_tag('/media/CACHE/css/ee62fbfd116a.css'),
             u'<script type="text/javascript" src="/media/CACHE/js/0a2bb9a287c0.js"></script>',
             u'<script type="text/javascript" src="/media/CACHE/js/fb1736ad48b7.js"></script>',
+            u'<script type="text/javascript" src="/media/CACHE/js/4e3758d50224.js"></script>',
             u'<script type="text/javascript" src="/media/CACHE/js/770a7311729e.js"></script>',
             u'<link rel="stylesheet" href="/media/CACHE/css/73e015f740c6.css" type="text/css" />',
         ], result)

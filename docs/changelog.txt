@@ -42,6 +42,9 @@ v1.2.0
   signal to be either :class:`compressor.css.CssCompressor` or
   :class:`compressor.js.JsCompressor` for easier customization.
 
+- Correctly handle offline compressing files that are found in ``{% if %}``
+  template blocks.
+
 v1.1.1
 ------
 
