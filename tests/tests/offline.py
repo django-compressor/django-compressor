@@ -27,8 +27,9 @@ class OfflineGenerationTestCase(TestCase):
         settings.COMPRESS_ENABLED = self._old_compress
         settings.COMPRESS_OFFLINE = self._old_compress_offline
         self.template_file.close()
-        if default_storage.exists('CACHE/manifest.json'):
-            default_storage.delete('CACHE/manifest.json')
+        manifest_path = os.path.join('CACHE', 'manifest.json')
+        if default_storage.exists(manifest_path):
+            default_storage.delete(manifest_path)
 
     def test_rendering_without_compressing_raises_exception(self):
         self.assertRaises(OfflineGenerationError,
