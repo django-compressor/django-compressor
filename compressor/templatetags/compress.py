@@ -53,7 +53,9 @@ class CompressorNode(template.Node):
             if key in offline_manifest:
                 return offline_manifest[key]
             else:
-                raise OfflineGenerationError('You have offline compression enabled but key "%s" is missing from offline manifest. You may need to run "python manage.py compress".' % key)
+                raise OfflineGenerationError('You have offline compression '
+                    'enabled but key "%s" is missing from offline manifest. '
+                    'You may need to run "python manage.py compress".' % key)
 
     def render_cached(self, compressor, forced):
         """
