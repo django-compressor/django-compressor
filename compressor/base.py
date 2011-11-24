@@ -168,14 +168,10 @@ class Compressor(object):
         Passes each hunk (file or code) to the 'input' methods
         of the compressor filters.
         """
-        verbatim_content = []
-        rendered_content = []
+        content = []
         for mode, hunk in self.hunks(mode, forced):
-            if mode == 'verbatim':
-                verbatim_content.append(hunk)
-            else:
-                rendered_content.append(hunk)
-        return verbatim_content, rendered_content
+                content.append((mode, hunk))
+        return content
 
     def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
         if not kind:
@@ -211,24 +207,25 @@ class Compressor(object):
         any custom modification. Calls other mode specific methods or simply
         returns the content directly.
         """
-        verbatim_content, rendered_content = self.filtered_input(mode, forced)
-        if not verbatim_content and not rendered_content:
+        content = self.filtered_input(mode, forced)
+        if not content:
             return ''
 
+        charset = self.charset
+        output = '\n'.join(c.encode(charset) for (m, c) in content)
 
-        rendered_output = '\n'.join(c.encode(self.charset)
-                                    for c in rendered_content)
         if settings.COMPRESS_ENABLED or forced:
-            filtered_content = self.filtered_output(rendered_output)
+            filtered_content = self.filtered_output(output)
             finished_content = self.handle_output(mode, filtered_content, forced)
-            verbatim_content.append(finished_content)
+            output = finished_content
 
-        if verbatim_content:
-            if not settings.COMPRESS_ENABLED and rendered_output:
-                verbatim_content.append(rendered_output)
-            return '\n'.join(verbatim_content)
+        return output
 
-        return self.content
+    def _filter_mode(self, content, mode):
+        return filter(lambda x: x[0] == mode, content)
+
+    def _exclude_mode(self, content, mode):
+        return filter(lambda x: x[0] != mode, content)
 
     def handle_output(self, mode, content, forced):
         # Then check for the appropriate output method and call it

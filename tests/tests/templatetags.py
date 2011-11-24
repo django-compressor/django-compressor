@@ -187,7 +187,27 @@ class PrecompilerTemplatetagTestCase(TestCase):
         <script type="text/coffeescript" src="{{ MEDIA_URL }}js/one.coffee">
         </script>
         {% endcompress %}"""
+
         out = script(src="/media/CACHE/js/95cfb869eead.js")
+        self.assertEqual(out, render(template, self.context))
+
+    def test_multiple_file_order_conserved(self):
+        settings.COMPRESS_ENABLED = False
+
+        template = u"""
+        {% load compress %}{% compress js %}
+        <script type="text/coffeescript" src="{{ MEDIA_URL }}js/one.coffee">
+        </script>
+        <script src="{{ MEDIA_URL }}js/one.js"></script>
+        <script type="text/coffeescript" src="{{ MEDIA_URL }}js/one.js">
+        </script>
+        {% endcompress %}"""
+
+        out = '\n'.join([
+                script(src="/media/CACHE/js/95cfb869eead.js"),
+                script(scripttype="", src="/media/js/one.js"),
+                script(src="/media/CACHE/js/81a2cd965815.js"),])
+
         self.assertEqual(out, render(template, self.context))
 
 def script(content="", src="", scripttype="text/javascript"):
