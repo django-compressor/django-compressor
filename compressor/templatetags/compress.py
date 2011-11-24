@@ -81,7 +81,7 @@ class CompressorNode(template.Node):
             return cached_offline
 
         # Prepare the compressor
-        context.update({'name': self.name})
+        context.update({'django_compress_block_name': self.name})
         compressor = self.compressor_cls(content=self.nodelist.render(context),
                                          context=context)
 
