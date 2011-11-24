@@ -38,6 +38,10 @@ v1.2.0
   if the YUI compressor is shipped as a script like
   ``/usr/bin/yui-compressor``.
 
+- Changed the sender parameter of the :func:`~compressor.signals.post_compress`
+  signal to be either :class:`compressor.css.CssCompressor` or
+  :class:`compressor.js.JsCompressor` for easier customization.
+
 v1.1.1
 ------
 

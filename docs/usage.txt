@@ -165,7 +165,14 @@ you need the exact filenames for use in an HTML5 manifest file.  The signal
 sends the following arguments:
 
 ``sender``
-    Always "django-compressor".
+    Either :class:`compressor.css.CssCompressor` or
+    :class:`compressor.js.JsCompressor`.
+
+    .. versionchanged:: 1.2
+
+    The sender is now one of the supported Compressor classes for
+    easier limitation to only one of them, previously it was a string
+    named ``'django-compressor'``.
 
 ``type``
     Either "``js``" or "``css``".
@@ -177,21 +184,23 @@ sends the following arguments:
     The context dictionary used to render the output of the compress template
     tag.
 
-    If ``mode`` is "``file``", this will contain a "``url``" key that maps to
-    the relative URL for the compressed asset.  
+    If ``mode`` is "``file``" the dictionary named ``compressed`` in the
+    context will contain a "``url``" key that maps to the relative URL for
+    the compressed asset.
 
-    If ``type`` is "``css``", the context will additionally contain a
-    "``media``" key with a value of ``None`` if no media attribute is specified on
-    the link/style tag and equal to that attribute if one is specified.  
+    If ``type`` is "``css``", the dictionary named ``compressed`` in the
+    context will additionally contain a "``media``" key with a value of
+    ``None`` if no media attribute is specified on the link/style tag and
+    equal to that attribute if one is specified.
 
-    Additionally, ``context['name']`` will be the third positional argument to
-    the template tag, if provided.
+    Additionally, ``context['compressed']['name']`` will be the third
+    positional argument to the template tag, if provided.
 
 .. note::
 
     When compressing CSS, the ``post_compress`` signal will be called once for
-    every different media attribute on the tags within the ``{% compress %}`` tag
-    in question.
+    every different media attribute on the tags within the ``{% compress %}``
+    tag in question.
 
 CSS Notes
 ---------
