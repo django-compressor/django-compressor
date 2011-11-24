@@ -20,6 +20,7 @@ except ImportError:
 
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
 from compressor.conf import settings
+from compressor.css import CssCompressor
 
 from .base import CompressorTestCase
 
@@ -42,6 +43,15 @@ LxmlParserTests = skipIf(lxml is None, 'lxml not found')(LxmlParserTests)
 
 class Html5LibParserTests(ParserTestCase, CompressorTestCase):
     parser_cls = 'compressor.parser.Html5LibParser'
+
+    def setUp(self):
+        super(Html5LibParserTests, self).setUp()
+        # special version of the css since the parser sucks
+        self.css = """\
+<link href="/media/css/one.css" rel="stylesheet" type="text/css">
+<style type="text/css">p { border:5px solid green;}</style>
+<link href="/media/css/two.css" rel="stylesheet" type="text/css">"""
+        self.css_node = CssCompressor(self.css)
 
     def test_css_split(self):
         out = [
