@@ -196,7 +196,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
             </script>
             {% endcompress %}"""
 
-            out = script(src="/media/CACHE/js/95cfb869eead.js")
+            out = script(src="/media/CACHE/js/one.95cfb869eead.js")
             self.assertEqual(out, render(template, self.context))
         finally:
             settings.COMPRESS_ENABLED = self.old_enabled
@@ -215,9 +215,9 @@ class PrecompilerTemplatetagTestCase(TestCase):
             {% endcompress %}"""
 
             out = '\n'.join([
-                    script(src="/media/CACHE/js/95cfb869eead.js"),
+                    script(src="/media/CACHE/js/one.95cfb869eead.js"),
                     script(scripttype="", src="/media/js/one.js"),
-                    script(src="/media/CACHE/js/81a2cd965815.js"),])
+                    script(src="/media/CACHE/js/one.81a2cd965815.js"),])
 
             self.assertEqual(out, render(template, self.context))
         finally:
