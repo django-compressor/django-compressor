@@ -69,6 +69,9 @@ class CompressorNode(template.Node):
             return cache_key, cache_content
         return None, None
 
+    def render_output(self, compressor, forced=False):
+        return compressor.output(self.mode, forced=forced)
+
     def render(self, context, forced=False):
 
         # Check if in debug mode
@@ -90,7 +93,7 @@ class CompressorNode(template.Node):
             return cache_content
 
         # call compressor output method and handle exceptions
-        rendered_output = compressor.output(self.mode, forced=forced)
+        rendered_output = self.render_output(compressor, forced)
         if cache_key:
             cache_set(cache_key, rendered_output)
         return rendered_output

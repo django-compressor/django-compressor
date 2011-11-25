@@ -51,12 +51,11 @@ class CompressorTestCase(TestCase):
 
     def test_css_hunks(self):
         out = ['body { background:#990; }', u'p { border:5px solid green;}', 'body { color:#fff; }']
-        hunks = [h for m, h in self.css_node.hunks()]
-        self.assertEqual(out, hunks)
+        self.assertEqual(out, list(self.css_node.hunks()))
 
     def test_css_output(self):
         out = u'body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }'
-        hunks = '\n'.join([h for m, h in self.css_node.hunks()])
+        hunks = '\n'.join([h for h in self.css_node.hunks()])
         self.assertEqual(out, hunks)
 
     def test_css_mtimes(self):
@@ -89,8 +88,7 @@ class CompressorTestCase(TestCase):
 
     def test_js_hunks(self):
         out = ['obj = {};', u'obj.value = "value";']
-        hunks = [h for m, h in self.js_node.hunks()]
-        self.assertEqual(out, hunks)
+        self.assertEqual(out, list(self.js_node.hunks()))
 
     def test_js_output(self):
         out = u'<script type="text/javascript" src="/media/CACHE/js/066cd253eada.js"></script>'

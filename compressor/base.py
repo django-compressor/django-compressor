@@ -123,7 +123,7 @@ class Compressor(object):
         return get_hexdigest(''.join(
             [self.content] + self.mtimes).encode(self.charset), 12)
 
-    def hunks(self, mode='file', forced=False):
+    def hunks(self, forced=False):
         """
         The heart of content parsing, iterates of the
         list of split contents and looks at its kind
@@ -152,29 +152,29 @@ class Compressor(object):
 
             if enabled:
                 value = self.filter(value, **options)
-                yield mode, smart_unicode(value, charset.lower())
+                yield smart_unicode(value, charset.lower())
             else:
                 if precompiled:
                     value = self.handle_output(kind, value, forced=True, basename=basename)
-                    yield "verbatim", smart_unicode(value, charset.lower())
+                    yield smart_unicode(value, charset.lower())
                 else:
-                    yield mode, self.parser.elem_str(elem)
+                    yield self.parser.elem_str(elem)
 
-    def filtered_output(self, content):
+    def filter_output(self, content):
         """
         Passes the concatenated content to the 'output' methods
         of the compressor filters.
         """
         return self.filter(content, method=METHOD_OUTPUT)
 
-    def filtered_input(self, mode='file', forced=False):
+    def filter_input(self, forced=False):
         """
         Passes each hunk (file or code) to the 'input' methods
         of the compressor filters.
         """
         content = []
-        for mode, hunk in self.hunks(mode, forced):
-                content.append((mode, hunk))
+        for hunk in self.hunks(forced):
+            content.append(hunk)
         return content
 
     def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
@@ -211,17 +211,15 @@ class Compressor(object):
         any custom modification. Calls other mode specific methods or simply
         returns the content directly.
         """
-        content = self.filtered_input(mode, forced)
+        content = self.filter_input(forced)
         if not content:
             return ''
 
-        charset = self.charset
-        output = '\n'.join(c.encode(charset) for (m, c) in content)
+        output = '\n'.join(c.encode(self.charset) for c in content)
 
         if settings.COMPRESS_ENABLED or forced:
-            filtered_content = self.filtered_output(output)
-            finished_content = self.handle_output(mode, filtered_content, forced)
-            output = finished_content
+            filtered_output = self.filter_output(output)
+            return self.handle_output(mode, filtered_output, forced)
 
         return output
 
