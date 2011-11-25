@@ -101,6 +101,19 @@ def get_hashed_mtime(filename, length=12):
     return get_hexdigest(mtime, length)
 
 
+def get_hashed_content(filename, length=12):
+    try:
+        filename = os.path.realpath(filename)
+    except OSError:
+        return None
+    hash_file = open(filename)
+    try:
+        content = hash_file.read()
+    finally:
+        hash_file.close()
+    return get_hexdigest(content, length)
+
+
 def cache_get(key):
     packed_val = cache.get(key)
     if packed_val is None:

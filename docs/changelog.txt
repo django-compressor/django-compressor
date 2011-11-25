@@ -45,6 +45,10 @@ v1.2.0
 - Correctly handle offline compressing files that are found in ``{% if %}``
   template blocks.
 
+- Renamed the second option for the ``COMPRESS_CSS_HASHING_METHOD`` setting
+  from ``'hash'`` to ``'content'`` to better describe what it does. The old
+  name is also supported, as well as the default being ``'mtime'``.
+
 v1.1.1
 ------
 

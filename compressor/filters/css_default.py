@@ -2,7 +2,8 @@ import os
 import re
 import posixpath
 
-from compressor.cache import get_hexdigest, get_hashed_mtime
+from compressor.cache import (get_hexdigest, get_hashed_mtime,
+                              get_hashed_content)
 from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
 from compressor.utils import staticfiles
@@ -61,12 +62,8 @@ class CssAbsoluteFilter(FilterBase):
         if filename:
             if settings.COMPRESS_CSS_HASHING_METHOD == "mtime":
                 suffix = get_hashed_mtime(filename)
-            elif settings.COMPRESS_CSS_HASHING_METHOD == "hash":
-                hash_file = open(filename)
-                try:
-                    suffix = get_hexdigest(hash_file.read(), 12)
-                finally:
-                    hash_file.close()
+            elif settings.COMPRESS_CSS_HASHING_METHOD in ("hash", "content"):
+                suffix = get_hashed_content(filename)
             else:
                 raise FilterError('COMPRESS_CSS_HASHING_METHOD is configured '
                                   'with an unknown method (%s).')
