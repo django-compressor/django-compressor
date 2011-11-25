@@ -225,12 +225,6 @@ class Compressor(object):
 
         return output
 
-    def _filter_mode(self, content, mode):
-        return filter(lambda x: x[0] == mode, content)
-
-    def _exclude_mode(self, content, mode):
-        return filter(lambda x: x[0] != mode, content)
-
     def handle_output(self, mode, content, forced, basename=None):
         # Then check for the appropriate output method and call it
         output_func = getattr(self, "output_%s" % mode, None)
