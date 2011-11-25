@@ -64,13 +64,12 @@ class Compressor(object):
         return basename.split("?", 1)[0]
 
     def get_filepath(self, content, basename=None):
-        filename = "%s.%s" % (get_hexdigest(content, 12), self.type)
-        if basename is not None:
-            filename = '.'.join([
-                os.path.splitext(os.path.split(basename)[1])[0],
-                filename
-            ])
-        return os.path.join(self.output_dir, self.output_prefix, filename)
+        parts = []
+        if basename:
+            filename = os.path.split(basename)[1]
+            parts.append(os.path.splitext(filename)[0])
+        parts.extend([get_hexdigest(content, 12), self.type])
+        return os.path.join(self.output_dir, self.output_prefix, '.'.join(parts))
 
     def get_filename(self, basename):
         filename = None
@@ -88,7 +87,7 @@ class Compressor(object):
             return filename
         # or just raise an exception as the last resort
         raise UncompressableFileError(
-            "'%s' could not be found in the COMPRESS_ROOT '%s'%s" % 
+            "'%s' could not be found in the COMPRESS_ROOT '%s'%s" %
             (basename, settings.COMPRESS_ROOT,
              self.finders and " or with staticfiles." or "."))
 
@@ -102,7 +101,7 @@ class Compressor(object):
             except UnicodeDecodeError, e:
                 raise UncompressableFileError("UnicodeDecodeError while "
                                               "processing '%s' with "
-                                              "charset %s: %s" % 
+                                              "charset %s: %s" %
                                               (filename, charset, e))
 
     @cached_property
@@ -274,5 +273,5 @@ class Compressor(object):
         final_context = Context(self.context)
         post_compress.send(sender=self.__class__, type=self.type,
                            mode=mode, context=final_context)
-        return render_to_string("compressor/%s_%s.html" % 
+        return render_to_string("compressor/%s_%s.html" %
                                 (self.type, mode), final_context)
