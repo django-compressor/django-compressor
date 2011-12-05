@@ -107,7 +107,7 @@ setup(
     long_description = read('README.rst'),
     author = 'Jannis Leidel',
     author_email = 'jannis@leidel.info',
-    packages = find_packages(exclude=['tests', 'tests.*']),
+    packages = find_packages(),
     package_data = find_package_data('compressor', only_in_packages=False),
     classifiers = [
         'Development Status :: 5 - Production/Stable',
