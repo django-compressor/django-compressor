@@ -1,0 +1,7 @@
+{% load compress %}{% spaceless %}
+
+{% compress js %}
+    <script type="text/javascript">
+        alert("{{ content|default:"Ooops!" }}");
+    </script>
+{% endcompress %}{% endspaceless %}
