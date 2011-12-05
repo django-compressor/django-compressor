@@ -11,6 +11,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.auth',
     'django.contrib.admin',
+    'django_jenkins',
     'compressor',
     'tests',
 ]
@@ -21,4 +22,11 @@ MEDIA_ROOT = os.path.join(TEST_DIR, 'media')
 
 TEMPLATE_DIRS = (
     os.path.join(TEST_DIR, 'templates'),
+)
+
+JENKINS_TASKS = (
+    'django_jenkins.tasks.run_pyflakes',
+    'django_jenkins.tasks.run_pep8',
+    'django_jenkins.tasks.with_coverage',
+    'django_jenkins.tasks.django_tests',
 )
