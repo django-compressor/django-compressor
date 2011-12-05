@@ -1,0 +1,12 @@
+rvm:
+   - 1.9.3
+before_script:
+  - sudo pip install tox
+script:
+  - tox
+notifications:
+  email:
+    - jannis@leidel.info
+branches:
+  only:
+    - develop
