@@ -1,16 +1,15 @@
-{% block content %}{% endblock %}
-
-{% block js%}
+{% spaceless %}
+{% block js %}
     <script type="text/javascript">
-        alert("test 3");
+        alert("test using block.super");
     </script>
 {% endblock %}
 
 {% block css %}
     <style type="text/css">
         body {
-            background: {{ color|default:"purple" }};
+            background: red;
         }
     </style>
 {% endblock %}
-
+{% endspaceless %}

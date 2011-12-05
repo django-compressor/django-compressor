@@ -1,0 +1,7 @@
+{% load compress %}{% spaceless %}
+
+{% compress js %}
+    <script type="text/javascript">
+        alert("{% firstof "testtemplatetag" %}");
+    </script>
+{% endcompress %}{% endspaceless %}
