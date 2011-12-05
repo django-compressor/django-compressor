@@ -11,9 +11,9 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.auth',
     'django.contrib.admin',
-    'compressor',
-    'compressor.tests',
     'django_jenkins',
+    'compressor',
+    'tests',
 ]
 
 MEDIA_URL = '/media/'
@@ -21,7 +21,10 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(TEST_DIR, 'media')
 
 TEMPLATE_DIRS = (
-    os.path.join(TEST_DIR, 'templates'),
+    # Specifically choose a name that will not be considered
+    # by app_directories loader, to make sure each test uses
+    # a specific template without considering the others.
+    os.path.join(TEST_DIR, 'test_templates'),
 )
 
 JENKINS_TASKS = (
