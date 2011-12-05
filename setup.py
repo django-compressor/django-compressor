@@ -97,7 +97,6 @@ def find_package_data(
                 out.setdefault(package, []).append(prefix + name)
     return out
 
-
 setup(
     name = "django_compressor",
     version = ":versiontools:compressor:",
@@ -108,7 +107,7 @@ setup(
     author = 'Jannis Leidel',
     author_email = 'jannis@leidel.info',
     packages = find_packages(),
-    package_data = find_package_data('compressor', only_in_packages=False),
+    package_data = find_package_data(),
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
