@@ -206,6 +206,7 @@ hunks you want to compile with the command specified as the second item:
     instead.
 
 Example::
+    
     COMPRESS_PRECOMPILERS = (
         ('text/coffeescript', 'coffee --compile --stdio'),
         ('text/less', 'lessc {infile} {outfile}'),
