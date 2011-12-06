@@ -14,13 +14,13 @@ from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_storage
 
-from .base import css_tag
 
-class OfflineTestCaseMixin():
+class OfflineTestCaseMixin(object):
     template_name = "test_compressor_offline.html"
-    templates_dir = "" # Change this for each test class, to separate templates
-    expected_hash = "" # Change this for each test class to the expected result
     verbosity = 0
+    # Change this for each test class
+    templates_dir = ""
+    expected_hash = ""
 
     def setUp(self):
         self._old_compress = settings.COMPRESS_ENABLED
@@ -62,9 +62,11 @@ class OfflineTestCaseMixin():
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         self.assertEqual(rendered_template, "".join(result) + "\n")
 
+
 class OfflineGenerationBlockSuperTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super"
     expected_hash = "7c02d201f69d"
+
 
 class OfflineGenerationConditionTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_condition"
@@ -81,9 +83,11 @@ class OfflineGenerationConditionTestCase(OfflineTestCaseMixin, TestCase):
         self.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
         super(OfflineGenerationConditionTestCase, self).tearDown()
 
+
 class OfflineGenerationTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_templatetag"
     expected_hash = "a27e1d3a619a"
+
 
 class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_with_context"
@@ -99,10 +103,12 @@ class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):
     def tearDown(self):
         self.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
         super(OfflineGenerationTestCaseWithContext, self).tearDown()
-        
+
+
 class OfflineGenerationTestCaseErrors(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_error_handling"
     expected_hash = "cd8870829421"
+
 
 class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "basic"

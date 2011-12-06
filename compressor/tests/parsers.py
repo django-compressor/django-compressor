@@ -21,8 +21,7 @@ except ImportError:
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
 from compressor.conf import settings
 from compressor.css import CssCompressor
-
-from .base import CompressorTestCase
+from compressor.tests.base import CompressorTestCase
 
 
 class ParserTestCase(object):

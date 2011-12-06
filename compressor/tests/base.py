@@ -19,7 +19,7 @@ def css_tag(href, **kwargs):
     return template % (href, rendered_attrs)
 
 
-test_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+test_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
 
 class CompressorTestCase(TestCase):

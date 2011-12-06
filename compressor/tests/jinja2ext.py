@@ -5,8 +5,7 @@ from django.test import TestCase
 import jinja2
 
 from compressor.conf import settings
-
-from .base import css_tag
+from compressor.tests.base import css_tag
 
 
 class TestJinja2CompressorExtension(TestCase):

@@ -8,9 +8,8 @@ from django.test import TestCase
 
 from compressor import base
 from compressor.conf import settings
-
-from .base import css_tag
-from .templatetags import render
+from compressor.tests.base import css_tag
+from compressor.tests.templatetags import render
 
 
 class StorageTestCase(TestCase):

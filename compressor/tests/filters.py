@@ -12,8 +12,7 @@ from compressor.utils import find_command
 from compressor.filters.base import CompilerFilter
 from compressor.filters.cssmin import CSSMinFilter
 from compressor.filters.css_default import CssAbsoluteFilter
-
-from .base import test_dir
+from compressor.tests.base import test_dir
 
 
 class CssTidyTestCase(TestCase):
@@ -30,7 +29,7 @@ color: black;
 
 CssTidyTestCase = skipIf(
     find_command(settings.COMPRESS_CSSTIDY_BINARY) is None,
-    'CSStidy binary %r not found' % settings.COMPRESS_CSSTIDY_BINARY
+    'CSStidy binary %r not found' % settings.COMPRESS_CSSTIDY_BINARY,
 )(CssTidyTestCase)
 
 
