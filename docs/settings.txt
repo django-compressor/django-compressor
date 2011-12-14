@@ -1,424 +1,410 @@
 .. _settings:
 
 Settings
---------
+========
+
+.. currentmodule:: django.conf.settings
 
 Django Compressor has a number of settings that control its behavior.
 They've been given sensible defaults.
 
-.. _compress_enabled:
+Base settings
+-------------
 
-COMPRESS_ENABLED
-^^^^^^^^^^^^^^^^
+.. attribute:: COMPRESS_ENABLED
 
-:Default: the opposite of ``DEBUG``
+    :default: the opposite of ``DEBUG``
 
-Boolean that decides if compression will happen. To test compression
-when ``DEBUG`` is ``True`` COMPRESS_ENABLED_ must also be set to ``True``.
+    Boolean that decides if compression will happen. To test compression
+    when ``DEBUG`` is ``True`` ``COMPRESS_ENABLED`` must also be set to
+    ``True``.
 
-When COMPRESS_ENABLED_ is ``False`` the input will be rendered without any
-compression except for code with a mimetype matching one listed in the
-COMPRESS_PRECOMPILERS_ setting. These matching files are still passed to the
-precompiler before rendering. 
+    When ``COMPRESS_ENABLED`` is ``False`` the input will be rendered without
+    any compression except for code with a mimetype matching one listed in the
+    :attr:`~django.conf.settings.COMPRESS_PRECOMPILERS` setting. These
+    matching files are still passed to the precompiler before rendering. 
 
-An example for some javascript and coffeescript.
+    An example for some javascript and coffeescript.
 
-.. code-block:: django
+    .. code-block:: django
 
-    {% load compress %}
+        {% load compress %}
 
-    {% compress js %}
-    <script type="text/javascript" src="/static/js/site-base.js" />
-    <script type="text/coffeescript" charset="utf-8" src="/static/js/awesome.coffee" />
-    {% endcompress %}
+        {% compress js %}
+        <script type="text/javascript" src="/static/js/site-base.js" />
+        <script type="text/coffeescript" charset="utf-8" src="/static/js/awesome.coffee" />
+        {% endcompress %}
 
-With COMPRESS_ENABLED_ set to ``False`` this would give you something like
-this::
+    With ``COMPRESS_ENABLED`` set to ``False`` this would give you something
+    like this::
 
-    <script type="text/javascript" src="/static/js/site-base.js"></script>
-    <script type="text/javascript" src="/static/CACHE/js/8dd1a2872443.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/static/js/site-base.js"></script>
+        <script type="text/javascript" src="/static/CACHE/js/8dd1a2872443.js" charset="utf-8"></script>
 
+.. attribute:: COMPRESS_URL
 
+    :Default: ``STATIC_URL`` (``MEDIA_URL`` for older Django versions)
 
-.. _compress_url:
+    Controls the URL that linked files will be read from and compressed files
+    will be written to.
 
-COMPRESS_URL
-^^^^^^^^^^^^
+    .. note::
 
-:Default: ``STATIC_URL`` (``MEDIA_URL`` for older Django versions)
+        This setting defaults to ``MEDIA_URL`` in case ``STATIC_URL``
+        is not given or empty, e.g. on older Django versions (< 1.3).
 
-Controls the URL that linked files will be read from and compressed files
-will be written to.
+.. attribute:: COMPRESS_ROOT
 
-.. note::
+    :Default: ``STATIC_ROOT`` (``MEDIA_ROOT`` for older Django versions)
 
-    This setting defaults to ``MEDIA_URL`` in case ``STATIC_URL``
-    is not given or empty, e.g. on older Django versions (<1.3).
+    Controls the absolute file path that linked static will be read from and
+    compressed static will be written to when using the default
+    :attr:`~django.conf.settings.COMPRESS_STORAGE`
+    ``compressor.storage.CompressorFileStorage``.
 
-.. _compress_root:
+    .. note::
 
-COMPRESS_ROOT
-^^^^^^^^^^^^^
+        This setting defaults to ``MEDIA_ROOT`` in case ``STATIC_ROOT``
+        is not given, e.g. on older Django versions (< 1.3).
 
-:Default: ``STATIC_ROOT`` (``MEDIA_ROOT`` for older Django versions)
+.. attribute:: COMPRESS_OUTPUT_DIR
 
-Controls the absolute file path that linked static will be read from and
-compressed static will be written to when using the default COMPRESS_STORAGE_
-``compressor.storage.CompressorFileStorage``.
+    :Default: ``'CACHE'``
 
-.. note::
+    Controls the directory inside :attr:`~django.conf.settings.COMPRESS_ROOT`
+    that compressed files will be written to.
 
-    This setting defaults to ``MEDIA_ROOT`` in case ``STATIC_ROOT``
-    is not given, e.g. on older Django versions (<1.3).
+Backend settings
+----------------
 
-COMPRESS_OUTPUT_DIR
-^^^^^^^^^^^^^^^^^^^
+.. attribute:: COMPRESS_CSS_FILTERS
 
-:Default: ``'CACHE'``
+    :default: ``['compressor.filters.css_default.CssAbsoluteFilter']``
 
-Controls the directory inside COMPRESS_ROOT_ that compressed files will
-be written to.
+    A list of filters that will be applied to CSS.
 
-.. _compress_css_filters:
+    Possible options are (including their settings):
 
-COMPRESS_CSS_FILTERS
-^^^^^^^^^^^^^^^^^^^^
+    - ``compressor.filters.css_default.CssAbsoluteFilter``
 
-:Default: ``['compressor.filters.css_default.CssAbsoluteFilter']``
+      A filter that normalizes the URLs used in ``url()`` CSS statements.
 
-A list of filters that will be applied to CSS.
+      .. attribute:: COMPRESS_CSS_HASHING_METHOD
 
-Possible options are:
+         The method to use when calculating the hash to append to
+         processed URLs. Either ``'mtime'`` (default) or ``'content'``.
+         Use the latter in case you're using multiple server to serve your
+         static files.
 
-``compressor.filters.css_default.CssAbsoluteFilter``
-""""""""""""""""""""""""""""""""""""""""""""""""""""
+    - ``compressor.filters.csstidy.CSSTidyFilter``
 
-A filter that normalizes the URLs used in ``url()`` CSS statements.
+      A filter that passes the CSS content to the CSSTidy_ tool.
 
-- ``COMPRESS_CSS_HASHING_METHOD`` -- The method to use when calculating
-  the hash to append to processed URLs. Either ``'mtime'`` (default) or
-  ``'content'``. Use the latter in case you're using multiple server to
-  serve your static files.
+      .. attribute:: COMPRESS_CSSTIDY_BINARY
 
-``compressor.filters.csstidy.CSSTidyFilter``
-""""""""""""""""""""""""""""""""""""""""""""
+         The CSSTidy binary filesystem path.
 
-A filter that passes the CSS content to the CSSTidy_ tool.
+      .. attribute:: COMPRESS_CSSTIDY_ARGUMENTS
 
-- ``COMPRESS_CSSTIDY_BINARY`` -- The CSSTidy binary filesystem path.
+         The arguments passed to CSSTidy.
 
-- ``COMPRESS_CSSTIDY_ARGUMENTS`` -- The arguments passed to CSSTidy.
+    - ``compressor.filters.datauri.DataUriFilter``
 
-``compressor.filters.datauri.DataUriFilter``
-""""""""""""""""""""""""""""""""""""""""""""
+      A filter for embedding media as `data: URIs`_ in the CSS.
 
-A filter for embedding media as `data: URIs`_ in the CSS.
+      .. attribute:: COMPRESS_DATA_URI_MAX_SIZE
 
-- ``COMPRESS_DATA_URI_MAX_SIZE`` -- Only files that are smaller than
-  this value will be embedded. In bytes.
+         Only files that are smaller than this in bytes value will be embedded.
 
-``compressor.filters.yui.YUICSSFilter``
-"""""""""""""""""""""""""""""""""""""""
+    - ``compressor.filters.yui.YUICSSFilter``
 
-A filter that passes the CSS content to the `YUI compressor`_.
+      A filter that passes the CSS content to the `YUI compressor`_.
 
-- ``COMPRESS_YUI_BINARY`` -- The YUI compressor filesystem path. Make sure
-  to also prepend this setting with ``java -jar`` if you use that kind of
-  distribution.
+      .. attribute:: COMPRESS_YUI_BINARY
 
-- ``COMPRESS_YUI_CSS_ARGUMENTS``-- The arguments passed to the compressor.
+         The YUI compressor filesystem path. Make sure to also prepend this
+         setting with ``java -jar`` if you use that kind of distribution.
 
-``compressor.filters.cssmin.CSSMinFilter``
-""""""""""""""""""""""""""""""""""""""""""
+      .. attribute:: COMPRESS_YUI_CSS_ARGUMENTS
 
-A filter that uses Zachary Voase's Python port of the YUI CSS compression
-algorithm cssmin_.
+         The arguments passed to the compressor.
 
-.. _CSSTidy: http://csstidy.sourceforge.net/
-.. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
-.. _cssmin: http://pypi.python.org/pypi/cssmin/
+    - ``compressor.filters.cssmin.CSSMinFilter``
+
+      A filter that uses Zachary Voase's Python port of the YUI CSS compression
+      algorithm cssmin_.
+
+    .. _CSSTidy: http://csstidy.sourceforge.net/
+    .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
+    .. _cssmin: http://pypi.python.org/pypi/cssmin/
 
 .. _compress_js_filters:
 
-COMPRESS_JS_FILTERS
-^^^^^^^^^^^^^^^^^^^
+.. attribute:: COMPRESS_JS_FILTERS
 
-:Default: ``['compressor.filters.jsmin.JSMinFilter']``
+    :Default: ``['compressor.filters.jsmin.JSMinFilter']``
 
-A list of filters that will be applied to javascript. Possible options are:
+    A list of filters that will be applied to javascript.
 
-``compressor.filters.jsmin.JSMinFilter``
-"""""""""""""""""""""""""""""""""""""""""
+    Possible options are:
 
-A filter that uses the jsmin implementation rJSmin_ to compress JavaScript code.
+    - ``compressor.filters.jsmin.JSMinFilter``
 
-.. _slimit_filter:
+      A filter that uses the jsmin implementation rJSmin_ to compress
+      JavaScript code.
 
-``compressor.filters.jsmin.SlimItFilter``
-"""""""""""""""""""""""""""""""""""""""""
+    .. _slimit_filter:
 
-A filter that uses the jsmin implementation `Slim It`_ to compress JavaScript code.
+    - ``compressor.filters.jsmin.SlimItFilter``
 
-``compressor.filters.closure.ClosureCompilerFilter``
-""""""""""""""""""""""""""""""""""""""""""""""""""""
+      A filter that uses the jsmin implementation `Slim It`_ to compress
+      JavaScript code.
 
-A filter that uses `Google Closure compiler`_.
+    - ``compressor.filters.closure.ClosureCompilerFilter``
 
-- ``COMPRESS_CLOSURE_COMPILER_BINARY`` -- The Closure compiler filesystem
-  path. Make sure to also prepend this setting with ``java -jar`` if you
-  use that kind of distribution.
+      A filter that uses `Google Closure compiler`_.
+  
+      .. attribute:: COMPRESS_CLOSURE_COMPILER_BINARY
 
-- ``COMPRESS_CLOSURE_COMPILER_ARGUMENTS`` -- The arguments passed to the compiler.
+         The Closure compiler filesystem path. Make sure to also prepend
+         this setting with ``java -jar`` if you use that kind of distribution.
 
-``compressor.filters.yui.YUIJSFilter``
-""""""""""""""""""""""""""""""""""""""
+      .. attribute:: COMPRESS_CLOSURE_COMPILER_ARGUMENTS
 
-A filter that passes the JavaScript code to the `YUI compressor`_.
+         The arguments passed to the compiler.
 
-- ``COMPRESS_YUI_BINARY`` -- The YUI compressor filesystem path.
+    - ``compressor.filters.yui.YUIJSFilter``
 
-- ``COMPRESS_YUI_JS_ARGUMENTS`` -- The arguments passed to the compressor.
+      A filter that passes the JavaScript code to the `YUI compressor`_.
 
-.. _rJSmin: http://opensource.perlig.de/rjsmin/
-.. _`Google Closure compiler`: http://code.google.com/closure/compiler/
-.. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
-.. _`Slim It`: http://slimit.org/
+      .. attribute:: COMPRESS_YUI_BINARY
 
-.. _compress_precompilers:
+         The YUI compressor filesystem path.
 
-COMPRESS_PRECOMPILERS
-^^^^^^^^^^^^^^^^^^^^^
+      .. attribute:: COMPRESS_YUI_JS_ARGUMENTS
 
-:Default: ``()``
+         The arguments passed to the compressor.
 
-An iterable of two-tuples whose first item is the mimetype of the files or
-hunks you want to compile with the command specified as the second item:
+    .. _rJSmin: http://opensource.perlig.de/rjsmin/
+    .. _`Google Closure compiler`: http://code.google.com/closure/compiler/
+    .. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
+    .. _`Slim It`: http://slimit.org/
 
-#. mimetype
-    The mimetype of the file or inline code should that should be compiled.
+.. attribute:: COMPRESS_PRECOMPILERS
 
-#. command
-    The command to call on each of the files. Modern Python string
-    formatting will be provided for the two placeholders ``{infile}`` and
-    ``{outfile}`` whose existence in the command string also triggers the
-    actual creation of those temporary files. If not given in the command
-    string, Django Compressor will use ``stdin`` and ``stdout`` respectively
-    instead.
+    :Default: ``()``
 
-Example::
+    An iterable of two-tuples whose first item is the mimetype of the files or
+    hunks you want to compile with the command specified as the second item:
 
-    COMPRESS_PRECOMPILERS = (
-        ('text/coffeescript', 'coffee --compile --stdio'),
-        ('text/less', 'lessc {infile} {outfile}'),
-        ('text/x-sass', 'sass {infile} {outfile}'),
-        ('text/x-scss', 'sass --scss {infile} {outfile}'),
-    )
+    #. mimetype
+        The mimetype of the file or inline code should that should be compiled.
 
-With that setting (and CoffeeScript_ installed), you could add the following
-code to your templates:
+    #. command
+        The command to call on each of the files. Modern Python string
+        formatting will be provided for the two placeholders ``{infile}`` and
+        ``{outfile}`` whose existence in the command string also triggers the
+        actual creation of those temporary files. If not given in the command
+        string, Django Compressor will use ``stdin`` and ``stdout`` respectively
+        instead.
 
-.. code-block:: django
+    Example::
 
-    {% load compress %}
+        COMPRESS_PRECOMPILERS = (
+            ('text/coffeescript', 'coffee --compile --stdio'),
+            ('text/less', 'lessc {infile} {outfile}'),
+            ('text/x-sass', 'sass {infile} {outfile}'),
+            ('text/x-scss', 'sass --scss {infile} {outfile}'),
+        )
 
-    {% compress js %}
-    <script type="text/coffeescript" charset="utf-8" src="/static/js/awesome.coffee" />
-    <script type="text/coffeescript" charset="utf-8">
-    # Functions:
-    square = (x) -> x * x
-    </script>
-    {% endcompress %}
+    With that setting (and CoffeeScript_ installed), you could add the following
+    code to your templates:
 
-This would give you something like this::
+    .. code-block:: django
 
-    <script type="text/javascript" src="/static/CACHE/js/8dd1a2872443.js" charset="utf-8"></script>
+        {% load compress %}
 
-The same works for less_, too:
+        {% compress js %}
+        <script type="text/coffeescript" charset="utf-8" src="/static/js/awesome.coffee" />
+        <script type="text/coffeescript" charset="utf-8">
+        # Functions:
+        square = (x) -> x * x
+        </script>
+        {% endcompress %}
 
-.. code-block:: django
+    This would give you something like this::
 
-    {% load compress %}
+        <script type="text/javascript" src="/static/CACHE/js/8dd1a2872443.js" charset="utf-8"></script>
 
-    {% compress css %}
-    <link type="text/less" rel="stylesheet" href="/static/css/styles.less" charset="utf-8">
-    <style type="text/less">
-    @color: #4D926F;
+    The same works for less_, too:
 
-    #header {
-      color: @color;
-    }
-    </style>
-    {% endcompress %}
+    .. code-block:: django
 
-Which would be rendered something like::
+        {% load compress %}
 
-    <link rel="stylesheet" href="/static/CACHE/css/8ccf8d877f18.css" type="text/css" charset="utf-8">
+        {% compress css %}
+        <link type="text/less" rel="stylesheet" href="/static/css/styles.less" charset="utf-8">
+        <style type="text/less">
+        @color: #4D926F;
 
-.. _less: http://lesscss.org/
-.. _CoffeeScript: http://jashkenas.github.com/coffee-script/
+        #header {
+          color: @color;
+        }
+        </style>
+        {% endcompress %}
 
-.. _compress_storage:
+    Which would be rendered something like::
 
-COMPRESS_STORAGE
-^^^^^^^^^^^^^^^^
+        <link rel="stylesheet" href="/static/CACHE/css/8ccf8d877f18.css" type="text/css" charset="utf-8">
 
-:Default: ``'compressor.storage.CompressorFileStorage'``
+    .. _less: http://lesscss.org/
+    .. _CoffeeScript: http://jashkenas.github.com/coffee-script/
 
-The dotted path to a Django Storage backend to be used to save the
-compressed files.
+.. attribute:: COMPRESS_STORAGE
 
-Django Compressor ships with one additional storage backend:
+    :Default: ``'compressor.storage.CompressorFileStorage'``
 
-* ``'compressor.storage.GzipCompressorFileStorage'``
+    The dotted path to a Django Storage backend to be used to save the
+    compressed files.
 
-  A subclass of the default storage backend, which will additionally
-  create ``*.gz`` files of each of the compressed files.
+    Django Compressor ships with one additional storage backend:
 
-.. _compress_parser:
+    * ``'compressor.storage.GzipCompressorFileStorage'``
 
-COMPRESS_PARSER
-^^^^^^^^^^^^^^^
+      A subclass of the default storage backend, which will additionally
+      create ``*.gz`` files of each of the compressed files.
 
-:Default: ``'compressor.parser.AutoSelectParser'``
+.. attribute:: COMPRESS_PARSER
 
-The backend to use when parsing the JavaScript or Stylesheet files. The
-``AutoSelectParser`` picks the ``lxml`` based parser when available, and falls
-back to ``HtmlParser`` if ``lxml`` is not available.
+    :Default: ``'compressor.parser.AutoSelectParser'``
 
-``LxmlParser`` is the fastest available parser, but ``HtmlParser`` is not much
-slower. ``AutoSelectParser`` adds a slight overhead, but in most cases it
-won't be necessary to change the default parser.
+    The backend to use when parsing the JavaScript or Stylesheet files. The
+    ``AutoSelectParser`` picks the ``lxml`` based parser when available, and falls
+    back to ``HtmlParser`` if ``lxml`` is not available.
 
-The other two included parsers are considerably slower and should only be
-used if absolutely necessary.
+    ``LxmlParser`` is the fastest available parser, but ``HtmlParser`` is not much
+    slower. ``AutoSelectParser`` adds a slight overhead, but in most cases it
+    won't be necessary to change the default parser.
 
-.. warning::
+    The other two included parsers are considerably slower and should only be
+    used if absolutely necessary.
 
-    In some cases the ``compressor.parser.HtmlParser`` parser isn't able to
-    parse invalid HTML in JavaScript or CSS content. As a workaround you
-    should use one of the more forgiving parsers, e.g. the
-    ``BeautifulSoupParser``.
+    .. warning::
 
-The backends included in Django Compressor:
+        In some cases the ``compressor.parser.HtmlParser`` parser isn't able to
+        parse invalid HTML in JavaScript or CSS content. As a workaround you
+        should use one of the more forgiving parsers, e.g. the
+        ``BeautifulSoupParser``.
 
-- ``compressor.parser.AutoSelectParser``
-- ``compressor.parser.LxmlParser``
-- ``compressor.parser.HtmlParser``
-- ``compressor.parser.BeautifulSoupParser``
-- ``compressor.parser.Html5LibParser``
+    The backends included in Django Compressor:
 
-See :ref:`dependencies` for more info about the packages you need
-for each parser.
+    - ``compressor.parser.AutoSelectParser``
+    - ``compressor.parser.LxmlParser``
+    - ``compressor.parser.HtmlParser``
+    - ``compressor.parser.BeautifulSoupParser``
+    - ``compressor.parser.Html5LibParser``
 
-.. _compress_cache_backend:
+    See :ref:`dependencies` for more info about the packages you need
+    for each parser.
 
-COMPRESS_CACHE_BACKEND
-^^^^^^^^^^^^^^^^^^^^^^
+Caching settings
+----------------
 
-:Default: ``"default"`` or ``CACHE_BACKEND``
+.. attribute:: COMPRESS_CACHE_BACKEND
 
-The backend to use for caching, in case you want to use a different cache
-backend for Django Compressor.
+    :Default: ``"default"`` or ``CACHE_BACKEND``
 
-If you have set the ``CACHES`` setting (new in Django 1.3),
-``COMPRESS_CACHE_BACKEND`` defaults to ``"default"``, which is the alias for
-the default cache backend. You can set it to a different alias that you have
-configured in your ``CACHES`` setting.
+    The backend to use for caching, in case you want to use a different cache
+    backend for Django Compressor.
 
-If you have not set ``CACHES`` and are using the old ``CACHE_BACKEND``
-setting, ``COMPRESS_CACHE_BACKEND`` defaults to the ``CACHE_BACKEND`` setting.
+    If you have set the ``CACHES`` setting (new in Django 1.3),
+    ``COMPRESS_CACHE_BACKEND`` defaults to ``"default"``, which is the alias for
+    the default cache backend. You can set it to a different alias that you have
+    configured in your ``CACHES`` setting.
 
-COMPRESS_REBUILD_TIMEOUT
-^^^^^^^^^^^^^^^^^^^^^^^^
+    If you have not set ``CACHES`` and are using the old ``CACHE_BACKEND``
+    setting, ``COMPRESS_CACHE_BACKEND`` defaults to the ``CACHE_BACKEND`` setting.
 
-:Default: ``2592000`` (30 days in seconds)
+.. attribute:: COMPRESS_REBUILD_TIMEOUT
 
-The period of time after which the compressed files are rebuilt even if
-no file changes are detected.
+    :Default: ``2592000`` (30 days in seconds)
 
-COMPRESS_MINT_DELAY
-^^^^^^^^^^^^^^^^^^^
+    The period of time after which the compressed files are rebuilt even if
+    no file changes are detected.
 
-:Default: ``30`` (seconds)
+.. attribute:: COMPRESS_MINT_DELAY
 
-The upper bound on how long any compression should take to run. Prevents
-dog piling, should be a lot smaller than COMPRESS_REBUILD_TIMEOUT_.
+    :Default: ``30`` (seconds)
 
-COMPRESS_MTIME_DELAY
-^^^^^^^^^^^^^^^^^^^^
+    The upper bound on how long any compression should take to run. Prevents
+    dog piling, should be a lot smaller than
+    :attr:`~django.conf.settings.COMPRESS_REBUILD_TIMEOUT`.
 
-:Default: ``10``
+.. attribute:: COMPRESS_MTIME_DELAY
 
-The amount of time (in seconds) to cache the modification timestamp of a
-file. Disabled by default. Should be smaller than COMPRESS_REBUILD_TIMEOUT_
-and COMPRESS_MINT_DELAY_.
+    :Default: ``10``
 
-COMPRESS_DEBUG_TOGGLE
-^^^^^^^^^^^^^^^^^^^^^
+    The amount of time (in seconds) to cache the modification timestamp of a
+    file. Disabled by default. Should be smaller than
+    :attr:`django.conf.settings.COMPRESS_REBUILD_TIMEOUT` and
+    :attr:`django.conf.settings.COMPRESS_MINT_DELAY`.
 
-:Default: None
+.. attribute:: COMPRESS_DEBUG_TOGGLE
 
-The name of the GET variable that toggles the debug mode and prevents Django
-Compressor from performing the actual compression. Only useful for debugging.
+    :Default: None
 
-.. warning::
+    The name of the GET variable that toggles the debug mode and prevents Django
+    Compressor from performing the actual compression. Only useful for debugging.
 
-    Don't use this option in production!
+    .. warning::
 
-    An easy convention is to only set it depending on the ``DEBUG`` setting::
+        Don't use this option in production!
 
-        if DEBUG:
-            COMPRESS_DEBUG_TOGGLE = 'whatever'
+        An easy convention is to only set it depending on the ``DEBUG`` setting::
 
-.. note::
+            if DEBUG:
+                COMPRESS_DEBUG_TOGGLE = 'whatever'
 
-    This only works for pages that are rendered using the RequestContext_
-    and the ``django.core.context_processors.request`` context processor.
+    .. note::
 
-.. _RequestContext: http://docs.djangoproject.com/en/dev/ref/templates/api/#django.template.RequestContext
+        This only works for pages that are rendered using the RequestContext_
+        and the ``django.core.context_processors.request`` context processor.
 
-.. _compress_offline:
+    .. _RequestContext: http://docs.djangoproject.com/en/dev/ref/templates/api/#django.template.RequestContext
 
-COMPRESS_OFFLINE
-^^^^^^^^^^^^^^^^
+Offline settings
+----------------
 
-:Default: ``False``
+.. attribute:: COMPRESS_OFFLINE
 
-Boolean that decides if compression should also be done outside of the
-request/response loop -- independent from user requests. This allows to
-pre-compress CSS and JavaScript files and works just like the automatic
-compression with the ``{% compress %}`` tag.
+    :Default: ``False``
 
-.. _compress_offline_timeout:
+    Boolean that decides if compression should also be done outside of the
+    request/response loop -- independent from user requests. This allows to
+    pre-compress CSS and JavaScript files and works just like the automatic
+    compression with the ``{% compress %}`` tag.
 
-COMPRESS_OFFLINE_TIMEOUT
-^^^^^^^^^^^^^^^^^^^^^^^^
+.. attribute:: COMPRESS_OFFLINE_TIMEOUT
 
-:Default: ``31536000`` (1 year in seconds)
+    :Default: ``31536000`` (1 year in seconds)
 
-The period of time with which the ``compress`` management command stores
-the pre-compressed the contents of ``{% compress %}`` template tags in
-the cache.
+    The period of time with which the ``compress`` management command stores
+    the pre-compressed the contents of ``{% compress %}`` template tags in
+    the cache.
 
-.. _compress_offline_context:
+.. attribute:: COMPRESS_OFFLINE_CONTEXT
 
-COMPRESS_OFFLINE_CONTEXT
-^^^^^^^^^^^^^^^^^^^^^^^^
+    :Default: ``{'MEDIA_URL': settings.MEDIA_URL}``
 
-:Default: ``{'MEDIA_URL': settings.MEDIA_URL}``
+    The context to be used by the ``compress`` management command when rendering
+    the contents of ``{% compress %}`` template tags and saving the result in the
+    offline cache.
 
-The context to be used by the ``compress`` management command when rendering
-the contents of ``{% compress %}`` template tags and saving the result in the
-offline cache.
+    If available, the ``STATIC_URL`` setting is also added to the context.
 
-If available, the ``STATIC_URL`` setting is also added to the context.
+.. attribute:: COMPRESS_OFFLINE_MANIFEST
 
-.. _compress_offline_manifest:
+    :Default: ``manifest.json``
 
-COMPRESS_OFFLINE_MANIFEST
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:Default: ``manifest.json``
-
-The name of the file to be used for saving the names of the files compressed
-offline.
+    The name of the file to be used for saving the names of the files compressed
+    offline.

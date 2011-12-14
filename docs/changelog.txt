@@ -79,8 +79,8 @@ v1.1
   manifest.json file).
 
   You can now easily run the :ref:`compress <pre-compression>` management
-  command locally and transfer the :ref:`COMPRESS_ROOT <compress_root>` dir
-  to your server.
+  command locally and transfer the :attr:`~django.conf.settings.COMPRESS_ROOT`
+  dir to your server.
 
 - Updated installation instructions to properly mention all dependencies,
   even those internally used.
@@ -257,7 +257,7 @@ Major improvements and a lot of bugfixes, some of which are:
 - New precompilation support, which allows compilation of files and
   hunks with easily configurable compilers before calling the actual
   output filters. See the
-  :ref:`COMPRESS_PRECOMPILERS <compress_precompilers>` for more details.
+  :attr:`~django.conf.settings.COMPRESS_PRECOMPILERS` for more details.
 
 - New staticfiles support. With the introduction of the staticfiles app
   to Django 1.3, compressor officially supports finding the files to
@@ -272,7 +272,7 @@ Major improvements and a lot of bugfixes, some of which are:
 - Various perfomance improvements by better caching and mtime cheking.
 
 - Deprecated ``COMPRESS_LESSC_BINARY`` setting because it's now
-  superseded by the :ref:`COMPRESS_PRECOMPILERS <compress_precompilers>`
+  superseded by the :attr:`~django.conf.settings.COMPRESS_PRECOMPILERS`
   setting. Just make sure to use the correct mimetype when linking to less
   files or adding inline code and add the following to your settings::
 
