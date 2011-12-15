@@ -35,7 +35,7 @@ Contents
 .. toctree::
  :maxdepth: 2
 
- installation
+ quickstart
  usage
  settings
  remote-storages
