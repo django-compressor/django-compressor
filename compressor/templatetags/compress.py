@@ -14,41 +14,36 @@ OUTPUT_INLINE = 'inline'
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
 
 
-class CompressorNode(template.Node):
-
-    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE, name=None):
-        self.nodelist = nodelist
-        self.kind = kind
-        self.mode = mode
-        self.name = name
-
-    def compressor_cls(self, *args, **kwargs):
+class CompressorMixin(object):
+    
+    def get_original_content(self, context):
+        raise NotImplementedError
+    
+    def compressor_cls(self, kind, *args, **kwargs):
         compressors = {
             "css": settings.COMPRESS_CSS_COMPRESSOR,
             "js": settings.COMPRESS_JS_COMPRESSOR,
         }
-        if self.kind not in compressors.keys():
+        if kind not in compressors.keys():
             raise template.TemplateSyntaxError(
                 "The compress tag's argument must be 'js' or 'css'.")
-        return get_class(compressors.get(self.kind),
-                         exception=ImproperlyConfigured)(*args, **kwargs)
+                
+        return get_class(compressors.get(kind),
+                         exception=ImproperlyConfigured)(*args, **kwargs) 
+    
+    def get_compressor(self, context, kind):
+        return self.compressor_cls(kind, 
+                                    content=self.get_original_content(context),
+                                    context=context)   
 
-    def debug_mode(self, context):
-        if settings.COMPRESS_DEBUG_TOGGLE:
-            # Only check for the debug parameter
-            # if a RequestContext was used
-            request = context.get('request', None)
-            if request is not None:
-                return settings.COMPRESS_DEBUG_TOGGLE in request.GET
-
-    def render_offline(self, context, forced):
+    def render_offline(self, context, forced=False):
         """
         If enabled and in offline mode, and not forced or in debug mode
         check the offline cache and return the result if given
         """
         if (settings.COMPRESS_ENABLED and
                 settings.COMPRESS_OFFLINE) and not forced:
-            key = get_offline_hexdigest(self.nodelist.render(context))
+            key = get_offline_hexdigest(self.get_original_content(context))
             offline_manifest = get_offline_manifest()
             if key in offline_manifest:
                 return offline_manifest[key]
@@ -57,47 +52,76 @@ class CompressorNode(template.Node):
                     'enabled but key "%s" is missing from offline manifest. '
                     'You may need to run "python manage.py compress".' % key)
 
-    def render_cached(self, compressor, forced):
+    def render_cached(self, compressor, mode, kind, forced=False):
         """
         If enabled checks the cache for the given compressor's cache key
         and return a tuple of cache key and output
         """
         if settings.COMPRESS_ENABLED and not forced:
-            cache_key = get_templatetag_cachekey(
-                compressor, self.mode, self.kind)
+            cache_key = get_templatetag_cachekey(compressor, mode, kind)
             cache_content = cache_get(cache_key)
             return cache_key, cache_content
         return None, None
+    
+    def render_compressed(self, context, mode, kind, forced=False):
+        
+        # See if it has been rendered offline
+        cached_offline = self.render_offline(context, forced=forced)
+        if cached_offline:
+            return cached_offline
+        
+        context['compressed'] = {'name': self.name}
+        compressor = self.get_compressor(context, self.kind)
+        
+        # Prepare the actual compressor and check cache
+        cache_key, cache_content = self.render_cached(compressor, mode, kind, forced=forced)
+        if cache_content is not None:
+            return cache_content
 
-    def render_output(self, compressor, forced=False):
-        return compressor.output(self.mode, forced=forced)
+        # call compressor output method and handle exceptions
+        try:
+            rendered_output = self.render_output(compressor, mode, forced=forced)
+            if cache_key:
+                cache_set(cache_key, rendered_output)
+            return rendered_output
+        except Exception, e:
+            if settings.DEBUG:
+                raise e
+
+        # Or don't do anything in production
+        return self.get_original_content(context)
+        
+    def render_output(self, compressor, mode, forced=False):
+        return compressor.output(mode, forced=forced)
+        
+        
+class CompressorNode(CompressorMixin, template.Node):
+
+    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE, name=None):
+        self.nodelist = nodelist
+        self.kind = kind
+        self.mode = mode
+        self.name = name
+        
+    def get_original_content(self, context):
+        return self.nodelist.render(context)
+                
+    def debug_mode(self, context):
+        if settings.COMPRESS_DEBUG_TOGGLE:
+            # Only check for the debug parameter
+            # if a RequestContext was used
+            request = context.get('request', None)
+            if request is not None:
+                return settings.COMPRESS_DEBUG_TOGGLE in request.GET
 
     def render(self, context, forced=False):
 
         # Check if in debug mode
         if self.debug_mode(context):
-            return self.nodelist.render(context)
-
-        # See if it has been rendered offline
-        cached_offline = self.render_offline(context, forced)
-        if cached_offline:
-            return cached_offline
-
-        # Prepare the compressor
-        context['compressed'] = {'name': self.name}
-        compressor = self.compressor_cls(content=self.nodelist.render(context),
-                                         context=context)
-        # Check cache
-        cache_key, cache_content = self.render_cached(compressor, forced)
-        if cache_content is not None:
-            return cache_content
-
-        # call compressor output method and handle exceptions
-        rendered_output = self.render_output(compressor, forced)
-        if cache_key:
-            cache_set(cache_key, rendered_output)
-        return rendered_output
-
+            return self.get_original_content(context)
+        
+        return self.render_compressed(context, self.mode, self.kind, forced)
+        
 
 @register.tag
 def compress(parser, token):

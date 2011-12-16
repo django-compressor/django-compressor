@@ -1,17 +1,12 @@
-from django.core.exceptions import ImproperlyConfigured
-
 from jinja2 import nodes
 from jinja2.ext import Extension
 from jinja2.exceptions import TemplateSyntaxError
 
 from compressor.conf import settings
-from compressor.utils import get_class
-from compressor.templatetags.compress import OUTPUT_FILE
-from compressor.cache import (cache_get, cache_set,
-                              get_templatetag_cachekey)
+from compressor.templatetags.compress import OUTPUT_FILE, CompressorMixin
 
 
-class CompressorExtension(Extension):
+class CompressorExtension(CompressorMixin, Extension):
 
     tags = set(['compress'])
 
@@ -46,40 +41,16 @@ class CompressorExtension(Extension):
             body).set_lineno(lineno)
 
     def _compress(self, kind, mode, caller):
-        mode = mode or OUTPUT_FILE
-        Compressor = get_class(self.compressors.get(kind),
-            exception=ImproperlyConfigured)
-        original_content = caller()
-        compressor = Compressor(original_content)
         # This extension assumes that we won't force compression
         forced = False
-
-        # Prepare the actual compressor and check cache
-        cache_key, cache_content = self.render_cached(kind, mode, compressor,
-            forced)
-        if cache_content is not None:
-            return cache_content
-
-        # call compressor output method and handle exceptions
-        try:
-            rendered_output = compressor.output(mode, forced)
-            if cache_key:
-                cache_set(cache_key, rendered_output)
-            return rendered_output
-        except Exception, e:
-            if settings.DEBUG:
-                raise e
-
-        # Or don't do anything in production
-        return original_content
-
-    def render_cached(self, kind, mode, compressor, forced):
-        """
-        If enabled checks the cache for the given compressor's cache key
-        and return a tuple of cache key and output
-        """
-        if settings.COMPRESS_ENABLED and not forced:
-            cache_key = get_templatetag_cachekey(compressor, mode, kind)
-            cache_content = cache_get(cache_key)
-            return cache_key, cache_content
-        return None, None
+        
+        mode = mode or OUTPUT_FILE
+        original_content = caller()
+        context = {
+            'original_content': original_content
+        }
+        return self.render_compressed(context, kind, mode, forced=forced)
+        
+    def get_original_content(self, context):
+        return context['original_content']
+    
