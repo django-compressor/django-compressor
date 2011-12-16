@@ -2,20 +2,12 @@ from jinja2 import nodes
 from jinja2.ext import Extension
 from jinja2.exceptions import TemplateSyntaxError
 
-from compressor.conf import settings
 from compressor.templatetags.compress import OUTPUT_FILE, CompressorMixin
 
 
 class CompressorExtension(CompressorMixin, Extension):
 
     tags = set(['compress'])
-
-    @property
-    def compressors(self):
-        return {
-            'js': settings.COMPRESS_JS_COMPRESSOR,
-            'css': settings.COMPRESS_CSS_COMPRESSOR,
-        }
 
     def parse(self, parser):
         lineno = parser.stream.next().lineno

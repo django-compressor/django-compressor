@@ -19,16 +19,19 @@ class CompressorMixin(object):
     def get_original_content(self, context):
         raise NotImplementedError
     
-    def compressor_cls(self, kind, *args, **kwargs):
-        compressors = {
-            "css": settings.COMPRESS_CSS_COMPRESSOR,
-            "js": settings.COMPRESS_JS_COMPRESSOR,
+    @property
+    def compressors(self):
+        return {
+            'js': settings.COMPRESS_JS_COMPRESSOR,
+            'css': settings.COMPRESS_CSS_COMPRESSOR,
         }
-        if kind not in compressors.keys():
+
+    def compressor_cls(self, kind, *args, **kwargs):
+        if kind not in self.compressors.keys():
             raise template.TemplateSyntaxError(
                 "The compress tag's argument must be 'js' or 'css'.")
                 
-        return get_class(compressors.get(kind),
+        return get_class(self.compressors.get(kind),
                          exception=ImproperlyConfigured)(*args, **kwargs) 
     
     def get_compressor(self, context, kind):
@@ -52,7 +55,7 @@ class CompressorMixin(object):
                     'enabled but key "%s" is missing from offline manifest. '
                     'You may need to run "python manage.py compress".' % key)
 
-    def render_cached(self, compressor, mode, kind, forced=False):
+    def render_cached(self, compressor, kind, mode, forced=False):
         """
         If enabled checks the cache for the given compressor's cache key
         and return a tuple of cache key and output
@@ -63,18 +66,18 @@ class CompressorMixin(object):
             return cache_key, cache_content
         return None, None
     
-    def render_compressed(self, context, mode, kind, forced=False):
+    def render_compressed(self, context, kind, mode, forced=False):
         
         # See if it has been rendered offline
         cached_offline = self.render_offline(context, forced=forced)
         if cached_offline:
             return cached_offline
         
-        context['compressed'] = {'name': self.name}
-        compressor = self.get_compressor(context, self.kind)
+        context['compressed'] = {'name': getattr(self, 'name', None)}
+        compressor = self.get_compressor(context, kind)
         
         # Prepare the actual compressor and check cache
-        cache_key, cache_content = self.render_cached(compressor, mode, kind, forced=forced)
+        cache_key, cache_content = self.render_cached(compressor, kind, mode, forced=forced)
         if cache_content is not None:
             return cache_content
 
@@ -120,7 +123,7 @@ class CompressorNode(CompressorMixin, template.Node):
         if self.debug_mode(context):
             return self.get_original_content(context)
         
-        return self.render_compressed(context, self.mode, self.kind, forced)
+        return self.render_compressed(context, self.kind, self.mode, forced=forced)
         
 
 @register.tag
