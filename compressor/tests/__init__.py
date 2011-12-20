@@ -2,7 +2,7 @@ from compressor.tests.base import (CompressorTestCase, CssMediaTestCase,
     VerboseTestCase, CacheBackendTestCase)
 from compressor.tests.filters import (CssTidyTestCase, PrecompilerTestCase,
     CssMinTestCase, CssAbsolutizingTestCase, CssAbsolutizingTestCaseWithHash,
-    CssDataUriTestCase)
+    CssDataUriTestCase, TemplateTestCase)
 from compressor.tests.jinja2ext import TestJinja2CompressorExtension
 from compressor.tests.offline import (
     OfflineGenerationBlockSuperTestCase, OfflineGenerationConditionTestCase,
