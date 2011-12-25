@@ -26,7 +26,7 @@ from the 3rd party app `django-storages`_. Some required settings are::
 Next, you need to specify the new CDN base URL and update the URLs to the
 files in your templates which you want to compress::
 
-    COMPRESS_URL = "http://compressor-test.s3.amazon.com/"
+    COMPRESS_URL = "http://compressor-test.s3.amazonaws.com/"
 
 .. note::
 
@@ -78,7 +78,7 @@ integrated.
 #. To have Django correctly render the URLs to your static files, set the
    STATIC_URL_ setting to the same value as
    :attr:`~django.conf.settings.COMPRESS_URL` (e.g.
-   ``"http://compressor-test.s3.amazon.com/"``).
+   ``"http://compressor-test.s3.amazonaws.com/"``).
 
 .. _CDN: http://en.wikipedia.org/wiki/Content_delivery_network
 .. _Amazon S3: https://s3.amazonaws.com/
