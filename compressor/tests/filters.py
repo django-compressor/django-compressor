@@ -1,8 +1,8 @@
 from __future__ import with_statement
 import os
 import sys
-from unittest2 import skipIf
 
+from django.utils.unittest import skipIf
 from django.test import TestCase
 
 from compressor.cache import get_hashed_mtime, get_hashed_content
