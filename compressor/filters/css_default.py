@@ -62,7 +62,7 @@ class CssAbsoluteFilter(FilterBase):
             if settings.COMPRESS_CSS_HASHING_METHOD == "mtime":
                 suffix = get_hashed_mtime(filename)
             elif settings.COMPRESS_CSS_HASHING_METHOD == "hash":
-                hash_file = open(filename)
+                hash_file = open(filename, 'rb')
                 try:
                     suffix = get_hexdigest(hash_file.read(), 12)
                 finally:
