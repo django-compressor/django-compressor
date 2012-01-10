@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v1.1.2
+------
+
+- Fixed an installation issue related to versiontools.
+
 v1.1.1
 ------
 
