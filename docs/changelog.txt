@@ -49,6 +49,11 @@ v1.2.0 (in development)
   from ``'hash'`` to ``'content'`` to better describe what it does. The old
   name is also supported, as well as the default being ``'mtime'``.
 
+v1.1.2
+------
+
+- Fixed an installation issue related to versiontools.
+
 v1.1.1
 ------
 

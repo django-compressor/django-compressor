@@ -125,6 +125,6 @@ setup(
         'django-appconf >= 0.4',
     ],
     setup_requires = [
-        'versiontools >= 1.6',
+        'versiontools >= 1.8.2',
     ],
 )
