@@ -138,6 +138,15 @@ Backend settings
     .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
     .. _cssmin: http://pypi.python.org/pypi/cssmin/
 
+    - ``compressor.filters.template.TemplateFilter``
+
+      A filter that renders the CSS content with Django templating system.
+
+      .. attribute:: COMPRESS_TEMPLATE_FILTER_CONTEXT
+
+         The context to render your css files with.
+
+
 .. _compress_js_filters:
 
 .. attribute:: COMPRESS_JS_FILTERS
@@ -184,6 +193,14 @@ Backend settings
       .. attribute:: COMPRESS_YUI_JS_ARGUMENTS
 
          The arguments passed to the compressor.
+
+    - ``compressor.filters.template.TemplateFilter``
+
+      A filter that renders the JavaScript code with Django templating system.
+
+      .. attribute:: COMPRESS_TEMPLATE_FILTER_CONTEXT
+
+         The context to render your JavaScript code with.
 
     .. _rJSmin: http://opensource.perlig.de/rjsmin/
     .. _`Google Closure compiler`: http://code.google.com/closure/compiler/
