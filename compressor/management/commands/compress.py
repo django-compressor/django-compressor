@@ -233,10 +233,11 @@ class Command(NoArgsCommand):
         return count, results
 
     def get_nodelist(self, node):
-        if isinstance(node, IfNode):
+        if (isinstance(node, IfNode) and
+                hasattr(node, 'nodelist_true') and
+                hasattr(node, 'nodelist_false')):
             return node.nodelist_true + node.nodelist_false
-        else:
-            return getattr(node, "nodelist", [])
+        return getattr(node, "nodelist", [])
 
     def walk_nodes(self, node, block_name=None):
         for node in self.get_nodelist(node):
