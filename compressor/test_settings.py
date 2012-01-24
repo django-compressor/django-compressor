@@ -1,10 +1,19 @@
 import os
+import django
 
 TEST_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'tests')
 
 COMPRESS_CACHE_BACKEND = 'locmem://'
 
-DATABASE_ENGINE = 'sqlite3'
+if django.VERSION[:2] > (1, 3):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
+else:
+    DATABASE_ENGINE = 'sqlite3'
 
 INSTALLED_APPS = [
     'compressor',
