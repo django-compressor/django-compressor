@@ -158,9 +158,9 @@ class Command(NoArgsCommand):
                 if verbosity > 0:
                     log.write("Unreadable template at: %s\n" % template_name)
                 continue
-            except TemplateSyntaxError:  # broken template -> ignore
+            except TemplateSyntaxError, e:  # broken template -> ignore
                 if verbosity > 0:
-                    log.write("Invalid template at: %s\n" % template_name)
+                    log.write("Invalid template %s: %s\n" % (template_name, e))
                 continue
             except TemplateDoesNotExist:  # non existent template -> ignore
                 if verbosity > 0:
