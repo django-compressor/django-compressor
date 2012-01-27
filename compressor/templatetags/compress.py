@@ -41,13 +41,23 @@ class CompressorNode(template.Node):
             if request is not None:
                 return settings.COMPRESS_DEBUG_TOGGLE in request.GET
 
+    def is_offline_compression_enabled(self, forced):
+        """
+        Check if offline compression is enabled or forced
+
+        Defaults to just checking the settings and forced argument,
+        but can be overriden to completely disable compression for
+        a subclass, for instance.
+        """
+        rval = (settings.COMPRESS_ENABLED and settings.COMPRESS_OFFLINE) or forced
+        return rval
+
     def render_offline(self, context, forced):
         """
-        If enabled and in offline mode, and not forced or in debug mode
-        check the offline cache and return the result if given
+        If enabled and in offline mode, and not forced check the offline cache
+        and return the result if given
         """
-        if (settings.COMPRESS_ENABLED and
-                settings.COMPRESS_OFFLINE) and not forced:
+        if self.is_offline_compression_enabled(forced) and not forced:
             key = get_offline_hexdigest(self.nodelist.render(context))
             offline_manifest = get_offline_manifest()
             if key in offline_manifest:
