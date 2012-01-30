@@ -74,14 +74,18 @@ class Compressor(object):
     def get_filename(self, basename):
         filename = None
         # first try finding the file in the root
-        if self.storage.exists(basename):
-            try:
-                filename = self.storage.path(basename)
-            except NotImplementedError:
-                # remote storages don't implement path, access the file locally
+        try:
+            # call path first so remote storages don't make it to exists,
+            # which would cause network I/O
+            filename = self.storage.path(basename)
+            if not self.storage.exists(basename):
+                filename = None
+        except NotImplementedError:
+            # remote storages don't implement path, access the file locally
+            if compressor_file_storage.exists(basename):
                 filename = compressor_file_storage.path(basename)
         # secondly try to find it with staticfiles (in debug mode)
-        elif self.finders:
+        if not filename and self.finders:
             filename = self.finders.find(urllib.url2pathname(basename))
         if filename:
             return filename
