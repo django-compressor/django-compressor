@@ -50,6 +50,18 @@ class Compressor(object):
         """
         raise NotImplementedError
 
+    def get_template_name(self, mode):
+        """
+        Returns the template path for the given mode.
+        """
+        try:
+            template = getattr(self, "template_name_%s" % mode)
+            if template:
+                return template
+        except AttributeError:
+            pass
+        return "compressor/%s_%s.html" % (self.type, mode)
+
     def get_basename(self, url):
         try:
             base_url = self.storage.base_url
@@ -269,5 +281,5 @@ class Compressor(object):
         final_context = Context(self.context)
         post_compress.send(sender=self.__class__, type=self.type,
                            mode=mode, context=final_context)
-        return render_to_string("compressor/%s_%s.html" %
-                                (self.type, mode), final_context)
+        template_name = self.get_template_name(mode)
+        return render_to_string(template_name, final_context)

@@ -4,8 +4,6 @@ from compressor.exceptions import UncompressableFileError
 
 
 class CssCompressor(Compressor):
-    template_name = "compressor/css.html"
-    template_name_inline = "compressor/css_inline.html"
 
     def __init__(self, content=None, output_prefix="css", context=None):
         super(CssCompressor, self).__init__(content=content,

@@ -207,7 +207,9 @@ class Command(NoArgsCommand):
                     # above, so we need to catch that (and ignore it, just like above)
                     # as well.
                     if verbosity > 0:
-                        log.write("Caught error when rendering extend node from template %s\n" % template.template_name)
+                        log.write("Caught error when rendering extend node "
+                                  "from template %s\n" %
+                                  template.template_name)
                     continue
             for node in nodes:
                 context.push()
