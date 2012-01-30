@@ -243,7 +243,7 @@ class Command(NoArgsCommand):
         for node in self.get_nodelist(node):
             if isinstance(node, BlockNode):
                 block_name = node.name
-            if isinstance(node, CompressorNode):
+            if isinstance(node, CompressorNode) and node.is_offline_compression_enabled(forced=True):
                 node._block_name = block_name
                 yield node
             else:
