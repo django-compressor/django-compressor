@@ -137,6 +137,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
         settings.COMPRESS_ENABLED = True
         settings.COMPRESS_PRECOMPILERS = (
             ('text/coffeescript', '%s %s' % (python, precompiler)),
+            ('text/less', '%s %s' % (python, precompiler)),
         )
         self.context = {'MEDIA_URL': settings.COMPRESS_URL}
 
@@ -218,6 +219,45 @@ class PrecompilerTemplatetagTestCase(TestCase):
                     script(scripttype="", src="/media/js/one.js"),
                     script(src="/media/CACHE/js/one.81a2cd965815.js"),])
 
+            self.assertEqual(out, render(template, self.context))
+        finally:
+            settings.COMPRESS_ENABLED = self.old_enabled
+
+    def test_css_multiple_files_disabled_compression(self):
+        self.old_enabled = settings.COMPRESS_ENABLED
+        settings.COMPRESS_ENABLED = False
+        assert(settings.COMPRESS_PRECOMPILERS)
+        try:
+            template = u"""
+            {% load compress %}{% compress css %}
+            <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/one.css"></link>
+            <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/two.css"></link>
+            {% endcompress %}"""
+
+            out = '\n'.join([
+                    '<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
+                    '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />'])
+
+            self.assertEqual(out, render(template, self.context))
+        finally:
+            settings.COMPRESS_ENABLED = self.old_enabled
+
+    def test_css_multiple_files_mixed_precompile_disabled_compression(self):
+        self.old_enabled = settings.COMPRESS_ENABLED
+        settings.COMPRESS_ENABLED = False
+        assert(settings.COMPRESS_PRECOMPILERS)
+        try:
+            template = u"""
+            {% load compress %}{% compress css %}
+            <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/one.css"/>
+            <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/two.css"/>
+            <link rel="stylesheet" type="text/less" href="{{ MEDIA_URL }}css/url/test.css"/>
+            {% endcompress %}"""
+
+            out = '\n'.join([
+                    '<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
+                    '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />',
+                    '<link rel="stylesheet" href="/media/CACHE/css/test.c4f8a285c249.css" type="text/css" />'])
             self.assertEqual(out, render(template, self.context))
         finally:
             settings.COMPRESS_ENABLED = self.old_enabled

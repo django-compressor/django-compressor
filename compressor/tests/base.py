@@ -142,20 +142,38 @@ class CssMediaTestCase(TestCase):
 <style type="text/css" media="print">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="/media/css/two.css" type="text/css" media="all">
 <style type="text/css">h1 { border:5px solid green;}</style>"""
-        self.css_node = CssCompressor(self.css)
 
     def test_css_output(self):
-        links = BeautifulSoup(self.css_node.output()).findAll('link')
+        css_node = CssCompressor(self.css)
+        links = BeautifulSoup(css_node.output()).findAll('link')
         media = [u'screen', u'print', u'all', None]
         self.assertEqual(len(links), 4)
         self.assertEqual(media, [l.get('media', None) for l in links])
 
     def test_avoid_reordering_css(self):
         css = self.css + '<style type="text/css" media="print">p { border:10px solid red;}</style>'
-        node = CssCompressor(css)
+        css_node = CssCompressor(css)
         media = [u'screen', u'print', u'all', None, u'print']
-        links = BeautifulSoup(node.output()).findAll('link')
+        links = BeautifulSoup(css_node.output()).findAll('link')
         self.assertEqual(media, [l.get('media', None) for l in links])
+
+    def test_passthough_when_compress_disabled(self):
+    	original_precompilers = settings.COMPRESS_PRECOMPILERS
+        settings.COMPRESS_ENABLED = False
+        settings.COMPRESS_PRECOMPILERS = (
+   			 ('text/foobar', 'python %s {infile} {outfile}' % os.path.join(test_dir, 'precompiler.py')),
+		)
+        css = """\
+<link rel="stylesheet" href="/media/css/one.css" type="text/css" media="screen">
+<link rel="stylesheet" href="/media/css/two.css" type="text/css" media="screen">
+<style type="text/foobar" media="screen">h1 { border:5px solid green;}</style>"""
+        css_node = CssCompressor(css)
+        output = BeautifulSoup(css_node.output()).findAll(['link','style'])
+        self.assertEqual([u'/media/css/one.css', u'/media/css/two.css', None], 
+                         [l.get('href', None) for l in output])
+        self.assertEqual([u'screen', u'screen', u'screen'], 
+                         [l.get('media', None) for l in output])
+    	settings.COMPRESS_PRECOMPILERS = original_precompilers
 
 
 class VerboseTestCase(CompressorTestCase):
