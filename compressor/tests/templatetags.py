@@ -234,7 +234,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/two.css"></link>
             {% endcompress %}"""
 
-            out = '\n'.join([
+            out = ''.join([
                     '<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
                     '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />'])
 
@@ -254,7 +254,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <link rel="stylesheet" type="text/less" href="{{ MEDIA_URL }}css/url/test.css"/>
             {% endcompress %}"""
 
-            out = '\n'.join([
+            out = ''.join([
                     '<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
                     '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />',
                     '<link rel="stylesheet" href="/media/CACHE/css/test.c4f8a285c249.css" type="text/css" />'])

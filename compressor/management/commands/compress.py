@@ -66,7 +66,7 @@ class Command(NoArgsCommand):
                 from django.template.loader import (
                     find_template_source as finder_func)
             try:
-                # Force django to calculate template_source_loaders from 
+                # Force django to calculate template_source_loaders from
                 # TEMPLATE_LOADERS settings, by asking to find a dummy template
                 source, name = finder_func('test')
             except TemplateDoesNotExist:

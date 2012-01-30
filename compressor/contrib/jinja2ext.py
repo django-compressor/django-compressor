@@ -35,14 +35,13 @@ class CompressorExtension(CompressorMixin, Extension):
     def _compress(self, kind, mode, caller):
         # This extension assumes that we won't force compression
         forced = False
-        
+
         mode = mode or OUTPUT_FILE
         original_content = caller()
         context = {
             'original_content': original_content
         }
         return self.render_compressed(context, kind, mode, forced=forced)
-        
+
     def get_original_content(self, context):
         return context['original_content']
-    
