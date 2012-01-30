@@ -269,5 +269,12 @@ class Compressor(object):
         final_context = Context(self.context)
         post_compress.send(sender=self.__class__, type=self.type,
                            mode=mode, context=final_context)
-        return render_to_string("compressor/%s_%s.html" %
-                                (self.type, mode), final_context)
+
+        template_attr = 'template_name'
+        if mode != 'file':
+            template_attr += '_%s' % mode
+        try:
+            template = getattr(self, template_attr)
+        except AttributeError:
+            template = "compressor/%s_%s.html" % (self.type, mode)
+        return render_to_string(template, final_context)
