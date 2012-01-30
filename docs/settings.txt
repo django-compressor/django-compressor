@@ -234,6 +234,12 @@ Backend settings
             ('text/x-scss', 'sass --scss {infile} {outfile}'),
         )
 
+    .. note::
+        The lessc compiler will have different parameters if installed
+        with Ruby Gems and not npm_.
+
+    _npm: http://lesscss.org/#-server-side-usage
+
     With that setting (and CoffeeScript_ installed), you could add the following
     code to your templates:
 
@@ -423,5 +429,5 @@ Offline settings
 
     :Default: ``manifest.json``
 
-    The name of the file to be used for saving the names of the files compressed
-    offline.
+    The name of the file to be used for saving the names of the files
+    compressed offline.
