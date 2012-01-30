@@ -116,7 +116,7 @@ example:
 
   $ sudo pip install tox
   ...
-  $ cd path/to/my/django_compressor/tests
+  $ cd path/to/my/django_compressor
   $ tox
 
 Contributing Documentation
