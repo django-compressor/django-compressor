@@ -67,6 +67,25 @@ class OfflineGenerationBlockSuperTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super"
     expected_hash = "7c02d201f69d"
 
+    
+class OfflineGenerationBlockSuperMultipleTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = "test_block_super_multiple"
+    expected_hash = "2f6ef61c488e"
+
+
+class OfflineGenerationBlockSuperTestCaseWithExtraContent(OfflineTestCaseMixin, TestCase):
+    templates_dir = "test_block_super_extra"
+    
+    def test_offline(self):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
+        self.assertEqual(2, count)
+        self.assertEqual([
+            u'<script type="text/javascript" src="/media/CACHE/js/ced14aec5856.js"></script>',
+            u'<script type="text/javascript" src="/media/CACHE/js/7c02d201f69d.js"></script>'
+        ], result)
+        rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
+        self.assertEqual(rendered_template, "".join(result) + "\n")
+
 
 class OfflineGenerationConditionTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_condition"
