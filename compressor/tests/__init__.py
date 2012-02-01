@@ -5,9 +5,14 @@ from compressor.tests.filters import (CssTidyTestCase, PrecompilerTestCase,
     CssDataUriTestCase, TemplateTestCase)
 from compressor.tests.jinja2ext import TestJinja2CompressorExtension
 from compressor.tests.offline import (
-    OfflineGenerationBlockSuperTestCase, OfflineGenerationConditionTestCase,
-    OfflineGenerationTemplateTagTestCase, OfflineGenerationTestCaseWithContext,
-    OfflineGenerationTestCaseErrors, OfflineGenerationTestCase)
+    OfflineGenerationBlockSuperTestCase,
+    OfflineGenerationBlockSuperTestCaseWithExtraContent,
+    OfflineGenerationBlockSuperMultipleTestCase,
+    OfflineGenerationConditionTestCase, 
+    OfflineGenerationTemplateTagTestCase, 
+    OfflineGenerationTestCaseWithContext, 
+    OfflineGenerationTestCaseErrors, 
+    OfflineGenerationTestCase)
 from compressor.tests.parsers import (LxmlParserTests, Html5LibParserTests,
     BeautifulSoupParserTests, HtmlParserTests)
 from compressor.tests.signals import PostCompressSignalTestCase
