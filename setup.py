@@ -99,7 +99,7 @@ def find_package_data(
 
 setup(
     name = "django_compressor",
-    version = ":versiontools:compressor:",
+    version = "1.1.2.post1",
     url = 'http://django_compressor.readthedocs.org/',
     license = 'MIT',
     description = "Compresses linked and inline JavaScript or CSS into single cached files.",
@@ -123,8 +123,5 @@ setup(
     zip_safe = False,
     install_requires = [
         'django-appconf >= 0.4',
-    ],
-    setup_requires = [
-        'versiontools >= 1.8.2',
     ],
 )
