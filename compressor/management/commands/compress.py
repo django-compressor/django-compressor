@@ -10,12 +10,13 @@ except ImportError:
     from StringIO import StringIO
 
 from django.core.management.base import  NoArgsCommand, CommandError
-from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
+from django.template import (Context, Template,
+                             TemplateDoesNotExist, TemplateSyntaxError)
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
-from django.template.loader import get_template
 from django.template.defaulttags import IfNode
-from django.template.loader_tags import ExtendsNode, BlockNode, BLOCK_CONTEXT_KEY
+from django.template.loader_tags import (ExtendsNode, BlockNode,
+                                         BLOCK_CONTEXT_KEY)
 
 try:
     from django.template.loaders.cached import Loader as CachedLoader
@@ -28,19 +29,19 @@ from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
 from compressor.utils import walk, any
 
-def patched__render(self, context):
-    # 'Fake' _render method that just returns the context instead of rendering.
-    # It also checks whether the first node is an extend node or not, to be able
-    # to handle complex inheritance chain.
-    self._render_firstnode = MethodType(patched__render_firstnode, self)
+def patched_render(self, context):
+    # 'Fake' _render method that just returns the context instead of
+    # rendering. It also checks whether the first node is an extend node or
+    # not, to be able to handle complex inheritance chain.
+    self._render_firstnode = MethodType(patched_render_firstnode, self)
     self._render_firstnode(context)
     return context
 
-def patched__render_firstnode(self, context):
+def patched_render_firstnode(self, context):
     # If this template has a ExtendsNode, we want to find out what
-    # should be put in render_context to make the {% block ... %} 
+    # should be put in render_context to make the {% block ... %}
     # tags work.
-    # 
+    #
     # We can't fully render the base template(s) (we don't have the
     # full context vars - only what's necessary to render the compress
     # nodes!), therefore we hack the ExtendsNode we found, patching
@@ -56,11 +57,11 @@ def patched__render_firstnode(self, context):
         try:
             extra_context = firstnode.render(context)
             context.render_context = extra_context.render_context
-            # We aren't rendering {% block %} tags, but we want {{ block.super }}
-            # inside {% compress %} inside {% block %}s to work. Therefore, we 
-            # need to pop() the last block context for each block name, to 
-            # emulate what would have been done if the {% block %} had been fully
-            # rendered.
+            # We aren't rendering {% block %} tags, but we want
+            # {{ block.super }} inside {% compress %} inside {% block %}s to
+            # work. Therefore, we need to pop() the last block context for
+            # each block name, to emulate what would have been done if the
+            # {% block %} had been fully rendered.
             for blockname in firstnode.blocks.keys():
                 context.render_context[BLOCK_CONTEXT_KEY].pop(blockname)
         except (IOError, TemplateSyntaxError, TemplateDoesNotExist):
@@ -69,21 +70,21 @@ def patched__render_firstnode(self, context):
             # above, so we need to catch that (and ignore it, just like above)
             # as well.
             if self._log_verbosity > 0:
-                self._log.write("Caught error when rendering extend node from \
-                           template %s\n" % template.template_name)
+                self._log.write("Caught error when rendering extend node from "
+                                "template %s\n" % self.template_name)
             return None
     return extra_context
 
 def patched_get_parent(self, context):
-    # Patch template returned by extendsnode's get_parent to make sure their 
-    # _render method is just returning the context instead of actually 
+    # Patch template returned by extendsnode's get_parent to make sure their
+    # _render method is just returning the context instead of actually
     # rendering stuff.
     # In addition, this follows the inheritance chain by looking if the first
     # node of the template is an extend node itself.
     compiled_template = self._old_get_parent(context)
     compiled_template._log = self._log
     compiled_template._log_verbosity = self._log_verbosity
-    compiled_template._render = MethodType(patched__render, compiled_template)
+    compiled_template._render = MethodType(patched_render, compiled_template)
     return compiled_template
 
 
@@ -231,7 +232,8 @@ class Command(NoArgsCommand):
 
         if verbosity > 0:
             log.write("Found 'compress' tags in:\n\t" +
-                      "\n\t".join((t.template_name for t in compressor_nodes.keys())) + "\n")
+                      "\n\t".join((t.template_name
+                                   for t in compressor_nodes.keys())) + "\n")
 
         log.write("Compressing... ")
         count = 0
@@ -241,7 +243,7 @@ class Command(NoArgsCommand):
             context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
             template._log = log
             template._log_verbosity = verbosity
-            template._render_firstnode = MethodType(patched__render_firstnode, template)
+            template._render_firstnode = MethodType(patched_render_firstnode, template)
             extra_context = template._render_firstnode(context)
             if extra_context is None:
                 # Something is wrong - ignore this template
