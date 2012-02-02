@@ -108,7 +108,7 @@ Backend settings
 
          The arguments passed to CSSTidy.
 
-    - ``compressor.filters.datauri.DataUriFilter``
+    - ``compressor.filters.datauri.CssDataUriFilter``
 
       A filter for embedding media as `data: URIs`_ in the CSS.
 
