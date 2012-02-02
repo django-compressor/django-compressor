@@ -72,7 +72,7 @@ def patched_render_firstnode(self, context):
             # as well.
             if self._log_verbosity > 0:
                 self._log.write("Caught error when rendering extend node from "
-                                "template %s\n" % self.template_name)
+                                "template %s\n" % self)
             return None
     return extra_context
 
