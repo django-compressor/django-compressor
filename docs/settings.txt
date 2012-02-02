@@ -22,7 +22,7 @@ Base settings
     When ``COMPRESS_ENABLED`` is ``False`` the input will be rendered without
     any compression except for code with a mimetype matching one listed in the
     :attr:`~django.conf.settings.COMPRESS_PRECOMPILERS` setting. These
-    matching files are still passed to the precompiler before rendering. 
+    matching files are still passed to the precompiler before rendering.
 
     An example for some javascript and coffeescript.
 
@@ -172,7 +172,7 @@ Backend settings
     - ``compressor.filters.closure.ClosureCompilerFilter``
 
       A filter that uses `Google Closure compiler`_.
-  
+
       .. attribute:: COMPRESS_CLOSURE_COMPILER_BINARY
 
          The Closure compiler filesystem path. Make sure to also prepend
@@ -369,8 +369,8 @@ Caching settings
 
     The amount of time (in seconds) to cache the modification timestamp of a
     file. Disabled by default. Should be smaller than
-    :attr:`django.conf.settings.COMPRESS_REBUILD_TIMEOUT` and
-    :attr:`django.conf.settings.COMPRESS_MINT_DELAY`.
+    :attr:`~django.conf.settings.COMPRESS_REBUILD_TIMEOUT` and
+    :attr:`~django.conf.settings.COMPRESS_MINT_DELAY`.
 
 .. attribute:: COMPRESS_DEBUG_TOGGLE
 
