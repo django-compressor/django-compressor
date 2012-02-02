@@ -14,6 +14,7 @@ from django.template import (Context, Template,
                              TemplateDoesNotExist, TemplateSyntaxError)
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
+from django.template.loader import get_template  # Leave this in to preload template locations
 from django.template.defaulttags import IfNode
 from django.template.loader_tags import (ExtendsNode, BlockNode,
                                          BLOCK_CONTEXT_KEY)
