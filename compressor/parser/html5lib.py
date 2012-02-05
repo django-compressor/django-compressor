@@ -2,12 +2,17 @@ from __future__ import absolute_import
 from django.utils.encoding import smart_unicode
 from django.core.exceptions import ImproperlyConfigured
 
+import html5lib
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 from compressor.utils.decorators import cached_property
 
 
 class Html5LibParser(ParserBase):
+    
+    def __init__(self, content):
+        super(Html5LibParser, self).__init__(content)
+        self.html5lib = html5lib
 
     def _serialize(self, elem):
         fragment = self.html5lib.treebuilders.simpletree.DocumentFragment()
@@ -23,8 +28,6 @@ class Html5LibParser(ParserBase):
     @cached_property
     def html(self):
         try:
-            import html5lib
-            self.html5lib = html5lib
             return html5lib.parseFragment(self.content)
         except ImportError, err:
             raise ImproperlyConfigured("Error while importing html5lib: %s" % err)
