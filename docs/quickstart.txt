@@ -32,8 +32,21 @@ Installation
          'compressor.finders.CompressorFinder',
      )
 
+* Finally, if you use Django Compressor and ``STATIC_URL`` in your
+  ``500.html`` error template, you should add a ``handler500`` in
+  your urlconf. For example, in Django 1.3:
+
+  .. code-block:: python
+
+     handler500 = TemplateView.as_view(template_name="500.html")
+
+  This ensures that RequestContext_ is used to render the template, which
+  is `not the case by default`_ but is needed to populate `STATIC _URL``.
+
 .. _staticfiles: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
 .. _django-staticfiles: http://pypi.python.org/pypi/django-staticfiles
+.. _RequestContext: https://docs.djangoproject.com/en/dev/ref/templates/api/#django.template.RequestContext
+.. _not the case by default: https://docs.djangoproject.com/en/dev/topics/http/views/#the-500-server-error-view
 
 .. _dependencies:
 
