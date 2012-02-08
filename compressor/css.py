@@ -21,7 +21,7 @@ class CssCompressor(Compressor):
             data = None
             elem_name = self.parser.elem_name(elem)
             elem_attribs = self.parser.elem_attribs(elem)
-            if elem_name == 'link' and elem_attribs['rel'] == 'stylesheet':
+            if elem_name == 'link' and elem_attribs['rel'].lower() == 'stylesheet':
                 basename = self.get_basename(elem_attribs['href'])
                 filename = self.get_filename(basename)
                 data = (SOURCE_FILE, filename, basename, elem)
