@@ -54,6 +54,10 @@ v1.1.2
 
 - Fixed an installation issue related to versiontools.
 
+- If offline cache is enabled and manifest check fails, {% compress %}
+  templatetag will fall back to regular compression techniques, rather than
+  raise an exception.
+
 v1.1.1
 ------
 

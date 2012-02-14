@@ -133,10 +133,13 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "basic"
     expected_hash = "f5e179b8eca4"
 
-    def test_rendering_without_compressing_raises_exception(self):
-        self.assertRaises(OfflineGenerationError,
-                          self.template.render, Context({}))
-
+    def test_rendering_without_compressing_does_fallback(self):
+        rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
+        self.assertEqual(
+            u'<script type="text/javascript" src="/media/CACHE/js/%s.js"></script>\n' % self.expected_hash,
+            rendered_template
+        )
+        
     def test_requires_model_validation(self):
         self.assertFalse(CompressCommand.requires_model_validation)
 
