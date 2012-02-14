@@ -21,10 +21,14 @@ and the HTML containing the element code for the combined file or piece of code
 being the value. Generating the offline manifest, using the ``compress`` 
 management command, also generates the combined files referenced in the manifest. 
 
-If offline cache is activated and the nodelist hash can not be found inside the
-manifest, {% compress %} will raise an ``OfflineGenerationError``.
+In a couple of instances, {% compress %} will not use the offline cache:
 
-If offline cache is de-activated, the following happens:
+- If offline cache is activated and the nodelist hash can not be found inside the
+  manifest.
+
+- If offline cache is de-activated
+
+In these scenarios, the following will happen:
 
 First step: parsing and file list
 ----------------------------------
