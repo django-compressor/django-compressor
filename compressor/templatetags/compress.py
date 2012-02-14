@@ -62,14 +62,13 @@ class CompressorMixin(object):
         and return the result if given
         """
         if self.is_offline_compression_enabled(forced) and not forced:
-            key = get_offline_hexdigest(self.nodelist.render(context))
+            rendered = self.nodelist.render(context)
+            key = get_offline_hexdigest(rendered)
             offline_manifest = get_offline_manifest()
             if key in offline_manifest:
                 return offline_manifest[key]
             else:
-                raise OfflineGenerationError('You have offline compression '
-                    'enabled but key "%s" is missing from offline manifest. '
-                    'You may need to run "python manage.py compress".' % key)
+                return rendered
 
     def render_cached(self, compressor, kind, mode, forced=False):
         """
