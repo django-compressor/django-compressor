@@ -68,7 +68,8 @@ class CssAbsoluteFilter(FilterBase):
                 suffix = get_hashed_content(filename)
             else:
                 raise FilterError('COMPRESS_CSS_HASHING_METHOD is configured '
-                                  'with an unknown method (%s).')
+                                  'with an unknown method (%s).' %
+                                  settings.COMPRESS_CSS_HASHING_METHOD)
         if suffix is None:
             return url
         if url.startswith(('http://', 'https://', '/')):
