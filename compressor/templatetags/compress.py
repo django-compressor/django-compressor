@@ -1,13 +1,15 @@
+import logging
+
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 
 from compressor.cache import (cache_get, cache_set, get_offline_hexdigest,
                               get_offline_manifest, get_templatetag_cachekey)
 from compressor.conf import settings
-from compressor.exceptions import OfflineGenerationError
 from compressor.utils import get_class
 
 register = template.Library()
+logger = logging.getLogger(__name__)
 
 OUTPUT_FILE = 'file'
 OUTPUT_INLINE = 'inline'
@@ -67,9 +69,10 @@ class CompressorMixin(object):
             if key in offline_manifest:
                 return offline_manifest[key]
             else:
-                raise OfflineGenerationError('You have offline compression '
+                logger.warning('You have offline compression '
                     'enabled but key "%s" is missing from offline manifest. '
                     'You may need to run "python manage.py compress".' % key)
+                return None
 
     def render_cached(self, compressor, kind, mode, forced=False):
         """
@@ -86,7 +89,7 @@ class CompressorMixin(object):
 
         # See if it has been rendered offline
         cached_offline = self.render_offline(context, forced=forced)
-        if cached_offline:
+        if cached_offline is not None:
             return cached_offline
 
         # Take a shortcut if we really don't have anything to do
