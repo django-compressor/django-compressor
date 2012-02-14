@@ -1,8 +1,8 @@
 Changelog
 =========
 
-v1.2.0 (in development)
------------------------
+v1.2 (in development)
+---------------------
 
 - Introduced a new ``compressed`` context dictionary that is passed to
   the templates that are responsible for rendering the compressed snippets.

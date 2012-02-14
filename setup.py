@@ -1,18 +1,31 @@
 import os
+import re
 import sys
 import codecs
 from fnmatch import fnmatchcase
 from distutils.util import convert_path
 from setuptools import setup, find_packages
 
-def read(fname):
-    return codecs.open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+def read(*parts):
+    return codecs.open(os.path.join(os.path.dirname(__file__), *parts)).read()
+
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
 standard_exclude = ('*.py', '*.pyc', '*$py.class', '*~', '.*', '*.bak')
 standard_exclude_directories = ('.*', 'CVS', '_darcs', './build',
                                 './dist', 'EGG-INFO', '*.egg-info')
+
 
 # (c) 2005 Ian Bicking and contributors; written for Paste (http://pythonpaste.org)
 # Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
@@ -98,17 +111,17 @@ def find_package_data(
     return out
 
 setup(
-    name = "django_compressor",
-    version = "1.1.2.post1",
-    url = 'http://django_compressor.readthedocs.org/',
-    license = 'MIT',
-    description = "Compresses linked and inline JavaScript or CSS into single cached files.",
-    long_description = read('README.rst'),
-    author = 'Jannis Leidel',
-    author_email = 'jannis@leidel.info',
-    packages = find_packages(),
-    package_data = find_package_data(),
-    classifiers = [
+    name="django_compressor",
+    version=find_version("compressor", "__init__.py"),
+    url='http://django_compressor.readthedocs.org/',
+    license='MIT',
+    description="Compresses linked and inline JavaScript or CSS into single cached files.",
+    long_description=read('README.rst'),
+    author='Jannis Leidel',
+    author_email='jannis@leidel.info',
+    packages=find_packages(),
+    package_data=find_package_data(),
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
         'Intended Audience :: Developers',
@@ -120,8 +133,8 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Topic :: Internet :: WWW/HTTP',
     ],
-    zip_safe = False,
-    install_requires = [
+    zip_safe=False,
+    install_requires=[
         'django-appconf >= 0.4',
     ],
 )
