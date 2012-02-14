@@ -49,6 +49,13 @@ v1.2.0 (in development)
   from ``'hash'`` to ``'content'`` to better describe what it does. The old
   name is also supported, as well as the default being ``'mtime'``.
 
+v1.1.3
+------
+
+- If offline cache is enabled and manifest check fails, {% compress %}
+  templatetag will fall back to regular compression techniques, rather than
+  raise an exception.
+
 v1.1.2
 ------
 
