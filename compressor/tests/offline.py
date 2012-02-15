@@ -9,6 +9,7 @@ except ImportError:
 from django.template import Template, Context
 from django.test import TestCase
 
+from compressor.cache import flush_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
@@ -134,6 +135,7 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
     expected_hash = "f5e179b8eca4"
 
     def test_rendering_without_compressing_raises_exception(self):
+        flush_offline_manifest()
         self.assertRaises(OfflineGenerationError,
                           self.template.render, Context({}))
 
