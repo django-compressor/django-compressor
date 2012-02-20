@@ -1,0 +1,60 @@
+Django Compressor scenarios
+===========================
+
+This document presents the most typical usage scenarios for Django Compressor,
+and should help you understand how to deploy it in production according to your
+setup.
+
+<FIXME there should be a note about staticfiles usage somewhere>
+
+.. note::
+
+    Note: all the scenarios with multiple front-end servers assume you want offline 
+    compression. While offline compression has its limits (see documentation <FIXME>)
+    it solves a number of problems associated with running multiple front-end 
+    servers, and also has the best performance.
+
+Scenario 1: One front-end server
+--------------------------------
+
+This is the most typical scenario for small sites. Just configure a cache 
+backend and let Django Compressor handle the rest automatically. You can ignore 
+offline compression for the moment, and enable it later if you run into 
+performance problems.
+
+If you choose to enable offline compression, you'll need to run the compress 
+command each time you deploy new code. You can either run the command on your
+front-end server after deployment, or on any correctly configured machine (such
+as your own, using production-like settings) before deploying and then upload 
+the contents of your `COMPRESS_OUTPUT_DIR` directory.
+  
+Note: If there is a significant amount of time between the time you deploy to 
+files on your server and the time when you restart your django application, your
+application might use old templates with a new manifest, possibly rendering your
+pages incoherent. If that happens, you should add something to your deployment
+procedure that changes the `COMPRESS_OFFLINE_MANIFEST` path for each new version
+of your code. This will ensure that old code uses old compressed output, and 
+new code new compressed output.
+  
+Scenario 2: Multiple front-end servers, static files shared using NFS or equivalent
+-----------------------------------------------------------------------------------
+
+Since static files are shared, you only need to deploy on one server. Follow the
+offline compression steps in the previous scenario. It is recommanded you change
+the `COMPRESS_OFFLINE_MANIFEST` for each deploy as described, especially if you 
+are not restarting all your django application instances on each server at the 
+same time.
+
+Scenario 3: Multiple front-end servers, static files NOT shared
+---------------------------------------------------------------
+
+Follow previous scenario steps for **each** server you are using. In addition, it's
+crucial to set `COMPRESS_CSS_HASHING_METHOD` to "`content`", so that the generated
+files stay the same across servers. It's recommanded to run some automated 
+script checking for manifest coherency between servers after deploy, just in 
+case.
+
+Scenario 4: static files on a remote storage
+--------------------------------------------
+
+<FIXME: write me>
