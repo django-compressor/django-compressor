@@ -120,7 +120,7 @@ class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):
         super(OfflineGenerationTestCaseWithContext, self).setUp()
 
     def tearDown(self):
-        self.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
+        settings.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
         super(OfflineGenerationTestCaseWithContext, self).tearDown()
 
 
