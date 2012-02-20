@@ -8,6 +8,7 @@ except ImportError:
 
 from django.template import Template, Context
 from django.test import TestCase
+from django.core.management.base import CommandError
 
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
@@ -126,7 +127,45 @@ class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):
 
 class OfflineGenerationTestCaseErrors(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_error_handling"
-    expected_hash = "cd8870829421"
+
+    def test_offline(self):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
+        self.assertEqual(2, count)
+        self.assertEqual([
+            u'<script type="text/javascript" src="/media/CACHE/js/cd8870829421.js"></script>',
+            u'<script type="text/javascript" src="/media/CACHE/js/3872c9ae3f42.js"></script>',
+        ], result)
+
+
+class OfflineGenerationTestCaseWithError(OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_error_handling'
+
+    def setUp(self):
+        self._old_compress_precompilers = settings.COMPRESS_PRECOMPILERS
+        settings.COMPRESS_PRECOMPILERS = (('text/coffeescript', 'non-existing-binary'),)
+        super(OfflineGenerationTestCaseWithError, self).setUp()
+
+    def test_offline(self):
+        """
+        Test that a CommandError is raised with DEBUG being False as well as
+        True, as otherwise errors in configuration will never show in
+        production.
+        """
+        self._old_debug = settings.DEBUG
+
+        try:
+            settings.DEBUG = True
+            self.assertRaises(CommandError, CompressCommand().compress)
+
+            settings.DEBUG = False
+            self.assertRaises(CommandError, CompressCommand().compress)
+
+        finally:
+            settings.DEBUG = self._old_debug
+
+    def tearDown(self):
+        settings.COMPRESS_PRECOMPILERS = self._old_compress_precompilers
+        super(OfflineGenerationTestCaseWithError, self).tearDown()
 
 
 class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
