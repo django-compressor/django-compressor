@@ -92,7 +92,7 @@ Backend settings
       .. attribute:: COMPRESS_CSS_HASHING_METHOD
 
          The method to use when calculating the hash to append to
-         processed URLs. Either ``'mtime'`` (default) or ``'content'``.
+         processed URLs. Either ``'mtime'`` (default) or ``'hash'``.
          Use the latter in case you're using multiple server to serve your
          static files.
 
