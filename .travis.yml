@@ -9,3 +9,4 @@ notifications:
 branches:
   only:
     - develop
+
