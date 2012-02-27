@@ -9,7 +9,7 @@ except ImportError:
 from django.template import Template, Context
 from django.test import TestCase
 
-from compressor.cache import flush_offline_manifest
+from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
@@ -134,10 +134,24 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "basic"
     expected_hash = "f5e179b8eca4"
 
-    def test_rendering_without_compressing_raises_exception(self):
+    def test_rendering_without_manifest_raises_exception(self):
+        # flush cached manifest
         flush_offline_manifest()
         self.assertRaises(OfflineGenerationError,
                           self.template.render, Context({}))
+
+    def test_deleting_manifest_does_not_affect_rendering(self):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
+        get_offline_manifest()
+        manifest_path = os.path.join('CACHE', 'manifest.json')
+        if default_storage.exists(manifest_path):
+            default_storage.delete(manifest_path)
+        self.assertEqual(1, count)
+        self.assertEqual([
+            u'<script type="text/javascript" src="/media/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
+        ], result)
+        rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
+        self.assertEqual(rendered_template, "".join(result) + "\n")
 
     def test_requires_model_validation(self):
         self.assertFalse(CompressCommand.requires_model_validation)
