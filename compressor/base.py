@@ -282,4 +282,4 @@ class Compressor(object):
         post_compress.send(sender=self.__class__, type=self.type,
                            mode=mode, context=final_context)
         template_name = self.get_template_name(mode)
-        return render_to_string(template_name, final_context)
+        return render_to_string(template_name, context_instance=final_context)
