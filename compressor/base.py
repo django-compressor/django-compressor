@@ -68,7 +68,7 @@ class Compressor(object):
         except AttributeError:
             base_url = settings.COMPRESS_URL
         if not url.startswith(base_url):
-            raise UncompressableFileError("'%s' isn't accesible via "
+            raise UncompressableFileError("'%s' isn't accessible via "
                                           "COMPRESS_URL ('%s') and can't be "
                                           "compressed" % (url, base_url))
         basename = url.replace(base_url, "", 1)
