@@ -62,18 +62,29 @@ def get_offline_manifest_filename():
     return os.path.join(output_dir, settings.COMPRESS_OFFLINE_MANIFEST)
 
 
+_offline_manifest = None
+
 def get_offline_manifest():
-    filename = get_offline_manifest_filename()
-    if default_storage.exists(filename):
-        return simplejson.load(default_storage.open(filename))
-    else:
-        return {}
+    global _offline_manifest
+    if _offline_manifest is None:
+        filename = get_offline_manifest_filename()
+        if default_storage.exists(filename):
+            _offline_manifest = simplejson.load(default_storage.open(filename))
+        else:
+            _offline_manifest = {}
+    return _offline_manifest
+
+
+def flush_offline_manifest():
+    global _offline_manifest
+    _offline_manifest = None    
 
 
 def write_offline_manifest(manifest):
     filename = get_offline_manifest_filename()
     default_storage.save(filename,
                          ContentFile(simplejson.dumps(manifest, indent=2)))
+    flush_offline_manifest()
 
 
 def get_templatetag_cachekey(compressor, mode, kind):
