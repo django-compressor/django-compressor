@@ -73,7 +73,7 @@ class CompressorConf(AppConf):
             value = getattr(settings, 'STATIC_ROOT', None)
             if not value:
                 value = settings.MEDIA_ROOT
-        if not value:
+        if value is None:
             raise ImproperlyConfigured("COMPRESS_ROOT setting must be set")
         return os.path.normcase(os.path.abspath(value))
 
