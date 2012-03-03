@@ -1,6 +1,0 @@
-BeautifulSoup>=3.2.1
-Django
-Jinja2>=2.6
-django-appconf>=0.5
-mock>=0.8.0
-unittest2>=0.5.1
