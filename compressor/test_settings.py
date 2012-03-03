@@ -5,7 +5,7 @@ TEST_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'tests')
 
 COMPRESS_CACHE_BACKEND = 'locmem://'
 
-if django.VERSION[:2] > (1, 2):
+if django.VERSION[:2] >= (1, 3):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -37,4 +37,3 @@ JENKINS_TASKS = (
     'django_jenkins.tasks.with_coverage',
     'django_jenkins.tasks.django_tests',
 )
-
