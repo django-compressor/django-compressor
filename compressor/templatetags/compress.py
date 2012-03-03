@@ -110,7 +110,7 @@ class CompressorMixin(object):
                 cache_set(cache_key, rendered_output)
             return rendered_output
         except Exception, e:
-            if settings.DEBUG:
+            if settings.DEBUG or forced:
                 raise e
 
         # Or don't do anything in production

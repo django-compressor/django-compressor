@@ -12,7 +12,8 @@ from compressor.tests.offline import (
     OfflineGenerationTemplateTagTestCase, 
     OfflineGenerationTestCaseWithContext, 
     OfflineGenerationTestCaseErrors, 
-    OfflineGenerationTestCase)
+    OfflineGenerationTestCase,
+    OfflineGenerationTestCaseWithError)
 from compressor.tests.parsers import (LxmlParserTests, Html5LibParserTests,
     BeautifulSoupParserTests, HtmlParserTests)
 from compressor.tests.signals import PostCompressSignalTestCase
