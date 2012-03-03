@@ -33,7 +33,7 @@ class OfflineTestCaseMixin(object):
         self.log = StringIO()
 
         # Force template dirs, because it enables us to force compress to
-        # consider only a specific directory (helps us make true, 
+        # consider only a specific directory (helps us make true,
         # independant unit tests).
         settings.TEMPLATE_DIRS = (
             os.path.join(settings.TEMPLATE_DIRS[0], self.templates_dir),
@@ -69,7 +69,7 @@ class OfflineGenerationBlockSuperTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super"
     expected_hash = "7c02d201f69d"
 
-    
+
 class OfflineGenerationBlockSuperMultipleTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super_multiple"
     expected_hash = "2f6ef61c488e"
@@ -77,7 +77,7 @@ class OfflineGenerationBlockSuperMultipleTestCase(OfflineTestCaseMixin, TestCase
 
 class OfflineGenerationBlockSuperTestCaseWithExtraContent(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super_extra"
-    
+
     def test_offline(self):
         count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
         self.assertEqual(2, count)
@@ -133,8 +133,8 @@ class OfflineGenerationTestCaseErrors(OfflineTestCaseMixin, TestCase):
         count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
         self.assertEqual(2, count)
         self.assertEqual([
-            u'<script type="text/javascript" src="/media/CACHE/js/cd8870829421.js"></script>',
             u'<script type="text/javascript" src="/media/CACHE/js/3872c9ae3f42.js"></script>',
+            u'<script type="text/javascript" src="/media/CACHE/js/cd8870829421.js"></script>',
         ], result)
 
 
@@ -213,4 +213,4 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
             self.assertTrue(isinstance(loaders[0], FileSystemLoader))
             self.assertTrue(isinstance(loaders[1], AppDirectoriesLoader))
         finally:
-            settings.TEMPLATE_LOADERS = old_loaders 
+            settings.TEMPLATE_LOADERS = old_loaders
