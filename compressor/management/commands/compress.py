@@ -323,4 +323,10 @@ class Command(NoArgsCommand):
                 raise CommandError(
                     "Offline compression is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
+
+        # Initialize all apps before the compressor runs so that they
+        # have an opportunity to register built-in template tags.
+        from django.db.models.loading import cache
+        cache.get_apps()
+
         self.compress(sys.stdout, **options)
