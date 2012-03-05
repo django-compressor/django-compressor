@@ -111,7 +111,7 @@ class CompressorMixin(object):
             return rendered_output
         except Exception, e:
             if settings.DEBUG or forced:
-                raise e
+                raise
 
         # Or don't do anything in production
         return self.get_original_content(context)
