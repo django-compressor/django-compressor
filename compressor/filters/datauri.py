@@ -29,6 +29,8 @@ class DataUriFilter(FilterBase):
         # strip query string of file paths
         if "?" in url:
             url = url.split("?")[0]
+        if "#" in url:
+            url = url.split("#")[0]
         return os.path.join(
             settings.COMPRESS_ROOT, url[len(settings.COMPRESS_URL):])
 
