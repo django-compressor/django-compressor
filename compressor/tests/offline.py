@@ -1,11 +1,13 @@
 from __future__ import with_statement
 import os
+from unittest2 import skipIf
 
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
 
+import django
 from django.template import Template, Context
 from django.test import TestCase
 from django.core.management.base import CommandError
@@ -108,6 +110,14 @@ class OfflineGenerationConditionTestCase(OfflineTestCaseMixin, TestCase):
 class OfflineGenerationTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_templatetag"
     expected_hash = "a27e1d3a619a"
+
+
+class OfflineGenerationStaticTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = "test_static_templatetag"
+    expected_hash = "dfa2bb387fa8"
+# This test uses {% static %} which was introduced in django 1.4
+OfflineGenerationStaticTemplateTagTestCase = skipIf(
+    django.VERSION[1] < 4, 'Django 1.4 not found') (OfflineGenerationStaticTemplateTagTestCase)
 
 
 class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):

@@ -10,6 +10,7 @@ from compressor.tests.offline import (
     OfflineGenerationBlockSuperMultipleTestCase,
     OfflineGenerationConditionTestCase,
     OfflineGenerationTemplateTagTestCase,
+    OfflineGenerationStaticTemplateTagTestCase,
     OfflineGenerationTestCaseWithContext,
     OfflineGenerationTestCaseErrors,
     OfflineGenerationTestCase,
