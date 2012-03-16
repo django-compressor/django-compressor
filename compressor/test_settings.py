@@ -21,6 +21,8 @@ INSTALLED_APPS = [
 ]
 
 MEDIA_URL = '/media/'
+STATIC_URL = MEDIA_URL
+
 
 MEDIA_ROOT = os.path.join(TEST_DIR, 'media')
 
