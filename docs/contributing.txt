@@ -114,7 +114,7 @@ example:
 
 .. code-block:: console
 
-  $ sudo pip install tox
+  $ sudo pip install https://bitbucket.org/hpk42/tox/get/tip.zip
   ...
   $ cd path/to/my/django_compressor
   $ tox
