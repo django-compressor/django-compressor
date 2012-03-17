@@ -7,19 +7,19 @@ The goal is to explain what the main template tag, {% compress %}, does
 behind the scenes, to help you debug performance problems for instance.
 
 Offline cache
--------------------------
+-------------
 
 If offline cache is activated, the first thing {% compress %} tries to do is
-retrieve the compressed version for its nodelist from the offline manifest 
+retrieve the compressed version for its nodelist from the offline manifest
 cache. It doesn't parse, doesn't check the modified times of the files, doesn't
 even know which files are concerned actually, since it doesn't look inside the
 nodelist of the template block enclosed by the ``compress`` template tag.
 The offline cache manifest is just a json file, stored on disk inside the
 directory that holds the compressed files. The format of the manifest is simply
-a key <=> value dictionnary, with the hash of the nodelist being the key, 
+a key <=> value dictionnary, with the hash of the nodelist being the key,
 and the HTML containing the element code for the combined file or piece of code
-being the value. Generating the offline manifest, using the ``compress`` 
-management command, also generates the combined files referenced in the manifest. 
+being the value. Generating the offline manifest, using the ``compress``
+management command, also generates the combined files referenced in the manifest.
 
 If offline cache is activated and the nodelist hash can not be found inside the
 manifest, {% compress %} will raise an ``OfflineGenerationError``.
@@ -27,7 +27,7 @@ manifest, {% compress %} will raise an ``OfflineGenerationError``.
 If offline cache is de-activated, the following happens:
 
 First step: parsing and file list
-----------------------------------
+---------------------------------
 
 A compressor instance is created, which in turns instantiates the HTML parser.
 The parser is used to determine a file or code hunk list. Each file mtime is
@@ -35,17 +35,17 @@ checked, first in cache and then on disk/storage, and this is used to
 determine an unique cache key.
 
 Second step: Checking the "main" cache
--------------------------------------
+--------------------------------------
 
 Compressor checks if it can get some info about the combined file/hunks
 corresponding to its instance, using the cache key obtained in the previous
 step. The cache content here will actually be the HTML containing the final
-element code, just like in the offline step before. 
+element code, just like in the offline step before.
 
 Everything stops here if the cache entry exists.
 
 Third step: Generating the combined file if needed
----------------------------------------------------
+--------------------------------------------------
 
 The file is generated if necessary. All precompilers are called and all
 filters are executed, and a hash is determined from the contents. This in
