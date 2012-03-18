@@ -142,10 +142,8 @@ class OfflineGenerationTestCaseErrors(OfflineTestCaseMixin, TestCase):
     def test_offline(self):
         count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
         self.assertEqual(2, count)
-        self.assertEqual([
-            u'<script type="text/javascript" src="/media/CACHE/js/3872c9ae3f42.js"></script>',
-            u'<script type="text/javascript" src="/media/CACHE/js/cd8870829421.js"></script>',
-        ], result)
+        self.assertIn(u'<script type="text/javascript" src="/media/CACHE/js/3872c9ae3f42.js"></script>', result)
+        self.assertIn(u'<script type="text/javascript" src="/media/CACHE/js/cd8870829421.js"></script>', result)
 
 
 class OfflineGenerationTestCaseWithError(OfflineTestCaseMixin, TestCase):
