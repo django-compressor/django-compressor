@@ -239,7 +239,7 @@ class Command(NoArgsCommand):
         log.write("Compressing... ")
         count = 0
         results = []
-        offline_manifest = {}
+        offline_manifest = SortedDict()
         for template, nodes in compressor_nodes.iteritems():
             context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
             template._log = log
