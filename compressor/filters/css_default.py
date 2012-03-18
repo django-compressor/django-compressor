@@ -10,6 +10,7 @@ from compressor.utils import staticfiles
 
 URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 SRC_PATTERN = re.compile(r'src=([\'"])(.+?)\1')
+SCHEMES = ('http://', 'https://', '/', 'data:')
 
 
 class CssAbsoluteFilter(FilterBase):
@@ -72,30 +73,26 @@ class CssAbsoluteFilter(FilterBase):
                                   settings.COMPRESS_CSS_HASHING_METHOD)
         if suffix is None:
             return url
-        if url.startswith(('http://', 'https://', '/')):
+        if url.startswith(SCHEMES):
             if "?" in url:
                 url = "%s&%s" % (url, suffix)
             else:
                 url = "%s?%s" % (url, suffix)
         return url
 
-    def url_converter(self, matchobj):
-        url = matchobj.group(1)
+    def _converter(self, matchobj, group, template):
+        url = matchobj.group(group)
         url = url.strip(' \'"')
-        if url.startswith(('http://', 'https://', '/', 'data:')):
+        if url.startswith(SCHEMES):
             return "url('%s')" % self.add_suffix(url)
         full_url = posixpath.normpath('/'.join([str(self.directory_name),
                                                 url]))
         if self.has_scheme:
             full_url = "%s%s" % (self.protocol, full_url)
-        return "url('%s')" % self.add_suffix(full_url)
+        return template % self.add_suffix(full_url)
+
+    def url_converter(self, matchobj):
+        return self._converter(matchobj, 1, "url('%s')")
 
     def src_converter(self, matchobj):
-        url = matchobj.group(2)
-        url = url.strip(' \'"')
-        if url.startswith(('http://', 'https://', '/', 'data:')):
-            return "src='%s'" % self.add_suffix(url)
-        full_url = posixpath.normpath('/'.join([str(self.directory_name), url]))
-        if self.has_scheme:
-            full_url = "%s%s" % (self.protocol, full_url)
-        return "src='%s'" % self.add_suffix(full_url)
+        return self._converter(matchobj, 2, "src='%s'")
