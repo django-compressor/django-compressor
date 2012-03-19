@@ -11,6 +11,7 @@ from compressor.base import SOURCE_HUNK, SOURCE_FILE
 from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
+from compressor.exceptions import FilterDoesNotExist
 
 
 def css_tag(href, **kwargs):
@@ -153,6 +154,17 @@ class CompressorTestCase(TestCase):
         css_node = CssCompressor(css)
         output = BeautifulSoup(css_node.output('inline'))
         self.assertEqual(output.text, 'OUTPUT')
+        settings.COMPRESS_PRECOMPILERS = original_precompilers
+
+    def test_nonexistent_precompiler_error(self):
+        original_precompilers = settings.COMPRESS_PRECOMPILERS
+        settings.COMPRESS_ENABLED = True
+        settings.COMPRESS_PRECOMPILERS = (
+             ('text/foobar', 'compressor.tests.base.NonexistentFilter'),
+        )
+        css = '<style type="text/foobar">p { border:10px solid red;}</style>'
+        css_node = CssCompressor(css)
+        self.assertRaises(FilterDoesNotExist, css_node.output, 'inline')
         settings.COMPRESS_PRECOMPILERS = original_precompilers
 
 
