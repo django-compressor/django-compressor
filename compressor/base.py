@@ -13,7 +13,8 @@ from django.utils.importlib import import_module
 from compressor.cache import get_hexdigest, get_mtime
 
 from compressor.conf import settings
-from compressor.exceptions import CompressorError, UncompressableFileError
+from compressor.exceptions import (CompressorError, UncompressableFileError,
+        FilterDoesNotExist)
 from compressor.filters import CompilerFilter
 from compressor.storage import default_storage, compressor_file_storage
 from compressor.signals import post_compress
@@ -209,12 +210,16 @@ class Compressor(object):
             else:
                 mod_name, cls_name = get_mod_func(filter_or_command)
                 try:
-                    precompiler_class = getattr(import_module(mod_name),
-                            cls_name)
-                except (ImportError, AttributeError):
+                    mod = import_module(mod_name)
+                except ImportError:
                     return True, CompilerFilter(content, filter_type=self.type,
                             command=filter_or_command, filename=filename).input(
                             **kwargs)
+                try:
+                    precompiler_class = getattr(mod, cls_name)
+                except AttributeError:
+                    raise FilterDoesNotExist('Could not find "%s".' %
+                            filter_or_command)
                 else:
                     return True, precompiler_class(content,
                             filter_type=self.type, filename=filename).input(
