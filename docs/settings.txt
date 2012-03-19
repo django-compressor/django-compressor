@@ -212,18 +212,22 @@ Backend settings
     :Default: ``()``
 
     An iterable of two-tuples whose first item is the mimetype of the files or
-    hunks you want to compile with the command specified as the second item:
+    hunks you want to compile with the command or filter specified as the second
+    item:
 
     #. mimetype
         The mimetype of the file or inline code should that should be compiled.
 
-    #. command
+    #. command_or_filter
         The command to call on each of the files. Modern Python string
         formatting will be provided for the two placeholders ``{infile}`` and
         ``{outfile}`` whose existence in the command string also triggers the
         actual creation of those temporary files. If not given in the command
         string, Django Compressor will use ``stdin`` and ``stdout`` respectively
         instead.
+
+        Alternatively, you may provide the fully qualified class name of a
+        filter you wish to use as a precompiler.
 
     Example::
 
@@ -232,6 +236,7 @@ Backend settings
             ('text/less', 'lessc {infile} {outfile}'),
             ('text/x-sass', 'sass {infile} {outfile}'),
             ('text/x-scss', 'sass --scss {infile} {outfile}'),
+            ('text/foobar', 'path.to.MyPrecompilerFilter'),
         )
 
     .. note::
