@@ -8,6 +8,7 @@ from django.template import Context
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_unicode
 from django.utils.safestring import mark_safe
+from django.utils.importlib import import_module
 
 from compressor.cache import get_hexdigest, get_mtime
 
@@ -16,7 +17,7 @@ from compressor.exceptions import CompressorError, UncompressableFileError
 from compressor.filters import CompilerFilter
 from compressor.storage import default_storage, compressor_file_storage
 from compressor.signals import post_compress
-from compressor.utils import get_class, staticfiles
+from compressor.utils import get_class, get_mod_func, staticfiles
 from compressor.utils.decorators import cached_property
 
 # Some constants for nicer handling.
@@ -199,15 +200,25 @@ class Compressor(object):
         attrs = self.parser.elem_attribs(elem)
         mimetype = attrs.get("type", None)
         if mimetype:
-            command = self.all_mimetypes.get(mimetype)
-            if command is None:
+            filter_or_command = self.all_mimetypes.get(mimetype)
+            if filter_or_command is None:
                 if mimetype not in ("text/css", "text/javascript"):
                     raise CompressorError("Couldn't find any precompiler in "
                                           "COMPRESS_PRECOMPILERS setting for "
                                           "mimetype '%s'." % mimetype)
             else:
-                return True, CompilerFilter(content, filter_type=self.type,
-                    command=command, filename=filename).input(**kwargs)
+                mod_name, cls_name = get_mod_func(filter_or_command)
+                try:
+                    precompiler_class = getattr(import_module(mod_name),
+                            cls_name)
+                except (ImportError, AttributeError):
+                    return True, CompilerFilter(content, filter_type=self.type,
+                            command=filter_or_command, filename=filename).input(
+                            **kwargs)
+                else:
+                    return True, precompiler_class(content,
+                            filter_type=self.type, filename=filename).input(
+                            **kwargs)
         return False, content
 
     def filter(self, content, method, **kwargs):
