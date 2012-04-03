@@ -229,7 +229,9 @@ class Command(NoArgsCommand):
 
         if not compressor_nodes:
             raise OfflineGenerationError(
-                "No 'compress' template tags found in templates.")
+                "No 'compress' template tags found in templates."
+                "Try running compress command with --follow-links and/or"
+                "--extension=EXTENSIONS")
 
         if verbosity > 0:
             log.write("Found 'compress' tags in:\n\t" +
