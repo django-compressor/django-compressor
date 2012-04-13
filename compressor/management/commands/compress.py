@@ -165,9 +165,7 @@ class Command(NoArgsCommand):
             raise OfflineGenerationError("No template loaders defined. You "
                                          "must set TEMPLATE_LOADERS in your "
                                          "settings.")
-        templates = set()
-        if 'templates' in options:
-            templates.update(options.get('templates'))
+        templates = set(options.get('templates') or [])
         if not templates:
             paths = set()
             for loader in self.get_loaders():
