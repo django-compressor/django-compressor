@@ -1,8 +1,10 @@
 from __future__ import with_statement
 import os
 import codecs
+import urllib
 
 from django.core.files.base import ContentFile
+from django.core.files.storage import get_storage_class
 from django.template import Context
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_unicode
@@ -12,10 +14,10 @@ from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
 from compressor.exceptions import CompressorError, UncompressableFileError
 from compressor.filters import CompilerFilter
-from compressor.storage import default_storage
+from compressor.storage import default_storage, compressor_file_storage
 from compressor.signals import post_compress
 from compressor.utils import get_class, staticfiles
-from compressor.utils.decorators import cached_property, memoize
+from compressor.utils.decorators import cached_property
 
 # Some constants for nicer handling.
 SOURCE_HUNK, SOURCE_FILE = 'inline', 'file'
@@ -66,13 +68,17 @@ class Compressor(object):
         return os.path.join(self.output_dir, self.output_prefix, filename)
 
     def get_filename(self, basename):
-        # first try to find it with staticfiles (in debug mode)
         filename = None
+        # first try finding the file in the root
         if self.storage.exists(basename):
-            filename = self.storage.path(basename)
-        # secondly try finding the file in the root
+            try:
+                filename = self.storage.path(basename)
+            except NotImplementedError:
+                # remote storages don't implement path, access the file locally
+                filename = compressor_file_storage.path(basename)
+        # secondly try to find it with staticfiles (in debug mode)
         elif self.finders:
-            filename = self.finders.find(basename)
+            filename = self.finders.find(urllib.url2pathname(basename))
         if filename:
             return filename
         # or just raise an exception as the last resort
@@ -113,7 +119,6 @@ class Compressor(object):
         return get_hexdigest(''.join(
             [self.content] + self.mtimes).encode(self.charset), 12)
 
-    @memoize
     def hunks(self, mode='file', forced=False):
         """
         The heart of content parsing, iterates of the
@@ -151,7 +156,6 @@ class Compressor(object):
                 else:
                     yield mode, self.parser.elem_str(elem)
 
-    @memoize
     def filtered_output(self, content):
         """
         Passes the concatenated content to the 'output' methods
@@ -159,7 +163,6 @@ class Compressor(object):
         """
         return self.filter(content, method=METHOD_OUTPUT)
 
-    @memoize
     def filtered_input(self, mode='file', forced=False):
         """
         Passes each hunk (file or code) to the 'input' methods
@@ -261,6 +264,7 @@ class Compressor(object):
         final_context.update(self.context)
         final_context.update(context)
         final_context.update(self.extra_context)
-        post_compress.send(sender='django-compressor', type=self.type, mode=mode, context=final_context) 
+        post_compress.send(sender='django-compressor', type=self.type,
+                           mode=mode, context=final_context)
         return render_to_string("compressor/%s_%s.html" %
                                 (self.type, mode), final_context)

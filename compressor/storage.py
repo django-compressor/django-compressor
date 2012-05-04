@@ -3,7 +3,7 @@ from os import path
 from datetime import datetime
 
 from django.core.files.storage import FileSystemStorage, get_storage_class
-from django.utils.functional import LazyObject
+from django.utils.functional import LazyObject, SimpleLazyObject
 
 from compressor.conf import settings
 
@@ -40,6 +40,10 @@ class CompressorFileStorage(FileSystemStorage):
         if self.exists(name):
             self.delete(name)
         return name
+
+
+compressor_file_storage = SimpleLazyObject(
+    lambda: get_storage_class('compressor.storage.CompressorFileStorage')())
 
 
 class GzipCompressorFileStorage(CompressorFileStorage):
