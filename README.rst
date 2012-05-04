@@ -64,3 +64,4 @@ The `in-development version`_ of Django Compressor can be installed with
 .. _django_compressor.readthedocs.org: http://django_compressor.readthedocs.org/
 .. _github.com/jezdez/django_compressor: https://github.com/jezdez/django_compressor
 .. _in-development version: http://github.com/jezdez/django_compressor/tarball/develop#egg=django_compressor-dev
+
