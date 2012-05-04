@@ -63,11 +63,19 @@ def get_offline_manifest_filename():
 
 
 def get_offline_manifest():
-    filename = get_offline_manifest_filename()
-    if default_storage.exists(filename):
-        return simplejson.load(default_storage.open(filename))
-    else:
+    manifest = cache.get(simple_cachekey("manifest"))
+    if manifest is None:
+        filename = get_offline_manifest_filename()
+        if default_storage.exists(filename):
+            manifest = simplejson.load(default_storage.open(filename))
+            if manifest is not None:
+                cache.set(simple_cachekey("manifest"), manifest)
+                return manifest
+        
         return {}
+
+    return manifest
+    
 
 
 def write_offline_manifest(manifest):

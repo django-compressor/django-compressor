@@ -12,3 +12,4 @@ docs/_build/
 .coverage
 htmlcov
 .sass-cache
+.DS_Store
