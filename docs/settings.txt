@@ -122,8 +122,7 @@ Backend settings
 
       .. attribute:: COMPRESS_YUI_BINARY
 
-         The YUI compressor filesystem path. Make sure to also prepend this
-         setting with ``java -jar`` if you use that kind of distribution.
+         The YUI compressor binary. Command is prepended  with ``java -jar``.
 
       .. attribute:: COMPRESS_YUI_CSS_ARGUMENTS
 
