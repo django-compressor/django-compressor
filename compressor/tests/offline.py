@@ -222,3 +222,12 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
             self.assertTrue(isinstance(loaders[1], AppDirectoriesLoader))
         finally:
             settings.TEMPLATE_LOADERS = old_loaders
+
+    def test_offline_with_selected_template(self):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, templates=[self.template_path])
+        self.assertEqual(1, count)
+        self.assertEqual([
+            u'<script type="text/javascript" src="/media/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
+        ], result)
+        rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
+        self.assertEqual(rendered_template, "".join(result) + "\n")

@@ -104,6 +104,9 @@ class Command(NoArgsCommand):
                 "(which defaults to MEDIA_ROOT). Be aware that using this "
                 "can lead to infinite recursion if a link points to a parent "
                 "directory of itself.", dest='follow_links'),
+        make_option('-t', '--template', action='append', dest='templates',
+            help="The path to a specific template to compress."
+                "Select multiple templates by using -t multiple times.")
     )
 
     requires_model_validation = False
@@ -162,34 +165,35 @@ class Command(NoArgsCommand):
             raise OfflineGenerationError("No template loaders defined. You "
                                          "must set TEMPLATE_LOADERS in your "
                                          "settings.")
-        paths = set()
-        for loader in self.get_loaders():
-            try:
-                module = import_module(loader.__module__)
-                get_template_sources = getattr(module,
-                    'get_template_sources', None)
-                if get_template_sources is None:
-                    get_template_sources = loader.get_template_sources
-                paths.update(list(get_template_sources('')))
-            except (ImportError, AttributeError):
-                # Yeah, this didn't work out so well, let's move on
-                pass
-        if not paths:
-            raise OfflineGenerationError("No template paths found. None of "
-                                         "the configured template loaders "
-                                         "provided template paths. See "
-                                         "http://django.me/template-loaders "
-                                         "for more information on template "
-                                         "loaders.")
-        if verbosity > 1:
-            log.write("Considering paths:\n\t" + "\n\t".join(paths) + "\n")
-        templates = set()
-        for path in paths:
-            for root, dirs, files in walk(path,
-                    followlinks=options.get('followlinks', False)):
-                templates.update(os.path.join(root, name)
-                    for name in files if not name.startswith('.') and
-                        any(fnmatch(name, "*%s" % glob) for glob in extensions))
+        templates = set(options.get('templates') or [])
+        if not templates:
+            paths = set()
+            for loader in self.get_loaders():
+                try:
+                    module = import_module(loader.__module__)
+                    get_template_sources = getattr(module,
+                        'get_template_sources', None)
+                    if get_template_sources is None:
+                        get_template_sources = loader.get_template_sources
+                    paths.update(list(get_template_sources('')))
+                except (ImportError, AttributeError):
+                    # Yeah, this didn't work out so well, let's move on
+                    pass
+            if not paths:
+                raise OfflineGenerationError(
+                          "No template paths found. None of the configured "
+                          "template loaders provided template paths. See "
+                          "http://django.me/template-loaders for more "
+                          "information on template loaders.")
+            if verbosity > 1:
+                log.write("Considering paths:\n\t" + "\n\t".join(paths) + "\n")
+            for path in paths:
+                for root, dirs, files in walk(path,
+                        followlinks=options.get('followlinks', False)):
+                    templates.update(os.path.join(root, name)
+                        for name in files if not name.startswith('.') and
+                            any(fnmatch(name, "*%s" % glob)
+                                for glob in extensions))
         if not templates:
             raise OfflineGenerationError("No templates found. Make sure your "
                                          "TEMPLATE_LOADERS and TEMPLATE_DIRS "
