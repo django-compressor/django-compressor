@@ -105,10 +105,10 @@ Running the tests
 ^^^^^^^^^^^^^^^^^
 
 To run the tests simply install tox_, change your working directory to
-the ``tests`` directory and run ``tox`` in your shell. This will run the tests
-in Python 2.5, 2.6 and 2.7 (if appropriate binaries are found on the ``PATH``)
-with Django 1.2.X and 1.3.X. The docs will be automatically built, too.
-If you only want to run a specific environment, pass the ``-e`` option to
+the ``django_compressor`` directory and run ``tox`` in your shell. This will run
+the tests in Python 2.5, 2.6 and 2.7 (if appropriate binaries are found on the
+``PATH``) with Django 1.2.X and 1.3.X. The docs will be automatically built,
+too. If you only want to run a specific environment, pass the ``-e`` option to
 ``tox``, e.g. ``tox -e py25``. For more information see the `tox docs`_. An
 example:
 
