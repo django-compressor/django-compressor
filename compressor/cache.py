@@ -13,6 +13,7 @@ from django.utils.importlib import import_module
 from compressor.conf import settings
 from compressor.storage import default_storage
 from compressor.utils import get_mod_func
+from compressor.exceptions import OfflineGenerationError
 
 _cachekey_func = None
 
@@ -62,6 +63,35 @@ def get_offline_manifest_filename():
     return os.path.join(output_dir, settings.COMPRESS_OFFLINE_MANIFEST)
 
 
+def _get_manifest_cache_key(s):
+    return get_cachekey('manifest.%s' % s)
+
+
+def get_offline_value(key):
+    """Get the link corresponding to the specified key in OFFLINE mode."""
+    value = cache.get(_get_manifest_cache_key(key))
+    if value is not None:
+        return value
+
+    # Key is not in cache, we have to read it from manifest itself.
+    offline_manifest = get_offline_manifest()
+    if key in offline_manifest:
+        cache.set(_get_manifest_cache_key(key), offline_manifest[key])
+        return offline_manifest[key]
+    else:
+        raise OfflineGenerationError('You have offline compression '
+            'enabled but key "%s" is missing from offline manifest. '
+            'You may need to run "python manage.py compress".' % key)
+
+
+def _cache_manifest(manifest):
+    """Store the offline manifest to local cache."""
+    cached_manifest = {}
+    for k,v in manifest.items():
+        cache_key = _get_manifest_cache_key(k)
+        cached_manifest[cache_key] = v
+    cache.set_many(cached_manifest)
+
 _offline_manifest = None
 
 
@@ -86,6 +116,7 @@ def write_offline_manifest(manifest):
     default_storage.save(filename,
                          ContentFile(simplejson.dumps(manifest, indent=2)))
     flush_offline_manifest()
+    _cache_manifest(manifest)
 
 
 def get_templatetag_cachekey(compressor, mode, kind):
