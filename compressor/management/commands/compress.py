@@ -7,14 +7,14 @@ from optparse import make_option
 try:
     from cStringIO import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from StringIO import StringIO  # noqa
 
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import (Context, Template,
                              TemplateDoesNotExist, TemplateSyntaxError)
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
-from django.template.loader import get_template  # Leave this in to preload template locations
+from django.template.loader import get_template  # noqa Leave this in to preload template locations
 from django.template.defaulttags import IfNode
 from django.template.loader_tags import (ExtendsNode, BlockNode,
                                          BLOCK_CONTEXT_KEY)
@@ -22,13 +22,14 @@ from django.template.loader_tags import (ExtendsNode, BlockNode,
 try:
     from django.template.loaders.cached import Loader as CachedLoader
 except ImportError:
-    CachedLoader = None
+    CachedLoader = None  # noqa
 
 from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
 from compressor.utils import walk, any
+
 
 def patched_render(self, context):
     # 'Fake' _render method that just returns the context instead of
@@ -37,6 +38,7 @@ def patched_render(self, context):
     self._render_firstnode = MethodType(patched_render_firstnode, self)
     self._render_firstnode(context)
     return context
+
 
 def patched_render_firstnode(self, context):
     # If this template has a ExtendsNode, we want to find out what
@@ -75,6 +77,7 @@ def patched_render_firstnode(self, context):
                                 "template %s\n" % self)
             return None
     return extra_context
+
 
 def patched_get_parent(self, context):
     # Patch template returned by extendsnode's get_parent to make sure their
@@ -116,7 +119,7 @@ class Command(NoArgsCommand):
                     find_template as finder_func)
             except ImportError:
                 from django.template.loader import (
-                    find_template_source as finder_func)
+                    find_template_source as finder_func)  # noqa
             try:
                 # Force django to calculate template_source_loaders from
                 # TEMPLATE_LOADERS settings, by asking to find a dummy template

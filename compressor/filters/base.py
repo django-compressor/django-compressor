@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import os
 import logging
 import subprocess
-import tempfile
+
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 from django.utils.importlib import import_module

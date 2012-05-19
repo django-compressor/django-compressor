@@ -51,7 +51,7 @@ class CompressorFileStorage(FileSystemStorage):
             super(CompressorFileStorage, self).delete(name)
         except OSError, e:
             if e.errno != errno.ENOENT:
-                raise 
+                raise
 
 
 compressor_file_storage = SimpleLazyObject(

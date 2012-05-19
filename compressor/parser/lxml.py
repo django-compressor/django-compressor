@@ -27,7 +27,7 @@ class LxmlParser(ParserBase):
         content = '<root>%s</root>' % self.content
         tree = self.fromstring(content)
         try:
-            ignore = self.tostring(tree, encoding=unicode)
+            self.tostring(tree, encoding=unicode)
         except UnicodeDecodeError:
             tree = self.soupparser.fromstring(content)
         return tree

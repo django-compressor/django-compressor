@@ -4,7 +4,6 @@ import codecs
 import urllib
 
 from django.core.files.base import ContentFile
-from django.core.files.storage import get_storage_class
 from django.template import Context
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_unicode

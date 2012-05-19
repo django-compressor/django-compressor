@@ -1,6 +1,5 @@
 from compressor.conf import settings
 from compressor.base import Compressor, SOURCE_HUNK, SOURCE_FILE
-from compressor.exceptions import UncompressableFileError
 
 
 class JsCompressor(Compressor):

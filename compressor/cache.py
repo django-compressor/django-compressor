@@ -64,6 +64,7 @@ def get_offline_manifest_filename():
 
 _offline_manifest = None
 
+
 def get_offline_manifest():
     global _offline_manifest
     if _offline_manifest is None:
@@ -77,7 +78,7 @@ def get_offline_manifest():
 
 def flush_offline_manifest():
     global _offline_manifest
-    _offline_manifest = None    
+    _offline_manifest = None
 
 
 def write_offline_manifest(manifest):
