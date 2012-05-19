@@ -34,3 +34,5 @@ TEMPLATE_DIRS = (
 )
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+SECRET_KEY = "iufoj=mibkpdz*%bob952x(%49rqgv8gg45k36kjcg76&-y5=!"
