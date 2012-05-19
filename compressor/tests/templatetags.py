@@ -49,10 +49,10 @@ class TemplatetagTestCase(TestCase):
 
     def test_uppercase_rel(self):
         template = u"""{% load compress %}{% compress css %}
-        <link rel="StyleSheet" href="{{ MEDIA_URL }}css/one.css" type="text/css">
-        <style type="text/css">p { border:5px solid green;}</style>
-        <link rel="StyleSheet" href="{{ MEDIA_URL }}css/two.css" type="text/css">
-        {% endcompress %}"""
+<link rel="StyleSheet" href="{{ MEDIA_URL }}css/one.css" type="text/css">
+<style type="text/css">p { border:5px solid green;}</style>
+<link rel="StyleSheet" href="{{ MEDIA_URL }}css/two.css" type="text/css">
+{% endcompress %}"""
         out = css_tag("/media/CACHE/css/e41ba2cc6982.css")
         self.assertEqual(out, render(template, self.context))
 
