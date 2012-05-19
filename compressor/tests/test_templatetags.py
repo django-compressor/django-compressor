@@ -10,7 +10,7 @@ from django.test import TestCase
 
 from compressor.conf import settings
 from compressor.signals import post_compress
-from compressor.tests.base import css_tag, test_dir
+from compressor.tests.test_base import css_tag, test_dir
 
 
 def render(template_string, context_dict=None):

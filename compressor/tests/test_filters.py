@@ -13,7 +13,7 @@ from compressor.filters.base import CompilerFilter
 from compressor.filters.cssmin import CSSMinFilter
 from compressor.filters.css_default import CssAbsoluteFilter
 from compressor.filters.template import TemplateFilter
-from compressor.tests.base import test_dir
+from compressor.tests.test_base import test_dir
 
 
 class CssTidyTestCase(TestCase):

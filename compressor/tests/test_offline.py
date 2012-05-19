@@ -5,7 +5,7 @@ from unittest2 import skipIf
 try:
     from cStringIO import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from StringIO import StringIO  # noqa
 
 import django
 from django.template import Template, Context
