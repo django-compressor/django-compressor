@@ -17,7 +17,7 @@ else:
 
 INSTALLED_APPS = [
     'compressor',
-    'django_jenkins',
+    'django_nose',
 ]
 
 MEDIA_URL = '/media/'
@@ -33,9 +33,4 @@ TEMPLATE_DIRS = (
     os.path.join(TEST_DIR, 'test_templates'),
 )
 
-JENKINS_TASKS = (
-    'django_jenkins.tasks.run_pyflakes',
-    'django_jenkins.tasks.run_pep8',
-    'django_jenkins.tasks.with_coverage',
-    'django_jenkins.tasks.django_tests',
-)
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
