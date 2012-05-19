@@ -7,6 +7,8 @@ before_install:
   - export PIP_USE_MIRRORS=true
   - export PIP_INDEX_URL=https://simple.crate.io/
   - export DJANGO_SETTINGS_MODULE=compressor.test_settings
+  - sudo apt-get update
+  - sudo apt-get install csstidy python-lxml
 install:
   - pip install -e .
   - pip install -r requirements/tests.txt Django==$DJANGO
