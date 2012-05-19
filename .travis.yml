@@ -20,3 +20,5 @@ env:
 branches:
   only:
     - develop
+notifications:
+  irc: "irc.freenode.org#django-compressor"
