@@ -6,3 +6,4 @@ BeautifulSoup==3.2.0
 html5lib
 mock
 jinja2
+lxml
