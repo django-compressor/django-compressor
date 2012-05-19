@@ -27,21 +27,11 @@ _field_part_re = re.compile(
     r'(?(1)(?:\]|$)([^.[]+)?)'  # ']' and invalid tail
 )
 
-if hasattr(re, '__version__'):
-    _format_str_sub = _format_str_re.sub
-else:
-    # Python 2.4 fails to preserve the Unicode type
-    def _format_str_sub(repl, s):
-        if isinstance(s, unicode):
-            return unicode(_format_str_re.sub(repl, s))
-        return _format_str_re.sub(repl, s)
+_format_str_sub = _format_str_re.sub
 
-if hasattr(int, '__index__'):
-    def _is_integer(value):
-        return hasattr(value, '__index__')
-else:   # Python 2.4
-    def _is_integer(value):
-        return isinstance(value, (int, long))
+
+def _is_integer(value):
+    return hasattr(value, '__index__')
 
 
 def _strformat(value, format_spec=""):
