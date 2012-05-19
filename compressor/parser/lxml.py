@@ -34,7 +34,7 @@ class LxmlParser(ParserBase):
 
     def css_elems(self):
         return self.tree.xpath(
-            '//meta[re:test(., "^link\[\@rel=\"stylesheet\"\]|style$", "i")]',
+            '//meta[re:test(., "^link\\[@rel=\\"stylesheet\\"\\]|style$", "i")]',
             namespaces={"re": "http://exslt.org/regular-expressions"})
 
     def js_elems(self):
