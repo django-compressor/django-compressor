@@ -8,17 +8,6 @@ Author: Florent Xicluna
 
 import re
 
-if hasattr(str, 'partition'):
-    def partition(s, sep):
-        return s.partition(sep)
-else:   # Python 2.4
-    def partition(s, sep):
-        try:
-            left, right = s.split(sep, 1)
-        except ValueError:
-            return s, '', ''
-        return left, sep, right
-
 _format_str_re = re.compile(
     r'((?<!{)(?:{{)+'                       # '{{'
     r'|(?:}})+(?!})'                        # '}}
@@ -190,8 +179,8 @@ class FormattableString(object):
             assert part == part[0] * len(part)
             return part[:len(part) // 2]
         repl = part[1:-1]
-        field, _, format_spec = partition(repl, ':')
-        literal, sep, conversion = partition(field, '!')
+        field, _, format_spec = repl.partition(':')
+        literal, sep, conversion = field.partition('!')
         if sep and not conversion:
             raise ValueError("end of format while looking for "
                              "conversion specifier")

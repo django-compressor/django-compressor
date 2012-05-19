@@ -70,6 +70,7 @@ def get_pathext(default_pathext=None):
         default_pathext = os.pathsep.join(['.COM', '.EXE', '.BAT', '.CMD'])
     return os.environ.get('PATHEXT', default_pathext)
 
+
 def find_command(cmd, paths=None, pathext=None):
     """
     Searches the PATH for the given command and returns its path

@@ -117,7 +117,8 @@ class OfflineGenerationStaticTemplateTagTestCase(OfflineTestCaseMixin, TestCase)
     expected_hash = "dfa2bb387fa8"
 # This test uses {% static %} which was introduced in django 1.4
 OfflineGenerationStaticTemplateTagTestCase = skipIf(
-    django.VERSION[1] < 4, 'Django 1.4 not found') (OfflineGenerationStaticTemplateTagTestCase)
+    django.VERSION[1] < 4, 'Django 1.4 not found'
+)(OfflineGenerationStaticTemplateTagTestCase)
 
 
 class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):

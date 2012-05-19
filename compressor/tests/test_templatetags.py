@@ -106,8 +106,10 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
         """
+
         class MockDebugRequest(object):
             GET = {settings.COMPRESS_DEBUG_TOGGLE: 'true'}
+
         context = dict(self.context, request=MockDebugRequest())
         out = u"""<script src="/media/js/one.js" type="text/javascript"></script>
         <script type="text/javascript">obj.value = "value";</script>"""
@@ -118,6 +120,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
         """
+
         def listener(sender, **kwargs):
             pass
         callback = Mock(wraps=listener)
@@ -219,7 +222,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
             out = '\n'.join([
                     script(src="/media/CACHE/js/one.95cfb869eead.js"),
                     script(scripttype="", src="/media/js/one.js"),
-                    script(src="/media/CACHE/js/one.81a2cd965815.js"),])
+                    script(src="/media/CACHE/js/one.81a2cd965815.js")])
 
             self.assertEqual(out, render(template, self.context))
         finally:
@@ -263,6 +266,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
             self.assertEqual(out, render(template, self.context))
         finally:
             settings.COMPRESS_ENABLED = self.old_enabled
+
 
 def script(content="", src="", scripttype="text/javascript"):
     """

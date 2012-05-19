@@ -158,22 +158,22 @@ class CssMediaTestCase(TestCase):
         self.assertEqual(media, [l.get('media', None) for l in links])
 
     def test_passthough_when_compress_disabled(self):
-    	original_precompilers = settings.COMPRESS_PRECOMPILERS
+        original_precompilers = settings.COMPRESS_PRECOMPILERS
         settings.COMPRESS_ENABLED = False
         settings.COMPRESS_PRECOMPILERS = (
-   			 ('text/foobar', 'python %s {infile} {outfile}' % os.path.join(test_dir, 'precompiler.py')),
-		)
+            ('text/foobar', 'python %s {infile} {outfile}' % os.path.join(test_dir, 'precompiler.py')),
+        )
         css = """\
 <link rel="stylesheet" href="/media/css/one.css" type="text/css" media="screen">
 <link rel="stylesheet" href="/media/css/two.css" type="text/css" media="screen">
 <style type="text/foobar" media="screen">h1 { border:5px solid green;}</style>"""
         css_node = CssCompressor(css)
-        output = BeautifulSoup(css_node.output()).findAll(['link','style'])
-        self.assertEqual([u'/media/css/one.css', u'/media/css/two.css', None], 
+        output = BeautifulSoup(css_node.output()).findAll(['link', 'style'])
+        self.assertEqual([u'/media/css/one.css', u'/media/css/two.css', None],
                          [l.get('href', None) for l in output])
-        self.assertEqual([u'screen', u'screen', u'screen'], 
+        self.assertEqual([u'screen', u'screen', u'screen'],
                          [l.get('media', None) for l in output])
-    	settings.COMPRESS_PRECOMPILERS = original_precompilers
+        settings.COMPRESS_PRECOMPILERS = original_precompilers
 
 
 class VerboseTestCase(CompressorTestCase):

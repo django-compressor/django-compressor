@@ -84,4 +84,3 @@ BeautifulSoupParserTests = skipIf(
 
 class HtmlParserTests(ParserTestCase, CompressorTestCase):
     parser_cls = 'compressor.parser.HtmlParser'
-
