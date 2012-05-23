@@ -1,11 +1,7 @@
 from __future__ import with_statement
 import os
+from StringIO import StringIO
 from unittest2 import skipIf
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO  # noqa
 
 import django
 from django.template import Template, Context
