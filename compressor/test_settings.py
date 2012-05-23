@@ -17,7 +17,6 @@ else:
 
 INSTALLED_APPS = [
     'compressor',
-    'django_nose',
 ]
 
 MEDIA_URL = '/media/'
@@ -33,6 +32,6 @@ TEMPLATE_DIRS = (
     os.path.join(TEST_DIR, 'test_templates'),
 )
 
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+TEST_RUNNER = 'discover_runner.DiscoverRunner'
 
 SECRET_KEY = "iufoj=mibkpdz*%bob952x(%49rqgv8gg45k36kjcg76&-y5=!"
