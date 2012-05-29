@@ -70,6 +70,7 @@ class OfflineGenerationBlockSuperMultipleTestCase(OfflineTestCaseMixin, TestCase
     templates_dir = "test_block_super_multiple"
     expected_hash = "2f6ef61c488e"
 
+
 class OfflineGenerationBlockSuperMultipleWithCachedLoaderTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super_multiple_cached"
     expected_hash = "2f6ef61c488e"
