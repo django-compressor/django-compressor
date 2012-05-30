@@ -108,7 +108,7 @@ class CompressorMixin(object):
             rendered_output = self.render_output(compressor, mode, forced=forced)
             if cache_key:
                 cache_set(cache_key, rendered_output)
-            return rendered_output
+            return rendered_output.decode('utf-8')
         except Exception:
             if settings.DEBUG or forced:
                 raise
