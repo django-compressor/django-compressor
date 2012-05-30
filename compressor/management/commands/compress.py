@@ -38,6 +38,9 @@ def patched_render(self, context):
     # not, to be able to handle complex inheritance chain.
     self._render_firstnode = MethodType(patched_render_firstnode, self)
     self._render_firstnode(context)
+
+    # Cleanup, uninstall our _render monkeypatch now that it has been called
+    self._render = self._old_render
     return context
 
 
@@ -52,7 +55,10 @@ def patched_render_firstnode(self, context):
     # its get_parent method so that rendering the ExtendsNode only
     # gives us the blocks content without doing any actual rendering.
     extra_context = {}
-    firstnode = self.nodelist[0]
+    try:
+        firstnode = self.nodelist[0]
+    except IndexError:
+        firstnode = None
     if isinstance(firstnode, ExtendsNode):
         firstnode._log = self._log
         firstnode._log_verbosity = self._log_verbosity
@@ -75,8 +81,11 @@ def patched_render_firstnode(self, context):
             # as well.
             if self._log_verbosity > 0:
                 self._log.write("Caught error when rendering extend node from "
-                                "template %s\n" % self)
+                                "template %s\n" % getattr(self, 'name', self))
             return None
+        finally:
+            # Cleanup, uninstall our get_parent monkeypatch now that it has been called
+            firstnode.get_parent = firstnode._old_get_parent
     return extra_context
 
 
@@ -89,6 +98,7 @@ def patched_get_parent(self, context):
     compiled_template = self._old_get_parent(context)
     compiled_template._log = self._log
     compiled_template._log_verbosity = self._log_verbosity
+    compiled_template._old_render = compiled_template._render
     compiled_template._render = MethodType(patched_render, compiled_template)
     return compiled_template
 
