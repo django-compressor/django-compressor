@@ -10,13 +10,14 @@ Offline cache
 -------------
 
 If offline cache is activated, the first thing {% compress %} tries to do is
-retrieve the compressed version for its nodelist from the offline manifest
-cache. It doesn't parse, doesn't check the modified times of the files, doesn't
+retrieve the compressed version for its nodelist from the cache and, in case it
+is not found there, from the offline manifest cache.
+It doesn't parse, doesn't check the modified times of the files, doesn't
 even know which files are concerned actually, since it doesn't look inside the
 nodelist of the template block enclosed by the ``compress`` template tag.
 The offline cache manifest is just a json file, stored on disk inside the
 directory that holds the compressed files. The format of the manifest is simply
-a key <=> value dictionnary, with the hash of the nodelist being the key,
+a key <=> value dictionary, with the hash of the nodelist being the key,
 and the HTML containing the element code for the combined file or piece of code
 being the value. Generating the offline manifest, using the ``compress``
 management command, also generates the combined files referenced in the manifest.
