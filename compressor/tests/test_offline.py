@@ -2,13 +2,16 @@ from __future__ import with_statement
 import os
 from StringIO import StringIO
 from unittest2 import skipIf
+from mock import patch
 
 import django
 from django.template import Template, Context
 from django.test import TestCase
 from django.core.management.base import CommandError
 
-from compressor.cache import flush_offline_manifest, get_offline_manifest
+from compressor.cache import (flush_offline_manifest, get_offline_manifest,
+                              cache, _cache_manifest, _get_manifest_cache_key,
+                              write_offline_manifest)
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
@@ -41,6 +44,7 @@ class OfflineTestCaseMixin(object):
         self.template_path = os.path.join(settings.TEMPLATE_DIRS[0], self.template_name)
         self.template_file = open(self.template_path)
         self.template = Template(self.template_file.read().decode(settings.FILE_CHARSET))
+        cache.clear()
 
     def tearDown(self):
         settings.COMPRESS_ENABLED = self._old_compress
@@ -236,3 +240,42 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
             self.assertTrue(isinstance(loaders[1], AppDirectoriesLoader))
         finally:
             settings.TEMPLATE_LOADERS = old_loaders
+
+
+class ManifestCacheTestCase(OfflineTestCaseMixin, TestCase):
+    """Tests for caching the offline manifest."""
+
+    templates_dir = "basic"
+    expected_hash = "f5e179b8eca4"
+
+    def test_cache_generation(self):
+        """Test saving the manifest to cache."""
+        manifest = {'1': 'a', '2': 'b'}
+        _cache_manifest(manifest)
+        for k,v in manifest.items():
+            self.assertEqual(cache.get(_get_manifest_cache_key(k)), v)
+
+    def test_compress_caches_manifest(self):
+        """Test that the compress command caches the generated manifest."""
+        manifest = {'1': 'a', '2': 'b'}
+        with patch('compressor.cache._cache_manifest') as m:
+            write_offline_manifest(manifest)
+            m.assert_called_with(manifest)
+
+    def test_key_fetched_from_manifest_when_not_in_cache(self):
+        """
+        Test fetching a key that is not in cache will try to bring it from
+        the manifest file.
+        """
+        count, result = CompressCommand().compress(
+            log=self.log, verbosity=self.verbosity
+        )
+        cache.clear()
+        rendered_template = self.template.render(
+            Context(settings.COMPRESS_OFFLINE_CONTEXT)
+        )
+        self.assertEqual(rendered_template, "".join(result) + "\n")
+        manifest = get_offline_manifest()
+        for key in manifest:
+            actual_key = _get_manifest_cache_key(key)
+            self.assertIsNotNone(cache.get(actual_key))
