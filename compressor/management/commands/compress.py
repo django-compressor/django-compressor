@@ -176,81 +176,56 @@ class Command(NoArgsCommand):
             raise OfflineGenerationError("No template loaders defined. You "
                                          "must set TEMPLATE_LOADERS in your "
                                          "settings.")
-        paths = set()
-        for loader in self.get_loaders():
-            try:
-                module = import_module(loader.__module__)
-                get_template_sources = getattr(module,
-                    'get_template_sources', None)
-                if get_template_sources is None:
-                    get_template_sources = loader.get_template_sources
-                paths.update(list(get_template_sources('')))
-            except (ImportError, AttributeError):
-                # Yeah, this didn't work out so well, let's move on
-                pass
-        if not paths:
-            raise OfflineGenerationError("No template paths found. None of "
-                                         "the configured template loaders "
-                                         "provided template paths. See "
-                                         "http://django.me/template-loaders "
-                                         "for more information on template "
-                                         "loaders.")
-        if verbosity > 1:
-            log.write("Considering paths:\n\t" + "\n\t".join(paths) + "\n")
-        templates = set()
-        for path in paths:
-            for root, dirs, files in walk(path,
-                    followlinks=options.get('followlinks', False)):
-                templates.update(os.path.join(root, name)
-                    for name in files if not name.startswith('.') and
-                        any(fnmatch(name, "*%s" % glob) for glob in extensions))
-        if not templates:
-            raise OfflineGenerationError("No templates found. Make sure your "
-                                         "TEMPLATE_LOADERS and TEMPLATE_DIRS "
-                                         "settings are correct.")
-        if verbosity > 1:
-            log.write("Found templates:\n\t" + "\n\t".join(templates) + "\n")
-
         compressor_nodes = SortedDict()
-        for template_name in templates:
-            try:
-                template_file = open(template_name)
+        loaded_paths = set()
+
+        for loader in self.get_loaders():
+            template_paths = self.find_templates(loader,
+                                                 extensions,
+                                                 options.get('follow_links', False))
+
+            if verbosity > 1:
+                log.write("Considering paths:\n\t" + "\n\t".join(template_paths) + "\n")
+
+            for path in template_paths:
+                if path in loaded_paths:
+                    continue
                 try:
-                    template = Template(template_file.read().decode(
-                                        settings.FILE_CHARSET))
+                    template = Template(loader.load_template_source(path)[0])
+                except AttributeError, TemplateDoesNotExist:
+                    template = self.default_template_load(path)
                 finally:
-                    template_file.close()
-            except IOError:  # unreadable file -> ignore
-                if verbosity > 0:
-                    log.write("Unreadable template at: %s\n" % template_name)
-                continue
-            except TemplateSyntaxError, e:  # broken template -> ignore
-                if verbosity > 0:
-                    log.write("Invalid template %s: %s\n" % (template_name, e))
-                continue
-            except TemplateDoesNotExist:  # non existent template -> ignore
-                if verbosity > 0:
-                    log.write("Non-existent template at: %s\n" % template_name)
-                continue
-            except UnicodeDecodeError:
-                if verbosity > 0:
-                    log.write("UnicodeDecodeError while trying to read "
-                              "template %s\n" % template_name)
-            nodes = list(self.walk_nodes(template))
-            if nodes:
-                template.template_name = template_name
-                compressor_nodes.setdefault(template, []).extend(nodes)
+                    if template:
+                        loaded_paths.add(path)
+                        if verbosity > 1:
+                            log.write("Found template: " + path + "\n")
+                        nodes = list(self.walk_nodes(template))
+                        if nodes:
+                            template.template_name = path
+                            compressor_nodes.setdefault(template, []).extend(nodes)
+
+        # if not paths:
+        #     raise OfflineGenerationError("No template paths found. None of "
+        #                                  "the configured template loaders "
+        #                                  "provided template paths. See "
+        #                                  "http://django.me/template-loaders "
+        #                                  "for more information on template "
+        #                                  "loaders.")
+
+
+        # if not templates:
+        #     raise OfflineGenerationError("No templates found. Make sure your "
+        #                                  "TEMPLATE_LOADERS and TEMPLATE_DIRS "
+        #                                  "settings are correct.")
+
 
         if not compressor_nodes:
             raise OfflineGenerationError(
-                "No 'compress' template tags found in templates."
-                "Try running compress command with --follow-links and/or"
-                "--extension=EXTENSIONS")
+                "No 'compress' template tags found in templates.")
 
         if verbosity > 0:
             log.write("Found 'compress' tags in:\n\t" +
-                      "\n\t".join((t.template_name
-                                   for t in compressor_nodes.keys())) + "\n")
+                      "\n\t".join((t.template_name for t in compressor_nodes.keys())) + "\n")
 
         log.write("Compressing... ")
         count = 0
@@ -340,3 +315,42 @@ class Command(NoArgsCommand):
                     "Offline compression is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
         self.compress(sys.stdout, **options)
+
+    def find_templates(self, loader, extensions, followlinks):
+        paths = set()
+
+        try:
+            module = import_module(loader.__module__)
+            get_template_sources = getattr(module,
+                'get_template_sources', None)
+            if get_template_sources is None:
+                get_template_sources = loader.get_template_sources
+            paths.update(list(get_template_sources('')))
+        except (ImportError, AttributeError):
+            # Yeah, this didn't work out so well, let's move on
+            pass
+
+        # Find templates that the given loader is intended to handle.
+        templates = set()
+        for path in paths:
+            for root, dirs, files in walk(path, followlinks=followlinks):
+                templates.update(os.path.join(root, name)
+                    for name in files if not name.startswith('.') and
+                        any(fnmatch(name, "*%s" % glob) for glob in extensions))
+
+        return templates
+
+    def default_template_load(self, template_name):
+        try:
+            template_file = open(template_name)
+            try:
+                return Template(template_file.read().decode(
+                    settings.FILE_CHARSET))
+            finally:
+                template_file.close()
+        except IOError:  # unreadable file -> ignore
+            if verbosity > 0:
+                log.write("Unreadable template at: %s\n" % template_name)
+        except TemplateSyntaxError:  # broken template -> ignore
+            if verbosity > 0:
+                log.write("Invalid template at: %s\n" % template_name)
