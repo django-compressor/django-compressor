@@ -214,16 +214,7 @@ class Command(NoArgsCommand):
         compressor_nodes = SortedDict()
         for template_name in templates:
             try:
-                template_file = open(template_name)
-                try:
-                    template = Template(template_file.read().decode(
-                                        settings.FILE_CHARSET))
-                finally:
-                    template_file.close()
-            except IOError:  # unreadable file -> ignore
-                if verbosity > 0:
-                    log.write("Unreadable template at: %s\n" % template_name)
-                continue
+                template = get_template(template_name)
             except TemplateSyntaxError, e:  # broken template -> ignore
                 if verbosity > 0:
                     log.write("Invalid template %s: %s\n" % (template_name, e))
