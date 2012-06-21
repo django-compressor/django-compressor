@@ -193,11 +193,7 @@ class Command(NoArgsCommand):
                 try:
                     template = Template(loader.load_template_source(path)[0])
                 except AttributeError, TemplateDoesNotExist:
-                    template = self.default_template_load(path, verbosity)
-                except TemplateSyntaxError:  # broken template -> ignore
-                    if verbosity > 0:
-                        log.write("Invalid template at: %s\n" % template_name)
-                    continue
+                    template = self.default_template_load(path)
                 finally:
                     if template:
                         loaded_paths.add(path)
@@ -207,6 +203,21 @@ class Command(NoArgsCommand):
                         if nodes:
                             template.template_name = path
                             compressor_nodes.setdefault(template, []).extend(nodes)
+
+        # if not paths:
+        #     raise OfflineGenerationError("No template paths found. None of "
+        #                                  "the configured template loaders "
+        #                                  "provided template paths. See "
+        #                                  "http://django.me/template-loaders "
+        #                                  "for more information on template "
+        #                                  "loaders.")
+
+
+        # if not templates:
+        #     raise OfflineGenerationError("No templates found. Make sure your "
+        #                                  "TEMPLATE_LOADERS and TEMPLATE_DIRS "
+        #                                  "settings are correct.")
+
 
         if not compressor_nodes:
             raise OfflineGenerationError(
@@ -252,7 +263,6 @@ class Command(NoArgsCommand):
 
         log.write("done\nCompressed %d block(s) from %d template(s).\n" %
                   (count, len(compressor_nodes)))
-
         return count, results
 
     def get_nodelist(self, node):
@@ -320,14 +330,6 @@ class Command(NoArgsCommand):
             # Yeah, this didn't work out so well, let's move on
             pass
 
-        if not paths:
-            raise OfflineGenerationError("No template paths found. None of "
-                                         "the configured template loaders "
-                                         "provided template paths. See "
-                                         "http://django.me/template-loaders "
-                                         "for more information on template "
-                                         "loaders.")
-
         # Find templates that the given loader is intended to handle.
         templates = set()
         for path in paths:
@@ -336,14 +338,9 @@ class Command(NoArgsCommand):
                     for name in files if not name.startswith('.') and
                         any(fnmatch(name, "*%s" % glob) for glob in extensions))
 
-        if not templates:
-            raise OfflineGenerationError("No templates found. Make sure your "
-                                         "TEMPLATE_LOADERS and TEMPLATE_DIRS "
-                                         "settings are correct.")
-
         return templates
 
-    def default_template_load(self, template_name, verbosity):
+    def default_template_load(self, template_name):
         try:
             template_file = open(template_name)
             try:
