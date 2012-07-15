@@ -46,7 +46,7 @@ class CompressorTestCase(TestCase):
             (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css', u'two.css'), u'css/two.css', u'<link rel="stylesheet" href="/media/css/two.css" type="text/css" />'),
         ]
         split = self.css_node.split_contents()
-        split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3])) for x in split]
+        split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3][0])) for x in split]
         self.assertEqual(out, split)
 
     def test_css_hunks(self):
@@ -83,7 +83,7 @@ class CompressorTestCase(TestCase):
             (SOURCE_HUNK, u'obj.value = "value";', None, '<script type="text/javascript">obj.value = "value";</script>'),
         ]
         split = self.js_node.split_contents()
-        split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3])) for x in split]
+        split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3][0])) for x in split]
         self.assertEqual(out, split)
 
     def test_js_hunks(self):
@@ -133,6 +133,60 @@ class CompressorTestCase(TestCase):
             self.assertEqual(output, JsCompressor(self.js).output())
         finally:
             settings.COMPRESS_OUTPUT_DIR = old_output_dir
+
+
+def make_elems_str(parser, elems):
+    return "".join([parser.elem_str(x) for x in elems])
+
+
+class CompressorGroupFirstTestCase(TestCase):
+    def setUp(self):
+        settings.COMPRESS_ENABLED = True
+        settings.COMPRESS_PRECOMPILERS = {}
+        self.css = """\
+<link rel="stylesheet" href="/media/css/one.css" type="text/css" />
+<style type="text/css">p { border:5px solid green;}</style>
+<link rel="stylesheet" href="/media/css/one.less" type="text/less" />
+<link rel="stylesheet" href="/media/css/two.less" type="text/less" />"""
+        self.css_node = CssCompressor(self.css)
+        self.css_node.opts = {'group_first': 'true'}
+
+        self.js = """\
+<script src="/media/js/one.js" type="text/javascript"></script>
+<script type="text/javascript">obj.value = "value";</script>
+<script src="/media/js/one.coffee" type="text/coffeescript"></script>
+<script src="/media/js/two.coffee" type="text/coffeescript"></script>"""
+        self.js_node = JsCompressor(self.js)
+
+    def test_css_group(self):
+        out = [
+            [SOURCE_HUNK,
+             u'body { background:#990; }p { border:5px solid green;}',
+             u'css/one.css',
+             u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" /><style type="text/css">p { border:5px solid green;}</style>'],
+            [SOURCE_HUNK,
+             u'body { background:#990; }body { color:#fff; }',
+             u'css/one.less',
+             u'<link rel="stylesheet" href="/media/css/one.less" type="text/less" /><link rel="stylesheet" href="/media/css/two.less" type="text/less" />'],
+        ]
+        split = self.css_node.group_contents()
+        split = [[x[0], x[1], x[2], make_elems_str(self.css_node.parser, x[3])] for x in split]
+        self.assertEqual(out, split)
+
+    def test_js_group(self):
+        out = [
+            [SOURCE_HUNK,
+             u'obj = {};obj.value = "value";',
+             u'js/one.js',
+             '<script src="/media/js/one.js" type="text/javascript"></script><script type="text/javascript">obj.value = "value";</script>'],
+            [SOURCE_HUNK,
+             u'# this is a comment.\n# this is a comment.',
+             u'js/one.coffee',
+             '<script src="/media/js/one.coffee" type="text/coffeescript"></script><script src="/media/js/two.coffee" type="text/coffeescript"></script>'],
+        ]
+        split = self.js_node.group_contents()
+        split = [[x[0], x[1], x[2], make_elems_str(self.js_node.parser, x[3])] for x in split]
+        self.assertEqual(out, split)
 
 
 class CssMediaTestCase(TestCase):
