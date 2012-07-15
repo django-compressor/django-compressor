@@ -3,13 +3,14 @@ from __future__ import with_statement
 import os
 import sys
 
-from mock import Mock
+from mock import Mock, patch
 
 from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
 
 from compressor.conf import settings
 from compressor.signals import post_compress
+from compressor.templatetags.compress import CompressorNode
 from compressor.tests.test_base import css_tag, test_dir
 
 
@@ -116,7 +117,7 @@ class TemplatetagTestCase(TestCase):
         self.assertEqual(out, render(template, context))
 
     def test_named_compress_tag(self):
-        template = u"""{% load compress %}{% compress js inline foo %}
+        template = u"""{% load compress %}{% compress js inline as foo %}
         <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
         """
@@ -129,6 +130,26 @@ class TemplatetagTestCase(TestCase):
         args, kwargs = callback.call_args
         context = kwargs['context']
         self.assertEqual('foo', context['compressed']['name'])
+
+    @patch('compressor.templatetags.compress.CompressorNode', wraps=CompressorNode)
+    def test_tag_opts(self, mock_class):
+        template = u"""{% load compress %}{% compress js inline group_first=True %}
+        <script type="text/javascript">obj.value = "value";</script>
+        {% endcompress %}
+        """
+        render(template)
+        self.assertEqual(len(mock_class.mock_calls), 1)
+        self.assertEqual(len(mock_class.mock_calls[0][1]), 5)
+        self.assertDictEqual(mock_class.mock_calls[0][1][4], {'group_first': 'True'})
+
+    @patch('compressor.templatetags.compress.CompressorNode', wraps=CompressorNode)
+    def test_variable_tag_opts(self, mock_class):
+        template = u"""{% load compress %}{% compress js inline group_first=True %}
+        <script type="text/javascript">obj.value = "value";</script>
+        {% endcompress %}
+        """
+        render(template, {'group_first': True})
+        self.assertDictEqual(mock_class.mock_calls[0][1][4], {'group_first': 'True'})
 
 
 class PrecompilerTemplatetagTestCase(TestCase):
