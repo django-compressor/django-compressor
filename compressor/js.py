@@ -17,9 +17,9 @@ class JsCompressor(Compressor):
             if 'src' in attribs:
                 basename = self.get_basename(attribs['src'])
                 filename = self.get_filename(basename)
-                content = (SOURCE_FILE, filename, basename, elem)
+                content = (SOURCE_FILE, filename, basename, [elem])
                 self.split_content.append(content)
             else:
                 content = self.parser.elem_content(elem)
-                self.split_content.append((SOURCE_HUNK, content, None, elem))
+                self.split_content.append((SOURCE_HUNK, content, None, [elem]))
         return self.split_content

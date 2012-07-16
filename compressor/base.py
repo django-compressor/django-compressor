@@ -50,6 +50,28 @@ class Compressor(object):
         """
         raise NotImplementedError
 
+    def group_contents(self):
+        contents = []
+        groups = {}
+        for kind, value, basename, elems in self.split_contents():
+            attrs = self.parser.elem_attribs(elems[0])
+            charset = attrs.get("charset", self.charset)
+            mimetype = attrs.get("type", None)
+            if mimetype:
+                if kind == SOURCE_FILE:
+                    value = self.get_filecontent(value, charset)
+                idx = groups.get(mimetype, -1)
+                if idx >= 0:
+                    contents[idx][0] = SOURCE_HUNK
+                    contents[idx][1] += value
+                    contents[idx][3].extend(elems)
+                else:
+                    groups[mimetype] = len(contents)
+                    contents.append([kind, value, smart_unicode(basename), elems])
+            else:
+                contents.append([kind, value, basename, elems])
+        return contents
+
     def get_template_name(self, mode):
         """
         Returns the template path for the given mode.
@@ -147,14 +169,17 @@ class Compressor(object):
         bunch of precompiled and/or rendered hunks.
         """
         enabled = settings.COMPRESS_ENABLED or forced
+        group_first = getattr(self, 'opts', None) and self.opts.get('group_first', 'false').lowercase() == 'true'
+        contents = group_first and self.group_contents() or self.split_contents()
 
-        for kind, value, basename, elem in self.split_contents():
+        for kind, value, basename, elems in contents:
             precompiled = False
-            attribs = self.parser.elem_attribs(elem)
+            # If it's a grouped set, they should all have the same charset and type
+            attribs = self.parser.elem_attribs(elems[0])
             charset = attribs.get("charset", self.charset)
             options = {
                 'method': METHOD_INPUT,
-                'elem': elem,
+                'elems': elems,
                 'kind': kind,
                 'basename': basename,
             }
@@ -174,7 +199,7 @@ class Compressor(object):
                     value = self.handle_output(kind, value, forced=True, basename=basename)
                     yield smart_unicode(value, charset.lower())
                 else:
-                    yield self.parser.elem_str(elem)
+                    yield "\n".join([self.parser.elem_str(e) for e in elems])
 
     def filter_output(self, content):
         """
@@ -193,10 +218,10 @@ class Compressor(object):
             content.append(hunk)
         return content
 
-    def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
+    def precompile(self, content, kind=None, elems=None, filename=None, **kwargs):
         if not kind:
             return False, content
-        attrs = self.parser.elem_attribs(elem)
+        attrs = self.parser.elem_attribs(elems[0])
         mimetype = attrs.get("type", None)
         if mimetype:
             command = self.all_mimetypes.get(mimetype)
