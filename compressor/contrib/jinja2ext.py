@@ -19,7 +19,7 @@ class CompressorExtension(CompressorMixin, Extension):
         if args[0].value not in self.compressors:
             raise TemplateSyntaxError('compress kind may be one of: %s' %
                                       (', '.join(self.compressors.keys())),
-                                       lineno)
+                                      lineno)
         if parser.stream.skip_if('comma'):
             modearg = parser.parse_expression()
             # Allow mode to be defined as jinja2 name node
