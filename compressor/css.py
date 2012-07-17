@@ -4,9 +4,9 @@ from compressor.conf import settings
 
 class CssCompressor(Compressor):
 
-    def __init__(self, content=None, output_prefix="css", context=None):
+    def __init__(self, content=None, output_prefix="css", context=None, opts=None):
         super(CssCompressor, self).__init__(content=content,
-            output_prefix=output_prefix, context=context)
+            output_prefix=output_prefix, context=context, opts=opts)
         self.filters = list(settings.COMPRESS_CSS_FILTERS)
         self.type = output_prefix
 
