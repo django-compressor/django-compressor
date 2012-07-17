@@ -59,7 +59,7 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
             (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css', u'two.css'), u'css/two.css', u'<link href="/media/css/two.css" rel="stylesheet" type="text/css">'),
         ]
         split = self.css_node.split_contents()
-        split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3])) for x in split]
+        split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3][0])) for x in split]
         self.assertEqual(out, split)
 
     def test_js_split(self):
@@ -68,7 +68,7 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
             (SOURCE_HUNK, u'obj.value = "value";', None, u'<script type="text/javascript">obj.value = "value";</script>'),
         ]
         split = self.js_node.split_contents()
-        split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3])) for x in split]
+        split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3][0])) for x in split]
         self.assertEqual(out, split)
 
 Html5LibParserTests = skipIf(
