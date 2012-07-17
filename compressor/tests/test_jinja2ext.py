@@ -29,15 +29,15 @@ class TestJinja2CompressorExtension(TestCase):
 
     def test_error_raised_if_no_arguments_given(self):
         self.assertRaises(jinja2.exceptions.TemplateSyntaxError,
-            self.env.from_string, '{% compress %}Foobar{% endcompress %}')
+                          self.env.from_string, '{% compress %}Foobar{% endcompress %}')
 
     def test_error_raised_if_wrong_kind_given(self):
         self.assertRaises(jinja2.exceptions.TemplateSyntaxError,
-            self.env.from_string, '{% compress foo %}Foobar{% endcompress %}')
+                          self.env.from_string, '{% compress foo %}Foobar{% endcompress %}')
 
     def test_error_raised_if_wrong_mode_given(self):
         self.assertRaises(jinja2.exceptions.TemplateSyntaxError,
-            self.env.from_string, '{% compress css foo %}Foobar{% endcompress %}')
+                          self.env.from_string, '{% compress css foo %}Foobar{% endcompress %}')
 
     def test_compress_is_disabled(self):
         org_COMPRESS_ENABLED = settings.COMPRESS_ENABLED

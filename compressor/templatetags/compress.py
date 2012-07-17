@@ -35,7 +35,7 @@ class CompressorMixin(object):
 
     def get_compressor(self, context, kind):
         return self.compressor_cls(kind,
-            content=self.get_original_content(context), context=context)
+                                   content=self.get_original_content(context), context=context)
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
@@ -68,8 +68,8 @@ class CompressorMixin(object):
                 return offline_manifest[key]
             else:
                 raise OfflineGenerationError('You have offline compression '
-                    'enabled but key "%s" is missing from offline manifest. '
-                    'You may need to run "python manage.py compress".' % key)
+                                             'enabled but key "%s" is missing from offline manifest. '
+                                             'You may need to run "python manage.py compress".' % key)
 
     def render_cached(self, compressor, kind, mode, forced=False):
         """
@@ -92,7 +92,7 @@ class CompressorMixin(object):
         # Take a shortcut if we really don't have anything to do
         if ((not settings.COMPRESS_ENABLED and
                 not settings.COMPRESS_PRECOMPILERS)
-                    and not forced):
+                and not forced):
             return self.get_original_content(context)
 
         context['compressed'] = {'name': getattr(self, 'name', None)}

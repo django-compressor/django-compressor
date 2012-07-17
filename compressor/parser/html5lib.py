@@ -18,7 +18,7 @@ class Html5LibParser(ParserBase):
         fragment = self.html5lib.treebuilders.simpletree.DocumentFragment()
         fragment.appendChild(elem)
         return self.html5lib.serialize(fragment,
-            quote_attr_values=True, omit_optional_tags=False)
+                                       quote_attr_values=True, omit_optional_tags=False)
 
     def _find(self, *names):
         for node in self.html.childNodes:

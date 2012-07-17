@@ -62,7 +62,7 @@ def _strformat(value, format_spec=""):
         pass
     try:
         if ((is_numeric and conversion == 's') or
-            (not is_integer and conversion in set('cdoxX'))):
+                (not is_integer and conversion in set('cdoxX'))):
             raise ValueError
         if conversion == 'c':
             conversion = 's'
@@ -246,7 +246,7 @@ def selftest():
     F = FormattableString
 
     assert F(u"{0:{width}.{precision}s}").format('hello world',
-             width=8, precision=5) == u'hello   '
+                                                 width=8, precision=5) == u'hello   '
 
     d = datetime.date(2010, 9, 7)
     assert F(u"The year is {0.year}").format(d) == u"The year is 2010"

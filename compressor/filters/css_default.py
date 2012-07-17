@@ -38,7 +38,7 @@ class CssAbsoluteFilter(FilterBase):
             self.host = parts[2]
         self.directory_name = '/'.join((self.url, os.path.dirname(self.path)))
         return SRC_PATTERN.sub(self.src_converter,
-            URL_PATTERN.sub(self.url_converter, self.content))
+                               URL_PATTERN.sub(self.url_converter, self.content))
 
     def find(self, basename):
         if settings.DEBUG and basename and staticfiles.finders:

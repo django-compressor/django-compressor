@@ -171,7 +171,7 @@ p { background: url('/media/img/python.png?%(hash1)s'); }
 p { background: url('/media/img/python.png?%(hash1)s'); }
 p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/media/img/python.png?%(hash1)s'); }
 """ % hash_dict,
-               u"""\
+                         u"""\
 p { background: url('/media/img/add.png?%(hash2)s'); }
 p { background: url('/media/img/add.png?%(hash2)s'); }
 p { background: url('/media/img/add.png?%(hash2)s'); }

@@ -7,11 +7,11 @@ import sys
 def main():
     p = optparse.OptionParser()
     p.add_option('-f', '--file', action="store",
-                type="string", dest="filename",
-                help="File to read from, defaults to stdin", default=None)
+                 type="string", dest="filename",
+                 help="File to read from, defaults to stdin", default=None)
     p.add_option('-o', '--output', action="store",
-                type="string", dest="outfile",
-                help="File to write to, defaults to stdout", default=None)
+                 type="string", dest="outfile",
+                 help="File to write to, defaults to stdout", default=None)
 
     options, arguments = p.parse_args()
 

@@ -113,7 +113,7 @@ class Compressor(object):
                 return fd.read()
             except IOError, e:
                 raise UncompressableFileError("IOError while processing "
-                                               "'%s': %s" % (filename, e))
+                                              "'%s': %s" % (filename, e))
             except UnicodeDecodeError, e:
                 raise UncompressableFileError("UnicodeDecodeError while "
                                               "processing '%s' with "
@@ -207,7 +207,7 @@ class Compressor(object):
                                           "mimetype '%s'." % mimetype)
             else:
                 return True, CompilerFilter(content, filter_type=self.type,
-                    command=command, filename=filename).input(**kwargs)
+                                            command=command, filename=filename).input(**kwargs)
         return False, content
 
     def filter(self, content, method, **kwargs):

@@ -19,7 +19,7 @@ class CompressorExtension(CompressorMixin, Extension):
         if args[0].value not in self.compressors:
             raise TemplateSyntaxError('compress kind may be one of: %s' %
                                       (', '.join(self.compressors.keys())),
-                                       lineno)
+                                      lineno)
         if parser.stream.skip_if('comma'):
             modearg = parser.parse_expression()
             # Allow mode to be defined as jinja2 name node
@@ -30,7 +30,7 @@ class CompressorExtension(CompressorMixin, Extension):
             args.append(nodes.Const('file'))
         body = parser.parse_statements(['name:endcompress'], drop_needle=True)
         return nodes.CallBlock(self.call_method('_compress', args), [], [],
-            body).set_lineno(lineno)
+                               body).set_lineno(lineno)
 
     def _compress(self, kind, mode, caller):
         # This extension assumes that we won't force compression

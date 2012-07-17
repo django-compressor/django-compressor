@@ -115,7 +115,7 @@ class CompilerFilter(FilterBase):
         try:
             command = fstr(self.command).format(**options)
             proc = subprocess.Popen(command, shell=True, cwd=self.cwd,
-                stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
+                                    stdout=self.stdout, stdin=self.stdin, stderr=self.stderr)
             if self.infile is None:
                 filtered, err = proc.communicate(self.content.encode('utf8'))
             else:
