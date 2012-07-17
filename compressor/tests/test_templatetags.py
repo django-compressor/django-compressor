@@ -219,10 +219,9 @@ class PrecompilerTemplatetagTestCase(TestCase):
             </script>
             {% endcompress %}"""
 
-            out = '\n'.join([
-                    script(src="/media/CACHE/js/one.95cfb869eead.js"),
-                    script(scripttype="", src="/media/js/one.js"),
-                    script(src="/media/CACHE/js/one.81a2cd965815.js")])
+            out = '\n'.join([script(src="/media/CACHE/js/one.95cfb869eead.js"),
+                             script(scripttype="", src="/media/js/one.js"),
+                             script(src="/media/CACHE/js/one.81a2cd965815.js")])
 
             self.assertEqual(out, render(template, self.context))
         finally:
@@ -239,9 +238,8 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/two.css"></link>
             {% endcompress %}"""
 
-            out = ''.join([
-                    '<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
-                    '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />'])
+            out = ''.join(['<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
+                           '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />'])
 
             self.assertEqual(out, render(template, self.context))
         finally:
@@ -259,10 +257,9 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <link rel="stylesheet" type="text/less" href="{{ MEDIA_URL }}css/url/test.css"/>
             {% endcompress %}"""
 
-            out = ''.join([
-                    '<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
-                    '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />',
-                    '<link rel="stylesheet" href="/media/CACHE/css/test.c4f8a285c249.css" type="text/css" />'])
+            out = ''.join(['<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
+                           '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />',
+                           '<link rel="stylesheet" href="/media/CACHE/css/test.c4f8a285c249.css" type="text/css" />'])
             self.assertEqual(out, render(template, self.context))
         finally:
             settings.COMPRESS_ENABLED = self.old_enabled

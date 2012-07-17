@@ -91,8 +91,7 @@ class CompressorMixin(object):
 
         # Take a shortcut if we really don't have anything to do
         if ((not settings.COMPRESS_ENABLED and
-                not settings.COMPRESS_PRECOMPILERS)
-                    and not forced):
+             not settings.COMPRESS_PRECOMPILERS) and not forced):
             return self.get_original_content(context)
 
         context['compressed'] = {'name': getattr(self, 'name', None)}
