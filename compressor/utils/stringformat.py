@@ -61,8 +61,7 @@ def _strformat(value, format_spec=""):
         # TODO: thousand separator
         pass
     try:
-        if ((is_numeric and conversion == 's') or
-            (not is_integer and conversion in set('cdoxX'))):
+        if ((is_numeric and conversion == 's') or (not is_integer and conversion in set('cdoxX'))):
             raise ValueError
         if conversion == 'c':
             conversion = 's'
