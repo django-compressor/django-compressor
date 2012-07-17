@@ -59,10 +59,14 @@ class Compressor(object):
             charset = attrs.get("charset", self.charset)
             mimetype = attrs.get("type", None)
             if mimetype:
-                if kind == SOURCE_FILE:
-                    value = self.get_filecontent(value, charset)
                 idx = groups.get(mimetype, -1)
                 if idx >= 0:
+                    # get the content of this elem if it's a file
+                    if kind == SOURCE_FILE:
+                        value = self.get_filecontent(value, charset)
+                    # if there is only 1 existing and it's a file, convert it too
+                    if len(contents[idx][3]) == 1 and contents[idx][0] == SOURCE_FILE:
+                        contents[idx][1] = self.get_filecontent(contents[idx][1], charset)
                     contents[idx][0] = SOURCE_HUNK
                     contents[idx][1] += value
                     contents[idx][3].extend(elems)

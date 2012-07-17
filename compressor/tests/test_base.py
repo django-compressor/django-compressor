@@ -173,6 +173,19 @@ class CompressorGroupFirstTestCase(TestCase):
         split = [[x[0], x[1], x[2], make_elems_str(self.css_node.parser, x[3])] for x in split]
         self.assertEqual(out, split)
 
+    def test_css_single(self):
+        css_node = CssCompressor("""<link rel="stylesheet" href="/media/css/one.css" type="text/css" />""")
+        css_node.opts = {'group_first': 'true'}
+        out = [
+            [SOURCE_FILE,
+             os.path.join(settings.COMPRESS_ROOT, u'css', u'one.css'),
+             u'css/one.css',
+             u'<link rel="stylesheet" href="/media/css/one.css" type="text/css" />'],
+        ]
+        split = css_node.group_contents()
+        split = [[x[0], x[1], x[2], make_elems_str(self.css_node.parser, x[3])] for x in split]
+        self.assertEqual(out, split)
+
     def test_js_group(self):
         out = [
             [SOURCE_HUNK,
