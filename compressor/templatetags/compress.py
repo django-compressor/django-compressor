@@ -1,3 +1,5 @@
+import re
+
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 
@@ -83,16 +85,17 @@ class CompressorMixin(object):
         return None, None
 
     def render_compressed(self, context, kind, mode, tag_opts=None, forced=False):
+        deferred = getattr(self, 'name', None) and tag_opts and tag_opts.get('deferred', 'false') == 'true'
 
         # See if it has been rendered offline
         cached_offline = self.render_offline(context, forced=forced)
         if cached_offline:
-            return cached_offline
+            return self.render_result(cached_offline, context, deferred, mode)
 
         # Take a shortcut if we really don't have anything to do
         if ((not settings.COMPRESS_ENABLED and
              not settings.COMPRESS_PRECOMPILERS) and not forced):
-            return self.get_original_content(context)
+            return self.render_result(self.get_original_content(context), context, deferred, mode)
 
         context['compressed'] = {'name': getattr(self, 'name', None)}
         compressor = self.get_compressor(context, kind, tag_opts)
@@ -100,23 +103,34 @@ class CompressorMixin(object):
         # Prepare the actual compressor and check cache
         cache_key, cache_content = self.render_cached(compressor, kind, mode, forced=forced)
         if cache_content is not None:
-            return cache_content
+            return self.render_result(cache_content, context, deferred, mode)
 
         # call compressor output method and handle exceptions
         try:
             rendered_output = self.render_output(compressor, mode, forced=forced)
             if cache_key:
                 cache_set(cache_key, rendered_output)
-            return rendered_output.decode('utf-8')
+            return self.render_result(rendered_output.decode('utf-8'), context, deferred, mode)
         except Exception:
             if settings.DEBUG or forced:
                 raise
 
         # Or don't do anything in production
-        return self.get_original_content(context)
+        return self.render_result(self.get_original_content(context), context, deferred)
 
     def render_output(self, compressor, mode, forced=False):
         return compressor.output(mode, forced=forced)
+
+    def render_result(self, content, context, deferred, mode):
+        if deferred:
+            if mode == OUTPUT_FILE:
+                match = re.search(r'(?:src|href)=["\']([^"\']+)', content)
+                if match:
+                    context[self.name] = match.group(1)
+                    return ""
+            context[self.name] = content
+            return ""
+        return content
 
 
 class CompressorNode(CompressorMixin, template.Node):

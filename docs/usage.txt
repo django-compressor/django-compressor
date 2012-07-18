@@ -130,6 +130,12 @@ group_first
     files to be processed together, as one might desire if they are maintaining a 'mixins.less'
     separate from page-specific .less files
 
+deferred
+    If true, instead of rendering the result of the compress tag into the template, the content
+    will be added to the template context under the name specified by the 'as <name>' tag argument.
+    If no name is specified, the content will be rendered normally.  If the tag would have
+    rendered to a file, the url of that file is contained in the template variable.
+
 .. _memcached: http://memcached.org/
 .. _caching documentation: http://docs.djangoproject.com/en/1.2/topics/cache/#memcached
 

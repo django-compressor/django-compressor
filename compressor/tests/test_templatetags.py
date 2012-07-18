@@ -151,6 +151,36 @@ class TemplatetagTestCase(TestCase):
         render(template, {'group_first': True})
         self.assertDictEqual(mock_class.mock_calls[0][1][4], {'group_first': 'True'})
 
+    def test_deferred(self):
+        template = u"""{% load compress %}{% compress js inline as foo deferred=true %}
+        <script type="text/javascript">obj.value = "value2";</script>
+        {% endcompress %}
+        """
+        out = u''
+        self.assertEqual(out, render(template))
+
+    def test_deferred_no_name(self):
+        template = u"""{% load compress %}{% compress js inline deferred=true %}
+        <script type="text/javascript">obj.value = "value2";</script>
+        {% endcompress %}
+        """
+        out = u"""<script type="text/javascript">obj.value="value2";</script>"""
+        self.assertEqual(out, render(template, self.context))
+
+    def test_deferred_placement(self):
+        template = u"""{% load compress %}{% spaceless %}{% compress js as foo deferred=true %}
+        <script type="text/javascript">obj.value = "value2";</script>
+        {% endcompress %}
+        {% compress css as bar deferred=true %}
+        <style type="text/css">p { border:6px solid green;}</style>
+        {% endcompress %}
+        <div>{{ foo }}</div>
+        <div>{{ bar }}</div>
+        {% endspaceless%}
+        """
+        out = u"""<div>/media/CACHE/js/47dbcda655c0.js</div><div>/media/CACHE/css/cfc168f9ca05.css</div>"""
+        self.assertEqual(out, render(template, self.context))
+
 
 class PrecompilerTemplatetagTestCase(TestCase):
     def setUp(self):
