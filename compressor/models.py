@@ -1,1 +1,1 @@
-from compressor.conf import CompressorConf
+from compressor.conf import CompressorConf  # noqa

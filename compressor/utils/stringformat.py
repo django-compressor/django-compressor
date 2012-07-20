@@ -8,17 +8,6 @@ Author: Florent Xicluna
 
 import re
 
-if hasattr(str, 'partition'):
-    def partition(s, sep):
-        return s.partition(sep)
-else:   # Python 2.4
-    def partition(s, sep):
-        try:
-            left, right = s.split(sep, 1)
-        except ValueError:
-            return s, '', ''
-        return left, sep, right
-
 _format_str_re = re.compile(
     r'((?<!{)(?:{{)+'                       # '{{'
     r'|(?:}})+(?!})'                        # '}}
@@ -38,21 +27,11 @@ _field_part_re = re.compile(
     r'(?(1)(?:\]|$)([^.[]+)?)'  # ']' and invalid tail
 )
 
-if hasattr(re, '__version__'):
-    _format_str_sub = _format_str_re.sub
-else:
-    # Python 2.4 fails to preserve the Unicode type
-    def _format_str_sub(repl, s):
-        if isinstance(s, unicode):
-            return unicode(_format_str_re.sub(repl, s))
-        return _format_str_re.sub(repl, s)
+_format_str_sub = _format_str_re.sub
 
-if hasattr(int, '__index__'):
-    def _is_integer(value):
-        return hasattr(value, '__index__')
-else:   # Python 2.4
-    def _is_integer(value):
-        return isinstance(value, (int, long))
+
+def _is_integer(value):
+    return hasattr(value, '__index__')
 
 
 def _strformat(value, format_spec=""):
@@ -82,8 +61,7 @@ def _strformat(value, format_spec=""):
         # TODO: thousand separator
         pass
     try:
-        if ((is_numeric and conversion == 's') or
-            (not is_integer and conversion in set('cdoxX'))):
+        if ((is_numeric and conversion == 's') or (not is_integer and conversion in set('cdoxX'))):
             raise ValueError
         if conversion == 'c':
             conversion = 's'
@@ -190,8 +168,8 @@ class FormattableString(object):
             assert part == part[0] * len(part)
             return part[:len(part) // 2]
         repl = part[1:-1]
-        field, _, format_spec = partition(repl, ':')
-        literal, sep, conversion = partition(field, '!')
+        field, _, format_spec = repl.partition(':')
+        literal, sep, conversion = field.partition('!')
         if sep and not conversion:
             raise ValueError("end of format while looking for "
                              "conversion specifier")

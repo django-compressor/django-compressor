@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import with_statement
 
 from django.test import TestCase
@@ -5,7 +6,7 @@ from django.test import TestCase
 import jinja2
 
 from compressor.conf import settings
-from compressor.tests.base import css_tag
+from compressor.tests.test_base import css_tag
 
 
 class TestJinja2CompressorExtension(TestCase):
@@ -122,4 +123,16 @@ class TestJinja2CompressorExtension(TestCase):
         {% endcompress %}""")
         context = {'MEDIA_URL': settings.COMPRESS_URL}
         out = '<script type="text/javascript">obj={};obj.value="value";</script>'
+        self.assertEqual(out, template.render(context))
+
+    def test_nonascii_inline_css(self):
+        org_COMPRESS_ENABLED = settings.COMPRESS_ENABLED
+        settings.COMPRESS_ENABLED = False
+        template = self.env.from_string(u'{% compress css %}'
+                                        u'<style type="text/css">'
+                                        u'/* русский текст */'
+                                        u'</style>{% endcompress %}')
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/b2cec0f8cb24.css" type="text/css" />'
+        settings.COMPRESS_ENABLED = org_COMPRESS_ENABLED
+        context = {'MEDIA_URL': settings.COMPRESS_URL}
         self.assertEqual(out, template.render(context))

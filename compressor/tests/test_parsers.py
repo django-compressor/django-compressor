@@ -21,7 +21,7 @@ except ImportError:
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
 from compressor.conf import settings
 from compressor.css import CssCompressor
-from compressor.tests.base import CompressorTestCase
+from compressor.tests.test_base import CompressorTestCase
 
 
 class ParserTestCase(object):
@@ -84,4 +84,3 @@ BeautifulSoupParserTests = skipIf(
 
 class HtmlParserTests(ParserTestCase, CompressorTestCase):
     parser_cls = 'compressor.parser.HtmlParser'
-

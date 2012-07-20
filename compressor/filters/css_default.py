@@ -2,8 +2,7 @@ import os
 import re
 import posixpath
 
-from compressor.cache import (get_hexdigest, get_hashed_mtime,
-                              get_hashed_content)
+from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
 from compressor.utils import staticfiles

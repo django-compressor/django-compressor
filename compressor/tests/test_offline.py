@@ -1,11 +1,7 @@
 from __future__ import with_statement
 import os
+from StringIO import StringIO
 from unittest2 import skipIf
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
 
 import django
 from django.template import Template, Context
@@ -31,14 +27,13 @@ class OfflineTestCaseMixin(object):
         self._old_compress_offline = settings.COMPRESS_OFFLINE
         self._old_template_dirs = settings.TEMPLATE_DIRS
         self._old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
-        self._old_template_loaders = settings.TEMPLATE_LOADERS
         self.log = StringIO()
 
-        # Force template dirs, because it enables us to force compress to
+        # Reset template dirs, because it enables us to force compress to
         # consider only a specific directory (helps us make true,
         # independant unit tests).
         settings.TEMPLATE_DIRS = (
-            os.path.join(settings.TEMPLATE_DIRS[0], self.templates_dir),
+            os.path.join(settings.TEST_DIR, 'test_templates', self.templates_dir),
         )
         # Enable offline compress
         settings.COMPRESS_ENABLED = True
@@ -51,7 +46,6 @@ class OfflineTestCaseMixin(object):
         settings.COMPRESS_ENABLED = self._old_compress
         settings.COMPRESS_OFFLINE = self._old_compress_offline
         settings.TEMPLATE_DIRS = self._old_template_dirs
-        settings.TEMPLATE_LOADERS = self._old_template_loaders
         self.template_file.close()
         manifest_path = os.path.join('CACHE', 'manifest.json')
         if default_storage.exists(manifest_path):
@@ -75,6 +69,25 @@ class OfflineGenerationBlockSuperTestCase(OfflineTestCaseMixin, TestCase):
 class OfflineGenerationBlockSuperMultipleTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super_multiple"
     expected_hash = "2f6ef61c488e"
+
+
+class OfflineGenerationBlockSuperMultipleWithCachedLoaderTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = "test_block_super_multiple_cached"
+    expected_hash = "2f6ef61c488e"
+
+    def setUp(self):
+        self._old_template_loaders = settings.TEMPLATE_LOADERS
+        settings.TEMPLATE_LOADERS = (
+            ('django.template.loaders.cached.Loader', (
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            )),
+        )
+        super(OfflineGenerationBlockSuperMultipleWithCachedLoaderTestCase, self).setUp()
+
+    def tearDown(self):
+        super(OfflineGenerationBlockSuperMultipleWithCachedLoaderTestCase, self).tearDown()
+        settings.TEMPLATE_LOADERS = self._old_template_loaders
 
 
 class OfflineGenerationBlockSuperTestCaseWithExtraContent(OfflineTestCaseMixin, TestCase):
@@ -117,7 +130,8 @@ class OfflineGenerationStaticTemplateTagTestCase(OfflineTestCaseMixin, TestCase)
     expected_hash = "dfa2bb387fa8"
 # This test uses {% static %} which was introduced in django 1.4
 OfflineGenerationStaticTemplateTagTestCase = skipIf(
-    django.VERSION[1] < 4, 'Django 1.4 not found') (OfflineGenerationStaticTemplateTagTestCase)
+    django.VERSION[1] < 4, 'Django 1.4 not found'
+)(OfflineGenerationStaticTemplateTagTestCase)
 
 
 class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):

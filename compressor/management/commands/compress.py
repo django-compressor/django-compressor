@@ -1,3 +1,4 @@
+# flake8: noqa
 import os
 import sys
 from types import MethodType
@@ -7,14 +8,14 @@ from optparse import make_option
 try:
     from cStringIO import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from StringIO import StringIO  # noqa
 
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import (Context, Template,
                              TemplateDoesNotExist, TemplateSyntaxError)
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
-from django.template.loader import get_template  # Leave this in to preload template locations
+from django.template.loader import get_template  # noqa Leave this in to preload template locations
 from django.template.defaulttags import IfNode
 from django.template.loader_tags import (ExtendsNode, BlockNode,
                                          BLOCK_CONTEXT_KEY)
@@ -22,7 +23,7 @@ from django.template.loader_tags import (ExtendsNode, BlockNode,
 try:
     from django.template.loaders.cached import Loader as CachedLoader
 except ImportError:
-    CachedLoader = None
+    CachedLoader = None  # noqa
 
 from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
@@ -30,13 +31,18 @@ from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
 from compressor.utils import walk, any
 
+
 def patched_render(self, context):
     # 'Fake' _render method that just returns the context instead of
     # rendering. It also checks whether the first node is an extend node or
     # not, to be able to handle complex inheritance chain.
     self._render_firstnode = MethodType(patched_render_firstnode, self)
     self._render_firstnode(context)
+
+    # Cleanup, uninstall our _render monkeypatch now that it has been called
+    self._render = self._old_render
     return context
+
 
 def patched_render_firstnode(self, context):
     # If this template has a ExtendsNode, we want to find out what
@@ -49,7 +55,10 @@ def patched_render_firstnode(self, context):
     # its get_parent method so that rendering the ExtendsNode only
     # gives us the blocks content without doing any actual rendering.
     extra_context = {}
-    firstnode = self.nodelist[0]
+    try:
+        firstnode = self.nodelist[0]
+    except IndexError:
+        firstnode = None
     if isinstance(firstnode, ExtendsNode):
         firstnode._log = self._log
         firstnode._log_verbosity = self._log_verbosity
@@ -72,9 +81,13 @@ def patched_render_firstnode(self, context):
             # as well.
             if self._log_verbosity > 0:
                 self._log.write("Caught error when rendering extend node from "
-                                "template %s\n" % self)
+                                "template %s\n" % getattr(self, 'name', self))
             return None
+        finally:
+            # Cleanup, uninstall our get_parent monkeypatch now that it has been called
+            firstnode.get_parent = firstnode._old_get_parent
     return extra_context
+
 
 def patched_get_parent(self, context):
     # Patch template returned by extendsnode's get_parent to make sure their
@@ -85,6 +98,7 @@ def patched_get_parent(self, context):
     compiled_template = self._old_get_parent(context)
     compiled_template._log = self._log
     compiled_template._log_verbosity = self._log_verbosity
+    compiled_template._old_render = compiled_template._render
     compiled_template._render = MethodType(patched_render, compiled_template)
     return compiled_template
 
@@ -116,7 +130,7 @@ class Command(NoArgsCommand):
                     find_template as finder_func)
             except ImportError:
                 from django.template.loader import (
-                    find_template_source as finder_func)
+                    find_template_source as finder_func)  # noqa
             try:
                 # Force django to calculate template_source_loaders from
                 # TEMPLATE_LOADERS settings, by asking to find a dummy template
@@ -229,7 +243,9 @@ class Command(NoArgsCommand):
 
         if not compressor_nodes:
             raise OfflineGenerationError(
-                "No 'compress' template tags found in templates.")
+                "No 'compress' template tags found in templates."
+                "Try running compress command with --follow-links and/or"
+                "--extension=EXTENSIONS")
 
         if verbosity > 0:
             log.write("Found 'compress' tags in:\n\t" +

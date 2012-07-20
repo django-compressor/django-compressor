@@ -3,6 +3,7 @@ from __future__ import with_statement
 import optparse
 import sys
 
+
 def main():
     p = optparse.OptionParser()
     p.add_option('-f', '--file', action="store",

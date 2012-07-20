@@ -4,6 +4,8 @@ Changelog
 v1.2 (in development)
 ---------------------
 
+- Moved CI to Travis: http://travis-ci.org/jezdez/django_compressor
+
 - Introduced a new ``compressed`` context dictionary that is passed to
   the templates that are responsible for rendering the compressed snippets.
 

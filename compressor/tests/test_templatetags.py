@@ -10,7 +10,7 @@ from django.test import TestCase
 
 from compressor.conf import settings
 from compressor.signals import post_compress
-from compressor.tests.base import css_tag, test_dir
+from compressor.tests.test_base import css_tag, test_dir
 
 
 def render(template_string, context_dict=None):
@@ -47,12 +47,14 @@ class TemplatetagTestCase(TestCase):
         out = css_tag("/media/CACHE/css/e41ba2cc6982.css")
         self.assertEqual(out, render(template, self.context))
 
+    maxDiff = None
+
     def test_uppercase_rel(self):
         template = u"""{% load compress %}{% compress css %}
-        <link rel="StyleSheet" href="{{ MEDIA_URL }}css/one.css" type="text/css">
-        <style type="text/css">p { border:5px solid green;}</style>
-        <link rel="StyleSheet" href="{{ MEDIA_URL }}css/two.css" type="text/css">
-        {% endcompress %}"""
+<link rel="StyleSheet" href="{{ MEDIA_URL }}css/one.css" type="text/css">
+<style type="text/css">p { border:5px solid green;}</style>
+<link rel="StyleSheet" href="{{ MEDIA_URL }}css/two.css" type="text/css">
+{% endcompress %}"""
         out = css_tag("/media/CACHE/css/e41ba2cc6982.css")
         self.assertEqual(out, render(template, self.context))
 
@@ -104,8 +106,10 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
         """
+
         class MockDebugRequest(object):
             GET = {settings.COMPRESS_DEBUG_TOGGLE: 'true'}
+
         context = dict(self.context, request=MockDebugRequest())
         out = u"""<script src="/media/js/one.js" type="text/javascript"></script>
         <script type="text/javascript">obj.value = "value";</script>"""
@@ -116,6 +120,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
         """
+
         def listener(sender, **kwargs):
             pass
         callback = Mock(wraps=listener)
@@ -214,10 +219,9 @@ class PrecompilerTemplatetagTestCase(TestCase):
             </script>
             {% endcompress %}"""
 
-            out = '\n'.join([
-                    script(src="/media/CACHE/js/one.95cfb869eead.js"),
-                    script(scripttype="", src="/media/js/one.js"),
-                    script(src="/media/CACHE/js/one.81a2cd965815.js"),])
+            out = '\n'.join([script(src="/media/CACHE/js/one.95cfb869eead.js"),
+                             script(scripttype="", src="/media/js/one.js"),
+                             script(src="/media/CACHE/js/one.81a2cd965815.js")])
 
             self.assertEqual(out, render(template, self.context))
         finally:
@@ -234,9 +238,8 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/two.css"></link>
             {% endcompress %}"""
 
-            out = ''.join([
-                    '<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
-                    '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />'])
+            out = ''.join(['<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
+                           '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />'])
 
             self.assertEqual(out, render(template, self.context))
         finally:
@@ -254,13 +257,13 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <link rel="stylesheet" type="text/less" href="{{ MEDIA_URL }}css/url/test.css"/>
             {% endcompress %}"""
 
-            out = ''.join([
-                    '<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
-                    '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />',
-                    '<link rel="stylesheet" href="/media/CACHE/css/test.c4f8a285c249.css" type="text/css" />'])
+            out = ''.join(['<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
+                           '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />',
+                           '<link rel="stylesheet" href="/media/CACHE/css/test.c4f8a285c249.css" type="text/css" />'])
             self.assertEqual(out, render(template, self.context))
         finally:
             settings.COMPRESS_ENABLED = self.old_enabled
+
 
 def script(content="", src="", scripttype="text/javascript"):
     """

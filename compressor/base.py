@@ -4,11 +4,11 @@ import codecs
 import urllib
 
 from django.core.files.base import ContentFile
-from django.core.files.storage import get_storage_class
 from django.template import Context
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_unicode
 from django.utils.importlib import import_module
+from django.utils.safestring import mark_safe
 
 from compressor.cache import get_hexdigest, get_mtime
 
@@ -115,7 +115,7 @@ class Compressor(object):
                 return fd.read()
             except IOError, e:
                 raise UncompressableFileError("IOError while processing "
-                                               "'%s': %s" % (filename, e))
+                                              "'%s': %s" % (filename, e))
             except UnicodeDecodeError, e:
                 raise UncompressableFileError("UnicodeDecodeError while "
                                               "processing '%s' with "
@@ -272,7 +272,7 @@ class Compressor(object):
         new_filepath = self.get_filepath(content, basename=basename)
         if not self.storage.exists(new_filepath) or forced:
             self.storage.save(new_filepath, ContentFile(content))
-        url = self.storage.url(new_filepath)
+        url = mark_safe(self.storage.url(new_filepath))
         return self.render_output(mode, {"url": url})
 
     def output_inline(self, mode, content, forced=False, basename=None):

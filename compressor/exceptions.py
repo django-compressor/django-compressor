@@ -4,6 +4,7 @@ class CompressorError(Exception):
     """
     pass
 
+
 class UncompressableFileError(Exception):
     """
     This exception is raised when a file cannot be compressed

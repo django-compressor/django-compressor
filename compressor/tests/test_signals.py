@@ -59,6 +59,7 @@ class PostCompressSignalTestCase(TestCase):
 <style type="text/css" media="print">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="/media/css/two.css" type="text/css" />"""
         css_node = CssCompressor(css)
+
         def listener(sender, **kwargs):
             pass
         callback = Mock(wraps=listener)

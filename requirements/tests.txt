@@ -1,0 +1,9 @@
+flake8
+django-discover-runner
+coverage
+unittest2
+BeautifulSoup==3.2.0
+html5lib
+mock
+jinja2
+lxml

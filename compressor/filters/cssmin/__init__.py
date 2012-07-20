@@ -1,5 +1,6 @@
 from compressor.filters import CallbackOutputFilter
 
+
 class CSSMinFilter(CallbackOutputFilter):
     """
     A filter that utilizes Zachary Voase's Python port of

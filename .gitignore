@@ -6,10 +6,6 @@ dist
 MANIFEST
 *.pyc
 *.egg-info
-.tox/
 *.egg
 docs/_build/
-.coverage
-htmlcov
 .sass-cache
-reports/

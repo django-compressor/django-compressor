@@ -1,7 +1,7 @@
 from django.template import Template, Context
 from django.conf import settings
 
-from compressor.filters import FilterBase, FilterError
+from compressor.filters import FilterBase
 
 
 class TemplateFilter(FilterBase):

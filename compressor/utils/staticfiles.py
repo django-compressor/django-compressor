@@ -12,7 +12,7 @@ if INSTALLED:
         from django.contrib.staticfiles import finders
     else:
         try:
-            from staticfiles import finders
+            from staticfiles import finders  # noqa
         except ImportError:
             # Old (pre 1.0) and incompatible version of staticfiles
             INSTALLED = False
@@ -24,4 +24,4 @@ if INSTALLED:
             "please add 'compressor.finders.CompressorFinder' to the "
             "STATICFILES_FINDERS setting.")
 else:
-    finders = None
+    finders = None  # noqa

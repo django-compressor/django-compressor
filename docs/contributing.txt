@@ -104,20 +104,12 @@ something this way) or IRC discussions.
 Running the tests
 ^^^^^^^^^^^^^^^^^
 
-To run the tests simply install tox_, change your working directory to
-the ``tests`` directory and run ``tox`` in your shell. This will run the tests
-in Python 2.5, 2.6 and 2.7 (if appropriate binaries are found on the ``PATH``)
-with Django 1.2.X and 1.3.X. The docs will be automatically built, too.
-If you only want to run a specific environment, pass the ``-e`` option to
-``tox``, e.g. ``tox -e py25``. For more information see the `tox docs`_. An
-example:
-
-.. code-block:: console
-
-  $ sudo pip install https://bitbucket.org/hpk42/tox/get/tip.zip
-  ...
-  $ cd path/to/my/django_compressor
-  $ tox
+To run the tests simply fork django_compressor, make the changes and open
+a pull request. The Travis_ bot will automatically run the tests of your
+branch/fork (see the `pull request announcment`_ for more info) and add a
+comment about the test results to the pull requests. Alternatively you
+can also login at Travis and enable your fork to run there, too. See the
+`Travis documentation`_ to read about how to do that.
 
 Contributing Documentation
 --------------------------
@@ -156,6 +148,9 @@ double cookie points. Seriously. You rock.
   `django CMS`_ project. Many thanks for allowing us to steal it!
 
 .. _Fork: http://github.com/jezdez/django_compressor
+.. _Travis: http://travis-ci.org/
+.. _`pull request announcment`: http://about.travis-ci.org/blog/announcing-pull-request-support/
+.. _`Travis documentation`: http://about.travis-ci.org/docs/
 .. _Sphinx: http://sphinx.pocoo.org/
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
 .. _github : http://www.github.com
@@ -166,5 +161,3 @@ double cookie points. Seriously. You rock.
 .. _git : http://git-scm.com/
 .. _restructuredText: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
 .. _`django CMS`: http://www.django-cms.org/
-.. _tox: http://pypi.python.org/pypi/tox
-.. _`tox docs`: http://codespeak.net/~hpk/tox/example/basic.html
