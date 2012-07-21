@@ -116,7 +116,7 @@ class CompressorMixin(object):
                 raise
 
         # Or don't do anything in production
-        return self.render_result(self.get_original_content(context), context, deferred)
+        return self.render_result(self.get_original_content(context), context, deferred, mode)
 
     def render_output(self, compressor, mode, forced=False):
         return compressor.output(mode, forced=forced)
