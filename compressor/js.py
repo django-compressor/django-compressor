@@ -4,8 +4,8 @@ from compressor.base import Compressor, SOURCE_HUNK, SOURCE_FILE
 
 class JsCompressor(Compressor):
 
-    def __init__(self, content=None, output_prefix="js", context=None):
-        super(JsCompressor, self).__init__(content, output_prefix, context)
+    def __init__(self, content=None, output_prefix="js", context=None, opts=None):
+        super(JsCompressor, self).__init__(content, output_prefix, context, opts)
         self.filters = list(settings.COMPRESS_JS_FILTERS)
         self.type = output_prefix
 
@@ -17,9 +17,9 @@ class JsCompressor(Compressor):
             if 'src' in attribs:
                 basename = self.get_basename(attribs['src'])
                 filename = self.get_filename(basename)
-                content = (SOURCE_FILE, filename, basename, elem)
+                content = (SOURCE_FILE, filename, basename, [elem])
                 self.split_content.append(content)
             else:
                 content = self.parser.elem_content(elem)
-                self.split_content.append((SOURCE_HUNK, content, None, elem))
+                self.split_content.append((SOURCE_HUNK, content, None, [elem]))
         return self.split_content
