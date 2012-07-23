@@ -221,7 +221,7 @@ class Compressor(object):
                     raise FilterDoesNotExist('Could not find "%s".' %
                             filter_or_command)
                 else:
-                    return True, precompiler_class(content,
+                    return True, precompiler_class(content, attrs,
                             filter_type=self.type, filename=filename).input(
                             **kwargs)
         return False, content
