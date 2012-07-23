@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from compressor.conf import settings
 from compressor.filters import CompilerFilter
 
 
 class DustFilter(CompilerFilter):
     """
     Filter for dust templates.
-    
+
     Precompiles templates with dustc (https://github.com/linkedin/dustjs/).
     Usage:
     {% compress js %}
     <script type="text/dust-template" charset="utf-8" src="/path/to/template.html" data-template-name="namespace/test">
     {% endcompress %}
-    
+
     Add the following setting to COMPRESS_PRECOMPILERS:
     COMPRESS_PRECOMPILERS = (
         ...,
