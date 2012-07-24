@@ -4,6 +4,10 @@ Changelog
 v1.2 (in development)
 ---------------------
 
+- Added compatibility with Django 1.4 and dropped support for Django 1.2.X.
+
+- Added contributing docs. Be sure to check them out and start contributing!
+
 - Moved CI to Travis: http://travis-ci.org/jezdez/django_compressor
 
 - Introduced a new ``compressed`` context dictionary that is passed to
@@ -50,6 +54,11 @@ v1.2 (in development)
 - Renamed the second option for the ``COMPRESS_CSS_HASHING_METHOD`` setting
   from ``'hash'`` to ``'content'`` to better describe what it does. The old
   name is also supported, as well as the default being ``'mtime'``.
+
+- Fixed CssAbsoluteFilter, ``src`` attributes in includes now get transformed.
+
+- Added a new hook to allow developers to completely bypass offline
+  compression in CompressorNode subclasses: ``is_offline_compression_enabled``.
 
 v1.1.2
 ------
