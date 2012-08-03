@@ -1,8 +1,8 @@
 Changelog
 =========
 
-v1.2 (in development)
----------------------
+v1.2 (in 08/03/2012)
+--------------------
 
 - Added compatibility with Django 1.4 and dropped support for Django 1.2.X.
 
@@ -59,6 +59,8 @@ v1.2 (in development)
 
 - Added a new hook to allow developers to completely bypass offline
   compression in CompressorNode subclasses: ``is_offline_compression_enabled``.
+
+- Dropped versiontools from required dependencies again.
 
 v1.1.2
 ------
