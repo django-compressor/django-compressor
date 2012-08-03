@@ -111,6 +111,19 @@ comment about the test results to the pull requests. Alternatively you
 can also login at Travis and enable your fork to run there, too. See the
 `Travis documentation`_ to read about how to do that.
 
+Alternatively, create a virtualenv and activate it, then install the
+requirements **in the virtualenv**::
+
+    $ virtualenv compressor_test
+    $ source compressor_test/bin/activate
+    (compressor_test) $ pip install -e .
+    (compressor_test) $ pip install -r requirements/tests.txt
+    (compressor_test) $ pip install Django
+
+Then run ``make test`` to run the tests. Please note that this only tests
+django_compressor in the Python version you've created the virtualenv with
+not all the versions that are required to be supported.
+
 Contributing Documentation
 --------------------------
 
