@@ -238,7 +238,7 @@ Backend settings
         The lessc compiler will have different parameters if installed
         with Ruby Gems and not npm_.
 
-    _npm: http://lesscss.org/#-server-side-usage
+        .. _npm: http://lesscss.org/#-server-side-usage
 
     With that setting (and CoffeeScript_ installed), you could add the following
     code to your templates:

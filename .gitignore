@@ -9,3 +9,4 @@ MANIFEST
 *.egg
 docs/_build/
 .sass-cache
+.coverage
