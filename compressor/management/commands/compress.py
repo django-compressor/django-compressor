@@ -291,9 +291,7 @@ class Command(NoArgsCommand):
         return count, results
 
     def get_nodelist(self, node):
-        if (isinstance(node, IfNode) and
-                hasattr(node, 'nodelist_true') and
-                hasattr(node, 'nodelist_false')):
+        if hasattr(node, 'nodelist_true') and hasattr(node, 'nodelist_false'):
             return node.nodelist_true + node.nodelist_false
         return getattr(node, "nodelist", [])
 
