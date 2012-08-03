@@ -33,12 +33,14 @@ Contents
 ========
 
 .. toctree::
- :maxdepth: 1
+ :maxdepth: 2
 
- installation
+ quickstart
  usage
+ scenarios
  settings
  remote-storages
  behind-the-scenes
  jinja2
+ contributing
  changelog

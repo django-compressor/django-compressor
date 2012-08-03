@@ -1,6 +1,8 @@
 Christian Metts
 Carl Meyer
 Jannis Leidel
+Mathieu Pillard
+
 
 Django Compressor's filters started life as the filters from Andreas Pelme's
 django-compress.
@@ -8,16 +10,24 @@ django-compress.
 Contributors:
 
 Aaron Godfrey
+Adam "Cezar" Jenkins
+Adrian Holovaty
+Alen Mujezinovic
+Andreas Pelme
+Apostolos Bessas
 Atamert Ölçgen
 Aymeric Augustin
+Bartek Ciszkowski
 Ben Firshman
 Ben Spaulding
 Benjamin Wohlwend
+Bojan Mihelac
 Boris Shemigon
 Brad Whittington
 Bruno Renié
 Chris Adams
 Chris Streeter
+Clay McClure
 David Medina
 David Ziegler
 Eugene Mirotin
@@ -25,31 +35,44 @@ Fenn Bailey
 Francisco Souza
 Gert Van Gool
 Harro van der Klauw
+Iván Raskovsky
 Jaap Roes
 James Roe
 Jason Davies
+Jens Diemer
 Jeremy Dunck
+Jervis Whitley
 John-Scott Atlakson
 Jonas von Poser
 Jonathan Lukens
 Julien Phalip
 Justin Lilly
-Lukasz Balcerzak
 Luis Nell
+Lukas Lehner
+Lukasz Balcerzak
 Maciek Szczesniak
 Maor Ben-Dayan
-Mathieu Pillard
+Mark Lavin
+Matt Schick
 Mehmet S. Catalbas
 Michael van de Waeter
 Mike Yumatov
 Nicolas Charlot
+Niran Babalola
+Paul McMillan
 Petar Radosevic
+Peter Bengtsson
+Peter Lundberg
 Philipp Bosch
 Philipp Wollermann
+Sam Dornan
 Selwin Ong
 Shabda Raaj
 Stefano Brentegani
+Sébastien Piquemal
 Thom Linton
+Tino de Bruijn
 Ulrich Petri
-Wilson Júnior
+Vladislav Poluhin
 wesleyb
+Wilson Júnior

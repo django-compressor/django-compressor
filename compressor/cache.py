@@ -49,8 +49,8 @@ def get_mtime_cachekey(filename):
     return get_cachekey("mtime.%s" % get_hexdigest(filename))
 
 
-def get_offline_hexdigest(source):
-    return get_hexdigest([smart_str(getattr(s, 's', s)) for s in source])
+def get_offline_hexdigest(render_template_string):
+    return get_hexdigest(render_template_string)
 
 
 def get_offline_cachekey(source):
@@ -62,18 +62,30 @@ def get_offline_manifest_filename():
     return os.path.join(output_dir, settings.COMPRESS_OFFLINE_MANIFEST)
 
 
+_offline_manifest = None
+
+
 def get_offline_manifest():
-    filename = get_offline_manifest_filename()
-    if default_storage.exists(filename):
-        return simplejson.load(default_storage.open(filename))
-    else:
-        return {}
+    global _offline_manifest
+    if _offline_manifest is None:
+        filename = get_offline_manifest_filename()
+        if default_storage.exists(filename):
+            _offline_manifest = simplejson.load(default_storage.open(filename))
+        else:
+            _offline_manifest = {}
+    return _offline_manifest
+
+
+def flush_offline_manifest():
+    global _offline_manifest
+    _offline_manifest = None
 
 
 def write_offline_manifest(manifest):
     filename = get_offline_manifest_filename()
     default_storage.save(filename,
                          ContentFile(simplejson.dumps(manifest, indent=2)))
+    flush_offline_manifest()
 
 
 def get_templatetag_cachekey(compressor, mode, kind):
@@ -99,6 +111,19 @@ def get_hashed_mtime(filename, length=12):
     except OSError:
         return None
     return get_hexdigest(mtime, length)
+
+
+def get_hashed_content(filename, length=12):
+    try:
+        filename = os.path.realpath(filename)
+    except OSError:
+        return None
+    hash_file = open(filename)
+    try:
+        content = hash_file.read()
+    finally:
+        hash_file.close()
+    return get_hexdigest(content, length)
 
 
 def cache_get(key):

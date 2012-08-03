@@ -1,0 +1,5 @@
+p { background: url('../../img/python.png'); }
+p { background: url(../../img/python.png); }
+p { background: url( ../../img/python.png ); }
+p { background: url( '../../img/python.png' ); }
+p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../../img/python.png'); }

@@ -1,0 +1,10 @@
+{% extends "buggy_template.html" %}
+{% load compress %}
+
+{% compress css %}
+    <style type="text/css">
+        body {
+            background: orange;
+        }
+    </style>
+{% endcompress %}

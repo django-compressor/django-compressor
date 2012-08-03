@@ -1,3 +1,4 @@
+# flake8: noqa
 import os
 import sys
 from types import MethodType
@@ -7,19 +8,22 @@ from optparse import make_option
 try:
     from cStringIO import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from StringIO import StringIO  # noqa
 
 from django.core.management.base import  NoArgsCommand, CommandError
-from django.template import Context, Template, TemplateDoesNotExist, TemplateSyntaxError
+from django.template import (Context, Template,
+                             TemplateDoesNotExist, TemplateSyntaxError)
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
-from django.template.loader import get_template
-from django.template.loader_tags import ExtendsNode, BlockNode, BLOCK_CONTEXT_KEY
+from django.template.loader import get_template  # noqa Leave this in to preload template locations
+from django.template.defaulttags import IfNode
+from django.template.loader_tags import (ExtendsNode, BlockNode,
+                                         BLOCK_CONTEXT_KEY)
 
 try:
     from django.template.loaders.cached import Loader as CachedLoader
 except ImportError:
-    CachedLoader = None
+    CachedLoader = None  # noqa
 
 from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
@@ -28,11 +32,74 @@ from compressor.templatetags.compress import CompressorNode
 from compressor.utils import walk, any
 
 
+def patched_render(self, context):
+    # 'Fake' _render method that just returns the context instead of
+    # rendering. It also checks whether the first node is an extend node or
+    # not, to be able to handle complex inheritance chain.
+    self._render_firstnode = MethodType(patched_render_firstnode, self)
+    self._render_firstnode(context)
+
+    # Cleanup, uninstall our _render monkeypatch now that it has been called
+    self._render = self._old_render
+    return context
+
+
+def patched_render_firstnode(self, context):
+    # If this template has a ExtendsNode, we want to find out what
+    # should be put in render_context to make the {% block ... %}
+    # tags work.
+    #
+    # We can't fully render the base template(s) (we don't have the
+    # full context vars - only what's necessary to render the compress
+    # nodes!), therefore we hack the ExtendsNode we found, patching
+    # its get_parent method so that rendering the ExtendsNode only
+    # gives us the blocks content without doing any actual rendering.
+    extra_context = {}
+    try:
+        firstnode = self.nodelist[0]
+    except IndexError:
+        firstnode = None
+    if isinstance(firstnode, ExtendsNode):
+        firstnode._log = self._log
+        firstnode._log_verbosity = self._log_verbosity
+        firstnode._old_get_parent = firstnode.get_parent
+        firstnode.get_parent = MethodType(patched_get_parent, firstnode)
+        try:
+            extra_context = firstnode.render(context)
+            context.render_context = extra_context.render_context
+            # We aren't rendering {% block %} tags, but we want
+            # {{ block.super }} inside {% compress %} inside {% block %}s to
+            # work. Therefore, we need to pop() the last block context for
+            # each block name, to emulate what would have been done if the
+            # {% block %} had been fully rendered.
+            for blockname in firstnode.blocks.keys():
+                context.render_context[BLOCK_CONTEXT_KEY].pop(blockname)
+        except (IOError, TemplateSyntaxError, TemplateDoesNotExist):
+            # That first node we are trying to render might cause more errors
+            # that we didn't catch when simply creating a Template instance
+            # above, so we need to catch that (and ignore it, just like above)
+            # as well.
+            if self._log_verbosity > 0:
+                self._log.write("Caught error when rendering extend node from "
+                                "template %s\n" % getattr(self, 'name', self))
+            return None
+        finally:
+            # Cleanup, uninstall our get_parent monkeypatch now that it has been called
+            firstnode.get_parent = firstnode._old_get_parent
+    return extra_context
+
+
 def patched_get_parent(self, context):
-    # Patch template returned by get_parent to make sure their _render method is
-    # just returning the context instead of actually rendering stuff.
+    # Patch template returned by extendsnode's get_parent to make sure their
+    # _render method is just returning the context instead of actually
+    # rendering stuff.
+    # In addition, this follows the inheritance chain by looking if the first
+    # node of the template is an extend node itself.
     compiled_template = self._old_get_parent(context)
-    compiled_template._render = MethodType(lambda self, c: c, compiled_template)
+    compiled_template._log = self._log
+    compiled_template._log_verbosity = self._log_verbosity
+    compiled_template._old_render = compiled_template._render
+    compiled_template._render = MethodType(patched_render, compiled_template)
     return compiled_template
 
 
@@ -63,11 +130,16 @@ class Command(NoArgsCommand):
                     find_template as finder_func)
             except ImportError:
                 from django.template.loader import (
-                    find_template_source as finder_func)
+                    find_template_source as finder_func)  # noqa
             try:
+                # Force django to calculate template_source_loaders from
+                # TEMPLATE_LOADERS settings, by asking to find a dummy template
                 source, name = finder_func('test')
             except TemplateDoesNotExist:
                 pass
+            # Reload template_source_loaders now that it has been calculated ;
+            # it should contain the list of valid, instanciated template loaders
+            # to use.
             from django.template.loader import template_source_loaders
         loaders = []
         # If template loader is CachedTemplateLoader, return the loaders
@@ -152,9 +224,13 @@ class Command(NoArgsCommand):
                 if verbosity > 0:
                     log.write("Unreadable template at: %s\n" % template_name)
                 continue
-            except TemplateSyntaxError:  # broken template -> ignore
+            except TemplateSyntaxError, e:  # broken template -> ignore
                 if verbosity > 0:
-                    log.write("Invalid template at: %s\n" % template_name)
+                    log.write("Invalid template %s: %s\n" % (template_name, e))
+                continue
+            except TemplateDoesNotExist:  # non existent template -> ignore
+                if verbosity > 0:
+                    log.write("Non-existent template at: %s\n" % template_name)
                 continue
             except UnicodeDecodeError:
                 if verbosity > 0:
@@ -167,41 +243,42 @@ class Command(NoArgsCommand):
 
         if not compressor_nodes:
             raise OfflineGenerationError(
-                "No 'compress' template tags found in templates.")
+                "No 'compress' template tags found in templates."
+                "Try running compress command with --follow-links and/or"
+                "--extension=EXTENSIONS")
 
         if verbosity > 0:
             log.write("Found 'compress' tags in:\n\t" +
-                      "\n\t".join((t.template_name for t in compressor_nodes.keys())) + "\n")
+                      "\n\t".join((t.template_name
+                                   for t in compressor_nodes.keys())) + "\n")
 
         log.write("Compressing... ")
         count = 0
         results = []
-        offline_manifest = {}
+        offline_manifest = SortedDict()
         for template, nodes in compressor_nodes.iteritems():
             context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
-            extra_context = {}
-            firstnode = template.nodelist[0]
-            if isinstance(firstnode, ExtendsNode):
-                # If this template has a ExtendsNode, we apply our patch to
-                # generate the necessary context, and then use it for all the
-                # nodes in it, just in case (we don't know which nodes were
-                # in a block)
-                firstnode._old_get_parent = firstnode.get_parent
-                firstnode.get_parent = MethodType(patched_get_parent, firstnode)
-                extra_context = firstnode.render(context)
-                context.render_context = extra_context.render_context
+            template._log = log
+            template._log_verbosity = verbosity
+            template._render_firstnode = MethodType(patched_render_firstnode, template)
+            extra_context = template._render_firstnode(context)
+            if extra_context is None:
+                # Something is wrong - ignore this template
+                continue
             for node in nodes:
                 context.push()
                 if extra_context and node._block_name:
-                    context['block'] = context.render_context[BLOCK_CONTEXT_KEY].pop(node._block_name)
+                    # Give a block context to the node if it was found inside
+                    # a {% block %}.
+                    context['block'] = context.render_context[BLOCK_CONTEXT_KEY].get_block(node._block_name)
                     if context['block']:
                         context['block'].context = context
-                key = get_offline_hexdigest(node.nodelist)
+                key = get_offline_hexdigest(node.nodelist.render(context))
                 try:
                     result = node.render(context, forced=True)
                 except Exception, e:
-                    raise CommandError("An error occured during rendering: "
-                                       "%s" % e)
+                    raise CommandError("An error occured during rendering %s: "
+                                       "%s" % (template.template_name, e))
                 offline_manifest[key] = result
                 context.pop()
                 results.append(result)
@@ -213,11 +290,18 @@ class Command(NoArgsCommand):
                   (count, len(compressor_nodes)))
         return count, results
 
+    def get_nodelist(self, node):
+        if (isinstance(node, IfNode) and
+                hasattr(node, 'nodelist_true') and
+                hasattr(node, 'nodelist_false')):
+            return node.nodelist_true + node.nodelist_false
+        return getattr(node, "nodelist", [])
+
     def walk_nodes(self, node, block_name=None):
-        for node in getattr(node, "nodelist", []):
+        for node in self.get_nodelist(node):
             if isinstance(node, BlockNode):
                 block_name = node.name
-            if isinstance(node, CompressorNode):
+            if isinstance(node, CompressorNode) and node.is_offline_compression_enabled(forced=True):
                 node._block_name = block_name
                 yield node
             else:
@@ -253,6 +337,6 @@ class Command(NoArgsCommand):
         if not settings.COMPRESS_OFFLINE:
             if not options.get("force"):
                 raise CommandError(
-                    "Offline compressiong is disabled. Set "
+                    "Offline compression is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
         self.compress(sys.stdout, **options)

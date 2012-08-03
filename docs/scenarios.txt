@@ -1,0 +1,67 @@
+.. _scenarios:
+
+Common Deployment Scenarios
+===========================
+
+This document presents the most typical scenarios in which Django Compressor
+can be configured, and should help you decide which method you may want to
+use for your stack.
+
+In-Request Compression
+----------------------
+
+This is the default method of compression. Where-in Django Compressor will
+go through the steps outlined in :ref:`behind_the_scenes`. You will find
+in-request compression beneficial if:
+
+* Using a single server setup, where the application and static files are on
+  the same machine.
+
+* Prefer a simple configuration. By default, there is no configuration
+  required.
+
+Caveats
+-------
+
+* If deploying to a multi-server setup and using
+  :attr:`~django.conf.settings.COMPRESS_PRECOMPILERS`, each binary is
+  required to be installed on each application server.
+
+* Application servers may not have permissions to write to your static
+  directories. For example, if deploying to a CDN (e.g. Amazon S3)
+
+Offline Compression
+-------------------
+
+This method decouples the compression outside of the request
+(see :ref:`behind_the_Scenes`) and can prove beneficial in the speed,
+and in many scenarios, the maintainability of your deployment.
+You will find offline compression beneficial if:
+
+* Using a multi-server setup. A common scenario for this may be multiple
+  application servers and a single static file server (CDN included).
+  With offline compression, you typically run ``manage.py compress``
+  on a single utility server, meaning you only maintain
+  :attr:`~django.conf.settings.COMPRESS_PRECOMPILERS` binaries in one
+  location.
+
+* You store compressed files on a CDN. 
+
+Caveats
+-------
+
+* If your templates have complex logic in how template inheritance is done
+  (e.g. ``{% extends context_variable %}``), then this becomes a problem,
+  as offline compression will not have the context, unless you set it in
+  :attr:`~django.conf.settings.COMPRESS_OFFLINE_CONTEXT`
+
+* Due to the way the manifest file is used, while deploying across a
+  multi-server setup, your application may use old templates with a new
+  manifest, possibly rendering your pages incoherent. The current suggested
+  solution for this is to change the
+  :attr:`~django.conf.settings.COMPRESS_OFFLINE_MANIFEST` path for each new
+  version of your code. This will ensure that the old code uses old
+  compressed output, and the new one appropriately as well.
+
+Every setup is unique, and your scenario may differ slightly. Choose what
+is the most sane to maintain for your situation.

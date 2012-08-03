@@ -62,6 +62,8 @@ class CompressorConf(AppConf):
     OFFLINE_CONTEXT = {}
     # The name of the manifest file (e.g. filename.ext)
     OFFLINE_MANIFEST = 'manifest.json'
+    # The Context to be used when TemplateFilter is used
+    TEMPLATE_FILTER_CONTEXT = {}
 
     class Meta:
         prefix = 'compress'
@@ -71,7 +73,7 @@ class CompressorConf(AppConf):
             value = getattr(settings, 'STATIC_ROOT', None)
             if not value:
                 value = settings.MEDIA_ROOT
-        if not value:
+        if value is None:
             raise ImproperlyConfigured("COMPRESS_ROOT setting must be set")
         return os.path.normcase(os.path.abspath(value))
 
@@ -100,6 +102,14 @@ class CompressorConf(AppConf):
         return value
 
     def configure_offline_context(self, value):
+        if not value:
+            value = {'MEDIA_URL': settings.MEDIA_URL}
+            # Adds the 1.3 STATIC_URL setting to the context if available
+            if getattr(settings, 'STATIC_URL', None):
+                value['STATIC_URL'] = settings.STATIC_URL
+        return value
+
+    def configure_template_filter_context(self, value):
         if not value:
             value = {'MEDIA_URL': settings.MEDIA_URL}
             # Adds the 1.3 STATIC_URL setting to the context if available

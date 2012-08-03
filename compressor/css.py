@@ -1,11 +1,8 @@
 from compressor.base import Compressor, SOURCE_HUNK, SOURCE_FILE
 from compressor.conf import settings
-from compressor.exceptions import UncompressableFileError
 
 
 class CssCompressor(Compressor):
-    template_name = "compressor/css.html"
-    template_name_inline = "compressor/css_inline.html"
 
     def __init__(self, content=None, output_prefix="css", context=None):
         super(CssCompressor, self).__init__(content=content,
@@ -30,9 +27,10 @@ class CssCompressor(Compressor):
             if data:
                 self.split_content.append(data)
                 media = elem_attribs.get('media', None)
-                # Append to the previous node if it had the same media type,
-                # otherwise create a new node.
-                if self.media_nodes and self.media_nodes[-1][0] == media:
+                # Append to the previous node if it had the same media type
+                append_to_previous = self.media_nodes and self.media_nodes[-1][0] == media
+                # and we are not just precompiling, otherwise create a new node.
+                if append_to_previous and settings.COMPRESS_ENABLED:
                     self.media_nodes[-1][1].split_content.append(data)
                 else:
                     node = CssCompressor(content=self.parser.elem_str(elem),

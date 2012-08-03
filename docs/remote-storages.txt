@@ -9,9 +9,12 @@ processes files, it requires the files to be processed (in the
 ``{% compress %}`` block) to be available in a local file system cache.
 
 Django Compressor provides hooks to automatically have compressed files
-pushed to a remote storage backend. Simply
-:ref:`set the storage backend <compress_storage>` that saves the result to a
-remote service.
+pushed to a remote storage backend. Simply set the storage backend
+that saves the result to a remote service (see
+:attr:`~django.conf.settings.COMPRESS_STORAGE`).
+
+django-storages
+^^^^^^^^^^^^^^^
 
 So assuming your CDN is `Amazon S3`_, you can use the boto_ storage backend
 from the 3rd party app `django-storages`_. Some required settings are::
@@ -23,7 +26,7 @@ from the 3rd party app `django-storages`_. Some required settings are::
 Next, you need to specify the new CDN base URL and update the URLs to the
 files in your templates which you want to compress::
 
-    COMPRESS_URL = "http://compressor-test.s3.amazon.com/"
+    COMPRESS_URL = "http://compressor-test.s3.amazonaws.com/"
 
 .. note::
 
@@ -43,7 +46,7 @@ provides a management command to collect static files from various
 locations which uses a storage backend, this is where both apps can be
 integrated.
 
-#. Make sure the :ref:`COMPRESS_ROOT <compress_root>` and STATIC_ROOT_
+#. Make sure the :attr:`~django.conf.settings.COMPRESS_ROOT` and STATIC_ROOT_
    settings are equal since both apps need to look at the same directories
    when to do their job.
 
@@ -68,13 +71,14 @@ integrated.
             self.local_storage._save(name, content)
             return name
 
-#. Set your :ref:`COMPRESS_STORAGE <compress_storage>` and STATICFILES_STORAGE_
+#. Set your :attr:`~django.conf.settings.COMPRESS_STORAGE` and STATICFILES_STORAGE_
    settings to the dotted path of your custom cached storage backend, e.g.
    ``'mysite.storage.CachedS3BotoStorage'``.
 
 #. To have Django correctly render the URLs to your static files, set the
-   STATIC_URL_ setting to the same value as :ref:`COMPRESS_URL <compress_url>`
-   (e.g. ``"http://compressor-test.s3.amazon.com/"``).
+   STATIC_URL_ setting to the same value as
+   :attr:`~django.conf.settings.COMPRESS_URL` (e.g.
+   ``"http://compressor-test.s3.amazonaws.com/"``).
 
 .. _CDN: http://en.wikipedia.org/wiki/Content_delivery_network
 .. _Amazon S3: https://s3.amazonaws.com/

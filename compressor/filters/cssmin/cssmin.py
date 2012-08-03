@@ -32,7 +32,7 @@
 try:
     from cStringIO import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from StringIO import StringIO  # noqa
 import re
 
 

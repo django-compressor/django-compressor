@@ -27,13 +27,14 @@ class LxmlParser(ParserBase):
         content = '<root>%s</root>' % self.content
         tree = self.fromstring(content)
         try:
-            ignore = self.tostring(tree, encoding=unicode)
+            self.tostring(tree, encoding=unicode)
         except UnicodeDecodeError:
             tree = self.soupparser.fromstring(content)
         return tree
 
     def css_elems(self):
-        return self.tree.xpath('link[@rel="stylesheet"]|style')
+        return self.tree.xpath('//link[re:test(@rel, "^stylesheet$", "i")]|style',
+            namespaces={"re": "http://exslt.org/regular-expressions"})
 
     def js_elems(self):
         return self.tree.findall('script')

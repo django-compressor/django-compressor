@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
+# flake8: noqa
 #
-# Copyright 2011
+# Copyright 2011, 2012
 # Andr\xe9 Malo or his licensors, as applicable
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +21,13 @@ r"""
  Javascript Minifier
 =====================
 
-Javascript Minifier based on `jsmin.c by Douglas Crockford`_\.
+rJSmin is a javascript minifier written in python.
 
-This module is a re-implementation based on the semantics of jsmin.c. Usually
-it produces the same results. It differs in the following ways:
+The minifier is based on the semantics of `jsmin.c by Douglas Crockford`_\.
+
+The module is a re-implementation aiming for speed, so it can be used at
+runtime (rather than during a preprocessing step). Usually it produces the
+same results as the original ``jsmin.c``. It differs in the following ways:
 
 - there is no error detection: unterminated string, regex and comment
   literals are treated as regular javascript code and minified as such.
@@ -31,16 +35,18 @@ it produces the same results. It differs in the following ways:
   are not converted to spaces (nor to \n)
 - Newline characters are not allowed inside string and regex literals, except
   for line continuations in string literals (ECMA-5).
-- rjsmin does not handle streams, but only complete strings. (However, the
+- "return /regex/" is recognized correctly.
+- "+ ++" and "- --" sequences are not collapsed to '+++' or '---'
+- rJSmin does not handle streams, but only complete strings. (However, the
   module provides a "streamy" interface).
 
-Besides the list above it differs from direct python ports of jsmin.c in
-speed. Since most parts of the logic are handled by the regex engine it's way
-faster than the original python port by Baruch Even. The speed factor varies
-between about 6 and 55 depending on input and python version (it gets faster
-the more compressed the input already is). Compared to the speed-refactored
-python port by Dave St.Germain the performance gain is less dramatic but still
-between 1.2 and 7. See the docs/BENCHMARKS file for details.
+Since most parts of the logic are handled by the regex engine it's way
+faster than the original python port of ``jsmin.c`` by Baruch Even. The speed
+factor varies between about 6 and 55 depending on input and python version
+(it gets faster the more compressed the input already is). Compared to the
+speed-refactored python port by Dave St.Germain the performance gain is less
+dramatic but still between 1.2 and 7. See the docs/BENCHMARKS file for
+details.
 
 rjsmin.c is a reimplementation of rjsmin.py in C and speeds it up even more.
 
@@ -53,13 +59,13 @@ __author__ = "Andr\xe9 Malo"
 __author__ = getattr(__author__, 'decode', lambda x: __author__)('latin-1')
 __docformat__ = "restructuredtext en"
 __license__ = "Apache License, Version 2.0"
-__version__ = '1.0.1'
-__all__ = ['jsmin', 'jsmin_for_posers']
+__version__ = '1.0.3'
+__all__ = ['jsmin']
 
 import re as _re
 
 
-def _make_jsmin(extended=True, python_only=False):
+def _make_jsmin(python_only=False):
     """
     Generate JS minifier based on `jsmin.c by Douglas Crockford`_
 
@@ -67,12 +73,6 @@ def _make_jsmin(extended=True, python_only=False):
        http://www.crockford.com/javascript/jsmin.c
 
     :Parameters:
-      `extended` : ``bool``
-        Extended Regexps? (using lookahead and lookbehind). This is faster,
-        because it can be optimized way more. The regexps used with `extended`
-        being false are only left here to allow easier porting to platforms
-        without extended regex features (and for my own reference...)
-
       `python_only` : ``bool``
         Use only the python variant. If true, the c extension is not even
         tried to be loaded.
@@ -104,17 +104,9 @@ def _make_jsmin(extended=True, python_only=False):
 
     charclass = r'(?:\[[^\\\]\r\n]*(?:\\[^\r\n][^\\\]\r\n]*)*\])'
     nospecial = r'[^/\\\[\r\n]'
-    if extended:
-        regex = r'(?:/(?![\r\n/*])%s*(?:(?:\\[^\r\n]|%s)%s*)*/)' % (
-            nospecial, charclass, nospecial
-        )
-    else:
-        regex = (
-            r'(?:/(?:[^*/\\\r\n\[]|%s|\\[^\r\n])%s*(?:(?:\\[^\r\n]|%s)%s*)*/)'
-        )
-        regex = regex % (charclass, nospecial, charclass, nospecial)
-    pre_regex = r'[(,=:\[!&|?{};\r\n]'
-
+    regex = r'(?:/(?![\r\n/*])%s*(?:(?:\\[^\r\n]|%s)%s*)*/)' % (
+        nospecial, charclass, nospecial
+    )
     space = r'(?:%s|%s)' % (space_chars, space_comment)
     newline = r'(?:%s?[\r\n])' % line_comment
 
@@ -171,128 +163,65 @@ def _make_jsmin(extended=True, python_only=False):
         ])
         return r'[%s]' % fix_charclass(result)
 
-    if extended:
-        id_literal = id_literal_(r'[a-zA-Z0-9_$]')
-        id_literal_open = id_literal_(r'[a-zA-Z0-9_${\[(+-]')
-        id_literal_close = id_literal_(r'[a-zA-Z0-9_$}\])"\047+-]')
+    not_id_literal = not_id_literal_(r'[a-zA-Z0-9_$]')
+    preregex1 = r'[(,=:\[!&|?{};\r\n]'
+    preregex2 = r'%(not_id_literal)sreturn' % locals()
 
-        space_sub = _re.compile((
-            r'([^\047"/\000-\040]+)'
-            r'|(%(strings)s[^\047"/\000-\040]*)'
-            r'|(?:(?<=%(pre_regex)s)%(space)s*(%(regex)s[^\047"/\000-\040]*))'
-            r'|(?<=%(id_literal_close)s)'
-                r'%(space)s*(?:(%(newline)s)%(space)s*)+'
-                r'(?=%(id_literal_open)s)'
-            r'|(?<=%(id_literal)s)(%(space)s)+(?=%(id_literal)s)'
-            r'|%(space)s+'
-            r'|(?:%(newline)s%(space)s*)+'
-        ) % locals()).sub
-        def space_subber(match):
-            """ Substitution callback """
-            # pylint: disable = C0321
-            groups = match.groups()
-            if groups[0]: return groups[0]
-            elif groups[1]: return groups[1]
-            elif groups[2]: return groups[2]
-            elif groups[3]: return '\n'
-            elif groups[4]: return ' '
-            return ''
+    id_literal = id_literal_(r'[a-zA-Z0-9_$]')
+    id_literal_open = id_literal_(r'[a-zA-Z0-9_${\[(+-]')
+    id_literal_close = id_literal_(r'[a-zA-Z0-9_$}\])"\047+-]')
 
-        def jsmin(script): # pylint: disable = W0621
-            r"""
-            Minify javascript based on `jsmin.c by Douglas Crockford`_\.
+    space_sub = _re.compile((
+        r'([^\047"/\000-\040]+)'
+        r'|(%(strings)s[^\047"/\000-\040]*)'
+        r'|(?:(?<=%(preregex1)s)%(space)s*(%(regex)s[^\047"/\000-\040]*))'
+        r'|(?:(?<=%(preregex2)s)%(space)s*(%(regex)s[^\047"/\000-\040]*))'
+        r'|(?<=%(id_literal_close)s)'
+            r'%(space)s*(?:(%(newline)s)%(space)s*)+'
+            r'(?=%(id_literal_open)s)'
+        r'|(?<=%(id_literal)s)(%(space)s)+(?=%(id_literal)s)'
+        r'|(?<=\+)(%(space)s)+(?=\+\+)'
+        r'|(?<=-)(%(space)s)+(?=--)'
+        r'|%(space)s+'
+        r'|(?:%(newline)s%(space)s*)+'
+    ) % locals()).sub
+    #print space_sub.__self__.pattern
 
-            Instead of parsing the stream char by char, it uses a regular
-            expression approach which minifies the whole script with one big
-            substitution regex.
+    def space_subber(match):
+        """ Substitution callback """
+        # pylint: disable = C0321, R0911
+        groups = match.groups()
+        if groups[0]: return groups[0]
+        elif groups[1]: return groups[1]
+        elif groups[2]: return groups[2]
+        elif groups[3]: return groups[3]
+        elif groups[4]: return '\n'
+        elif groups[5] or groups[6] or groups[7]: return ' '
+        else: return ''
 
-            .. _jsmin.c by Douglas Crockford:
-               http://www.crockford.com/javascript/jsmin.c
+    def jsmin(script): # pylint: disable = W0621
+        r"""
+        Minify javascript based on `jsmin.c by Douglas Crockford`_\.
 
-            :Parameters:
-              `script` : ``str``
-                Script to minify
+        Instead of parsing the stream char by char, it uses a regular
+        expression approach which minifies the whole script with one big
+        substitution regex.
 
-            :Return: Minified script
-            :Rtype: ``str``
-            """
-            return space_sub(space_subber, '\n%s\n' % script).strip()
+        .. _jsmin.c by Douglas Crockford:
+           http://www.crockford.com/javascript/jsmin.c
 
-    else:
-        not_id_literal = not_id_literal_(r'[a-zA-Z0-9_$]')
-        not_id_literal_open = not_id_literal_(r'[a-zA-Z0-9_${\[(+-]')
-        not_id_literal_close = not_id_literal_(r'[a-zA-Z0-9_$}\])"\047+-]')
+        :Parameters:
+          `script` : ``str``
+            Script to minify
 
-        space_norm_sub = _re.compile((
-            r'(%(strings)s)'
-            r'|(?:(%(pre_regex)s)%(space)s*(%(regex)s))'
-            r'|(%(space)s)+'
-            r'|(?:(%(newline)s)%(space)s*)+'
-        ) % locals()).sub
-        def space_norm_subber(match):
-            """ Substitution callback """
-            # pylint: disable = C0321
-            groups = match.groups()
-            if groups[0]: return groups[0]
-            elif groups[1]: return groups[1].replace('\r', '\n') + groups[2]
-            elif groups[3]: return ' '
-            elif groups[4]: return '\n'
+        :Return: Minified script
+        :Rtype: ``str``
+        """
+        return space_sub(space_subber, '\n%s\n' % script).strip()
 
-        space_sub1 = _re.compile((
-            r'[\040\n]?(%(strings)s|%(pre_regex)s%(regex)s)'
-            r'|\040(%(not_id_literal)s)'
-            r'|\n(%(not_id_literal_open)s)'
-        ) % locals()).sub
-        def space_subber1(match):
-            """ Substitution callback """
-            groups = match.groups()
-            return groups[0] or groups[1] or groups[2]
-
-        space_sub2 = _re.compile((
-            r'(%(strings)s)\040?'
-            r'|(%(pre_regex)s%(regex)s)[\040\n]?'
-            r'|(%(not_id_literal)s)\040'
-            r'|(%(not_id_literal_close)s)\n'
-        ) % locals()).sub
-        def space_subber2(match):
-            """ Substitution callback """
-            groups = match.groups()
-            return groups[0] or groups[1] or groups[2] or groups[3]
-
-        def jsmin(script):
-            r"""
-            Minify javascript based on `jsmin.c by Douglas Crockford`_\.
-
-            Instead of parsing the stream char by char, it uses a regular
-            expression approach. The script is minified with three passes:
-
-            normalization
-                Control character are mapped to spaces, spaces and newlines
-                are squeezed and comments are stripped.
-            space removal 1
-                Spaces before certain tokens are removed
-            space removal 2
-                Spaces after certain tokens are remove
-
-            .. _jsmin.c by Douglas Crockford:
-               http://www.crockford.com/javascript/jsmin.c
-
-            :Parameters:
-              `script` : ``str``
-                Script to minify
-
-            :Return: Minified script
-            :Rtype: ``str``
-            """
-            return space_sub2(space_subber2,
-                space_sub1(space_subber1,
-                    space_norm_sub(space_norm_subber, '\n%s\n' % script)
-                )
-            ).strip()
     return jsmin
 
-# forcing python_only here since we don't ship the C extension anyway
-jsmin = _make_jsmin(python_only=True)
+jsmin = _make_jsmin()
 
 
 def jsmin_for_posers(script):
@@ -324,8 +253,11 @@ def jsmin_for_posers(script):
             groups[0] or
             groups[1] or
             groups[2] or
-            (groups[3] and '\n') or
-            (groups[4] and ' ') or
+            groups[3] or
+            (groups[4] and '\n') or
+            (groups[5] and ' ') or
+            (groups[6] and ' ') or
+            (groups[7] and ' ') or
             ''
         )
 
@@ -336,15 +268,21 @@ def jsmin_for_posers(script):
         r')(?:[\000-\011\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/'
         r'))*((?:/(?![\r\n/*])[^/\\\[\r\n]*(?:(?:\\[^\r\n]|(?:\[[^\\\]\r\n]*'
         r'(?:\\[^\r\n][^\\\]\r\n]*)*\]))[^/\\\[\r\n]*)*/)[^\047"/\000-\040]*'
-        r'))|(?<=[^\000-!#%&(*,./:-@\[\\^`{|~])(?:[\000-\011\013\014\016-\04'
-        r'0]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/))*(?:((?:(?://[^\r\n]*)?[\r\n'
-        r']))(?:[\000-\011\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)'
-        r'*/))*)+(?=[^\000-#%-\047)*,./:-@\\-^`|-~])|(?<=[^\000-#%-,./:-@\[-'
-        r'^`{-~-])((?:[\000-\011\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*'
-        r']*\*+)*/)))+(?=[^\000-#%-,./:-@\[-^`{-~-])|(?:[\000-\011\013\014\0'
-        r'16-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/))+|(?:(?:(?://[^\r\n]*)'
-        r'?[\r\n])(?:[\000-\011\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]'
-        r'*\*+)*/))*)+', subber, '\n%s\n' % script
+        r'))|(?:(?<=[\000-#%-,./:-@\[-^`{-~-]return)(?:[\000-\011\013\014\01'
+        r'6-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/))*((?:/(?![\r\n/*])[^/'
+        r'\\\[\r\n]*(?:(?:\\[^\r\n]|(?:\[[^\\\]\r\n]*(?:\\[^\r\n][^\\\]\r\n]'
+        r'*)*\]))[^/\\\[\r\n]*)*/)[^\047"/\000-\040]*))|(?<=[^\000-!#%&(*,./'
+        r':-@\[\\^`{|~])(?:[\000-\011\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/'
+        r'*][^*]*\*+)*/))*(?:((?:(?://[^\r\n]*)?[\r\n]))(?:[\000-\011\013\01'
+        r'4\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/))*)+(?=[^\000-#%-\04'
+        r'7)*,./:-@\\-^`|-~])|(?<=[^\000-#%-,./:-@\[-^`{-~-])((?:[\000-\011'
+        r'\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)))+(?=[^\000-'
+        r'#%-,./:-@\[-^`{-~-])|(?<=\+)((?:[\000-\011\013\014\016-\040]|(?:/'
+        r'\*[^*]*\*+(?:[^/*][^*]*\*+)*/)))+(?=\+\+)|(?<=-)((?:[\000-\011\013'
+        r'\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)))+(?=--)|(?:[\00'
+        r'0-\011\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/))+|(?:('
+        r'?:(?://[^\r\n]*)?[\r\n])(?:[\000-\011\013\014\016-\040]|(?:/\*[^*]'
+        r'*\*+(?:[^/*][^*]*\*+)*/))*)+', subber, '\n%s\n' % script
     ).strip()
 
 

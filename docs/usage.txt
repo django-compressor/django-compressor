@@ -46,21 +46,24 @@ Which would be rendered something like:
 
     <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
-Linked files **must** be accessible via :ref:`COMPRESS_URL <compress_url>`.
+Linked files **must** be accessible via
+:attr:`~django.conf.settings.COMPRESS_URL`.
 
-If the :ref:`COMPRESS_ENABLED <compress_enabled>` setting is ``False``
+If the :attr:`~django.conf.settings.COMPRESS_ENABLED` setting is ``False``
 (defaults to the opposite of DEBUG) the ``compress`` template tag does nothing
 and simply returns exactly what it was given.
 
 .. note::
 
-    If you've configured any :ref:`precompilers <compress_precompilers>`
-    setting :ref:`COMPRESS_ENABLED <compress_enabled>` to ``False`` won't
+    If you've configured any
+    :attr:`precompilers <django.conf.settings.COMPRESS_PRECOMPILERS>`
+    setting :attr:`~django.conf.settings.COMPRESS_ENABLED` to ``False`` won't
     affect the processing of those files. Only the
-    :ref:`CSS <compress_css_filters>` and
-    :ref:`JavaScript filters <compress_js_filters>` will be disabled.
+    :attr:`CSS <django.conf.settings.COMPRESS_CSS_FILTERS>` and
+    :attr:`JavaScript filters <django.conf.settings.COMPRESS_JS_FILTERS>`
+    will be disabled.
 
-If both DEBUG and :ref:`COMPRESS_ENABLED <compress_enabled>` are set to
+If both DEBUG and :attr:`~django.conf.settings.COMPRESS_ENABLED` are set to
 ``True``, incompressible files (off-site or non existent) will throw an
 exception. If DEBUG is ``False`` these files will be silently stripped.
 
@@ -69,7 +72,7 @@ exception. If DEBUG is ``False`` these files will be silently stripped.
     For production sites it is **strongly recommended** to use a real cache
     backend such as memcached_ to speed up the checks of compressed files.
     Make sure you set your Django cache backend appropriately (also see
-    :ref:`COMPRESS_CACHE_BACKEND <compress_cache_backend>` and
+    :attr:`~django.conf.settings.COMPRESS_CACHE_BACKEND` and
     Django's `caching documentation`_).
 
 The compress template tag supports a second argument specifying the output
@@ -112,7 +115,7 @@ works just like the automatic compression with the ``{% compress %}`` tag.
 
 To compress the files "offline" and update the offline cache you have
 to use the ``compress`` management command, ideally during deployment.
-Also make sure to enable the :ref:`COMPRESS_OFFLINE <compress_offline>`
+Also make sure to enable the :attr:`django.conf.settings.COMPRESS_OFFLINE`
 setting. In case you don't use the ``compress`` management command, Django
 Compressor will automatically fallback to the automatic compression using
 the template tag.
@@ -120,7 +123,7 @@ the template tag.
 The command parses all templates that can be found with the template
 loader (as specified in the TEMPLATE_LOADERS_ setting) and looks for
 ``{% compress %}`` blocks. It then will use the context as defined in
-:ref:`COMPRESS_OFFLINE_CONTEXT <compress_offline_context>` to render its
+:attr:`django.conf.settings.COMPRESS_OFFLINE_CONTEXT` to render its
 content. So if you use any variables inside the ``{% compress %}`` blocks,
 make sure to list all values you require in ``COMPRESS_OFFLINE_CONTEXT``.
 It's similar to a template context and should be used if a variable is used
@@ -146,8 +149,8 @@ the commonly used setting to refer to saved files ``MEDIA_URL`` and
 ``STATIC_URL`` (if specified in the settings).
 
 The result of running the ``compress`` management command will be cached
-in a file called ``manifest.json`` using the :ref:`configured storage
-<compress_storage>` to be able to be transfered from your developement
+in a file called ``manifest.json`` using the :attr:`configured storage
+<django.conf.settings.COMPRESS_STORAGE>` to be able to be transfered from your developement
 computer to the server easily.
 
 .. _TEMPLATE_LOADERS: http://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
@@ -165,7 +168,14 @@ you need the exact filenames for use in an HTML5 manifest file.  The signal
 sends the following arguments:
 
 ``sender``
-    Always "django-compressor".
+    Either :class:`compressor.css.CssCompressor` or
+    :class:`compressor.js.JsCompressor`.
+
+    .. versionchanged:: 1.2
+
+    The sender is now one of the supported Compressor classes for
+    easier limitation to only one of them, previously it was a string
+    named ``'django-compressor'``.
 
 ``type``
     Either "``js``" or "``css``".
@@ -177,21 +187,23 @@ sends the following arguments:
     The context dictionary used to render the output of the compress template
     tag.
 
-    If ``mode`` is "``file``", this will contain a "``url``" key that maps to
-    the relative URL for the compressed asset.  
+    If ``mode`` is "``file``" the dictionary named ``compressed`` in the
+    context will contain a "``url``" key that maps to the relative URL for
+    the compressed asset.
 
-    If ``type`` is "``css``", the context will additionally contain a
-    "``media``" key with a value of ``None`` if no media attribute is specified on
-    the link/style tag and equal to that attribute if one is specified.  
+    If ``type`` is "``css``", the dictionary named ``compressed`` in the
+    context will additionally contain a "``media``" key with a value of
+    ``None`` if no media attribute is specified on the link/style tag and
+    equal to that attribute if one is specified.
 
-    Additionally, ``context['name']`` will be the third positional argument to
-    the template tag, if provided.
+    Additionally, ``context['compressed']['name']`` will be the third
+    positional argument to the template tag, if provided.
 
 .. note::
 
     When compressing CSS, the ``post_compress`` signal will be called once for
-    every different media attribute on the tags within the ``{% compress %}`` tag
-    in question.
+    every different media attribute on the tags within the ``{% compress %}``
+    tag in question.
 
 CSS Notes
 ---------
