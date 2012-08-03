@@ -1,3 +1,5 @@
+.. _behind_the_scenes:
+
 Behind the scenes
 =================
 
