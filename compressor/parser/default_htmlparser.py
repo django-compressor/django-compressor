@@ -16,7 +16,9 @@ class DefaultHtmlParser(ParserBase, HTMLParser):
             self.feed(self.content)
             self.close()
         except Exception, err:
-            raise ParserError("Error while initializing HtmlParser: %s" % err)
+            lineno = err.lineno
+            line = self.content.splitlines()[lineno]
+            raise ParserError("Error while initializing HtmlParser: %s (line: %s)" % (err, repr(line)))
 
     def handle_starttag(self, tag, attrs):
         tag = tag.lower()
