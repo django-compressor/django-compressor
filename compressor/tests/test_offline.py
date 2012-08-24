@@ -236,3 +236,23 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
             self.assertTrue(isinstance(loaders[1], AppDirectoriesLoader))
         finally:
             settings.TEMPLATE_LOADERS = old_loaders
+
+
+class OfflineGenerationInlineNonAsciiTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = "test_inline_non_ascii"
+
+    def setUp(self):
+        self.old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
+        settings.COMPRESS_OFFLINE_CONTEXT = {
+            'test_non_ascii_value': u'\u2014',
+        }
+        super(OfflineGenerationInlineNonAsciiTestCase, self).setUp()
+
+    def tearDown(self):
+        self.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
+        super(OfflineGenerationInlineNonAsciiTestCase, self).tearDown()
+
+    def test_offline(self):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
+        rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
+        self.assertEqual(rendered_template, "".join(result) + "\n")
