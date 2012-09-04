@@ -28,20 +28,36 @@ class CompressorExtension(CompressorMixin, Extension):
                 args.append(modearg)
         else:
             args.append(nodes.Const('file'))
+        args.append(nodes.ContextReference())
         body = parser.parse_statements(['name:endcompress'], drop_needle=True)
-        return nodes.CallBlock(self.call_method('_compress', args), [], [],
+        return nodes.CallBlock(self.call_method('_compress', args), [], [], 
             body).set_lineno(lineno)
 
-    def _compress(self, kind, mode, caller):
+    def _compress(self, kind, mode, context, caller):
         # This extension assumes that we won't force compression
-        forced = False
+        forced = context.get('compress_forced', False)
 
         mode = mode or OUTPUT_FILE
         original_content = caller()
-        context = {
+        context = { 
             'original_content': original_content
-        }
+        }   
         return self.render_compressed(context, kind, mode, forced=forced)
+
+    def render_offline(self, context, forced):
+        """ 
+        If enabled and in offline mode, and not forced check the offline cache
+        and return the result if given
+        """
+        if self.is_offline_compression_enabled(forced) and not forced:
+            key = get_offline_hexdigest(self.get_original_content(context))
+            offline_manifest = get_offline_manifest()
+            if key in offline_manifest:
+                return offline_manifest[key]
+            else:
+                raise OfflineGenerationError('You have offline compression '
+                    'enabled but key "%s" is missing from offline manifest. '
+                    'You may need to run "python manage.py compress".' % key)
 
     def get_original_content(self, context):
         return context['original_content']
