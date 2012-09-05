@@ -1,9 +1,10 @@
 from jinja2 import nodes
 from jinja2.ext import Extension
 from jinja2.exceptions import TemplateSyntaxError
-
+from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import OUTPUT_FILE, CompressorMixin
-
+from compressor.cache import (get_offline_hexdigest, 
+                             get_offline_manifest)
 
 class CompressorExtension(CompressorMixin, Extension):
 
