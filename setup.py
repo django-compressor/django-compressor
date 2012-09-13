@@ -133,4 +133,7 @@ setup(
     install_requires=[
         'django-appconf >= 0.4',
     ],
+    extras_require = {
+        'cssmin':  ["cssmin"],
+    },
 )
