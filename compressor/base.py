@@ -7,16 +7,18 @@ from django.core.files.base import ContentFile
 from django.template import Context
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_unicode
+from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
 
 from compressor.cache import get_hexdigest, get_mtime
 
 from compressor.conf import settings
-from compressor.exceptions import CompressorError, UncompressableFileError
+from compressor.exceptions import (CompressorError, UncompressableFileError,
+        FilterDoesNotExist)
 from compressor.filters import CompilerFilter
 from compressor.storage import default_storage, compressor_file_storage
 from compressor.signals import post_compress
-from compressor.utils import get_class, staticfiles
+from compressor.utils import get_class, get_mod_func, staticfiles
 from compressor.utils.decorators import cached_property
 
 # Some constants for nicer handling.
@@ -199,15 +201,29 @@ class Compressor(object):
         attrs = self.parser.elem_attribs(elem)
         mimetype = attrs.get("type", None)
         if mimetype:
-            command = self.all_mimetypes.get(mimetype)
-            if command is None:
+            filter_or_command = self.all_mimetypes.get(mimetype)
+            if filter_or_command is None:
                 if mimetype not in ("text/css", "text/javascript"):
                     raise CompressorError("Couldn't find any precompiler in "
                                           "COMPRESS_PRECOMPILERS setting for "
                                           "mimetype '%s'." % mimetype)
             else:
-                return True, CompilerFilter(content, filter_type=self.type,
-                    command=command, filename=filename).input(**kwargs)
+                mod_name, cls_name = get_mod_func(filter_or_command)
+                try:
+                    mod = import_module(mod_name)
+                except ImportError:
+                    return True, CompilerFilter(content, filter_type=self.type,
+                            command=filter_or_command, filename=filename).input(
+                                **kwargs)
+                try:
+                    precompiler_class = getattr(mod, cls_name)
+                except AttributeError:
+                    raise FilterDoesNotExist('Could not find "%s".' %
+                            filter_or_command)
+                else:
+                    return True, precompiler_class(content, attrs,
+                            filter_type=self.type, filename=filename).input(
+                                **kwargs)
         return False, content
 
     def filter(self, content, method, **kwargs):

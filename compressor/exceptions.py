@@ -31,3 +31,10 @@ class OfflineGenerationError(Exception):
     Offline compression generation related exceptions
     """
     pass
+
+
+class FilterDoesNotExist(Exception):
+    """
+    Raised when a filter class cannot be found.
+    """
+    pass
