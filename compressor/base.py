@@ -7,8 +7,8 @@ from django.core.files.base import ContentFile
 from django.template import Context
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_unicode
-from django.utils.safestring import mark_safe
 from django.utils.importlib import import_module
+from django.utils.safestring import mark_safe
 
 from compressor.cache import get_hexdigest, get_mtime
 
@@ -214,7 +214,7 @@ class Compressor(object):
                 except ImportError:
                     return True, CompilerFilter(content, filter_type=self.type,
                             command=filter_or_command, filename=filename).input(
-                            **kwargs)
+                                **kwargs)
                 try:
                     precompiler_class = getattr(mod, cls_name)
                 except AttributeError:
@@ -223,7 +223,7 @@ class Compressor(object):
                 else:
                     return True, precompiler_class(content, attrs,
                             filter_type=self.type, filename=filename).input(
-                            **kwargs)
+                                **kwargs)
         return False, content
 
     def filter(self, content, method, **kwargs):

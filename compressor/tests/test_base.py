@@ -148,7 +148,7 @@ class CompressorTestCase(TestCase):
         original_precompilers = settings.COMPRESS_PRECOMPILERS
         settings.COMPRESS_ENABLED = True
         settings.COMPRESS_PRECOMPILERS = (
-             ('text/foobar', 'compressor.tests.base.TestPrecompiler'),
+            ('text/foobar', 'compressor.tests.base.TestPrecompiler'),
         )
         css = '<style type="text/foobar">p { border:10px solid red;}</style>'
         css_node = CssCompressor(css)
@@ -160,7 +160,7 @@ class CompressorTestCase(TestCase):
         original_precompilers = settings.COMPRESS_PRECOMPILERS
         settings.COMPRESS_ENABLED = True
         settings.COMPRESS_PRECOMPILERS = (
-             ('text/foobar', 'compressor.tests.base.NonexistentFilter'),
+            ('text/foobar', 'compressor.tests.base.NonexistentFilter'),
         )
         css = '<style type="text/foobar">p { border:10px solid red;}</style>'
         css_node = CssCompressor(css)
