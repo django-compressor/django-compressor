@@ -22,7 +22,7 @@ def css_tag(href, **kwargs):
 
 class TestPrecompiler(object):
     """A filter whose output is always the string 'OUTPUT' """
-    def __init__(self, content, filter_type=None, filename=None):
+    def __init__(self, content, attrs, filter_type=None, filename=None):
         pass
 
     def input(self, **kwargs):
@@ -145,27 +145,31 @@ class CompressorTestCase(TestCase):
             settings.COMPRESS_OUTPUT_DIR = old_output_dir
 
     def test_precompiler_class_used(self):
-        original_precompilers = settings.COMPRESS_PRECOMPILERS
-        settings.COMPRESS_ENABLED = True
-        settings.COMPRESS_PRECOMPILERS = (
-            ('text/foobar', 'compressor.tests.base.TestPrecompiler'),
-        )
-        css = '<style type="text/foobar">p { border:10px solid red;}</style>'
-        css_node = CssCompressor(css)
-        output = BeautifulSoup(css_node.output('inline'))
-        self.assertEqual(output.text, 'OUTPUT')
-        settings.COMPRESS_PRECOMPILERS = original_precompilers
+        try:
+            original_precompilers = settings.COMPRESS_PRECOMPILERS
+            settings.COMPRESS_ENABLED = True
+            settings.COMPRESS_PRECOMPILERS = (
+                ('text/foobar', 'compressor.tests.test_base.TestPrecompiler'),
+            )
+            css = '<style type="text/foobar">p { border:10px solid red;}</style>'
+            css_node = CssCompressor(css)
+            output = BeautifulSoup(css_node.output('inline'))
+            self.assertEqual(output.text, 'OUTPUT')
+        finally:
+            settings.COMPRESS_PRECOMPILERS = original_precompilers
 
-    def test_nonexistent_precompiler_error(self):
-        original_precompilers = settings.COMPRESS_PRECOMPILERS
-        settings.COMPRESS_ENABLED = True
-        settings.COMPRESS_PRECOMPILERS = (
-            ('text/foobar', 'compressor.tests.base.NonexistentFilter'),
-        )
-        css = '<style type="text/foobar">p { border:10px solid red;}</style>'
-        css_node = CssCompressor(css)
-        self.assertRaises(FilterDoesNotExist, css_node.output, 'inline')
-        settings.COMPRESS_PRECOMPILERS = original_precompilers
+    def test_nonexistent_precompiler_class_error(self):
+        try:
+            original_precompilers = settings.COMPRESS_PRECOMPILERS
+            settings.COMPRESS_ENABLED = True
+            settings.COMPRESS_PRECOMPILERS = (
+                ('text/foobar', 'compressor.tests.test_base.NonexistentFilter'),
+            )
+            css = '<style type="text/foobar">p { border:10px solid red;}</style>'
+            css_node = CssCompressor(css)
+            self.assertRaises(FilterDoesNotExist, css_node.output, 'inline')
+        finally:
+            settings.COMPRESS_PRECOMPILERS = original_precompilers
 
 
 class CssMediaTestCase(TestCase):
