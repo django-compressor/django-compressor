@@ -142,6 +142,24 @@ class CssAbsolutizingTestCase(TestCase):
         output = "p { background: url('%(url)simg/python.png?%(hash)s#foo') }" % params
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
+    def test_css_absolute_filter_querystring(self):
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
+        params = {
+            'url': settings.COMPRESS_URL,
+            'hash': self.hashing_func(imagefilename),
+        }
+        content = "p { background: url('../../img/python.png?foo') }"
+
+        output = "p { background: url('%(url)simg/python.png?foo&%(hash)s') }" % params
+        filter = CssAbsoluteFilter(content)
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+        settings.COMPRESS_URL = params['url'] = 'http://media.example.com/'
+        filter = CssAbsoluteFilter(content)
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        output = "p { background: url('%(url)simg/python.png?foo&%(hash)s') }" % params
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+
     def test_css_absolute_filter_https(self):
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
         imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')

@@ -52,6 +52,8 @@ class CssAbsoluteFilter(FilterBase):
             local_path = local_path.replace(self.protocol + self.host, "", 1)
         # remove url fragment, if any
         local_path = local_path.rsplit("#", 1)[0]
+        # remove querystring, if any
+        local_path = local_path.rsplit("?", 1)[0]
         # Now, we just need to check if we can find
         # the path from COMPRESS_URL in our url
         if local_path.startswith(self.url_path):
