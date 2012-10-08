@@ -36,7 +36,8 @@ same results as the original ``jsmin.c``. It differs in the following ways:
 - Newline characters are not allowed inside string and regex literals, except
   for line continuations in string literals (ECMA-5).
 - "return /regex/" is recognized correctly.
-- "+ ++" and "- --" sequences are not collapsed to '+++' or '---'
+- "+ +" and "- -" sequences are not collapsed to '++' or '--'
+- Newlines before ! operators are removed more sensibly
 - rJSmin does not handle streams, but only complete strings. (However, the
   module provides a "streamy" interface).
 
@@ -59,7 +60,7 @@ __author__ = "Andr\xe9 Malo"
 __author__ = getattr(__author__, 'decode', lambda x: __author__)('latin-1')
 __docformat__ = "restructuredtext en"
 __license__ = "Apache License, Version 2.0"
-__version__ = '1.0.3'
+__version__ = '1.0.5'
 __all__ = ['jsmin']
 
 import re as _re
@@ -168,7 +169,7 @@ def _make_jsmin(python_only=False):
     preregex2 = r'%(not_id_literal)sreturn' % locals()
 
     id_literal = id_literal_(r'[a-zA-Z0-9_$]')
-    id_literal_open = id_literal_(r'[a-zA-Z0-9_${\[(+-]')
+    id_literal_open = id_literal_(r'[a-zA-Z0-9_${\[(!+-]')
     id_literal_close = id_literal_(r'[a-zA-Z0-9_$}\])"\047+-]')
 
     space_sub = _re.compile((
@@ -180,8 +181,8 @@ def _make_jsmin(python_only=False):
             r'%(space)s*(?:(%(newline)s)%(space)s*)+'
             r'(?=%(id_literal_open)s)'
         r'|(?<=%(id_literal)s)(%(space)s)+(?=%(id_literal)s)'
-        r'|(?<=\+)(%(space)s)+(?=\+\+)'
-        r'|(?<=-)(%(space)s)+(?=--)'
+        r'|(?<=\+)(%(space)s)+(?=\+)'
+        r'|(?<=-)(%(space)s)+(?=-)'
         r'|%(space)s+'
         r'|(?:%(newline)s%(space)s*)+'
     ) % locals()).sub
@@ -274,15 +275,15 @@ def jsmin_for_posers(script):
         r'*)*\]))[^/\\\[\r\n]*)*/)[^\047"/\000-\040]*))|(?<=[^\000-!#%&(*,./'
         r':-@\[\\^`{|~])(?:[\000-\011\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/'
         r'*][^*]*\*+)*/))*(?:((?:(?://[^\r\n]*)?[\r\n]))(?:[\000-\011\013\01'
-        r'4\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/))*)+(?=[^\000-#%-\04'
-        r'7)*,./:-@\\-^`|-~])|(?<=[^\000-#%-,./:-@\[-^`{-~-])((?:[\000-\011'
-        r'\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)))+(?=[^\000-'
-        r'#%-,./:-@\[-^`{-~-])|(?<=\+)((?:[\000-\011\013\014\016-\040]|(?:/'
-        r'\*[^*]*\*+(?:[^/*][^*]*\*+)*/)))+(?=\+\+)|(?<=-)((?:[\000-\011\013'
-        r'\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)))+(?=--)|(?:[\00'
-        r'0-\011\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/))+|(?:('
-        r'?:(?://[^\r\n]*)?[\r\n])(?:[\000-\011\013\014\016-\040]|(?:/\*[^*]'
-        r'*\*+(?:[^/*][^*]*\*+)*/))*)+', subber, '\n%s\n' % script
+        r'4\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/))*)+(?=[^\000-\040"#'
+        r'%-\047)*,./:-@\\-^`|-~])|(?<=[^\000-#%-,./:-@\[-^`{-~-])((?:[\000-'
+        r'\011\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)))+(?=[^'
+        r'\000-#%-,./:-@\[-^`{-~-])|(?<=\+)((?:[\000-\011\013\014\016-\040]|'
+        r'(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)))+(?=\+)|(?<=-)((?:[\000-\011\0'
+        r'13\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)))+(?=-)|(?:[\0'
+        r'00-\011\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/))+|(?:'
+        r'(?:(?://[^\r\n]*)?[\r\n])(?:[\000-\011\013\014\016-\040]|(?:/\*[^*'
+        r']*\*+(?:[^/*][^*]*\*+)*/))*)+', subber, '\n%s\n' % script
     ).strip()
 
 
