@@ -145,8 +145,7 @@ command::
     }
 
 If not specified, the ``COMPRESS_OFFLINE_CONTEXT`` will by default contain
-the commonly used setting to refer to saved files ``MEDIA_URL`` and
-``STATIC_URL`` (if specified in the settings).
+the commonly used setting to refer to saved files ``STATIC_URL``.
 
 The result of running the ``compress`` management command will be cached
 in a file called ``manifest.json`` using the :attr:`configured storage

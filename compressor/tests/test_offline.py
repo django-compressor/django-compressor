@@ -55,7 +55,7 @@ class OfflineTestCaseMixin(object):
         count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
         self.assertEqual(1, count)
         self.assertEqual([
-            u'<script type="text/javascript" src="/media/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
+            u'<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
         ], result)
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         self.assertEqual(rendered_template, "".join(result) + "\n")
@@ -97,8 +97,8 @@ class OfflineGenerationBlockSuperTestCaseWithExtraContent(OfflineTestCaseMixin, 
         count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
         self.assertEqual(2, count)
         self.assertEqual([
-            u'<script type="text/javascript" src="/media/CACHE/js/ced14aec5856.js"></script>',
-            u'<script type="text/javascript" src="/media/CACHE/js/7c02d201f69d.js"></script>'
+            u'<script type="text/javascript" src="/static/CACHE/js/ced14aec5856.js"></script>',
+            u'<script type="text/javascript" src="/static/CACHE/js/7c02d201f69d.js"></script>'
         ], result)
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         self.assertEqual(rendered_template, "".join(result) + "\n")
@@ -156,8 +156,8 @@ class OfflineGenerationTestCaseErrors(OfflineTestCaseMixin, TestCase):
     def test_offline(self):
         count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
         self.assertEqual(2, count)
-        self.assertIn(u'<script type="text/javascript" src="/media/CACHE/js/3872c9ae3f42.js"></script>', result)
-        self.assertIn(u'<script type="text/javascript" src="/media/CACHE/js/cd8870829421.js"></script>', result)
+        self.assertIn(u'<script type="text/javascript" src="/static/CACHE/js/3872c9ae3f42.js"></script>', result)
+        self.assertIn(u'<script type="text/javascript" src="/static/CACHE/js/cd8870829421.js"></script>', result)
 
 
 class OfflineGenerationTestCaseWithError(OfflineTestCaseMixin, TestCase):
@@ -209,7 +209,7 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
             default_storage.delete(manifest_path)
         self.assertEqual(1, count)
         self.assertEqual([
-            u'<script type="text/javascript" src="/media/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
+            u'<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
         ], result)
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         self.assertEqual(rendered_template, "".join(result) + "\n")

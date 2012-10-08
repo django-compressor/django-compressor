@@ -24,13 +24,13 @@ class StorageTestCase(TestCase):
 
     def test_css_tag_with_storage(self):
         template = u"""{% load compress %}{% compress css %}
-        <link rel="stylesheet" href="{{ MEDIA_URL }}css/one.css" type="text/css">
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
         <style type="text/css">p { border:5px solid white;}</style>
-        <link rel="stylesheet" href="{{ MEDIA_URL }}css/two.css" type="text/css">
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
         {% endcompress %}
         """
-        context = {'MEDIA_URL': settings.COMPRESS_URL}
-        out = css_tag("/media/CACHE/css/1d4424458f88.css")
+        context = {'STATIC_URL': settings.COMPRESS_URL}
+        out = css_tag("/static/CACHE/css/1d4424458f88.css")
         self.assertEqual(out, render(template, context))
 
     def test_race_condition_handling(self):

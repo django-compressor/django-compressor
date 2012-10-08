@@ -43,29 +43,19 @@ Base settings
 
 .. attribute:: COMPRESS_URL
 
-    :Default: ``STATIC_URL`` (``MEDIA_URL`` for older Django versions)
+    :Default: ``STATIC_URL``
 
     Controls the URL that linked files will be read from and compressed files
     will be written to.
 
-    .. note::
-
-        This setting defaults to ``MEDIA_URL`` in case ``STATIC_URL``
-        is not given or empty, e.g. on older Django versions (< 1.3).
-
 .. attribute:: COMPRESS_ROOT
 
-    :Default: ``STATIC_ROOT`` (``MEDIA_ROOT`` for older Django versions)
+    :Default: ``STATIC_ROOT``
 
     Controls the absolute file path that linked static will be read from and
     compressed static will be written to when using the default
     :attr:`~django.conf.settings.COMPRESS_STORAGE`
     ``compressor.storage.CompressorFileStorage``.
-
-    .. note::
-
-        This setting defaults to ``MEDIA_ROOT`` in case ``STATIC_ROOT``
-        is not given, e.g. on older Django versions (< 1.3).
 
 .. attribute:: COMPRESS_OUTPUT_DIR
 
@@ -422,7 +412,7 @@ Offline settings
 
 .. attribute:: COMPRESS_OFFLINE_CONTEXT
 
-    :Default: ``{'MEDIA_URL': settings.MEDIA_URL}``
+    :Default: ``{'STATIC_URL': settings.STATIC_URL}``
 
     The context to be used by the ``compress`` management command when rendering
     the contents of ``{% compress %}`` template tags and saving the result in the

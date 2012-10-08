@@ -39,7 +39,7 @@ The storage backend to save the compressed files needs to be changed, too::
 Using staticfiles
 ^^^^^^^^^^^^^^^^^
 
-If you are using Django 1.3's staticfiles_ contrib app or the standalone
+If you are using Django's staticfiles_ contrib app or the standalone
 app django-staticfiles_, you'll need to use a temporary filesystem cache
 for Django Compressor to know which files to compress. Since staticfiles
 provides a management command to collect static files from various
