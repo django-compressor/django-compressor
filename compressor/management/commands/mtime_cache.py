@@ -22,7 +22,7 @@ class Command(NoArgsCommand):
                 "'.*' and '*~'."),
         make_option('--follow-links', dest='follow_links', action='store_true',
             help="Follow symlinks when traversing the COMPRESS_ROOT "
-                "(which defaults to MEDIA_ROOT). Be aware that using this "
+                "(which defaults to STATIC_ROOT). Be aware that using this "
                 "can lead to infinite recursion if a link points to a parent "
                 "directory of itself."),
         make_option('-c', '--clean', dest='clean', action='store_true',

@@ -28,7 +28,7 @@ class TemplatetagTestCase(TestCase):
     def setUp(self):
         self.old_enabled = settings.COMPRESS_ENABLED
         settings.COMPRESS_ENABLED = True
-        self.context = {'MEDIA_URL': settings.COMPRESS_URL}
+        self.context = {'STATIC_URL': settings.COMPRESS_URL}
 
     def tearDown(self):
         settings.COMPRESS_ENABLED = self.old_enabled
@@ -40,58 +40,58 @@ class TemplatetagTestCase(TestCase):
 
     def test_css_tag(self):
         template = u"""{% load compress %}{% compress css %}
-<link rel="stylesheet" href="{{ MEDIA_URL }}css/one.css" type="text/css">
+<link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
 <style type="text/css">p { border:5px solid green;}</style>
-<link rel="stylesheet" href="{{ MEDIA_URL }}css/two.css" type="text/css">
+<link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
 {% endcompress %}"""
-        out = css_tag("/media/CACHE/css/e41ba2cc6982.css")
+        out = css_tag("/static/CACHE/css/e41ba2cc6982.css")
         self.assertEqual(out, render(template, self.context))
 
     maxDiff = None
 
     def test_uppercase_rel(self):
         template = u"""{% load compress %}{% compress css %}
-<link rel="StyleSheet" href="{{ MEDIA_URL }}css/one.css" type="text/css">
+<link rel="StyleSheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
 <style type="text/css">p { border:5px solid green;}</style>
-<link rel="StyleSheet" href="{{ MEDIA_URL }}css/two.css" type="text/css">
+<link rel="StyleSheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
 {% endcompress %}"""
-        out = css_tag("/media/CACHE/css/e41ba2cc6982.css")
+        out = css_tag("/static/CACHE/css/e41ba2cc6982.css")
         self.assertEqual(out, render(template, self.context))
 
     def test_nonascii_css_tag(self):
         template = u"""{% load compress %}{% compress css %}
-        <link rel="stylesheet" href="{{ MEDIA_URL }}css/nonasc.css" type="text/css">
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/nonasc.css" type="text/css">
         <style type="text/css">p { border:5px solid green;}</style>
         {% endcompress %}
         """
-        out = css_tag("/media/CACHE/css/799f6defe43c.css")
+        out = css_tag("/static/CACHE/css/799f6defe43c.css")
         self.assertEqual(out, render(template, self.context))
 
     def test_js_tag(self):
         template = u"""{% load compress %}{% compress js %}
-        <script src="{{ MEDIA_URL }}js/one.js" type="text/javascript"></script>
+        <script src="{{ STATIC_URL }}js/one.js" type="text/javascript"></script>
         <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
         """
-        out = u'<script type="text/javascript" src="/media/CACHE/js/066cd253eada.js"></script>'
+        out = u'<script type="text/javascript" src="/static/CACHE/js/066cd253eada.js"></script>'
         self.assertEqual(out, render(template, self.context))
 
     def test_nonascii_js_tag(self):
         template = u"""{% load compress %}{% compress js %}
-        <script src="{{ MEDIA_URL }}js/nonasc.js" type="text/javascript"></script>
+        <script src="{{ STATIC_URL }}js/nonasc.js" type="text/javascript"></script>
         <script type="text/javascript">var test_value = "\u2014";</script>
         {% endcompress %}
         """
-        out = u'<script type="text/javascript" src="/media/CACHE/js/e214fe629b28.js"></script>'
+        out = u'<script type="text/javascript" src="/static/CACHE/js/e214fe629b28.js"></script>'
         self.assertEqual(out, render(template, self.context))
 
     def test_nonascii_latin1_js_tag(self):
         template = u"""{% load compress %}{% compress js %}
-        <script src="{{ MEDIA_URL }}js/nonasc-latin1.js" type="text/javascript" charset="latin-1"></script>
+        <script src="{{ STATIC_URL }}js/nonasc-latin1.js" type="text/javascript" charset="latin-1"></script>
         <script type="text/javascript">var test_value = "\u2014";</script>
         {% endcompress %}
         """
-        out = u'<script type="text/javascript" src="/media/CACHE/js/be9e078b5ca7.js"></script>'
+        out = u'<script type="text/javascript" src="/static/CACHE/js/be9e078b5ca7.js"></script>'
         self.assertEqual(out, render(template, self.context))
 
     def test_compress_tag_with_illegal_arguments(self):
@@ -102,7 +102,7 @@ class TemplatetagTestCase(TestCase):
 
     def test_debug_toggle(self):
         template = u"""{% load compress %}{% compress js %}
-        <script src="{{ MEDIA_URL }}js/one.js" type="text/javascript"></script>
+        <script src="{{ STATIC_URL }}js/one.js" type="text/javascript"></script>
         <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
         """
@@ -111,7 +111,7 @@ class TemplatetagTestCase(TestCase):
             GET = {settings.COMPRESS_DEBUG_TOGGLE: 'true'}
 
         context = dict(self.context, request=MockDebugRequest())
-        out = u"""<script src="/media/js/one.js" type="text/javascript"></script>
+        out = u"""<script src="/static/js/one.js" type="text/javascript"></script>
         <script type="text/javascript">obj.value = "value";</script>"""
         self.assertEqual(out, render(template, context))
 
@@ -144,7 +144,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
             ('text/coffeescript', '%s %s' % (python, precompiler)),
             ('text/less', '%s %s' % (python, precompiler)),
         )
-        self.context = {'MEDIA_URL': settings.COMPRESS_URL}
+        self.context = {'STATIC_URL': settings.COMPRESS_URL}
 
     def tearDown(self):
         settings.COMPRESS_ENABLED = self.old_enabled
@@ -154,7 +154,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
         template = u"""{% load compress %}{% compress js %}
             <script type="text/coffeescript"># this is a comment.</script>
             {% endcompress %}"""
-        out = script(src="/media/CACHE/js/e920d58f166d.js")
+        out = script(src="/static/CACHE/js/e920d58f166d.js")
         self.assertEqual(out, render(template, self.context))
 
     def test_compress_coffeescript_tag_and_javascript_tag(self):
@@ -162,7 +162,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <script type="text/coffeescript"># this is a comment.</script>
             <script type="text/javascript"># this too is a comment.</script>
             {% endcompress %}"""
-        out = script(src="/media/CACHE/js/ef6b32a54575.js")
+        out = script(src="/static/CACHE/js/ef6b32a54575.js")
         self.assertEqual(out, render(template, self.context))
 
     def test_coffeescript_and_js_tag_with_compress_enabled_equals_false(self):
@@ -197,11 +197,11 @@ class PrecompilerTemplatetagTestCase(TestCase):
         try:
             template = u"""
             {% load compress %}{% compress js %}
-            <script type="text/coffeescript" src="{{ MEDIA_URL }}js/one.coffee">
+            <script type="text/coffeescript" src="{{ STATIC_URL }}js/one.coffee">
             </script>
             {% endcompress %}"""
 
-            out = script(src="/media/CACHE/js/one.95cfb869eead.js")
+            out = script(src="/static/CACHE/js/one.95cfb869eead.js")
             self.assertEqual(out, render(template, self.context))
         finally:
             settings.COMPRESS_ENABLED = self.old_enabled
@@ -212,16 +212,16 @@ class PrecompilerTemplatetagTestCase(TestCase):
         try:
             template = u"""
             {% load compress %}{% compress js %}
-            <script type="text/coffeescript" src="{{ MEDIA_URL }}js/one.coffee">
+            <script type="text/coffeescript" src="{{ STATIC_URL }}js/one.coffee">
             </script>
-            <script src="{{ MEDIA_URL }}js/one.js"></script>
-            <script type="text/coffeescript" src="{{ MEDIA_URL }}js/one.js">
+            <script src="{{ STATIC_URL }}js/one.js"></script>
+            <script type="text/coffeescript" src="{{ STATIC_URL }}js/one.js">
             </script>
             {% endcompress %}"""
 
-            out = '\n'.join([script(src="/media/CACHE/js/one.95cfb869eead.js"),
-                             script(scripttype="", src="/media/js/one.js"),
-                             script(src="/media/CACHE/js/one.81a2cd965815.js")])
+            out = '\n'.join([script(src="/static/CACHE/js/one.95cfb869eead.js"),
+                             script(scripttype="", src="/static/js/one.js"),
+                             script(src="/static/CACHE/js/one.81a2cd965815.js")])
 
             self.assertEqual(out, render(template, self.context))
         finally:
@@ -234,12 +234,12 @@ class PrecompilerTemplatetagTestCase(TestCase):
         try:
             template = u"""
             {% load compress %}{% compress css %}
-            <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/one.css"></link>
-            <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/two.css"></link>
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/one.css"></link>
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/two.css"></link>
             {% endcompress %}"""
 
-            out = ''.join(['<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
-                           '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />'])
+            out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css" />',
+                           '<link rel="stylesheet" type="text/css" href="/static/css/two.css" />'])
 
             self.assertEqual(out, render(template, self.context))
         finally:
@@ -252,14 +252,14 @@ class PrecompilerTemplatetagTestCase(TestCase):
         try:
             template = u"""
             {% load compress %}{% compress css %}
-            <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/one.css"/>
-            <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/two.css"/>
-            <link rel="stylesheet" type="text/less" href="{{ MEDIA_URL }}css/url/test.css"/>
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/one.css"/>
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/two.css"/>
+            <link rel="stylesheet" type="text/less" href="{{ STATIC_URL }}css/url/test.css"/>
             {% endcompress %}"""
 
-            out = ''.join(['<link rel="stylesheet" type="text/css" href="/media/css/one.css" />',
-                           '<link rel="stylesheet" type="text/css" href="/media/css/two.css" />',
-                           '<link rel="stylesheet" href="/media/CACHE/css/test.c4f8a285c249.css" type="text/css" />'])
+            out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css" />',
+                           '<link rel="stylesheet" type="text/css" href="/static/css/two.css" />',
+                           '<link rel="stylesheet" href="/static/CACHE/css/test.5dddc6c2fb5a.css" type="text/css" />'])
             self.assertEqual(out, render(template, self.context))
         finally:
             settings.COMPRESS_ENABLED = self.old_enabled
