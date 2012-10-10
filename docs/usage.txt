@@ -46,6 +46,11 @@ Which would be rendered something like:
 
     <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
+.. note::
+
+    django-compressor will try to group ouputs by media. So if you encounter an unexpected result,
+    try to remove the media attributes or set the same value for all the tags.
+
 Linked files **must** be accessible via
 :attr:`~django.conf.settings.COMPRESS_URL`.
 
