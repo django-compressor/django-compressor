@@ -48,8 +48,7 @@ Which would be rendered something like:
 
 .. note::
 
-    django-compressor will try to group ouputs by media. So if you encounter an unexpected result,
-    try to remove the media attributes or set the same value for all the tags.
+    Remember that django-compressor will try to :ref:`group ouputs by media <css_notes>`.
 
 Linked files **must** be accessible via
 :attr:`~django.conf.settings.COMPRESS_URL`.
@@ -208,6 +207,8 @@ sends the following arguments:
     When compressing CSS, the ``post_compress`` signal will be called once for
     every different media attribute on the tags within the ``{% compress %}``
     tag in question.
+
+.. _css_notes:
 
 CSS Notes
 ---------
