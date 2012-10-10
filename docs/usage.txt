@@ -208,8 +208,6 @@ sends the following arguments:
     every different media attribute on the tags within the ``{% compress %}``
     tag in question.
 
-.. _css_notes:
-
 CSS Notes
 ---------
 
