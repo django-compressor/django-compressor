@@ -139,12 +139,16 @@ class CompressorNode(CompressorMixin, template.Node):
                 return settings.COMPRESS_DEBUG_TOGGLE in request.GET
 
     def render(self, context, forced=False):
-
-        # Check if in debug mode
+		# Check if in debug mode
         if self.debug_mode(context):
-            return self.get_original_content(context)
-
-        return self.render_compressed(context, self.kind, self.mode, forced=forced)
+            content = self.get_original_content(context)
+        else:
+            content = self.render_compressed(context, self.kind, self.mode, forced=forced)
+        
+        if 'STATIC_URL' in context and settings.COMPRESS_URL != context['STATIC_URL']:
+            content = content.replace(settings.COMPRESS_URL, context['STATIC_URL'])
+        
+        return content
 
 
 @register.tag
