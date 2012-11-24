@@ -205,7 +205,7 @@ class Command(NoArgsCommand):
                     followlinks=options.get('followlinks', False)):
                 templates.update(os.path.join(root, name)
                     for name in files if not name.startswith('.') and
-                        any(fnmatch(name, "*%s" % glob) for glob in extensions)) and
+                        any(fnmatch(name, "*%s" % glob) for glob in extensions) and
                         not any(re.match(pattern, os.path.join(root, name)) for pattern in ignore_patterns))
         if not templates:
             raise OfflineGenerationError("No templates found. Make sure your "
