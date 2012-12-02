@@ -24,7 +24,7 @@ class CssAbsoluteFilter(FilterBase):
     def input(self, filename=None, basename=None, **kwargs):
         if self.url.startswith(('http://', 'https://')):
             self.has_scheme = True
-        if filename is None: # like inline css
+        if filename is None:  # like inline css
             return self.content
         filename = os.path.normcase(os.path.abspath(filename))
         if (not self.has_scheme and not (filename and filename.startswith(self.root)) and
