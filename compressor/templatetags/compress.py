@@ -62,7 +62,7 @@ class CompressorMixin(object):
         and return the result if given
         """
         if self.is_offline_compression_enabled(forced) and not forced:
-            key = get_offline_hexdigest(self.nodelist.render(context))
+            key = get_offline_hexdigest(self.get_original_content(context))
             offline_manifest = get_offline_manifest()
             if key in offline_manifest:
                 return offline_manifest[key]
