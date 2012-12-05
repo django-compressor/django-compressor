@@ -31,6 +31,7 @@ class CompressorConf(AppConf):
         # ('text/coffeescript', 'coffee --compile --stdio'),
         # ('text/less', 'lessc {infile} {outfile}'),
         # ('text/x-sass', 'sass {infile} {outfile}'),
+        # ('text/stylus', 'stylus < {infile} > {outfile}'),
         # ('text/x-scss', 'sass --scss {infile} {outfile}'),
     )
     CLOSURE_COMPILER_BINARY = 'java -jar compiler.jar'
