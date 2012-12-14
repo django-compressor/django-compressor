@@ -14,7 +14,7 @@ from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.utils import find_command
-from compressor.filters.base import CompilerFilter
+from compressor.filters.base import CompilerFilter, CachedCompilerFilter
 from compressor.filters.cssmin import CSSMinFilter, rCSSMinFilter
 from compressor.filters.css_default import CssAbsoluteFilter
 from compressor.filters.jsmin import JSMinFilter
@@ -51,6 +51,7 @@ class PrecompilerTestCase(TestCase):
     def setUp(self):
         self.test_precompiler = os.path.join(test_dir, 'precompiler.py')
         self.setup_infile()
+        settings.COMPRESS_CACHEABLE_PRECOMPILERS = ('text/css',)
 
     def setup_infile(self, filename='static/css/one.css'):
         self.filename = os.path.join(test_dir, filename)
@@ -104,18 +105,28 @@ class PrecompilerTestCase(TestCase):
 
     def test_precompiler_cache(self):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
-        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
+        compiler = CachedCompilerFilter(content=self.content, filename=self.filename, command=command, mimetype='text/css')
         self.assertEqual(u"body { color:#990; }", compiler.input())
         # We tell whether the precompiler actually ran by inspecting compiler.infile. If not None, the compiler had to
         # write the input out to the file for the external command. If None, it was in the cache and thus skipped.
         self.assertIsNotNone(compiler.infile)  # Not cached
 
-        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
+        compiler = CachedCompilerFilter(content=self.content, filename=self.filename, command=command, mimetype='text/css')
         self.assertEqual(u"body { color:#990; }", compiler.input())
         self.assertIsNone(compiler.infile)  # Cached
 
         self.content += ' '  # Invalidate cache by slightly changing content
-        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
+        compiler = CachedCompilerFilter(content=self.content, filename=self.filename, command=command, mimetype='text/css')
+        self.assertEqual(u"body { color:#990; }", compiler.input())
+        self.assertIsNotNone(compiler.infile)  # Not cached
+
+    def test_precompiler_not_cacheable(self):
+        command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
+        compiler = CachedCompilerFilter(content=self.content, filename=self.filename, command=command, mimetype='text/different')
+        self.assertEqual(u"body { color:#990; }", compiler.input())
+        self.assertIsNotNone(compiler.infile)  # Not cached
+
+        compiler = CachedCompilerFilter(content=self.content, filename=self.filename, command=command, mimetype='text/different')
         self.assertEqual(u"body { color:#990; }", compiler.input())
         self.assertIsNotNone(compiler.infile)  # Not cached
 

@@ -20,7 +20,7 @@ from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
 from compressor.exceptions import (CompressorError, UncompressableFileError,
         FilterDoesNotExist)
-from compressor.filters import CompilerFilter
+from compressor.filters import CachedCompilerFilter
 from compressor.storage import compressor_file_storage
 from compressor.signals import post_compress
 from compressor.utils import get_class, get_mod_func, staticfiles
@@ -254,9 +254,9 @@ class Compressor(object):
                 try:
                     mod = import_module(mod_name)
                 except (ImportError, TypeError):
-                    filter = CompilerFilter(
-                        content, filter_type=self.type, filename=filename,
-                        charset=charset, command=filter_or_command)
+                    filter = CachedCompilerFilter(
+                        content=content, filter_type=self.type, filename=filename,
+                        charset=charset, command=filter_or_command, mimetype=mimetype)
                     return True, filter.input(**kwargs)
                 try:
                     precompiler_class = getattr(mod, cls_name)
