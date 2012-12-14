@@ -1,9 +1,11 @@
 from __future__ import absolute_import, unicode_literals
 import io
+import hashlib
 import logging
 import subprocess
 
 from platform import system
+from django.core.cache import get_cache
 
 if system() != "Windows":
     try:
@@ -33,6 +35,8 @@ from compressor.utils import get_mod_func
 
 
 logger = logging.getLogger("compressor.filters")
+
+cache = get_cache(settings.COMPRESS_CACHE_BACKEND)
 
 
 class FilterBase(object):
@@ -140,6 +144,11 @@ class CompilerFilter(FilterBase):
         self.infile = self.outfile = None
 
     def input(self, **kwargs):
+        content_hash = hashlib.sha1(self.command + self.content.encode('utf8')).hexdigest()
+        data = cache.get(content_hash)
+        if data:
+            return data
+
         encoding = self.default_encoding
         options = dict(self.options)
 
@@ -208,5 +217,5 @@ class CompilerFilter(FilterBase):
                 self.infile.close()
             if self.outfile is not None:
                 self.outfile.close()
-
+        cache.set(content_hash, filtered, settings.COMPRESS_REBUILD_TIMEOUT)
         return smart_text(filtered)
