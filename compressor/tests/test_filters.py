@@ -102,6 +102,23 @@ class PrecompilerTestCase(TestCase):
         compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
         self.assertEqual(type(compiler.input()), six.text_type)
 
+    def test_precompiler_cache(self):
+        command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
+        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
+        self.assertEqual(u"body { color:#990; }", compiler.input())
+        # We tell whether the precompiler actually ran by inspecting compiler.infile. If not None, the compiler had to
+        # write the input out to the file for the external command. If None, it was in the cache and thus skipped.
+        self.assertIsNotNone(compiler.infile)  # Not cached
+
+        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
+        self.assertEqual(u"body { color:#990; }", compiler.input())
+        self.assertIsNone(compiler.infile)  # Cached
+
+        self.content += ' '  # Invalidate cache by slightly changing content
+        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
+        self.assertEqual(u"body { color:#990; }", compiler.input())
+        self.assertIsNotNone(compiler.infile)  # Not cached
+
 
 class CssMinTestCase(TestCase):
     def test_cssmin_filter(self):
