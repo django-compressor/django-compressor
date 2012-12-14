@@ -1,22 +1,19 @@
 from __future__ import absolute_import
 import os
-import hashlib
 import logging
 import subprocess
 
-from django.core.cache import get_cache
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 from django.utils.importlib import import_module
 
+from compressor.cache import cache, get_precompiler_cachekey
 from compressor.conf import settings
 from compressor.exceptions import FilterError
 from compressor.utils import get_mod_func
 from compressor.utils.stringformat import FormattableString as fstr
 
 logger = logging.getLogger("compressor.filters")
-
-cache = get_cache(settings.COMPRESS_CACHE_BACKEND)
 
 
 class FilterBase(object):
@@ -99,10 +96,6 @@ class CompilerFilter(FilterBase):
         self.infile, self.outfile = None, None
 
     def input(self, **kwargs):
-        content_hash = hashlib.sha1(self.command + self.content.encode('utf8')).hexdigest()
-        data = cache.get(content_hash)
-        if data:
-            return data
         options = dict(self.options)
         if self.infile is None:
             if "{infile}" in self.command:
@@ -150,5 +143,26 @@ class CompilerFilter(FilterBase):
             if self.outfile is not None:
                 filtered = self.outfile.read()
                 self.outfile.close()
-        cache.set(content_hash, filtered, settings.COMPRESS_REBUILD_TIMEOUT)
         return filtered
+
+
+class CachedCompilerFilter(CompilerFilter):
+
+    def __init__(self, mimetype, **kwargs):
+        self.mimetype = mimetype
+        super(CachedCompilerFilter, self).__init__(**kwargs)
+
+    def input(self, **kwargs):
+        if self.mimetype in settings.COMPRESS_CACHEABLE_PRECOMPILERS:
+            key = self.get_cache_key()
+            data = cache.get(key)
+            if data:
+                return data
+            filtered = super(CachedCompilerFilter, self).input(**kwargs)
+            cache.set(key, filtered, settings.COMPRESS_REBUILD_TIMEOUT)
+            return filtered
+        else:
+            return super(CachedCompilerFilter, self).input(**kwargs)
+
+    def get_cache_key(self):
+        return get_precompiler_cachekey(self.command, self.content.encode('utf8'))
