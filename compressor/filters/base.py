@@ -1,8 +1,10 @@
 from __future__ import absolute_import
 import os
+import hashlib
 import logging
 import subprocess
 
+from django.core.cache import get_cache
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 from django.utils.importlib import import_module
@@ -13,6 +15,8 @@ from compressor.utils import get_mod_func
 from compressor.utils.stringformat import FormattableString as fstr
 
 logger = logging.getLogger("compressor.filters")
+
+cache = get_cache(settings.COMPRESS_CACHE_BACKEND)
 
 
 class FilterBase(object):
@@ -95,6 +99,10 @@ class CompilerFilter(FilterBase):
         self.infile, self.outfile = None, None
 
     def input(self, **kwargs):
+        content_hash = hashlib.sha1(self.command + self.content.encode('utf8')).hexdigest()
+        data = cache.get(content_hash)
+        if data:
+            return data
         options = dict(self.options)
         if self.infile is None:
             if "{infile}" in self.command:
@@ -142,4 +150,5 @@ class CompilerFilter(FilterBase):
             if self.outfile is not None:
                 filtered = self.outfile.read()
                 self.outfile.close()
+        cache.set(content_hash, filtered, settings.COMPRESS_REBUILD_TIMEOUT)
         return filtered
