@@ -12,6 +12,11 @@ try:
 except ImportError:
     from StringIO import StringIO  # noqa
 
+try:
+    import multiprocessing
+except ImportError:
+    multiprocessing = None
+
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import (Context, Template,
                              TemplateDoesNotExist, TemplateSyntaxError)
@@ -297,7 +302,7 @@ class Command(NoArgsCommand):
 
         max_processes = options.get('processes', 1)
 
-        if max_processes > 1:
+        if max_processes > 1 and multiprocessing is not None:
             processes = []
             results_queue = multiprocessing.Queue()
             error_queue = multiprocessing.Queue()
