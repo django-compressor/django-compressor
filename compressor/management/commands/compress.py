@@ -1,4 +1,5 @@
 # flake8: noqa
+import multiprocessing
 import os
 import sys
 from types import MethodType
@@ -103,6 +104,32 @@ def patched_get_parent(self, context):
     return compiled_template
 
 
+def perform_compress(template, nodes, log, verbosity, results_queue):
+    context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
+    template._log = log
+    template._log_verbosity = verbosity
+    template._render_firstnode = MethodType(patched_render_firstnode, template)
+    extra_context = template._render_firstnode(context)
+    if extra_context is None:
+        # Something is wrong - ignore this template
+        return
+    for node in nodes:
+        context.push()
+        if extra_context and node._block_name:
+            # Give a block context to the node if it was found inside
+            # a {% block %}.
+            context['block'] = context.render_context[BLOCK_CONTEXT_KEY].get_block(node._block_name)
+            if context['block']:
+                context['block'].context = context
+        key = get_offline_hexdigest(node.nodelist.render(context))
+        try:
+            result = node.render(context, forced=True)
+        except Exception, e:
+            raise CommandError("An error occured during rendering %s: "
+                               "%s" % (template.template_name, e))
+        results_queue.put([key, result])
+        context.pop()
+
 class Command(NoArgsCommand):
     help = "Compress content outside of the request/response cycle"
     option_list = NoArgsCommand.option_list + (
@@ -110,6 +137,8 @@ class Command(NoArgsCommand):
             help='The file extension(s) to examine (default: ".html", '
                 'separate multiple extensions with commas, or use -e '
                 'multiple times)'),
+        make_option('--processes', '-p', action='store', dest='processes', default=1,
+            help='The number of processes to use when compressing files. Default 1.'),
         make_option('-f', '--force', default=False, action='store_true',
             help="Force the generation of compressed content even if the "
                 "COMPRESS_ENABLED setting is not True.", dest='force'),
@@ -253,36 +282,24 @@ class Command(NoArgsCommand):
                                    for t in compressor_nodes.keys())) + "\n")
 
         log.write("Compressing... ")
-        count = 0
-        results = []
         offline_manifest = SortedDict()
+
+        results = []
+        count = 0
+
+        processes = []
+        results_queue = multiprocessing.Queue()
         for template, nodes in compressor_nodes.iteritems():
-            context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
-            template._log = log
-            template._log_verbosity = verbosity
-            template._render_firstnode = MethodType(patched_render_firstnode, template)
-            extra_context = template._render_firstnode(context)
-            if extra_context is None:
-                # Something is wrong - ignore this template
-                continue
-            for node in nodes:
-                context.push()
-                if extra_context and node._block_name:
-                    # Give a block context to the node if it was found inside
-                    # a {% block %}.
-                    context['block'] = context.render_context[BLOCK_CONTEXT_KEY].get_block(node._block_name)
-                    if context['block']:
-                        context['block'].context = context
-                key = get_offline_hexdigest(node.nodelist.render(context))
-                try:
-                    result = node.render(context, forced=True)
-                except Exception, e:
-                    raise CommandError("An error occured during rendering %s: "
-                                       "%s" % (template.template_name, e))
-                offline_manifest[key] = result
-                context.pop()
-                results.append(result)
-                count += 1
+            p = multiprocessing.Process(target=perform_compress, args=(template, nodes, log, verbosity, results_queue))
+            p.start()
+            processes.append(p)
+        for p in processes:
+            p.join()
+        while not results_queue.empty():
+            key, result = results_queue.get()
+            offline_manifest[key] = result
+            results.append(result)
+            count += 1
 
         write_offline_manifest(offline_manifest)
 
