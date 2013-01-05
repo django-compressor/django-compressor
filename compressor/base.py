@@ -33,7 +33,7 @@ class Compressor(object):
     """
     type = None
 
-    def __init__(self, content=None, output_prefix=None, context=None, *args, **kwargs):
+    def __init__(self, content=None, output_prefix=None, context=None, opts=None, *args, **kwargs):
         self.content = content or ""
         self.output_prefix = output_prefix or "compressed"
         self.output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
@@ -44,6 +44,7 @@ class Compressor(object):
         self.extra_context = {}
         self.all_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
         self.finders = staticfiles.finders
+        self.opts = opts or {}
 
     def split_contents(self):
         """
@@ -51,6 +52,32 @@ class Compressor(object):
         iterable with four values: kind, value, basename, element
         """
         raise NotImplementedError
+
+    def group_contents(self):
+        contents = []
+        groups = {}
+        for kind, value, basename, elems in self.split_contents():
+            attrs = self.parser.elem_attribs(elems[0])
+            charset = attrs.get("charset", self.charset)
+            mimetype = attrs.get("type", None)
+            if mimetype:
+                idx = groups.get(mimetype, -1)
+                if idx >= 0:
+                    # get the content of this elem if it's a file
+                    if kind == SOURCE_FILE:
+                        value = self.get_filecontent(value, charset)
+                    # if there is only 1 existing and it's a file, convert it too
+                    if len(contents[idx][3]) == 1 and contents[idx][0] == SOURCE_FILE:
+                        contents[idx][1] = self.get_filecontent(contents[idx][1], charset)
+                    contents[idx][0] = SOURCE_HUNK
+                    contents[idx][1] += value
+                    contents[idx][3].extend(elems)
+                else:
+                    groups[mimetype] = len(contents)
+                    contents.append([kind, value, smart_unicode(basename), elems])
+            else:
+                contents.append([kind, value, basename, elems])
+        return contents
 
     def get_template_name(self, mode):
         """
@@ -149,17 +176,21 @@ class Compressor(object):
         bunch of precompiled and/or rendered hunks.
         """
         enabled = settings.COMPRESS_ENABLED or forced
+        group_first = self.opts.get('group_first', 'false').lower() == 'true'
+        contents = group_first and self.group_contents() or self.split_contents()
 
-        for kind, value, basename, elem in self.split_contents():
+        for kind, value, basename, elems in contents:
             precompiled = False
-            attribs = self.parser.elem_attribs(elem)
+            # If it's a grouped set, they should all have the same charset and type
+            attribs = self.parser.elem_attribs(elems[0])
             charset = attribs.get("charset", self.charset)
             options = {
                 'method': METHOD_INPUT,
-                'elem': elem,
+                'elems': elems,
                 'kind': kind,
                 'basename': basename,
             }
+            options.update(self.opts)
 
             if kind == SOURCE_FILE:
                 options = dict(options, filename=value)
@@ -176,7 +207,7 @@ class Compressor(object):
                     value = self.handle_output(kind, value, forced=True, basename=basename)
                     yield smart_unicode(value, charset.lower())
                 else:
-                    yield self.parser.elem_str(elem)
+                    yield "\n".join([self.parser.elem_str(e) for e in elems])
 
     def filter_output(self, content):
         """
@@ -195,10 +226,10 @@ class Compressor(object):
             content.append(hunk)
         return content
 
-    def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
+    def precompile(self, content, kind=None, elems=None, filename=None, **kwargs):
         if not kind:
             return False, content
-        attrs = self.parser.elem_attribs(elem)
+        attrs = self.parser.elem_attribs(elems[0])
         mimetype = attrs.get("type", None)
         if mimetype:
             filter_or_command = self.all_mimetypes.get(mimetype)

@@ -6,7 +6,7 @@ Usage
 .. code-block:: django
 
     {% load compress %}
-    {% compress <js/css> [<file/inline> [block_name]] %}
+    {% compress js|css [file|inline] [as <block_name>] [<option>=<value>[ <option>=<value>...]] %}
     <html of inline or linked JS/CSS>
     {% endcompress %}
 
@@ -79,10 +79,9 @@ exception. If DEBUG is ``False`` these files will be silently stripped.
     :attr:`~django.conf.settings.COMPRESS_CACHE_BACKEND` and
     Django's `caching documentation`_).
 
-The compress template tag supports a second argument specifying the output
-mode and defaults to saving the result in a file. Alternatively you can
-pass '``inline``' to the template tag to return the content directly to the
-rendered page, e.g.:
+The compress template tag supports specifying the output mode and defaults
+to saving the result in a file. Alternatively, you can pass '``inline``' to
+the template tag to return the content directly to the rendered page, e.g.:
 
 .. code-block:: django
 
@@ -100,9 +99,46 @@ would be rendered something like::
     obj.value = "value";
     </script>
 
-The compress template tag also supports a third argument for naming the output
-of that particular compress tag.  This is then added to the context so you can
-access it in the `post_compress signal <signals>`.
+The compress template tag also supports naming the output of that particular
+compress tag, e.g.:
+
+.. code-block:: django
+
+    {% load compress %}
+
+    {% compress js as main_js %}
+    <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+    {% endcompress %}
+
+This is then added to the context so you can access it in the `post_compress signal <signals>`.
+
+The compress template also supports passing any number of arbitrary keyword arguments.  These are
+passed to all the compressors and, when using the default compressor classes, all of the
+precompilers and filters, e.g.:
+
+.. code-block:: django
+
+    {% load compress %}
+
+    {% compress js foo=bar group_first=true %}
+    <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+    {% endcompress %}
+
+The following options are currently used by django_compressor:
+
+group_first
+    If true, the django_compressor will concatenate files of like types before passing them to
+    precompilers and filters.  This could be used, for instance, to allow separately maintained
+    files to be processed together, as one might desire if they are maintaining a 'mixins.less'
+    separate from page-specific .less files
+
+deferred
+    If true, instead of rendering the result of the compress tag into the template, the content
+    will be added to the template context under the name specified by the 'as <name>' tag argument.
+    If no name is specified, the content will be rendered normally.  If the tag would have
+    rendered to a file, the url of that file is contained in the template variable.
 
 .. _memcached: http://memcached.org/
 .. _caching documentation: http://docs.djangoproject.com/en/1.2/topics/cache/#memcached

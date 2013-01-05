@@ -1,3 +1,5 @@
+import re
+
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 
@@ -33,9 +35,9 @@ class CompressorMixin(object):
         return get_class(self.compressors.get(kind),
                          exception=ImproperlyConfigured)(*args, **kwargs)
 
-    def get_compressor(self, context, kind):
+    def get_compressor(self, context, kind, tag_opts):
         return self.compressor_cls(kind,
-            content=self.get_original_content(context), context=context)
+            content=self.get_original_content(context), context=context, opts=tag_opts)
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
@@ -82,50 +84,63 @@ class CompressorMixin(object):
             return cache_key, cache_content
         return None, None
 
-    def render_compressed(self, context, kind, mode, forced=False):
+    def render_compressed(self, context, kind, mode, tag_opts=None, forced=False):
+        deferred = getattr(self, 'name', None) and tag_opts and tag_opts.get('deferred', 'false') == 'true'
 
         # See if it has been rendered offline
         cached_offline = self.render_offline(context, forced=forced)
         if cached_offline:
-            return cached_offline
+            return self.render_result(cached_offline, context, deferred, mode)
 
         # Take a shortcut if we really don't have anything to do
         if ((not settings.COMPRESS_ENABLED and
              not settings.COMPRESS_PRECOMPILERS) and not forced):
-            return self.get_original_content(context)
+            return self.render_result(self.get_original_content(context), context, deferred, mode)
 
         context['compressed'] = {'name': getattr(self, 'name', None)}
-        compressor = self.get_compressor(context, kind)
+        compressor = self.get_compressor(context, kind, tag_opts)
 
         # Prepare the actual compressor and check cache
         cache_key, cache_content = self.render_cached(compressor, kind, mode, forced=forced)
         if cache_content is not None:
-            return cache_content
+            return self.render_result(cache_content, context, deferred, mode)
 
         # call compressor output method and handle exceptions
         try:
             rendered_output = self.render_output(compressor, mode, forced=forced)
             if cache_key:
                 cache_set(cache_key, rendered_output)
-            return rendered_output.decode('utf-8')
+            return self.render_result(rendered_output.decode('utf-8'), context, deferred, mode)
         except Exception:
             if settings.DEBUG or forced:
                 raise
 
         # Or don't do anything in production
-        return self.get_original_content(context)
+        return self.render_result(self.get_original_content(context), context, deferred, mode)
 
     def render_output(self, compressor, mode, forced=False):
         return compressor.output(mode, forced=forced)
 
+    def render_result(self, content, context, deferred, mode):
+        if deferred:
+            if mode == OUTPUT_FILE:
+                match = re.search(r'(?:src|href)=["\']([^"\']+)', content)
+                if match:
+                    context[self.name] = match.group(1)
+                    return ""
+            context[self.name] = content
+            return ""
+        return content
+
 
 class CompressorNode(CompressorMixin, template.Node):
 
-    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE, name=None):
+    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE, name=None, tag_opts={}):
         self.nodelist = nodelist
         self.kind = kind
         self.mode = mode
         self.name = name
+        self.tag_opts = tag_opts
 
     def get_original_content(self, context):
         return self.nodelist.render(context)
@@ -144,7 +159,16 @@ class CompressorNode(CompressorMixin, template.Node):
         if self.debug_mode(context):
             return self.get_original_content(context)
 
-        return self.render_compressed(context, self.kind, self.mode, forced=forced)
+        self.resolve_variables(context)
+        return self.render_compressed(context, self.kind, self.mode, self.tag_opts, forced=forced)
+
+    def resolve_variables(self, context):
+        for option, value in self.tag_opts.items():
+            try:
+                value = value.resolve(context)
+            except template.VariableDoesNotExist:
+                value = unicode(value)
+            self.tag_opts[option] = value
 
 
 @register.tag
@@ -154,7 +178,7 @@ def compress(parser, token):
 
     Syntax::
 
-        {% compress <js/css> %}
+        {% compress js|css [file|inline] [<option>=<value>[ <option>=<value>...]] [as <variable_name>] %}
         <html of inline or linked JS/CSS>
         {% endcompress %}
 
@@ -191,22 +215,30 @@ def compress(parser, token):
 
     args = token.split_contents()
 
-    if not len(args) in (2, 3, 4):
+    if not len(args) >= 2:
         raise template.TemplateSyntaxError(
-            "%r tag requires either one, two or three arguments." % args[0])
+            "%r tag requires at least one argument." % args[0])
 
     kind = args[1]
-
+    name = None
+    mode = OUTPUT_FILE
+    tag_opts = {}
     if len(args) >= 3:
-        mode = args[2]
-        if not mode in OUTPUT_MODES:
-            raise template.TemplateSyntaxError(
-                "%r's second argument must be '%s' or '%s'." %
-                (args[0], OUTPUT_FILE, OUTPUT_INLINE))
-    else:
-        mode = OUTPUT_FILE
-    if len(args) == 4:
-        name = args[3]
-    else:
-        name = None
-    return CompressorNode(nodelist, kind, mode, name)
+        looking_for_name = False
+        for i in range(2, len(args)):
+            if looking_for_name:
+                name = args[i]
+                looking_for_name = False
+            elif args[i] == "as":
+                looking_for_name = True
+            elif '=' in args[i]:
+                option, value = args[i].split("=")
+                tag_opts[option] = template.Variable(value)
+            elif args[i] in OUTPUT_MODES:
+                mode = args[i]
+            else:
+                raise template.TemplateSyntaxError(
+                    "%r's third argument on must either be (file|input) or <option>=<value> or 'as <name>'" %
+                    args[0])
+
+    return CompressorNode(nodelist, kind, mode, name, tag_opts)
