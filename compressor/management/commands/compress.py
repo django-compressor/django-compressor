@@ -105,7 +105,7 @@ def patched_get_parent(self, context):
     return compiled_template
 
 
-def perform_compress(template, nodes, log, verbosity, results_queue):
+def perform_compress(template, nodes, log, verbosity, results_queue, error_queue):
     context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
     template._log = log
     template._log_verbosity = verbosity
@@ -126,8 +126,9 @@ def perform_compress(template, nodes, log, verbosity, results_queue):
         try:
             result = node.render(context, forced=True)
         except Exception, e:
-            raise CommandError("An error occured during rendering %s: "
-                               "%s" % (template.template_name, e))
+            error_queue.put(CommandError("An error occured during rendering %s: "
+                               "%s" % (template.template_name, e)))
+            return
         results_queue.put([key, result])
         context.pop()
 
@@ -288,15 +289,18 @@ class Command(NoArgsCommand):
         results = []
         count = 0
 
+        max_processes = options.get('processes', 1)
+
         processes = []
-        # We can't use a process pool because templates aren't pickleable. Instead we implement
-        # a simple one ourselves that doesn't reuse processes, but limits their count.
-        max_processes = options['processes']
         results_queue = multiprocessing.Queue()
+        error_queue = multiprocessing.Queue()
         for template, nodes in compressor_nodes.iteritems():
-            p = multiprocessing.Process(target=perform_compress, args=(template, nodes, log, verbosity, results_queue))
+            p = multiprocessing.Process(target=perform_compress, args=(template, nodes, log,
+                                                                       verbosity, results_queue, error_queue))
             p.start()
             processes.append(p)
+            # We can't use a process pool because templates aren't pickleable. Instead we implement
+            # a simple one ourselves that doesn't reuse processes, but limits their count.
             while len(processes) >= max_processes:
                 time.sleep(0.1)
                 for process in processes:
@@ -305,6 +309,8 @@ class Command(NoArgsCommand):
                         processes.remove(process)
         for p in processes:
             p.join()
+        while not error_queue.empty():
+            raise error_queue.get()
         while not results_queue.empty():
             key, result = results_queue.get()
             offline_manifest[key] = result
