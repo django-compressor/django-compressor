@@ -2,6 +2,7 @@
 import multiprocessing
 import os
 import sys
+import time
 from types import MethodType
 from fnmatch import fnmatch
 from optparse import make_option
@@ -137,7 +138,7 @@ class Command(NoArgsCommand):
             help='The file extension(s) to examine (default: ".html", '
                 'separate multiple extensions with commas, or use -e '
                 'multiple times)'),
-        make_option('--processes', '-p', action='store', dest='processes', default=1,
+        make_option('--processes', '-p', action='store', type=int, dest='processes', default=1,
             help='The number of processes to use when compressing files. Default 1.'),
         make_option('-f', '--force', default=False, action='store_true',
             help="Force the generation of compressed content even if the "
@@ -288,11 +289,20 @@ class Command(NoArgsCommand):
         count = 0
 
         processes = []
+        # We can't use a process pool because templates aren't pickleable. Instead we implement
+        # a simple one ourselves that doesn't reuse processes, but limits their count.
+        max_processes = options['processes']
         results_queue = multiprocessing.Queue()
         for template, nodes in compressor_nodes.iteritems():
             p = multiprocessing.Process(target=perform_compress, args=(template, nodes, log, verbosity, results_queue))
             p.start()
             processes.append(p)
+            while len(processes) >= max_processes:
+                time.sleep(0.1)
+                for process in processes:
+                    if not process.is_alive():
+                        process.join()
+                        processes.remove(process)
         for p in processes:
             p.join()
         while not results_queue.empty():
