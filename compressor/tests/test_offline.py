@@ -3,6 +3,11 @@ import os
 from StringIO import StringIO
 from unittest2 import skipIf
 
+try:
+    import multiprocessing
+except ImportError:
+    multiprocessing = None  # noqa
+
 import django
 from django.template import Template, Context
 from django.test import TestCase
@@ -51,14 +56,18 @@ class OfflineTestCaseMixin(object):
         if default_storage.exists(manifest_path):
             default_storage.delete(manifest_path)
 
-    def test_offline(self):
-        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
+    def test_offline(self, **options):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, **options)
         self.assertEqual(1, count)
         self.assertEqual([
             u'<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
         ], result)
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         self.assertEqual(rendered_template, "".join(result) + "\n")
+
+    @skipIf(multiprocessing is None, 'multiprocessing module not available')
+    def test_offline_multiprocess(self):
+        self.test_offline(processes=2)
 
 
 class OfflineGenerationBlockSuperTestCase(OfflineTestCaseMixin, TestCase):
@@ -93,8 +102,8 @@ class OfflineGenerationBlockSuperMultipleWithCachedLoaderTestCase(OfflineTestCas
 class OfflineGenerationBlockSuperTestCaseWithExtraContent(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super_extra"
 
-    def test_offline(self):
-        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
+    def test_offline(self, **options):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, **options)
         self.assertEqual(2, count)
         self.assertEqual([
             u'<script type="text/javascript" src="/static/CACHE/js/ced14aec5856.js"></script>',
@@ -153,8 +162,8 @@ class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):
 class OfflineGenerationTestCaseErrors(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_error_handling"
 
-    def test_offline(self):
-        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
+    def test_offline(self, **options):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, **options)
         self.assertEqual(2, count)
         self.assertIn(u'<script type="text/javascript" src="/static/CACHE/js/3872c9ae3f42.js"></script>', result)
         self.assertIn(u'<script type="text/javascript" src="/static/CACHE/js/cd8870829421.js"></script>', result)
@@ -168,7 +177,7 @@ class OfflineGenerationTestCaseWithError(OfflineTestCaseMixin, TestCase):
         settings.COMPRESS_PRECOMPILERS = (('text/coffeescript', 'non-existing-binary'),)
         super(OfflineGenerationTestCaseWithError, self).setUp()
 
-    def test_offline(self):
+    def test_offline(self, **options):
         """
         Test that a CommandError is raised with DEBUG being False as well as
         True, as otherwise errors in configuration will never show in
