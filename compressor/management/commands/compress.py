@@ -1,6 +1,7 @@
 # flake8: noqa
 import os
 import sys
+import time
 from types import MethodType
 from fnmatch import fnmatch
 from optparse import make_option
@@ -9,6 +10,11 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO  # noqa
+
+try:
+    import multiprocessing
+except ImportError:
+    multiprocessing = None
 
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import (Context, Template,
@@ -103,6 +109,39 @@ def patched_get_parent(self, context):
     return compiled_template
 
 
+def perform_compress(template, nodes, log, verbosity):
+    context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
+    template._log = log
+    template._log_verbosity = verbosity
+    template._render_firstnode = MethodType(patched_render_firstnode, template)
+    extra_context = template._render_firstnode(context)
+    if extra_context is None:
+        # Something is wrong - ignore this template
+        return
+    for node in nodes:
+        context.push()
+        if extra_context and node._block_name:
+            # Give a block context to the node if it was found inside
+            # a {% block %}.
+            context['block'] = context.render_context[BLOCK_CONTEXT_KEY].get_block(node._block_name)
+            if context['block']:
+                context['block'].context = context
+        key = get_offline_hexdigest(node.nodelist.render(context))
+        try:
+            result = node.render(context, forced=True)
+        except Exception, e:
+            raise CommandError("An error occured during rendering %s: "
+                               "%s" % (template.template_name, e))
+        context.pop()
+        yield key, result
+
+def perform_compress_async(template, nodes, log, verbosity, results_queue, error_queue):
+    try:
+        for key, result in perform_compress(template, nodes, log, verbosity):
+            results_queue.put((key, result))
+    except Exception, e:
+        error_queue.put(e)
+
 class Command(NoArgsCommand):
     help = "Compress content outside of the request/response cycle"
     option_list = NoArgsCommand.option_list + (
@@ -110,6 +149,8 @@ class Command(NoArgsCommand):
             help='The file extension(s) to examine (default: ".html", '
                 'separate multiple extensions with commas, or use -e '
                 'multiple times)'),
+        make_option('--processes', '-p', action='store', type=int, dest='processes', default=1,
+            help='The number of processes to use when compressing files. Default 1.'),
         make_option('-f', '--force', default=False, action='store_true',
             help="Force the generation of compressed content even if the "
                 "COMPRESS_ENABLED setting is not True.", dest='force'),
@@ -253,36 +294,47 @@ class Command(NoArgsCommand):
                                    for t in compressor_nodes.keys())) + "\n")
 
         log.write("Compressing... ")
-        count = 0
-        results = []
         offline_manifest = SortedDict()
-        for template, nodes in compressor_nodes.iteritems():
-            context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
-            template._log = log
-            template._log_verbosity = verbosity
-            template._render_firstnode = MethodType(patched_render_firstnode, template)
-            extra_context = template._render_firstnode(context)
-            if extra_context is None:
-                # Something is wrong - ignore this template
-                continue
-            for node in nodes:
-                context.push()
-                if extra_context and node._block_name:
-                    # Give a block context to the node if it was found inside
-                    # a {% block %}.
-                    context['block'] = context.render_context[BLOCK_CONTEXT_KEY].get_block(node._block_name)
-                    if context['block']:
-                        context['block'].context = context
-                key = get_offline_hexdigest(node.nodelist.render(context))
-                try:
-                    result = node.render(context, forced=True)
-                except Exception, e:
-                    raise CommandError("An error occured during rendering %s: "
-                                       "%s" % (template.template_name, e))
+
+        results = []
+        count = 0
+
+        max_processes = options.get('processes', 1)
+
+        if max_processes > 1 and multiprocessing is not None:
+            processes = []
+            results_queue = multiprocessing.Queue()
+            error_queue = multiprocessing.Queue()
+            for template, nodes in compressor_nodes.iteritems():
+                p = multiprocessing.Process(target=perform_compress_async, args=(template, nodes, log,
+                                                                           verbosity, results_queue, error_queue))
+                p.start()
+                processes.append(p)
+                # We can't use a process pool because templates aren't pickleable. Instead we implement
+                # a simple one ourselves that doesn't reuse processes, but limits their count.
+                while len(processes) >= max_processes:
+                    time.sleep(0.1)
+                    for process in processes:
+                        if not process.is_alive():
+                            process.join()
+                            processes.remove(process)
+            for p in processes:
+                p.join()
+            while not error_queue.empty():
+                raise error_queue.get()
+            while not results_queue.empty():
+                key, result = results_queue.get()
                 offline_manifest[key] = result
-                context.pop()
                 results.append(result)
                 count += 1
+        else:
+            if max_processes > 1:
+                log.write("Warning: multiprocessing was requested, but the multiprocessing module is not available.\n")
+            for template, nodes in compressor_nodes.iteritems():
+                for key, result in perform_compress(template, nodes, log, verbosity):
+                    offline_manifest[key] = result
+                    results.append(result)
+                    count += 1
 
         write_offline_manifest(offline_manifest)
 
