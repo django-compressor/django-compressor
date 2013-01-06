@@ -1,5 +1,4 @@
 # flake8: noqa
-import multiprocessing
 import os
 import sys
 import time
@@ -329,6 +328,8 @@ class Command(NoArgsCommand):
                 results.append(result)
                 count += 1
         else:
+            if max_processes > 1:
+                log.write("Warning: multiprocessing was requested, but the multiprocessing module is not available.\n")
             for template, nodes in compressor_nodes.iteritems():
                 for key, result in perform_compress(template, nodes, log, verbosity):
                     offline_manifest[key] = result
