@@ -94,7 +94,7 @@ class CompressorMixin(object):
              not settings.COMPRESS_PRECOMPILERS) and not forced):
             return self.get_original_content(context)
 
-        context['compressed'] = {'name': getattr(self, 'name', None)}
+        context.update({'compressed': {'name': getattr(self, 'name', None)}})
         compressor = self.get_compressor(context, kind)
 
         # Prepare the actual compressor and check cache
@@ -107,13 +107,16 @@ class CompressorMixin(object):
             rendered_output = self.render_output(compressor, mode, forced=forced)
             if cache_key:
                 cache_set(cache_key, rendered_output)
+            context.pop()
             return rendered_output.decode('utf-8')
         except Exception:
             if settings.DEBUG or forced:
                 raise
 
         # Or don't do anything in production
-        return self.get_original_content(context)
+        output = self.get_original_content(context)
+        context.pop()
+        return output
 
     def render_output(self, compressor, mode, forced=False):
         return compressor.output(mode, forced=forced)
