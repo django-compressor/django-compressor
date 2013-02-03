@@ -91,7 +91,9 @@ class CssAbsoluteFilter(FilterBase):
     def _converter(self, matchobj, group, template):
         url = matchobj.group(group)
         url = url.strip(' \'"')
-        if url.startswith(SCHEMES):
+        if url.startswith('#'):
+            return "url('%s')" % url
+        elif url.startswith(SCHEMES):
             return "url('%s')" % self.add_suffix(url)
         full_url = posixpath.normpath('/'.join([str(self.directory_name),
                                                 url]))
