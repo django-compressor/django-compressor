@@ -142,6 +142,16 @@ class CssAbsolutizingTestCase(TestCase):
         output = "p { background: url('%(url)simg/python.png?%(hash)s#foo') }" % params
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
+    def test_css_absolute_filter_only_url_fragment(self):
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        content = "p { background: url('#foo') }"
+        filter = CssAbsoluteFilter(content)
+        self.assertEqual(content, filter.input(filename=filename, basename='css/url/test.css'))
+        settings.COMPRESS_URL = 'http://media.example.com/'
+        filter = CssAbsoluteFilter(content)
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        self.assertEqual(content, filter.input(filename=filename, basename='css/url/test.css'))
+
     def test_css_absolute_filter_querystring(self):
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
         imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
