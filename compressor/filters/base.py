@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-import os
 import logging
 import subprocess
 
@@ -102,7 +101,6 @@ class CompilerFilter(FilterBase):
                     self.infile = NamedTemporaryFile(mode="w")
                     self.infile.write(self.content.encode('utf8'))
                     self.infile.flush()
-                    os.fsync(self.infile)
                     options["infile"] = self.infile.name
                 else:
                     self.infile = open(self.filename)
