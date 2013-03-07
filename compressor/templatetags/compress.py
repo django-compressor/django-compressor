@@ -1,6 +1,6 @@
 from django import template
 from django.core.exceptions import ImproperlyConfigured
-
+from django.utils.importlib import import_module
 from compressor.cache import (cache_get, cache_set, get_offline_hexdigest,
                               get_offline_manifest, get_templatetag_cachekey)
 from compressor.conf import settings
@@ -194,9 +194,7 @@ def compress(parser, token):
     if not len(args) in (2, 3, 4):
         raise template.TemplateSyntaxError(
             "%r tag requires either one, two or three arguments." % args[0])
-
     kind = args[1]
-
     if len(args) >= 3:
         mode = args[2]
         if not mode in OUTPUT_MODES:
@@ -209,4 +207,9 @@ def compress(parser, token):
         name = args[3]
     else:
         name = None
-    return CompressorNode(nodelist, kind, mode, name)
+    compressor_class_setting = settings.COMPRESS_NODE_CLASS
+    if compressor_class_setting:
+        compressor_class = import_module(compressor_class_setting).CompressorNode
+    else:
+        compressor_class = CompressorNode
+    return compressor_class(nodelist, kind, mode, name)
