@@ -3,7 +3,7 @@
  Get django-sekizai, django-compessor (and django-cms) playing nicely together
  re: https://github.com/ojii/django-sekizai/issues/4
  using: https://github.com/jezdez/django_compressor.git
- and: https://github.com/ojii/django-sekizai.git@0.5
+ and: https://github.com/ojii/django-sekizai.git@0.6 or later
 """
 from compressor.templatetags.compress import CompressorNode
 from django.template.base import Template
