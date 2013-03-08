@@ -265,6 +265,12 @@ class PrecompilerTemplatetagTestCase(TestCase):
             settings.COMPRESS_ENABLED = self.old_enabled
 
 
+class CustomClassPrecompilerTestCase(PrecompilerTemplatetagTestCase):
+    def setUp(self):
+        settings.COMPRESS_NODE_CLASS = 'compressor.tests.test_compress_node'
+        super(CustomClassPrecompilerTestCase, self).setUp()
+
+
 def script(content="", src="", scripttype="text/javascript"):
     """
     returns a unicode text html script element.
