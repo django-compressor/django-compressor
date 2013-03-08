@@ -2,6 +2,7 @@ from __future__ import with_statement
 
 import os
 import sys
+import copy
 
 from mock import Mock
 
@@ -121,14 +122,20 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
 
+        context_copy = []
+
         def listener(sender, **kwargs):
-            pass
+            context_copy.append(copy.deepcopy(kwargs['context']))
+
         callback = Mock(wraps=listener)
         post_compress.connect(callback)
         render(template)
         args, kwargs = callback.call_args
         context = kwargs['context']
-        self.assertEqual('foo', context['compressed']['name'])
+        # compressed must be in the context while the tag is being rendered
+        self.assertEqual('foo', context_copy[0]['compressed']['name'])
+        # but it must not remain when the tag is done
+        self.assertRaises(KeyError, lambda: context['compressed'])
 
 
 class PrecompilerTemplatetagTestCase(TestCase):
