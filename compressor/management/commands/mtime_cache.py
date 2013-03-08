@@ -6,7 +6,6 @@ from django.core.management.base import NoArgsCommand, CommandError
 
 from compressor.conf import settings
 from compressor.cache import cache, get_mtime, get_mtime_cachekey
-from compressor.utils import walk
 
 
 class Command(NoArgsCommand):
@@ -58,7 +57,7 @@ class Command(NoArgsCommand):
         files_to_add = set()
         keys_to_delete = set()
 
-        for root, dirs, files in walk(settings.COMPRESS_ROOT, followlinks=options['follow_links']):
+        for root, dirs, files in os.walk(settings.COMPRESS_ROOT, followlinks=options['follow_links']):
             for dir_ in dirs:
                 if self.is_ignored(dir_):
                     dirs.remove(dir_)

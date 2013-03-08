@@ -29,7 +29,6 @@ from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
-from compressor.utils import walk, any
 
 
 def patched_render(self, context):
@@ -199,7 +198,7 @@ class Command(NoArgsCommand):
             log.write("Considering paths:\n\t" + "\n\t".join(paths) + "\n")
         templates = set()
         for path in paths:
-            for root, dirs, files in walk(path,
+            for root, dirs, files in os.walk(path,
                     followlinks=options.get('followlinks', False)):
                 templates.update(os.path.join(root, name)
                     for name in files if not name.startswith('.') and
