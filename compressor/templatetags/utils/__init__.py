@@ -10,6 +10,7 @@ from compressor.utils import get_class
 
 OUTPUT_FILE = 'file'
 
+
 class CompressorMixin(object):
 
     def get_original_content(self, context):

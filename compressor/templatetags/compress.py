@@ -10,7 +10,6 @@ OUTPUT_INLINE = 'inline'
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
 
 
-
 @register.tag
 def compress(parser, token):
     """
@@ -71,7 +70,5 @@ def compress(parser, token):
         name = args[3]
     else:
         name = None
-    
     compressor_class = import_module(settings.COMPRESS_NODE_CLASS).CompressorNode
-    
     return compressor_class(nodelist, kind, mode, name)

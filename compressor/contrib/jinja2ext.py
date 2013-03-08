@@ -2,7 +2,8 @@ from jinja2 import nodes
 from jinja2.ext import Extension
 from jinja2.exceptions import TemplateSyntaxError
 
-from compressor.templatetags.compress import OUTPUT_FILE, CompressorMixin
+from compressor.templatetags.compress import OUTPUT_FILE
+from compressor.templatetags.utils import CompressorMixin
 
 
 class CompressorExtension(CompressorMixin, Extension):

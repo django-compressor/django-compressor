@@ -28,7 +28,7 @@ except ImportError:
 from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
-from compressor.templatetags.compress import CompressorNode
+from compressor.templatetags.utils import CompressorNode
 from compressor.utils import walk, any
 
 

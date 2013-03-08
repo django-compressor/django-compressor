@@ -5,7 +5,7 @@
  using: https://github.com/jezdez/django_compressor.git
  and: https://github.com/ojii/django-sekizai.git@0.5
 """
-from compressor.templatetags.compress import CompressorNode
+from compressor.templatetags.utils import CompressorNode
 from django.template.base import Template
 
 
