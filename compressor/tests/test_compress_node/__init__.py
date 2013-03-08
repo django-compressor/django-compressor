@@ -1,4 +1,4 @@
-from ...templatetags.utils import CompressorNode as BaseCompressorNode
+from ...templatetags.compress import CompressorNode as BaseCompressorNode
 
 
 class CompressorNode(BaseCompressorNode):
