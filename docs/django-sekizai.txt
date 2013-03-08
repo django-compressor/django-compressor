@@ -1,5 +1,5 @@
 django-sekizai Support
-==============
+======================
 
 Django Compressor comes with support for _django-sekizai via an extension.
 _django-sekizai provides the ability to include template code, from within
@@ -10,7 +10,7 @@ It requires _django-sekizai to installed. Refer to the _django-sekizai _docs
 for how to use ``render_block``
 
 Usage
---------------
+-----
 
 .. code-block:: django
 
