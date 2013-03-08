@@ -16,7 +16,7 @@ class CompressorConf(AppConf):
     PARSER = 'compressor.parser.AutoSelectParser'
     OUTPUT_DIR = 'CACHE'
     STORAGE = 'compressor.storage.CompressorFileStorage'
-    NODE_CLASS = None
+    NODE_CLASS = 'compressor.templatetags.utils'
     CSS_COMPRESSOR = 'compressor.css.CssCompressor'
     JS_COMPRESSOR = 'compressor.js.JsCompressor'
 
