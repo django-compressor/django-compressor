@@ -1,8 +1,44 @@
 Changelog
 =========
 
-v1.2 (in 08/03/2012)
---------------------
+v1.3 (in developement)
+----------------------
+
+- Dropped support for Python 2.5. Removed ``any`` and ``walk`` compatibility 
+  functions in ``compressor.utils``.
+
+- Removed compatibility with Django 1.2 for default values of some settings:
+
+  - :attr:`~COMPRESS_ROOT` no longer uses ``MEDIA_ROOT`` if ``STATIC_ROOT`` is
+    not defined. It expects ``STATIC_ROOT`` to be defined instead.
+
+  - :attr:`~COMPRESS_URL` no longer uses ``MEDIA_URL`` if ``STATIC_URL`` is
+    not defined. It expects ``STATIC_URL`` to be defined instead.
+
+  - :attr:`~COMPRESS_CACHE_BACKEND` no longer uses ``CACHE_BACKEND`` and simply 
+    defaults to ``default``.
+
+- Added precompiler class support. This enables you to write custom precompilers
+  with python logic in them instead of just relying on executables.
+
+- Made CssAbsoluteFilter smarter: it now handles URLs with hash fragments or
+  querystring correctly. In addition, it now leaves alone fragment-only URLs.
+
+- Removed a ``fsync()`` call in CompilerFilter to improve performance. We 
+  already called ``self.infile.flush()`` so that call was not necessary.
+
+- Added an extension to provide django-sekizai support. 
+  See :ref:`django-sekizai Support <django-sekizai_support>` for more 
+  information.
+
+- Fixed a DeprecationWarning regarding the use of django.utils.hashcompat.
+
+- Fixed an error with the jinja2ext extension.
+
+- Updated bundled rjsmin.py to fix some JavaScript compression errors.
+
+v1.2
+----
 
 - Added compatibility with Django 1.4 and dropped support for Django 1.2.X.
 
