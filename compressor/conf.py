@@ -1,5 +1,4 @@
 import os
-from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
@@ -32,6 +31,7 @@ class CompressorConf(AppConf):
         # ('text/coffeescript', 'coffee --compile --stdio'),
         # ('text/less', 'lessc {infile} {outfile}'),
         # ('text/x-sass', 'sass {infile} {outfile}'),
+        # ('text/stylus', 'stylus < {infile} > {outfile}'),
         # ('text/x-scss', 'sass --scss {infile} {outfile}'),
     )
     CLOSURE_COMPILER_BINARY = 'java -jar compiler.jar'
@@ -69,20 +69,17 @@ class CompressorConf(AppConf):
         prefix = 'compress'
 
     def configure_root(self, value):
+        # Uses Django's STATIC_ROOT by default
         if value is None:
-            value = getattr(settings, 'STATIC_ROOT', None)
-            if not value:
-                value = settings.MEDIA_ROOT
+            value = settings.STATIC_ROOT
         if value is None:
             raise ImproperlyConfigured("COMPRESS_ROOT setting must be set")
         return os.path.normcase(os.path.abspath(value))
 
     def configure_url(self, value):
-        # Uses Django 1.3's STATIC_URL by default or falls back to MEDIA_URL
+        # Uses Django's STATIC_URL by default
         if value is None:
-            value = getattr(settings, 'STATIC_URL', None)
-            if not value:
-                value = settings.MEDIA_URL
+            value = settings.STATIC_URL
         if not value.endswith('/'):
             raise ImproperlyConfigured("URL settings (e.g. COMPRESS_URL) "
                                        "must have a trailing slash")
@@ -90,31 +87,17 @@ class CompressorConf(AppConf):
 
     def configure_cache_backend(self, value):
         if value is None:
-            # If we are on Django 1.3 AND using the new CACHES setting...
-            if DJANGO_VERSION[:2] >= (1, 3) and hasattr(settings, 'CACHES'):
-                value = 'default'
-            else:
-                # falling back to the old CACHE_BACKEND setting
-                value = getattr(settings, 'CACHE_BACKEND', None)
-                if not value:
-                    raise ImproperlyConfigured("Please specify a cache "
-                                               "backend in your settings.")
+            value = 'default'
         return value
 
     def configure_offline_context(self, value):
         if not value:
-            value = {'MEDIA_URL': settings.MEDIA_URL}
-            # Adds the 1.3 STATIC_URL setting to the context if available
-            if getattr(settings, 'STATIC_URL', None):
-                value['STATIC_URL'] = settings.STATIC_URL
+            value = {'STATIC_URL': settings.STATIC_URL}
         return value
 
     def configure_template_filter_context(self, value):
         if not value:
-            value = {'MEDIA_URL': settings.MEDIA_URL}
-            # Adds the 1.3 STATIC_URL setting to the context if available
-            if getattr(settings, 'STATIC_URL', None):
-                value['STATIC_URL'] = settings.STATIC_URL
+            value = {'STATIC_URL': settings.STATIC_URL}
         return value
 
     def configure_precompilers(self, value):

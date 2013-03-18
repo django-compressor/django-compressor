@@ -62,7 +62,7 @@ class CompressorMixin(object):
         and return the result if given
         """
         if self.is_offline_compression_enabled(forced) and not forced:
-            key = get_offline_hexdigest(self.nodelist.render(context))
+            key = get_offline_hexdigest(self.get_original_content(context))
             offline_manifest = get_offline_manifest()
             if key in offline_manifest:
                 return offline_manifest[key]
@@ -107,7 +107,7 @@ class CompressorMixin(object):
             rendered_output = self.render_output(compressor, mode, forced=forced)
             if cache_key:
                 cache_set(cache_key, rendered_output)
-            return rendered_output.decode('utf-8')
+            return rendered_output
         except Exception:
             if settings.DEBUG or forced:
                 raise
@@ -161,27 +161,27 @@ def compress(parser, token):
     Examples::
 
         {% compress css %}
-        <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/static/css/one.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
-        <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/static/css/two.css" type="text/css" charset="utf-8">
         {% endcompress %}
 
     Which would be rendered something like::
 
-        <link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">
+        <link rel="stylesheet" href="/static/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">
 
     or::
 
         {% compress js %}
-        <script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         {% endcompress %}
 
     Which would be rendered something like::
 
-        <script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
-    Linked files must be on your COMPRESS_URL (which defaults to MEDIA_URL).
+    Linked files must be on your COMPRESS_URL (which defaults to STATIC_URL).
     If DEBUG is true off-site files will throw exceptions. If DEBUG is false
     they will be silently stripped.
     """

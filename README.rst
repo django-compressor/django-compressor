@@ -48,7 +48,7 @@ tool it will be fairly easy to implement a custom filter. Simply extend
 from one of the available base classes.
 
 More documentation about the usage and settings of Django Compressor can be
-found on `django_compressor.readthedocs.org`_.
+found on `django-compressor.readthedocs.org`_.
 
 The source code for Django Compressor can be found and contributed to on
 `github.com/jezdez/django_compressor`_. There you can also file tickets.
@@ -65,7 +65,7 @@ The `in-development version`_ of Django Compressor can be installed with
 .. _JSMin: http://www.crockford.com/javascript/jsmin.html
 .. _cssmin: https://github.com/zacharyvoase/cssmin
 .. _data URIs: http://en.wikipedia.org/wiki/Data_URI_scheme
-.. _django_compressor.readthedocs.org: http://django_compressor.readthedocs.org/
+.. _django-compressor.readthedocs.org: http://django-compressor.readthedocs.org/en/latest/
 .. _github.com/jezdez/django_compressor: https://github.com/jezdez/django_compressor
 .. _in-development version: http://github.com/jezdez/django_compressor/tarball/develop#egg=django_compressor-dev
 

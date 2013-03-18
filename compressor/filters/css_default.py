@@ -50,6 +50,10 @@ class CssAbsoluteFilter(FilterBase):
             # COMPRESS_URL had a protocol,
             # remove it and the hostname from our path.
             local_path = local_path.replace(self.protocol + self.host, "", 1)
+        # remove url fragment, if any
+        local_path = local_path.rsplit("#", 1)[0]
+        # remove querystring, if any
+        local_path = local_path.rsplit("?", 1)[0]
         # Now, we just need to check if we can find
         # the path from COMPRESS_URL in our url
         if local_path.startswith(self.url_path):
@@ -73,16 +77,23 @@ class CssAbsoluteFilter(FilterBase):
         if suffix is None:
             return url
         if url.startswith(SCHEMES):
+            fragment = None
+            if "#" in url:
+                url, fragment = url.rsplit("#", 1)
             if "?" in url:
                 url = "%s&%s" % (url, suffix)
             else:
                 url = "%s?%s" % (url, suffix)
+            if fragment is not None:
+                url = "%s#%s" % (url, fragment)
         return url
 
     def _converter(self, matchobj, group, template):
         url = matchobj.group(group)
         url = url.strip(' \'"')
-        if url.startswith(SCHEMES):
+        if url.startswith('#'):
+            return "url('%s')" % url
+        elif url.startswith(SCHEMES):
             return "url('%s')" % self.add_suffix(url)
         full_url = posixpath.normpath('/'.join([str(self.directory_name),
                                                 url]))

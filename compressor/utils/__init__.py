@@ -1,36 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
 
 from compressor.exceptions import FilterError
-
-if sys.version_info < (2, 5):
-    # Add any http://docs.python.org/library/functions.html?#any to Python < 2.5
-    def any(seq):
-        for item in seq:
-            if item:
-                return True
-        return False
-
-else:
-    any = any
-
-
-if sys.version_info < (2, 6):
-    def walk(root, topdown=True, onerror=None, followlinks=False):
-        """
-        A version of os.walk that can follow symlinks for Python < 2.6
-        """
-        for dirpath, dirnames, filenames in os.walk(root, topdown, onerror):
-            yield (dirpath, dirnames, filenames)
-            if followlinks:
-                for d in dirnames:
-                    p = os.path.join(dirpath, d)
-                    if os.path.islink(p):
-                        for link_dirpath, link_dirnames, link_filenames in walk(p):
-                            yield (link_dirpath, link_dirnames, link_filenames)
-else:
-    from os import walk
 
 
 def get_class(class_string, exception=FilterError):

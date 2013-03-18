@@ -68,6 +68,7 @@ class GzipCompressorFileStorage(CompressorFileStorage):
         out = gzip.open(u'%s.gz' % self.path(filename), 'wb')
         out.writelines(open(self.path(filename), 'rb'))
         out.close()
+        return filename
 
 
 class DefaultStorage(LazyObject):

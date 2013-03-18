@@ -29,7 +29,6 @@ from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
-from compressor.utils import walk, any
 
 
 def patched_render(self, context):
@@ -115,7 +114,7 @@ class Command(NoArgsCommand):
                 "COMPRESS_ENABLED setting is not True.", dest='force'),
         make_option('--follow-links', default=False, action='store_true',
             help="Follow symlinks when traversing the COMPRESS_ROOT "
-                "(which defaults to MEDIA_ROOT). Be aware that using this "
+                "(which defaults to STATIC_ROOT). Be aware that using this "
                 "can lead to infinite recursion if a link points to a parent "
                 "directory of itself.", dest='follow_links'),
     )
@@ -199,7 +198,7 @@ class Command(NoArgsCommand):
             log.write("Considering paths:\n\t" + "\n\t".join(paths) + "\n")
         templates = set()
         for path in paths:
-            for root, dirs, files in walk(path,
+            for root, dirs, files in os.walk(path,
                     followlinks=options.get('followlinks', False)):
                 templates.update(os.path.join(root, name)
                     for name in files if not name.startswith('.') and
@@ -291,9 +290,8 @@ class Command(NoArgsCommand):
         return count, results
 
     def get_nodelist(self, node):
-        if (isinstance(node, IfNode) and
-                hasattr(node, 'nodelist_true') and
-                hasattr(node, 'nodelist_false')):
+        # Check if node is an ```if``` switch with true and false branches
+        if hasattr(node, 'nodelist_true') and hasattr(node, 'nodelist_false'):
             return node.nodelist_true + node.nodelist_false
         return getattr(node, "nodelist", [])
 

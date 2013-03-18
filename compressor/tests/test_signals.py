@@ -14,13 +14,13 @@ class PostCompressSignalTestCase(TestCase):
         settings.COMPRESS_PRECOMPILERS = {}
         settings.COMPRESS_DEBUG_TOGGLE = 'nocompress'
         self.css = """\
-<link rel="stylesheet" href="/media/css/one.css" type="text/css" />
+<link rel="stylesheet" href="/static/css/one.css" type="text/css" />
 <style type="text/css">p { border:5px solid green;}</style>
-<link rel="stylesheet" href="/media/css/two.css" type="text/css" />"""
+<link rel="stylesheet" href="/static/css/two.css" type="text/css" />"""
         self.css_node = CssCompressor(self.css)
 
         self.js = """\
-<script src="/media/js/one.js" type="text/javascript"></script>
+<script src="/static/js/one.js" type="text/javascript"></script>
 <script type="text/javascript">obj.value = "value";</script>"""
         self.js_node = JsCompressor(self.js)
 
@@ -55,9 +55,9 @@ class PostCompressSignalTestCase(TestCase):
 
     def test_css_signal_multiple_media_attributes(self):
         css = """\
-<link rel="stylesheet" href="/media/css/one.css" media="handheld" type="text/css" />
+<link rel="stylesheet" href="/static/css/one.css" media="handheld" type="text/css" />
 <style type="text/css" media="print">p { border:5px solid green;}</style>
-<link rel="stylesheet" href="/media/css/two.css" type="text/css" />"""
+<link rel="stylesheet" href="/static/css/two.css" type="text/css" />"""
         css_node = CssCompressor(css)
 
         def listener(sender, **kwargs):

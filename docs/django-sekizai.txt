@@ -1,0 +1,24 @@
+.. _django-sekizai_support:
+
+django-sekizai Support
+======================
+
+Django Compressor comes with support for _django-sekizai via an extension.
+_django-sekizai provides the ability to include template code, from within
+any block, to a parent block. It is primarily used to include js/css from
+included templates to the master template.
+
+It requires _django-sekizai to installed. Refer to the _django-sekizai _docs
+for how to use ``render_block``
+
+Usage
+-----
+
+.. code-block:: django
+
+    {% load sekizai_tags %}
+    {% render_block "<js/css>" postprocessor "compressor.contrib.sekizai.compress" %}
+
+
+.. _django-sekizai: https://github.com/ojii/django-sekizai
+.. _docs: http://django-sekizai.readthedocs.org/en/latest/

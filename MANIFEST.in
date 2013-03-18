@@ -1,6 +1,7 @@
 include AUTHORS
 include README.rst
 include LICENSE
+recursive-include docs *
 recursive-include compressor/templates/compressor *.html
 recursive-include compressor/tests/media *.js *.css *.png *.coffee
 recursive-include compressor/tests/test_templates *.html

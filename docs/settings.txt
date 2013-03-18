@@ -43,29 +43,19 @@ Base settings
 
 .. attribute:: COMPRESS_URL
 
-    :Default: ``STATIC_URL`` (``MEDIA_URL`` for older Django versions)
+    :Default: ``STATIC_URL``
 
     Controls the URL that linked files will be read from and compressed files
     will be written to.
 
-    .. note::
-
-        This setting defaults to ``MEDIA_URL`` in case ``STATIC_URL``
-        is not given or empty, e.g. on older Django versions (< 1.3).
-
 .. attribute:: COMPRESS_ROOT
 
-    :Default: ``STATIC_ROOT`` (``MEDIA_ROOT`` for older Django versions)
+    :Default: ``STATIC_ROOT``
 
     Controls the absolute file path that linked static will be read from and
     compressed static will be written to when using the default
     :attr:`~django.conf.settings.COMPRESS_STORAGE`
     ``compressor.storage.CompressorFileStorage``.
-
-    .. note::
-
-        This setting defaults to ``MEDIA_ROOT`` in case ``STATIC_ROOT``
-        is not given, e.g. on older Django versions (< 1.3).
 
 .. attribute:: COMPRESS_OUTPUT_DIR
 
@@ -212,18 +202,22 @@ Backend settings
     :Default: ``()``
 
     An iterable of two-tuples whose first item is the mimetype of the files or
-    hunks you want to compile with the command specified as the second item:
+    hunks you want to compile with the command or filter specified as the second
+    item:
 
     #. mimetype
         The mimetype of the file or inline code should that should be compiled.
 
-    #. command
+    #. command_or_filter
         The command to call on each of the files. Modern Python string
         formatting will be provided for the two placeholders ``{infile}`` and
         ``{outfile}`` whose existence in the command string also triggers the
         actual creation of those temporary files. If not given in the command
         string, Django Compressor will use ``stdin`` and ``stdout`` respectively
         instead.
+
+        Alternatively, you may provide the fully qualified class name of a
+        filter you wish to use as a precompiler.
 
     Example::
 
@@ -232,13 +226,18 @@ Backend settings
             ('text/less', 'lessc {infile} {outfile}'),
             ('text/x-sass', 'sass {infile} {outfile}'),
             ('text/x-scss', 'sass --scss {infile} {outfile}'),
+            ('text/stylus', 'stylus < {infile} > {outfile}'),
+            ('text/foobar', 'path.to.MyPrecompilerFilter'),
         )
 
     .. note::
-        The lessc compiler will have different parameters if installed
-        with Ruby Gems and not npm_.
+        Depending on the implementation, some precompilers might not support
+        outputting to something else than ``stdout``, so you'll need to omit the
+        ``{outfile}`` parameter when working with those. For instance, if you 
+        are using the Ruby version of lessc, you'll need to set up the 
+        precompiler like this::
 
-        .. _npm: http://lesscss.org/#-server-side-usage
+            ('text/less', 'lessc {infile}'),
 
     With that setting (and CoffeeScript_ installed), you could add the following
     code to your templates:
@@ -417,7 +416,7 @@ Offline settings
 
 .. attribute:: COMPRESS_OFFLINE_CONTEXT
 
-    :Default: ``{'MEDIA_URL': settings.MEDIA_URL}``
+    :Default: ``{'STATIC_URL': settings.STATIC_URL}``
 
     The context to be used by the ``compress`` management command when rendering
     the contents of ``{% compress %}`` template tags and saving the result in the

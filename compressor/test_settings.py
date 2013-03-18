@@ -19,11 +19,10 @@ INSTALLED_APPS = [
     'compressor',
 ]
 
-MEDIA_URL = '/media/'
-STATIC_URL = MEDIA_URL
+STATIC_URL = '/static/'
 
 
-MEDIA_ROOT = os.path.join(TEST_DIR, 'media')
+STATIC_ROOT = os.path.join(TEST_DIR, 'static')
 
 TEMPLATE_DIRS = (
     # Specifically choose a name that will not be considered
