@@ -16,6 +16,7 @@ from compressor.conf import settings
 from compressor.exceptions import (CompressorError, UncompressableFileError,
         FilterDoesNotExist)
 from compressor.filters import CompilerFilter
+from compressor.filters.css_default import CssAbsoluteFilter
 from compressor.storage import default_storage, compressor_file_storage
 from compressor.signals import post_compress
 from compressor.utils import get_class, get_mod_func, staticfiles
@@ -173,6 +174,7 @@ class Compressor(object):
                 yield smart_unicode(value, charset.lower())
             else:
                 if precompiled:
+                    value = self.filter(value, enabled=False, **options)
                     value = self.handle_output(kind, value, forced=True, basename=basename)
                     yield smart_unicode(value, charset.lower())
                 else:
@@ -226,8 +228,13 @@ class Compressor(object):
                                 **kwargs)
         return False, content
 
-    def filter(self, content, method, **kwargs):
-        for filter_cls in self.cached_filters:
+    def filter(self, content, method, enabled=True, **kwargs):
+        if enabled:
+            filters = self.cached_filters
+        else:
+            filters = [CssAbsoluteFilter] if CssAbsoluteFilter in self.cached_filters else []
+
+        for filter_cls in filters:
             filter_func = getattr(
                 filter_cls(content, filter_type=self.type), method)
             try:
