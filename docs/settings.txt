@@ -371,6 +371,19 @@ Caching settings
     :attr:`~django.conf.settings.COMPRESS_REBUILD_TIMEOUT` and
     :attr:`~django.conf.settings.COMPRESS_MINT_DELAY`.
 
+.. attribute:: COMPRESS_CACHEABLE_PRECOMPILERS
+
+    :Default: ``()``
+
+    An iterable of precompiler mimetypes as defined in :attr:`~django.conf.settings.COMPRESS_PRECOMPILERS`
+    for which the compiler output can be cached based solely on the contents
+    of the input file. This lets Django Compressor avoid recompiling unchanged
+    files. Caching is appropriate for compilers such as CoffeeScript where files
+    are compiled one-to-one, but not for compilers such as SASS that have an
+    ``import`` mechanism for including one file from another. If caching is enabled
+    for such a compiler, Django Compressor will not know to recompile files when a file
+    they import is modified.
+
 .. attribute:: COMPRESS_DEBUG_TOGGLE
 
     :Default: None

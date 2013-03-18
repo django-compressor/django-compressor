@@ -6,6 +6,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 from django.utils.importlib import import_module
 
+from compressor.cache import cache, get_precompiler_cachekey
 from compressor.conf import settings
 from compressor.exceptions import FilterError
 from compressor.utils import get_mod_func
@@ -141,3 +142,25 @@ class CompilerFilter(FilterBase):
                 filtered = self.outfile.read()
                 self.outfile.close()
         return filtered
+
+
+class CachedCompilerFilter(CompilerFilter):
+
+    def __init__(self, mimetype, **kwargs):
+        self.mimetype = mimetype
+        super(CachedCompilerFilter, self).__init__(**kwargs)
+
+    def input(self, **kwargs):
+        if self.mimetype in settings.COMPRESS_CACHEABLE_PRECOMPILERS:
+            key = self.get_cache_key()
+            data = cache.get(key)
+            if data:
+                return data
+            filtered = super(CachedCompilerFilter, self).input(**kwargs)
+            cache.set(key, filtered, settings.COMPRESS_REBUILD_TIMEOUT)
+            return filtered
+        else:
+            return super(CachedCompilerFilter, self).input(**kwargs)
+
+    def get_cache_key(self):
+        return get_precompiler_cachekey(self.command, self.content.encode('utf8'))
