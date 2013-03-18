@@ -346,7 +346,7 @@ Major improvements and a lot of bugfixes, some of which are:
 - Added ``mtime_cache`` management command to add and/or remove all mtimes
   from the cache.
 
-- Moved docs to Read The Docs: http://django_compressor.readthedocs.org
+- Moved docs to Read The Docs: http://django-compressor.readthedocs.org/en/latest/
 
 - Added optional ``compressor.storage.GzipCompressorFileStorage`` storage
   backend that gzips of the saved files automatically for easier deployment.

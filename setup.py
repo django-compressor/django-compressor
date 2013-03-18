@@ -109,7 +109,7 @@ def find_package_data(where='.', package='',
 setup(
     name="django_compressor",
     version=find_version("compressor", "__init__.py"),
-    url='http://django_compressor.readthedocs.org/',
+    url='http://django-compressor.readthedocs.org/en/latest/',
     license='MIT',
     description="Compresses linked and inline JavaScript or CSS into single cached files.",
     long_description=read('README.rst'),
