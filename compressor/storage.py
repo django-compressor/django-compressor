@@ -1,5 +1,6 @@
 import errno
 import gzip
+import os
 from os import path
 from datetime import datetime
 
@@ -65,7 +66,10 @@ class GzipCompressorFileStorage(CompressorFileStorage):
     """
     def save(self, filename, content):
         filename = super(GzipCompressorFileStorage, self).save(filename, content)
-        out = gzip.open(u'%s.gz' % self.path(filename), 'wb')
+
+        # workaround for http://bugs.python.org/issue13664
+        name = os.path.basename(filename).encode('latin1', errors='replace')
+        out = gzip.GzipFile(name, fileobj=open(filename + ".gz", 'wb'))
         out.writelines(open(self.path(filename), 'rb'))
         out.close()
         return filename
