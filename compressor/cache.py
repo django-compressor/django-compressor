@@ -5,7 +5,10 @@ import time
 
 from django.core.cache import get_cache
 from django.core.files.base import ContentFile
-from django.utils import simplejson
+try:
+    import json as simplejson
+except ImportError:
+    from django.utils import simplejson
 from django.utils.encoding import smart_str
 from django.utils.functional import SimpleLazyObject
 from django.utils.importlib import import_module
