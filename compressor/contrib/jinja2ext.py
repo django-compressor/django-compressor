@@ -10,7 +10,7 @@ class CompressorExtension(CompressorMixin, Extension):
     tags = set(['compress'])
 
     def parse(self, parser):
-        lineno = parser.stream.next().lineno
+        lineno = next(parser.stream).lineno
         kindarg = parser.parse_expression()
         # Allow kind to be defined as jinja2 name node
         if isinstance(kindarg, nodes.Name):

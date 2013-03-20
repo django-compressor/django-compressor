@@ -28,13 +28,15 @@
 #
 """`cssmin` - A Python port of the YUI CSS compressor."""
 
+import re
 
 try:
     from cStringIO import StringIO
 except ImportError:
-    from StringIO import StringIO  # noqa
-import re
-
+    try:
+        from StringIO import StringIO
+    except ImportError:
+        from io import StringIO # python 3
 
 __version__ = '0.1.4'
 

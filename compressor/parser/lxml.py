@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.encoding import smart_unicode
 
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 from compressor.utils.decorators import cached_property
+from compressor.utils.compat import smart_text
 
 
 class LxmlParser(ParserBase):
@@ -16,9 +16,9 @@ class LxmlParser(ParserBase):
             self.fromstring = fromstring
             self.soupparser = soupparser
             self.tostring = tostring
-        except ImportError, err:
+        except ImportError as err:
             raise ImproperlyConfigured("Error while importing lxml: %s" % err)
-        except Exception, err:
+        except Exception as err:
             raise ParserError("Error while initializing Parser: %s" % err)
         super(LxmlParser, self).__init__(content)
 
@@ -43,13 +43,13 @@ class LxmlParser(ParserBase):
         return elem.attrib
 
     def elem_content(self, elem):
-        return smart_unicode(elem.text)
+        return smart_text(elem.text)
 
     def elem_name(self, elem):
         return elem.tag
 
     def elem_str(self, elem):
-        elem_as_string = smart_unicode(
+        elem_as_string = smart_text(
             self.tostring(elem, method='html', encoding=unicode))
         if elem.tag == 'link':
             # This makes testcases happy

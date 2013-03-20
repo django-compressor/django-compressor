@@ -28,7 +28,7 @@ def main():
         with open(options.outfile, 'w') as f:
             f.write(content)
     else:
-        print content
+        print(content)
 
 
 if __name__ == '__main__':

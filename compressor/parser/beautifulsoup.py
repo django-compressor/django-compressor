@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.encoding import smart_unicode
 
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 from compressor.utils.decorators import cached_property
+from compressor.utils.compat import smart_text
 
 
 class BeautifulSoupParser(ParserBase):
@@ -14,9 +14,9 @@ class BeautifulSoupParser(ParserBase):
         try:
             from BeautifulSoup import BeautifulSoup
             return BeautifulSoup(self.content)
-        except ImportError, err:
+        except ImportError as err:
             raise ImproperlyConfigured("Error while importing BeautifulSoup: %s" % err)
-        except Exception, err:
+        except Exception as err:
             raise ParserError("Error while initializing Parser: %s" % err)
 
     def css_elems(self):
@@ -35,4 +35,4 @@ class BeautifulSoupParser(ParserBase):
         return elem.name
 
     def elem_str(self, elem):
-        return smart_unicode(elem)
+        return smart_text(elem)

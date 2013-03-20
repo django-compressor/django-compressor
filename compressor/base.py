@@ -1,17 +1,17 @@
-from __future__ import with_statement
+from __future__ import with_statement, unicode_literals
 import os
 import codecs
 import urllib
 
+import six
 from django.core.files.base import ContentFile
 from django.template import Context
 from django.template.loader import render_to_string
-from django.utils.encoding import smart_unicode
 from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
 
 from compressor.cache import get_hexdigest, get_mtime
-
+from compressor.utils.compat import smart_text
 from compressor.conf import settings
 from compressor.exceptions import (CompressorError, UncompressableFileError,
         FilterDoesNotExist)
@@ -34,7 +34,7 @@ class Compressor(object):
     type = None
 
     def __init__(self, content=None, output_prefix=None, context=None, *args, **kwargs):
-        self.content = content or ""
+        self.content = content or ""  # rendered contents of {% compress %} tag
         self.output_prefix = output_prefix or "compressed"
         self.output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
         self.charset = settings.DEFAULT_CHARSET
@@ -65,6 +65,10 @@ class Compressor(object):
         return "compressor/%s_%s.html" % (self.type, mode)
 
     def get_basename(self, url):
+        """
+        Takes full path to a static file (eg. "/static/css/style.css") and
+        returns path with storage's base url removed (eg. "css/style.css").
+        """
         try:
             base_url = self.storage.base_url
         except AttributeError:
@@ -78,6 +82,17 @@ class Compressor(object):
         return basename.split("?", 1)[0]
 
     def get_filepath(self, content, basename=None):
+        """
+        Returns file path for an output file based on contents.
+
+        Returned path is relative to compressor storage's base url, for
+        example "CACHE/css/e41ba2cc6982.css".
+
+        When `basename` argument is provided then file name (without extension)
+        will be used as a part of returned file name, for example:
+
+        get_filepath(content, "my_file.css") -> 'CACHE/css/my_file.e41ba2cc6982.css'
+        """
         parts = []
         if basename:
             filename = os.path.split(basename)[1]
@@ -86,6 +101,11 @@ class Compressor(object):
         return os.path.join(self.output_dir, self.output_prefix, '.'.join(parts))
 
     def get_filename(self, basename):
+        """
+        Returns full path to a file, for example:
+
+        get_filename('css/one.css') -> '/full/path/to/static/css/one.css'
+        """
         filename = None
         # first try finding the file in the root
         try:
@@ -110,13 +130,16 @@ class Compressor(object):
              self.finders and " or with staticfiles." or "."))
 
     def get_filecontent(self, filename, charset):
-        with codecs.open(filename, 'rb', charset) as fd:
+        """
+        Reads file contents using given `charset` and returns it as text.
+        """
+        with codecs.open(filename, 'r', charset) as fd:
             try:
                 return fd.read()
-            except IOError, e:
+            except IOError as e:
                 raise UncompressableFileError("IOError while processing "
                                               "'%s': %s" % (filename, e))
-            except UnicodeDecodeError, e:
+            except UnicodeDecodeError as e:
                 raise UncompressableFileError("UnicodeDecodeError while "
                                               "processing '%s' with "
                                               "charset %s: %s" %
@@ -143,7 +166,7 @@ class Compressor(object):
 
     def hunks(self, forced=False):
         """
-        The heart of content parsing, iterates of the
+        The heart of content parsing, iterates over the
         list of split contents and looks at its kind
         to decide what to do with it. Should yield a
         bunch of precompiled and/or rendered hunks.
@@ -170,11 +193,11 @@ class Compressor(object):
 
             if enabled:
                 value = self.filter(value, **options)
-                yield smart_unicode(value, charset.lower())
+                yield smart_text(value, charset.lower())
             else:
                 if precompiled:
                     value = self.handle_output(kind, value, forced=True, basename=basename)
-                    yield smart_unicode(value, charset.lower())
+                    yield smart_text(value, charset.lower())
                 else:
                     yield self.parser.elem_str(elem)
 
@@ -243,11 +266,10 @@ class Compressor(object):
         any custom modification. Calls other mode specific methods or simply
         returns the content directly.
         """
-        content = self.filter_input(forced)
-        if not content:
-            return ''
+        output = '\n'.join(self.filter_input(forced))
 
-        output = '\n'.join(c.encode(self.charset) for c in content)
+        if not output:
+            return ''
 
         if settings.COMPRESS_ENABLED or forced:
             filtered_output = self.filter_output(output)
