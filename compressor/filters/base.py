@@ -23,12 +23,14 @@ class FilterBase(object):
     Subclasses should implement `input` and/or `output` methods which must
     return a string (unicode under python 2) or raise a NotImplementedError.
     """
-    def __init__(self, content, filter_type=None, filename=None, verbose=0):
+    def __init__(self, content, filter_type=None, filename=None, verbose=0,
+                 charset=None):
         self.type = filter_type
         self.content = content
         self.verbose = verbose or settings.COMPRESS_VERBOSE
         self.logger = logger
         self.filename = filename
+        self.charset = charset
 
     def input(self, **kwargs):
         raise NotImplementedError
@@ -93,7 +95,7 @@ class CompilerFilter(FilterBase):
     """
     command = None
     options = ()
-    encoding = 'utf8'
+    default_encoding = settings.FILE_CHARSET
 
     def __init__(self, content, command=None, *args, **kwargs):
         super(CompilerFilter, self).__init__(content, *args, **kwargs)
@@ -119,17 +121,22 @@ class CompilerFilter(FilterBase):
         self.infile = self.outfile = None
 
     def input(self, **kwargs):
-        encoding = self.encoding
+        encoding = self.default_encoding
         options = dict(self.options)
 
         if self.infile is None and "{infile}" in self.command:
             # create temporary input file if needed
             if self.filename is None:
                 self.infile = NamedTemporaryFile(mode='wb')
-                self.infile.write(self.content.encode(self.encoding))
+                self.infile.write(self.content.encode(encoding))
                 self.infile.flush()
                 options["infile"] = self.infile.name
             else:
+                # we use source file directly, which may be encoded using
+                # something different than utf8. If that's the case file will
+                # be included with charset="something" html attribute and
+                # charset will be available as filter's charset attribute
+                encoding = self.charset #or self.default_encoding
                 self.infile = open(self.filename)
                 options["infile"] = self.filename
 

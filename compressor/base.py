@@ -180,6 +180,7 @@ class Compressor(object):
                 'elem': elem,
                 'kind': kind,
                 'basename': basename,
+                'charset': charset,
             }
 
             if kind == SOURCE_FILE:
@@ -190,15 +191,14 @@ class Compressor(object):
                 precompiled, value = self.precompile(value, **options)
 
             if enabled:
-                value = self.filter(value, **options)
-                yield smart_text(value, charset.lower())
+                yield self.filter(value, **options)
             else:
                 if precompiled:
-                    value = self.handle_output(kind, value, forced=True, basename=basename)
-                    yield smart_text(value, charset.lower())
+                    yield self.handle_output(kind, value, forced=True,
+                                             basename=basename)
                 else:
                     yield self.parser.elem_str(elem)
-
+    
     def filter_output(self, content):
         """
         Passes the concatenated content to the 'output' methods
@@ -216,7 +216,13 @@ class Compressor(object):
             content.append(hunk)
         return content
 
-    def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
+    def precompile(self, content, kind=None, elem=None, filename=None,
+                   charset=None, **kwargs):
+        """
+        Processes file using a pre compiler.
+
+        This is the place where files like coffee script are processed.
+        """
         if not kind:
             return False, content
         attrs = self.parser.elem_attribs(elem)
@@ -233,18 +239,21 @@ class Compressor(object):
                 try:
                     mod = import_module(mod_name)
                 except ImportError:
-                    return True, CompilerFilter(content, filter_type=self.type,
-                            command=filter_or_command, filename=filename).input(
-                                **kwargs)
+                    filter = CompilerFilter(
+                        content, filter_type=self.type, filename=filename,
+                        charset=charset, command=filter_or_command)
+                    return True, filter.input(**kwargs)
                 try:
                     precompiler_class = getattr(mod, cls_name)
                 except AttributeError:
                     raise FilterDoesNotExist('Could not find "%s".' %
                             filter_or_command)
                 else:
-                    return True, precompiler_class(content, attrs,
-                            filter_type=self.type, filename=filename).input(
-                                **kwargs)
+                    filter = precompiler_class(
+                        content, attrs, filter_type=self.type, charset=charset,
+                        filename=filename)
+                    return True, filter.input(**kwargs)
+
         return False, content
 
     def filter(self, content, method, **kwargs):

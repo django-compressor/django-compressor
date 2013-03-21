@@ -45,27 +45,34 @@ class PrecompilerTestCase(TestCase):
 
     def test_precompiler_infile_outfile(self):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
-        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
+        compiler = CompilerFilter(
+            content=self.content, filename=self.filename,
+            charset=settings.FILE_CHARSET, command=command)
         self.assertEqual("body { color:#990; }", compiler.input())
 
     def test_precompiler_infile_stdout(self):
         command = '%s %s -f {infile}' % (sys.executable, self.test_precompiler)
-        compiler = CompilerFilter(content=self.content, filename=None, command=command)
+        compiler = CompilerFilter(
+            content=self.content, filename=None, charset=None, command=command)
         self.assertEqual("body { color:#990; }%s" % os.linesep, compiler.input())
 
     def test_precompiler_stdin_outfile(self):
         command = '%s %s -o {outfile}' % (sys.executable, self.test_precompiler)
-        compiler = CompilerFilter(content=self.content, filename=None, command=command)
+        compiler = CompilerFilter(
+            content=self.content, filename=None, charset=None, command=command)
         self.assertEqual("body { color:#990; }", compiler.input())
 
     def test_precompiler_stdin_stdout(self):
         command = '%s %s' % (sys.executable, self.test_precompiler)
-        compiler = CompilerFilter(content=self.content, filename=None, command=command)
+        compiler = CompilerFilter(
+            content=self.content, filename=None, charset=None, command=command)
         self.assertEqual("body { color:#990; }%s" % os.linesep, compiler.input())
 
     def test_precompiler_stdin_stdout_filename(self):
         command = '%s %s' % (sys.executable, self.test_precompiler)
-        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
+        compiler = CompilerFilter(
+            content=self.content, filename=self.filename,
+            charset=settings.FILE_CHARSET, command=command)
         self.assertEqual("body { color:#990; }%s" % os.linesep, compiler.input())
 
 

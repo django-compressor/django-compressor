@@ -27,7 +27,8 @@ def css_tag(href, **kwargs):
 
 class TestPrecompiler(object):
     """A filter whose output is always the string 'OUTPUT' """
-    def __init__(self, content, attrs, filter_type=None, filename=None):
+    def __init__(self, content, attrs, filter_type=None, filename=None,
+                 charset=None):
         pass
 
     def input(self, **kwargs):
