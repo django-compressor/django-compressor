@@ -1,9 +1,7 @@
 from __future__ import with_statement, unicode_literals
 import os
 import codecs
-import urllib
 
-import six
 from django.core.files.base import ContentFile
 from django.template import Context
 from django.template.loader import render_to_string
@@ -11,7 +9,7 @@ from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
 
 from compressor.cache import get_hexdigest, get_mtime
-from compressor.utils.compat import smart_text
+from compressor.utils.compat import smart_text, url2pathname
 from compressor.conf import settings
 from compressor.exceptions import (CompressorError, UncompressableFileError,
         FilterDoesNotExist)
@@ -120,7 +118,7 @@ class Compressor(object):
                 filename = compressor_file_storage.path(basename)
         # secondly try to find it with staticfiles (in debug mode)
         if not filename and self.finders:
-            filename = self.finders.find(urllib.url2pathname(basename))
+            filename = self.finders.find(url2pathname(basename))
         if filename:
             return filename
         # or just raise an exception as the last resort

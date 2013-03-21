@@ -1,3 +1,4 @@
+# noqa
 import six
 
 try:
@@ -26,3 +27,9 @@ else:
         from cStringIO import StringIO
     except ImportError:
         from StringIO import StringIO
+
+try:
+    from urllib.request import url2pathname
+except ImportError:
+    from urllib import url2pathname
+
