@@ -98,7 +98,8 @@ class CompilerFilter(FilterBase):
         if self.infile is None:
             if "{infile}" in self.command:
                 if self.filename is None:
-                    self.infile = NamedTemporaryFile(mode="w")
+                    ext = self.type and ".%s" % self.type or ""
+                    self.infile = NamedTemporaryFile(mode="w", suffix=ext)
                     self.infile.write(self.content.encode('utf8'))
                     self.infile.flush()
                     options["infile"] = self.infile.name
