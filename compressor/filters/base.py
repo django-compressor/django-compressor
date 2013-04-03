@@ -5,6 +5,7 @@ import subprocess
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 from django.utils.importlib import import_module
+from django.utils.encoding import smart_unicode
 
 from compressor.conf import settings
 from compressor.exceptions import FilterError
@@ -140,4 +141,5 @@ class CompilerFilter(FilterBase):
             if self.outfile is not None:
                 filtered = self.outfile.read()
                 self.outfile.close()
-        return filtered
+
+        return smart_unicode(filtered)
