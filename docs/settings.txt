@@ -334,7 +334,7 @@ Caching settings
 
 .. attribute:: COMPRESS_CACHE_BACKEND
 
-    :Default: ``"default"`` or ``CACHE_BACKEND``
+    :Default: ``CACHES["default"]`` or ``CACHE_BACKEND``
 
     The backend to use for caching, in case you want to use a different cache
     backend for Django Compressor.
