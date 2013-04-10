@@ -7,7 +7,7 @@ def __get_app_paths():
     app_paths = set()
     for app in settings.INSTALLED_APPS:
         module = __import__(app)
-        app_paths.add(module.__path__[0])
+        app_paths.add(os.path.abspath(module.__path__[0]))
 
     return app_paths
 
