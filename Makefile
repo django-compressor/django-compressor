@@ -1,3 +1,8 @@
+testenv:
+	pip install -e .
+	pip install -r requirements/tests.txt
+	pip install Django
+
 test:
 	flake8 compressor --ignore=E501,E128
 	coverage run --branch --source=compressor `which django-admin.py` test --settings=compressor.test_settings compressor
