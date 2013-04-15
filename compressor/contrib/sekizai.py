@@ -15,4 +15,7 @@ def compress(context, data, name):
     Name is either 'js' or 'css' (the sekizai namespace)
     Basically passes the string through the {% compress 'js' %} template tag
     """
-    return CompressorNode(nodelist=Template(data).nodelist, kind=name, mode='file').render(context=context)
+    rendered = CompressorNode(nodelist=Template(data).nodelist, kind=name, mode='file').render(context=context)
+    if not isinstance(rendered, unicode):
+        rendered = rendered.decode('utf-8')
+    return rendered
