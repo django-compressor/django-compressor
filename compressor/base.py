@@ -65,15 +65,22 @@ class Compressor(object):
         return "compressor/%s_%s.html" % (self.type, mode)
 
     def get_basename(self, url):
+        """
+        Given a url check if it matches the compress url setting, if not error.
+        :param url:
+        :return:
+        """
         try:
             base_url = self.storage.base_url
         except AttributeError:
             base_url = settings.COMPRESS_URL
-        if not url.startswith(base_url):
-            raise UncompressableFileError("'%s' isn't accessible via "
-                                          "COMPRESS_URL ('%s') and can't be "
+
+        if not url.find(base_url) > 0:
+            raise UncompressableFileError("'%s' isn't accessible as uri stems don't match via "
+                                          "COMPRESS_URL ('%s') and thus can't be "
                                           "compressed" % (url, base_url))
-        basename = url.replace(base_url, "", 1)
+            pass
+        basename = url.split(base_url)[1]
         # drop the querystring, which is used for non-compressed cache-busting.
         return basename.split("?", 1)[0]
 
