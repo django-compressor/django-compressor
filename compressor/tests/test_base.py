@@ -2,8 +2,12 @@ from __future__ import with_statement, unicode_literals
 import os
 import re
 
-from bs4 import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    from BeautifulSoup import BeautifulSoup
 
+from django.utils import six
 from django.core.cache.backends import locmem
 from django.test import TestCase
 
@@ -16,7 +20,10 @@ from compressor.exceptions import FilterDoesNotExist
 
 def make_soup(markup):
     # we use html.parser instead of lxml because it doesn't work on python 3.3
-    return BeautifulSoup(markup, 'html.parser')
+    if six.PY3:
+        return BeautifulSoup(markup, 'html.parser')
+    else:
+        return BeautifulSoup(markup)
 
 
 def css_tag(href, **kwargs):

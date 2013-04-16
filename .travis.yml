@@ -1,8 +1,8 @@
 language: python
 python:
-#   - "2.6"
-#   - "2.7"
-#   - "3.2"
+  - "2.6"
+  - "2.7"
+  - "3.2"
   - "3.3"
 before_install:
   - export PIP_USE_MIRRORS=true
@@ -11,24 +11,24 @@ before_install:
   - sudo apt-get install csstidy libxml2-dev libxslt-dev
 install:
   - pip install -e .
-#   - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then pip install unittest2 --use-mirrors; fi
-#   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install unittest2 --use-mirrors; fi
-#   - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then pip install BeautifulSoup --use-mirrors; fi
-#   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install BeautifulSoup --use-mirrors; fi
-#   - if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then pip install BeautifulSoup4 --use-mirrors; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then pip install unittest2 --use-mirrors; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install unittest2 --use-mirrors; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then pip install BeautifulSoup --use-mirrors; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install BeautifulSoup --use-mirrors; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then pip install BeautifulSoup4 --use-mirrors; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then pip install BeautifulSoup4 --use-mirrors; fi
   - pip install -r requirements/tests.txt Django==$DJANGO
 script:
   - make test
 env:
-#   - DJANGO=1.4.5
+  - DJANGO=1.4.5
   - DJANGO=1.5
-# matrix:
-#   exclude:
-#     - python: "3.2"
-#       env: DJANGO=1.4.5
-#     - python: "3.3"
-#       env: DJANGO=1.4.5
+matrix:
+  exclude:
+    - python: "3.2"
+      env: DJANGO=1.4.5
+    - python: "3.3"
+      env: DJANGO=1.4.5
 branches:
   only:
     - py3_new

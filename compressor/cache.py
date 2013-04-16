@@ -6,7 +6,7 @@ import time
 
 from django.core.cache import get_cache
 from django.core.files.base import ContentFile
-from django.utils.encoding import force_str
+from django.utils.encoding import force_text, smart_bytes
 from django.utils.functional import SimpleLazyObject
 from django.utils.importlib import import_module
 
@@ -14,28 +14,22 @@ from compressor.conf import settings
 from compressor.storage import default_storage
 from compressor.utils import get_mod_func
 
-try:
-    from django.utils.encoding import force_bytes
-except ImportError:
-    # django < 1.4.2
-    from django.utils.encoding import force_str as force_bytes
-
 _cachekey_func = None
 
 
 def get_hexdigest(plaintext, length=None):
-    digest = hashlib.md5(force_bytes(plaintext)).hexdigest()
+    digest = hashlib.md5(smart_bytes(plaintext)).hexdigest()
     if length:
         return digest[:length]
     return digest
 
 
 def simple_cachekey(key):
-    return 'django_compressor.%s' % force_str(key)
+    return 'django_compressor.%s' % force_text(key)
 
 
 def socket_cachekey(key):
-    return "django_compressor.%s.%s" % (socket.gethostname(), force_str(key))
+    return "django_compressor.%s.%s" % (socket.gethostname(), force_text(key))
 
 
 def get_cachekey(*args, **kwargs):
