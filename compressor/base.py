@@ -75,7 +75,7 @@ class Compressor(object):
         except AttributeError:
             base_url = settings.COMPRESS_URL
 
-        if not url.find(base_url) > 0:
+        if not url.find(base_url) >= 0:
             raise UncompressableFileError("'%s' isn't accessible as uri stems don't match via "
                                           "COMPRESS_URL ('%s') and thus can't be "
                                           "compressed" % (url, base_url))
