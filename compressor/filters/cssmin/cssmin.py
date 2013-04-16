@@ -30,14 +30,6 @@
 
 import re
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    try:
-        from StringIO import StringIO
-    except ImportError:
-        from io import StringIO # python 3
-
 __version__ = '0.1.4'
 
 

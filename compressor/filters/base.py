@@ -136,7 +136,7 @@ class CompilerFilter(FilterBase):
                 # something different than utf8. If that's the case file will
                 # be included with charset="something" html attribute and
                 # charset will be available as filter's charset attribute
-                encoding = self.charset #or self.default_encoding
+                encoding = self.charset  # or self.default_encoding
                 self.infile = open(self.filename)
                 options["infile"] = self.filename
 

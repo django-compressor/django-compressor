@@ -250,7 +250,7 @@ def selftest():
     d = datetime.date(2010, 9, 7)
     assert F(u"The year is {0.year}").format(d) == u"The year is 2010"
     assert F(u"Tested on {0:%Y-%m-%d}").format(d) == u"Tested on 2010-09-07"
-    print 'Test successful'
+    print('Test successful')
 
 if __name__ == '__main__':
     selftest()
