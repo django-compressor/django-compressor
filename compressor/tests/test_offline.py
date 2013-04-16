@@ -259,7 +259,7 @@ class OfflineGenerationInlineNonAsciiTestCase(OfflineTestCaseMixin, TestCase):
     def setUp(self):
         self.old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
         settings.COMPRESS_OFFLINE_CONTEXT = {
-            'test_non_ascii_value': u'\u2014',
+            'test_non_ascii_value': '\u2014',
         }
         super(OfflineGenerationInlineNonAsciiTestCase, self).setUp()
 
