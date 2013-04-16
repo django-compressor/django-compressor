@@ -1,4 +1,4 @@
-import six
+from django.utils import six
 from django.utils.functional import LazyObject
 from django.utils.importlib import import_module
 

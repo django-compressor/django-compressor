@@ -3,10 +3,10 @@ import io
 import logging
 import subprocess
 
-import six
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 from django.utils.importlib import import_module
+from django.utils import six
 
 from compressor.conf import settings
 from compressor.exceptions import FilterError

@@ -2,7 +2,8 @@
 from __future__ import unicode_literals
 import os
 
-import six
+from django.utils import six
+
 from compressor.exceptions import FilterError
 
 

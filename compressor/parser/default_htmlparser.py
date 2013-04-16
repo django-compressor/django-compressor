@@ -1,4 +1,5 @@
-import six
+from django.utils import six
+
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 
