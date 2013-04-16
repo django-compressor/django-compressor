@@ -79,6 +79,11 @@ class PrecompilerTestCase(TestCase):
             charset=settings.FILE_CHARSET, command=command)
         self.assertEqual("body { color:#990; }%s" % os.linesep, compiler.input())
 
+    def test_precompiler_output_unicode(self):
+        command = '%s %s' % (sys.executable, self.test_precompiler)
+        compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
+        self.assertEqual(type(compiler.input()), unicode)
+
 
 class CssMinTestCase(TestCase):
     def test_cssmin_filter(self):
