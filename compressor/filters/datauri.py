@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import os
 import re
 import mimetypes
@@ -39,7 +40,8 @@ class DataUriFilter(FilterBase):
         if not url.startswith('data:'):
             path = self.get_file_path(url)
             if os.stat(path).st_size <= settings.COMPRESS_DATA_URI_MAX_SIZE:
-                data = b64encode(open(path, 'rb').read())
+                with open(path, 'rb') as file:
+                    data = b64encode(file.read()).decode('ascii')
                 return 'url("data:%s;base64,%s")' % (
                     mimetypes.guess_type(path)[0], data)
         return 'url("%s")' % url

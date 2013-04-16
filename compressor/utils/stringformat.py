@@ -6,7 +6,11 @@ An implementation of the advanced string formatting (PEP 3101).
 Author: Florent Xicluna
 """
 
+from __future__ import unicode_literals
+
 import re
+
+from django.utils import six
 
 _format_str_re = re.compile(
     r'((?<!{)(?:{{)+'                       # '{{'
@@ -128,7 +132,7 @@ def _format_field(value, parts, conv, spec, want_bytes=False):
         value = value.strftime(str(spec))
     else:
         value = _strformat(value, spec)
-    if want_bytes and isinstance(value, unicode):
+    if want_bytes and isinstance(value, six.text_type):
         return str(value)
     return value
 
@@ -138,9 +142,9 @@ class FormattableString(object):
 
     The method format() behaves like str.format() in python 2.6+.
 
-    >>> FormattableString(u'{a:5}').format(a=42)
-    ... # Same as u'{a:5}'.format(a=42)
-    u'   42'
+    >>> FormattableString('{a:5}').format(a=42)
+    ... # Same as '{a:5}'.format(a=42)
+    '   42'
 
     """
 
@@ -244,13 +248,13 @@ def selftest():
     import datetime
     F = FormattableString
 
-    assert F(u"{0:{width}.{precision}s}").format('hello world',
-             width=8, precision=5) == u'hello   '
+    assert F("{0:{width}.{precision}s}").format('hello world',
+             width=8, precision=5) == 'hello   '
 
     d = datetime.date(2010, 9, 7)
-    assert F(u"The year is {0.year}").format(d) == u"The year is 2010"
-    assert F(u"Tested on {0:%Y-%m-%d}").format(d) == u"Tested on 2010-09-07"
-    print 'Test successful'
+    assert F("The year is {0.year}").format(d) == "The year is 2010"
+    assert F("Tested on {0:%Y-%m-%d}").format(d) == "Tested on 2010-09-07"
+    print('Test successful')
 
 if __name__ == '__main__':
     selftest()

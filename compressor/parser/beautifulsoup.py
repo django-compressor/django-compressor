@@ -1,10 +1,16 @@
 from __future__ import absolute_import
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.encoding import smart_unicode
 
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 from compressor.utils.decorators import cached_property
+from django.utils import six
+
+try:
+    from django.utils.encoding import smart_text
+except ImportError:
+    # django < 1.4.2
+    from django.utils.encoding import smart_unicode as smart_text
 
 
 class BeautifulSoupParser(ParserBase):
@@ -12,18 +18,27 @@ class BeautifulSoupParser(ParserBase):
     @cached_property
     def soup(self):
         try:
-            from BeautifulSoup import BeautifulSoup
+            if six.PY3:
+                from bs4 import BeautifulSoup
+            else:
+                from BeautifulSoup import BeautifulSoup
             return BeautifulSoup(self.content)
-        except ImportError, err:
+        except ImportError as err:
             raise ImproperlyConfigured("Error while importing BeautifulSoup: %s" % err)
-        except Exception, err:
+        except Exception as err:
             raise ParserError("Error while initializing Parser: %s" % err)
 
     def css_elems(self):
-        return self.soup.findAll({'link': True, 'style': True})
+        if six.PY3:
+            return self.soup.find_all({'link': True, 'style': True})
+        else:
+            return self.soup.findAll({'link': True, 'style': True})
 
     def js_elems(self):
-        return self.soup.findAll('script')
+        if six.PY3:
+            return self.soup.find_all('script')
+        else:
+            return self.soup.findAll('script')
 
     def elem_attribs(self, elem):
         return dict(elem.attrs)
@@ -35,4 +50,4 @@ class BeautifulSoupParser(ParserBase):
         return elem.name
 
     def elem_str(self, elem):
-        return smart_unicode(elem)
+        return smart_text(elem)

@@ -1,4 +1,4 @@
-from __future__ import with_statement
+from __future__ import with_statement, unicode_literals
 import errno
 import os
 
@@ -23,7 +23,7 @@ class StorageTestCase(TestCase):
         base.default_storage = self._storage
 
     def test_css_tag_with_storage(self):
-        template = u"""{% load compress %}{% compress css %}
+        template = """{% load compress %}{% compress css %}
         <link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
         <style type="text/css">p { border:5px solid white;}</style>
         <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
@@ -40,7 +40,7 @@ class StorageTestCase(TestCase):
         def race_remove(path):
             "Patched os.remove to raise ENOENT (No such file or directory)"
             original_remove(path)
-            raise OSError(errno.ENOENT, u'Fake ENOENT')
+            raise OSError(errno.ENOENT, 'Fake ENOENT')
 
         try:
             os.remove = race_remove
