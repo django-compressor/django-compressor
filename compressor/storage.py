@@ -69,10 +69,13 @@ class GzipCompressorFileStorage(CompressorFileStorage):
         filename = super(GzipCompressorFileStorage, self).save(filename, content)
 
         # workaround for http://bugs.python.org/issue13664
-        name = os.path.basename(filename).encode('latin1', errors='replace')
-        out = gzip.GzipFile(name, fileobj=open("%s.gz" % filename, 'wb'))
-        out.writelines(open(self.path(filename), 'rb'))
-        out.close()
+        name = os.path.basename(filename).encode('latin1', 'replace')
+        f_in = open(self.path(filename), 'rb')
+        f_out = gzip.GzipFile(name, fileobj=open('%s.gz' % self.path(filename), 'wb'))
+        f_out.write(f_in.read())
+        f_out.close()
+        f_in.close()
+
         return filename
 
 

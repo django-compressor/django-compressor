@@ -28,4 +28,3 @@ matrix:
 branches:
   only:
     - py3_new
-    - python3
