@@ -8,6 +8,8 @@ Author: Florent Xicluna
 
 import re
 
+from django.utils import six
+
 _format_str_re = re.compile(
     r'((?<!{)(?:{{)+'                       # '{{'
     r'|(?:}})+(?!})'                        # '}}
@@ -128,7 +130,7 @@ def _format_field(value, parts, conv, spec, want_bytes=False):
         value = value.strftime(str(spec))
     else:
         value = _strformat(value, spec)
-    if want_bytes and isinstance(value, unicode):
+    if want_bytes and isinstance(value, six.text_type):
         return str(value)
     return value
 
