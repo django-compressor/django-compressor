@@ -8,8 +8,12 @@ from django.template.loader import render_to_string
 from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
 
+try:
+    from urllib.request import url2pathname
+except ImportError:
+    from urllib import url2pathname
+
 from compressor.cache import get_hexdigest, get_mtime
-from compressor.utils.compat import smart_text, url2pathname
 from compressor.conf import settings
 from compressor.exceptions import (CompressorError, UncompressableFileError,
         FilterDoesNotExist)
@@ -198,7 +202,7 @@ class Compressor(object):
                                              basename=basename)
                 else:
                     yield self.parser.elem_str(elem)
-    
+
     def filter_output(self, content):
         """
         Passes the concatenated content to the 'output' methods

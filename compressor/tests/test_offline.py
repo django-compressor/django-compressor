@@ -2,10 +2,10 @@ from __future__ import with_statement, unicode_literals
 import io
 import os
 
-import six
 import django
 from django.template import Template, Context
 from django.test import TestCase
+from django.utils import six
 from django.core.management.base import CommandError
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
@@ -13,7 +13,21 @@ from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_storage
-from compressor.utils.compat import StringIO, unittest as ut2
+
+try:
+    from django.utils import unittest as ut2
+except ImportError:
+    import unittest2 as ut2
+
+if six.PY3:
+    # there is an 'io' module in python 2.6+, but io.StringIO does not
+    # accept regular strings, just unicode objects
+    from io import StringIO
+else:
+    try:
+        from cStringIO import StringIO
+    except ImportError:
+        from StringIO import StringIO
 
 
 class OfflineTestCaseMixin(object):

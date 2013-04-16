@@ -4,19 +4,23 @@ import os
 import sys
 import textwrap
 
-import six
+from django.utils import six
 from django.test import TestCase
 
 from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.utils import find_command
-from compressor.utils.compat import unittest as ut2
 from compressor.filters.base import CompilerFilter
 from compressor.filters.cssmin import CSSMinFilter
 from compressor.filters.css_default import CssAbsoluteFilter
 from compressor.filters.template import TemplateFilter
 from compressor.tests.test_base import test_dir
+
+try:
+    from django.utils import unittest as ut2
+except ImportError:
+    import unittest2 as ut2
 
 
 @ut2.skipIf(find_command(settings.COMPRESS_CSSTIDY_BINARY) is None,

@@ -21,7 +21,11 @@ from compressor.base import SOURCE_HUNK, SOURCE_FILE
 from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.tests.test_base import CompressorTestCase
-from compressor.utils.compat import unittest as ut2
+
+try:
+    from django.utils import unittest as ut2
+except ImportError:
+    import unittest2 as ut2
 
 
 class ParserTestCase(object):

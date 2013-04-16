@@ -4,7 +4,12 @@ from django.core.exceptions import ImproperlyConfigured
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 from compressor.utils.decorators import cached_property
-from compressor.utils.compat import smart_text
+
+try:
+    from django.utils.encoding import smart_text
+except ImportError:
+    # django < 1.4.2
+    from django.utils.encoding import smart_unicode as smart_text
 
 
 class Html5LibParser(ParserBase):

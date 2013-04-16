@@ -9,6 +9,7 @@ from optparse import make_option
 from django.core.management.base import  NoArgsCommand, CommandError
 from django.template import (Context, Template,
                              TemplateDoesNotExist, TemplateSyntaxError)
+from django.utils import six
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
@@ -25,7 +26,16 @@ from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
-from compressor.utils.compat import StringIO
+
+if six.PY3:
+    # there is an 'io' module in python 2.6+, but io.StringIO does not
+    # accept regular strings, just unicode objects
+    from io import StringIO
+else:
+    try:
+        from cStringIO import StringIO
+    except ImportError:
+        from StringIO import StringIO
 
 
 def patched_render(self, context):

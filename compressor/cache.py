@@ -13,7 +13,12 @@ from django.utils.importlib import import_module
 from compressor.conf import settings
 from compressor.storage import default_storage
 from compressor.utils import get_mod_func
-from compressor.utils.compat import force_bytes
+
+try:
+    from django.utils.encoding import force_bytes
+except ImportError:
+    # django < 1.4.2
+    from django.utils.encoding import force_str as force_bytes
 
 _cachekey_func = None
 
