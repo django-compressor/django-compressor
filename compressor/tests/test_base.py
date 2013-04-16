@@ -219,7 +219,10 @@ class CssMediaTestCase(TestCase):
 
     def test_css_output(self):
         css_node = CssCompressor(self.css)
-        links = make_soup(css_node.output()).findAll('link')
+        if six.PY3:
+            links = make_soup(css_node.output()).find_all('link')
+        else:
+            links = make_soup(css_node.output()).findAll('link')
         media = ['screen', 'print', 'all', None]
         self.assertEqual(len(links), 4)
         self.assertEqual(media, [l.get('media', None) for l in links])
@@ -228,7 +231,10 @@ class CssMediaTestCase(TestCase):
         css = self.css + '<style type="text/css" media="print">p { border:10px solid red;}</style>'
         css_node = CssCompressor(css)
         media = ['screen', 'print', 'all', None, 'print']
-        links = make_soup(css_node.output()).findAll('link')
+        if six.PY3:
+            links = make_soup(css_node.output()).find_all('link')
+        else:
+            links = make_soup(css_node.output()).findAll('link')
         self.assertEqual(media, [l.get('media', None) for l in links])
 
     def test_passthough_when_compress_disabled(self):
@@ -242,7 +248,10 @@ class CssMediaTestCase(TestCase):
 <link rel="stylesheet" href="/static/css/two.css" type="text/css" media="screen">
 <style type="text/foobar" media="screen">h1 { border:5px solid green;}</style>"""
         css_node = CssCompressor(css)
-        output = make_soup(css_node.output()).findAll(['link', 'style'])
+        if six.PY3:
+            output = make_soup(css_node.output()).find_all(['link', 'style'])
+        else:
+            output = make_soup(css_node.output()).findAll(['link', 'style'])
         self.assertEqual(['/static/css/one.css', '/static/css/two.css', None],
                          [l.get('href', None) for l in output])
         self.assertEqual(['screen', 'screen', 'screen'],
