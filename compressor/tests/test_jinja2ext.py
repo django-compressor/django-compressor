@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import with_statement
+from __future__ import with_statement, unicode_literals
 
 from django.test import TestCase
 
@@ -53,13 +53,13 @@ class TestJinja2CompressorExtension(TestCase):
         settings.COMPRESS_ENABLED = org_COMPRESS_ENABLED
 
     def test_empty_tag(self):
-        template = self.env.from_string(u"""{% compress js %}{% block js %}
+        template = self.env.from_string("""{% compress js %}{% block js %}
         {% endblock %}{% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        self.assertEqual(u'', template.render(context))
+        self.assertEqual('', template.render(context))
 
     def test_css_tag(self):
-        template = self.env.from_string(u"""{% compress css -%}
+        template = self.env.from_string("""{% compress css -%}
         <link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
         <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css" charset="utf-8">
@@ -69,7 +69,7 @@ class TestJinja2CompressorExtension(TestCase):
         self.assertEqual(out, template.render(context))
 
     def test_nonascii_css_tag(self):
-        template = self.env.from_string(u"""{% compress css -%}
+        template = self.env.from_string("""{% compress css -%}
         <link rel="stylesheet" href="{{ STATIC_URL }}css/nonasc.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
         {% endcompress %}""")
@@ -78,34 +78,34 @@ class TestJinja2CompressorExtension(TestCase):
         self.assertEqual(out, template.render(context))
 
     def test_js_tag(self):
-        template = self.env.from_string(u"""{% compress js -%}
+        template = self.env.from_string("""{% compress js -%}
         <script src="{{ STATIC_URL }}js/one.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = u'<script type="text/javascript" src="/static/CACHE/js/066cd253eada.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/066cd253eada.js"></script>'
         self.assertEqual(out, template.render(context))
 
     def test_nonascii_js_tag(self):
-        template = self.env.from_string(u"""{% compress js -%}
+        template = self.env.from_string("""{% compress js -%}
         <script src="{{ STATIC_URL }}js/nonasc.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">var test_value = "\u2014";</script>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = u'<script type="text/javascript" src="/static/CACHE/js/e214fe629b28.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/e214fe629b28.js"></script>'
         self.assertEqual(out, template.render(context))
 
     def test_nonascii_latin1_js_tag(self):
-        template = self.env.from_string(u"""{% compress js -%}
+        template = self.env.from_string("""{% compress js -%}
         <script src="{{ STATIC_URL }}js/nonasc-latin1.js" type="text/javascript" charset="latin-1"></script>
         <script type="text/javascript">var test_value = "\u2014";</script>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = u'<script type="text/javascript" src="/static/CACHE/js/be9e078b5ca7.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/be9e078b5ca7.js"></script>'
         self.assertEqual(out, template.render(context))
 
     def test_css_inline(self):
-        template = self.env.from_string(u"""{% compress css, inline -%}
+        template = self.env.from_string("""{% compress css, inline -%}
         <link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
         {% endcompress %}""")
@@ -117,7 +117,7 @@ class TestJinja2CompressorExtension(TestCase):
         self.assertEqual(out, template.render(context))
 
     def test_js_inline(self):
-        template = self.env.from_string(u"""{% compress js, inline -%}
+        template = self.env.from_string("""{% compress js, inline -%}
         <script src="{{ STATIC_URL }}js/one.js" type="text/css" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         {% endcompress %}""")
@@ -128,11 +128,11 @@ class TestJinja2CompressorExtension(TestCase):
     def test_nonascii_inline_css(self):
         org_COMPRESS_ENABLED = settings.COMPRESS_ENABLED
         settings.COMPRESS_ENABLED = False
-        template = self.env.from_string(u'{% compress css %}'
-                                        u'<style type="text/css">'
-                                        u'/* русский текст */'
-                                        u'</style>{% endcompress %}')
-        out = u'<link rel="stylesheet" href="/static/CACHE/css/b2cec0f8cb24.css" type="text/css" />'
+        template = self.env.from_string('{% compress css %}'
+                                        '<style type="text/css">'
+                                        '/* русский текст */'
+                                        '</style>{% endcompress %}')
+        out = '<link rel="stylesheet" href="/static/CACHE/css/b2cec0f8cb24.css" type="text/css" />'
         settings.COMPRESS_ENABLED = org_COMPRESS_ENABLED
         context = {'STATIC_URL': settings.COMPRESS_URL}
         self.assertEqual(out, template.render(context))
