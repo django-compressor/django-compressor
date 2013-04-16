@@ -11,12 +11,8 @@ before_install:
   - sudo apt-get install csstidy libxml2-dev libxslt-dev
 install:
   - pip install -e .
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then pip install unittest2 --use-mirrors; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install unittest2 --use-mirrors; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then pip install BeautifulSoup --use-mirrors; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install BeautifulSoup --use-mirrors; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.2 ]]; then pip install BeautifulSoup4 --use-mirrors; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then pip install BeautifulSoup4 --use-mirrors; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then pip install unittest2 BeautifulSoup --use-mirrors; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.* ]]; then pip install BeautifulSoup4 --use-mirrors; fi
   - pip install -r requirements/tests.txt Django==$DJANGO
 script:
   - make test
