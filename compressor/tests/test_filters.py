@@ -82,7 +82,7 @@ class PrecompilerTestCase(TestCase):
     def test_precompiler_output_unicode(self):
         command = '%s %s' % (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
-        self.assertEqual(type(compiler.input()), unicode)
+        self.assertEqual(type(compiler.input()), six.text_type)
 
 
 class CssMinTestCase(TestCase):
