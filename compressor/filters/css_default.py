@@ -2,6 +2,7 @@ import os
 import re
 import posixpath
 
+from django.core.files.storage import get_storage_class
 from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
@@ -88,18 +89,57 @@ class CssAbsoluteFilter(FilterBase):
                 url = "%s#%s" % (url, fragment)
         return url
 
+    def change_filename(self, url):
+        filename = self.guess_filename(url)
+        hashed_name = None
+        if filename:
+            storage_class = get_storage_class(settings.STATICFILES_STORAGE)()
+            hashed_name = storage_class.hashed_name(name=filename)
+        if hashed_name is None:
+            return url
+        if url.startswith(SCHEMES):
+            hashed_filename = hashed_name.rsplit('/', 1)[1]
+            url_path = url.rsplit('/', 1)[0]
+            fragment = None
+            if "#" in url:
+                url, fragment = url.rsplit("#", 1)
+                url = "%s/%s#%s" % (url_path, hashed_filename, fragment)
+            elif "?" in url:
+                url, fragment = url.rsplit("?", 1)
+                url = "%s/%s?%s" % (url_path, hashed_filename, fragment)
+            else:
+                hashed_filename = hashed_name.rsplit('/', 1)[1]
+                url_path = url.rsplit('/', 1)[0]
+                url = "%s/%s" % (url_path, hashed_filename)
+        return url
+
     def _converter(self, matchobj, group, template):
         url = matchobj.group(group)
         url = url.strip(' \'"')
         if url.startswith('#'):
             return "url('%s')" % url
         elif url.startswith(SCHEMES):
-            return "url('%s')" % self.add_suffix(url)
+            if settings.COMPRESS_CSS_INVALIDATION_METHOD == 'suffix':
+                return "url('%s')" % self.add_suffix(url)
+            elif settings.COMPRESS_CSS_INVALIDATION_METHOD == 'filename':
+                return "url('%s')" % self.change_filename(url)
+            else:
+                raise FilterError('COMPRESS_CSS_INVALIDATION_METHOD is configured '
+                                  'with an unknown method (%s).' %
+                                  settings.COMPRESS_CSS_HASHING_METHOD)
+
         full_url = posixpath.normpath('/'.join([str(self.directory_name),
                                                 url]))
         if self.has_scheme:
             full_url = "%s%s" % (self.protocol, full_url)
-        return template % self.add_suffix(full_url)
+        if settings.COMPRESS_CSS_INVALIDATION_METHOD == 'suffix':
+            return template % self.add_suffix(full_url)
+        elif settings.COMPRESS_CSS_INVALIDATION_METHOD == 'filename':
+            return template % self.change_filename(full_url)
+        else:
+                raise FilterError('COMPRESS_CSS_INVALIDATION_METHOD is configured '
+                                  'with an unknown method (%s).' %
+                                  settings.COMPRESS_CSS_HASHING_METHOD)
 
     def url_converter(self, matchobj):
         return self._converter(matchobj, 1, "url('%s')")

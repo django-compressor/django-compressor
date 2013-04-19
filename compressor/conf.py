@@ -24,6 +24,7 @@ class CompressorConf(AppConf):
     ROOT = None
 
     CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
+    CSS_INVALIDATION_METHOD = 'suffix'
     CSS_HASHING_METHOD = 'mtime'
 
     JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
