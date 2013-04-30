@@ -160,6 +160,7 @@ class Compressor(object):
             charset = attribs.get("charset", self.charset)
             options = {
                 'method': METHOD_INPUT,
+                'safe': not enabled,
                 'elem': elem,
                 'kind': kind,
                 'basename': basename,
@@ -172,10 +173,10 @@ class Compressor(object):
             if self.all_mimetypes:
                 precompiled, value = self.precompile(value, **options)
 
-            modified, value = self.filter(value, safe=(not enabled), **options)
+            modified, value = self.filter(value, **options)
             if enabled:
                 yield smart_unicode(value, charset.lower())
-            elif modified:
+            elif precompiled or modified:
                 value = self.handle_output(kind, value, forced=True, basename=basename)
                 yield smart_unicode(value, charset.lower())
             else:
