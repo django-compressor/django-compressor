@@ -240,6 +240,144 @@ p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/static/img/
             self.assertEqual(path, filter.guess_filename(url))
 
 
+class CssAbsolutizingInvalidationTestCase(CssAbsolutizingTestCase):
+    hashing_method = 'content'
+    hashing_func = staticmethod(get_hashed_content)
+    content = ("p { background: url('../../img/python.png') }"
+               "p { filter: Alpha(src='../../img/python.png') }")
+
+    def setUp(self):
+        super(CssAbsolutizingInvalidationTestCase, self).setUp()
+        self.old_caching = settings.COMPRESS_CSS_INVALIDATION_METHOD
+        self.old_staticfiles_storage = settings.STATICFILES_STORAGE
+        settings.COMPRESS_CSS_INVALIDATION_METHOD = 'filename'
+        settings.STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
+
+    def tearDown(self):
+        super(CssAbsolutizingInvalidationTestCase, self).tearDown()
+        settings.COMPRESS_CSS_INVALIDATION_METHOD = self.old_caching
+        settings.STATICFILES_STORAGE = self.old_staticfiles_storage
+
+    def test_css_absolute_filter(self):
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
+        params = {
+            'url': settings.COMPRESS_URL,
+            'hash': self.hashing_func(imagefilename),
+        }
+        output = ("p { background: url('%(url)simg/python.%(hash)s.png') }"
+                  "p { filter: Alpha(src='%(url)simg/python.%(hash)s.png') }") % params
+        filter = CssAbsoluteFilter(self.content)
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+        settings.COMPRESS_URL = params['url'] = 'http://static.example.com/'
+        filter = CssAbsoluteFilter(self.content)
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        output = ("p { background: url('%(url)simg/python.%(hash)s.png') }"
+                  "p { filter: Alpha(src='%(url)simg/python.%(hash)s.png') }") % params
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+
+    def test_css_absolute_filter_url_fragment(self):
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
+        params = {
+            'url': settings.COMPRESS_URL,
+            'hash': self.hashing_func(imagefilename),
+        }
+        content = "p { background: url('../../img/python.png#foo') }"
+
+        output = "p { background: url('%(url)simg/python.%(hash)s.png#foo') }" % params
+        filter = CssAbsoluteFilter(content)
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+        settings.COMPRESS_URL = params['url'] = 'http://media.example.com/'
+        filter = CssAbsoluteFilter(content)
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        output = "p { background: url('%(url)simg/python.%(hash)s.png#foo') }" % params
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+
+    def test_css_absolute_filter_only_url_fragment(self):
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        content = "p { background: url('#foo') }"
+        filter = CssAbsoluteFilter(content)
+        self.assertEqual(content, filter.input(filename=filename, basename='css/url/test.css'))
+        settings.COMPRESS_URL = 'http://media.example.com/'
+        filter = CssAbsoluteFilter(content)
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        self.assertEqual(content, filter.input(filename=filename, basename='css/url/test.css'))
+
+    def test_css_absolute_filter_querystring(self):
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
+        params = {
+            'url': settings.COMPRESS_URL,
+            'hash': self.hashing_func(imagefilename),
+        }
+        content = "p { background: url('../../img/python.png?foo') }"
+
+        output = "p { background: url('%(url)simg/python.%(hash)s.png?foo') }" % params
+        filter = CssAbsoluteFilter(content)
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+        settings.COMPRESS_URL = params['url'] = 'http://media.example.com/'
+        filter = CssAbsoluteFilter(content)
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        output = "p { background: url('%(url)simg/python.%(hash)s.png?foo') }" % params
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+
+    def test_css_absolute_filter_https(self):
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
+        params = {
+            'url': settings.COMPRESS_URL,
+            'hash': self.hashing_func(imagefilename),
+        }
+        output = ("p { background: url('%(url)simg/python.%(hash)s.png') }"
+                  "p { filter: Alpha(src='%(url)simg/python.%(hash)s.png') }") % params
+        filter = CssAbsoluteFilter(self.content)
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+        settings.COMPRESS_URL = params['url'] = 'https://static.example.com/'
+        filter = CssAbsoluteFilter(self.content)
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        output = ("p { background: url('%(url)simg/python.%(hash)s.png') }"
+                  "p { filter: Alpha(src='%(url)simg/python.%(hash)s.png') }") % params
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+
+    def test_css_absolute_filter_relative_path(self):
+        filename = os.path.join(settings.TEST_DIR, 'whatever', '..', 'static', 'whatever/../css/url/test.css')
+        imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
+        params = {
+            'url': settings.COMPRESS_URL,
+            'hash': self.hashing_func(imagefilename),
+        }
+        output = ("p { background: url('%(url)simg/python.%(hash)s.png') }"
+                  "p { filter: Alpha(src='%(url)simg/python.%(hash)s.png') }") % params
+        filter = CssAbsoluteFilter(self.content)
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+        settings.COMPRESS_URL = params['url'] = 'https://static.example.com/'
+        filter = CssAbsoluteFilter(self.content)
+        output = ("p { background: url('%(url)simg/python.%(hash)s.png') }"
+                  "p { filter: Alpha(src='%(url)simg/python.%(hash)s.png') }") % params
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+
+    def test_css_hunks(self):
+        hash_dict = {
+            'hash1': self.hashing_func(os.path.join(settings.COMPRESS_ROOT, 'img/python.png')),
+            'hash2': self.hashing_func(os.path.join(settings.COMPRESS_ROOT, 'img/add.png')),
+        }
+        self.assertEqual([u"""\
+p { background: url('/static/img/python.%(hash1)s.png'); }
+p { background: url('/static/img/python.%(hash1)s.png'); }
+p { background: url('/static/img/python.%(hash1)s.png'); }
+p { background: url('/static/img/python.%(hash1)s.png'); }
+p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/static/img/python.%(hash1)s.png'); }
+""" % hash_dict,
+               u"""\
+p { background: url('/static/img/add.%(hash2)s.png'); }
+p { background: url('/static/img/add.%(hash2)s.png'); }
+p { background: url('/static/img/add.%(hash2)s.png'); }
+p { background: url('/static/img/add.%(hash2)s.png'); }
+p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/static/img/add.%(hash2)s.png'); }
+""" % hash_dict], list(self.css_node.hunks()))
+
+
 class CssAbsolutizingTestCaseWithHash(CssAbsolutizingTestCase):
     hashing_method = 'content'
     hashing_func = staticmethod(get_hashed_content)

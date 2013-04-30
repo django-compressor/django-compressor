@@ -86,6 +86,14 @@ Backend settings
          Use the latter in case you're using multiple server to serve your
          static files.
 
+      .. attribute:: COMPRESS_CSS_INVALIDATION_METHOD
+
+         The method used to invalidate files in CDN and end user caches
+         when files change. Either ``'suffix'`` (default) or ``'filename'``.
+         Use the latter in case you are using versioned file names with
+         django staticfiles CachedFilesMixin and example of which can be
+         found in :ref:`remote_storages`
+
     - ``compressor.filters.csstidy.CSSTidyFilter``
 
       A filter that passes the CSS content to the CSSTidy_ tool.
@@ -233,8 +241,8 @@ Backend settings
     .. note::
         Depending on the implementation, some precompilers might not support
         outputting to something else than ``stdout``, so you'll need to omit the
-        ``{outfile}`` parameter when working with those. For instance, if you 
-        are using the Ruby version of lessc, you'll need to set up the 
+        ``{outfile}`` parameter when working with those. For instance, if you
+        are using the Ruby version of lessc, you'll need to set up the
         precompiler like this::
 
             ('text/less', 'lessc {infile}'),

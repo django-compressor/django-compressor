@@ -80,6 +80,79 @@ integrated.
    :attr:`~django.conf.settings.COMPRESS_URL` (e.g.
    ``"http://compressor-test.s3.amazonaws.com/"``).
 
+Cache Invalidation
+^^^^^^^^^^^^^^^^^^
+
+If you are using a CDN like `Amazon Cloudfront`_, files that you store will be
+cached for potentially a very long time.  To enable users to see updated files
+you will want to invalidate the files stored in the CDN and all caches and proxies between.
+The recommended way to invalidate files is to use versioned file names, django-compressor
+takes care of this for css and js files by changing the name to a hash of the contents of
+the compressed files, but to invalidate images and other files that the css refers to we
+need to do more work.
+
+#. If you use Django's staticfiles_ contrib app you can use the CachedStaticFilesStorage_
+   storage class by setting your STATICFILES_STORAGE_ to 'django.contrib.staticfiles.storage.CahcedStaticFilesStorage'.
+
+#. If you are using a remote storage backend such as s3 discussed
+   above you can use the CachedFilesMixin from Django's staticfiles_ contrib app
+   to add a post_process function to collectstatic that will rename all of your
+   files with a hash of the files content in the filename, giving you versioned
+   file names.  Below is the example from above of the boto S3 storage backend from
+   django-storages_ with CachedFilesMixin::
+
+    from django.core.files.storage import get_storage_class
+    from django.contrib.staticfiles.storage import CachedFilesMixin
+    from storages.backends.s3boto import S3BotoStorage
+
+    class CachedS3BotoStorage(CachedFilesMixin, S3BotoStorage):
+        """
+        S3 storage backend that saves the files locally, too.
+        """
+        def __init__(self, *args, **kwargs):
+            super(CachedS3BotoStorage, self).__init__(*args, **kwargs)
+            self.local_storage = get_storage_class(
+                "compressor.storage.CompressorFileStorage")()
+
+        def save(self, name, content):
+            name = super(CachedS3BotoStorage, self).save(name, content)
+            self.local_storage._save(name, content)
+            return name
+
+
+    class CompressorCachedS3BotoStorage(S3BotoStorage):
+        """
+        S3 storage backend that saves the files locally, too.
+        """
+        def __init__(self, *args, **kwargs):
+            super(CompressorCachedS3BotoStorage, self).__init__(*args, **kwargs)
+            self.local_storage = get_storage_class(
+                "compressor.storage.CompressorFileStorage")()
+
+        def save(self, name, content):
+            name = super(CompressorCachedS3BotoStorage, self).save(name, content)
+            self.local_storage._save(name, content)
+            return name
+
+   Set your :attr:`~django.conf.settings.COMPRESS_STORAGE` setting to the
+   dotted path of your CompressorCachedS3BotoStorage backend, e.g.
+   ``'mysite.storage.CompressorCachedS3BotoStorage'`` and set the STATICFILES_STORAGE_
+   setting to the dotted path of your CachedS3BotoStorage backed, e.g.
+   ``'mysite.storage.CachedS3BotoStorage'``.  The reason for the two different
+   storage backends is because the STATICFILES_STORAGE_ backend should post-process
+   the files and create versions with the hash in the filename, we do not want the
+   compressor files to be post-processed so we avoid using the CachedFilesMixin in
+   that case.
+
+   Finally you have to change the django-storages_ setting AWS_S3_CUSTOM_DOMAIN to
+   the domain that you wish to serve your files from, this should be set similar to
+   your STATIC_URL_ setting but without the http:// e.g.: ``'xxxxxxxxx.cloudfront.net'``
+
+#. Now that your files will be versioned with a hash in the filename, you have to tell
+   django-compressor to change references in the css files to point to the new versioned
+   files.  This is done via the CssAbsoluteFilter, which is set to the default for
+   :attr:`~django.conf.settings.COMPRESS_CSS_FILTERS`. You must also set the :attr:`~django.conf.settings.COMPRESS_CSS_INVALIDATION_METHOD` setting to ``'filename'`` to tell CssAbsoluteFilter to add a hash of the files contents to the filename.
+
 .. _CDN: http://en.wikipedia.org/wiki/Content_delivery_network
 .. _Amazon S3: https://s3.amazonaws.com/
 .. _boto: http://boto.cloudhackers.com/
@@ -89,3 +162,5 @@ integrated.
 .. _STATIC_ROOT: http://docs.djangoproject.com/en/dev/ref/settings/#static-root
 .. _STATIC_URL: http://docs.djangoproject.com/en/dev/ref/settings/#static-url
 .. _STATICFILES_STORAGE: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-storage
+.. _Amazon Cloudfront: http://aws.amazon.com/cloudfront/
+.. _CachedStaticFilesStorage: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#cachedstaticfilesstorage
