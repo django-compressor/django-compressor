@@ -3,6 +3,7 @@ import re
 import posixpath
 
 from django.core.files.storage import get_storage_class
+from django.core.files import File
 from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
@@ -91,27 +92,22 @@ class CssAbsoluteFilter(FilterBase):
 
     def change_filename(self, url):
         filename = self.guess_filename(url)
-        hashed_name = None
+        hash = None
         if filename:
+            try:
+                hash_file = os.path.realpath(filename)
+            except OSError:
+                return None
+
+            content = File(open(hash_file))
             storage_class = get_storage_class(settings.STATICFILES_STORAGE)()
-            hashed_name = storage_class.hashed_name(name=filename)
-        if hashed_name is None:
+            hash = storage_class.file_hash(name=filename, content=content)
+
+        if hash is None:
             return url
         if url.startswith(SCHEMES):
-            hashed_filename = hashed_name.rsplit('/', 1)[1]
-            url_path = url.rsplit('/', 1)[0]
-            fragment = None
-            if "#" in url:
-                url, fragment = url.rsplit("#", 1)
-                url = "%s/%s#%s" % (url_path, hashed_filename, fragment)
-            elif "?" in url:
-                url, fragment = url.rsplit("?", 1)
-                url = "%s/%s?%s" % (url_path, hashed_filename, fragment)
-            else:
-                hashed_filename = hashed_name.rsplit('/', 1)[1]
-                url_path = url.rsplit('/', 1)[0]
-                url = "%s/%s" % (url_path, hashed_filename)
-        return url
+            url_path, ext = url.rsplit('.', 1)
+        return "%s.%s.%s" % (url_path, hash, ext)
 
     def _converter(self, matchobj, group, template):
         url = matchobj.group(group)
