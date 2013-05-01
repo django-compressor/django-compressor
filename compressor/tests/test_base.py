@@ -213,6 +213,36 @@ class CssMediaTestCase(TestCase):
         settings.COMPRESS_PRECOMPILERS = original_precompilers
 
 
+class UnicodeEncodingTestCase(TestCase):
+
+    def test_utf8_encoded_unicode(self):
+        try:
+            original_precompilers = settings.COMPRESS_PRECOMPILERS
+            original_enabled = settings.COMPRESS_ENABLED
+            settings.COMPRESS_ENABLED = False
+            settings.COMPRESS_PRECOMPILERS = (
+                ('text/javascript', 'python %s -f {infile} -o {outfile}' % os.path.join(test_dir, 'precompiler.py')),
+            )
+            js = """\
+<script src="/static/js/nonasc.js" type="text/javascript"></script>"""
+            js_node = JsCompressor(js)
+            output = BeautifulSoup(js_node.output()).findAll(['script'])
+            compiled_output_src = output[0].get('src')
+            prefix = u'/static/CACHE/js/'
+            self.assertTrue(compiled_output_src.startswith(prefix))
+            compiled_output_filename = compiled_output_src[len(prefix):]
+            original_path = os.path.join(test_dir, 'static', 'js', 'nonasc.js')
+            cache_path = os.path.join(test_dir, 'static', 'CACHE', 'js', compiled_output_filename)
+            with open(original_path, 'rb') as f:
+                original_content = f.read().decode('utf8')
+            with open(cache_path, 'rb') as f:
+                cache_content = f.read().decode('utf8')
+            self.assertEqual(original_content, cache_content)
+        finally:
+            settings.COMPRESS_PRECOMPILERS = original_precompilers
+            settings.COMPRESS_ENABLED = original_enabled
+
+
 class VerboseTestCase(CompressorTestCase):
 
     def setUp(self):

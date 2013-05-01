@@ -271,6 +271,8 @@ class Compressor(object):
         """
         new_filepath = self.get_filepath(content, basename=basename)
         if not self.storage.exists(new_filepath) or forced:
+            if isinstance(content, unicode):
+                content = content.encode('utf8')
             self.storage.save(new_filepath, ContentFile(content))
         url = mark_safe(self.storage.url(new_filepath))
         return self.render_output(mode, {"url": url})
