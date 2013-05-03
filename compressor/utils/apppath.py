@@ -30,6 +30,8 @@ def get_app_path_for_filepath(file_path):
                 file = file[1:]
             try:
                 file_path = AppDirectoriesFinder().find(file)
+                if len(file_path) == 0:
+                    return os.path.dirname(path)
             except:
                 return None
     for path in __app_paths:
