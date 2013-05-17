@@ -1,6 +1,12 @@
 Django Compressor
 =================
 
+.. image:: https://pypip.in/v/django_compressor/badge.png
+        :target: https://pypi.python.org/pypi/django_compressor
+
+.. image:: https://pypip.in/d/django_compressor/badge.png
+        :target: https://pypi.python.org/pypi/django_compressor
+
 .. image:: https://secure.travis-ci.org/jezdez/django_compressor.png?branch=develop
     :alt: Build Status
     :target: http://travis-ci.org/jezdez/django_compressor
