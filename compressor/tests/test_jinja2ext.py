@@ -6,8 +6,6 @@ import sys
 from django.test import TestCase
 from django.utils import unittest, six
 
-import jinja2
-
 from compressor.conf import settings
 from compressor.tests.test_base import css_tag
 
@@ -23,6 +21,9 @@ class TestJinja2CompressorExtension(TestCase):
        that we use jinja2 specific controls (*minus* character at block's
        beginning or end). For more information see jinja2 documentation.
     """
+    def setUp(self):
+        import jinja2
+        self.jinja2 = jinja2
 
     def assertStrippedEqual(self, result, expected):
         self.assertEqual(result.strip(), expected.strip(), "%r != %r" % (
@@ -30,18 +31,18 @@ class TestJinja2CompressorExtension(TestCase):
 
     def setUp(self):
         from compressor.contrib.jinja2ext import CompressorExtension
-        self.env = jinja2.Environment(extensions=[CompressorExtension])
+        self.env = self.jinja2.Environment(extensions=[CompressorExtension])
 
     def test_error_raised_if_no_arguments_given(self):
-        self.assertRaises(jinja2.exceptions.TemplateSyntaxError,
+        self.assertRaises(self.jinja2.exceptions.TemplateSyntaxError,
             self.env.from_string, '{% compress %}Foobar{% endcompress %}')
 
     def test_error_raised_if_wrong_kind_given(self):
-        self.assertRaises(jinja2.exceptions.TemplateSyntaxError,
+        self.assertRaises(self.jinja2.exceptions.TemplateSyntaxError,
             self.env.from_string, '{% compress foo %}Foobar{% endcompress %}')
 
     def test_error_raised_if_wrong_mode_given(self):
-        self.assertRaises(jinja2.exceptions.TemplateSyntaxError,
+        self.assertRaises(self.jinja2.exceptions.TemplateSyntaxError,
             self.env.from_string, '{% compress css foo %}Foobar{% endcompress %}')
 
     def test_compress_is_disabled(self):
