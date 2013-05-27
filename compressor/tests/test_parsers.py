@@ -20,12 +20,10 @@ except ImportError:
 
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
 from compressor.conf import settings
-from compressor.css import CssCompressor
 from compressor.tests.test_base import CompressorTestCase
 
 
 class ParserTestCase(object):
-
     def setUp(self):
         self.old_parser = settings.COMPRESS_PARSER
         settings.COMPRESS_PARSER = self.parser_cls
@@ -42,34 +40,86 @@ LxmlParserTests = skipIf(lxml is None, 'lxml not found')(LxmlParserTests)
 
 class Html5LibParserTests(ParserTestCase, CompressorTestCase):
     parser_cls = 'compressor.parser.Html5LibParser'
-
-    def setUp(self):
-        super(Html5LibParserTests, self).setUp()
-        # special version of the css since the parser sucks
-        self.css = """\
-<link href="/static/css/one.css" rel="stylesheet" type="text/css">
-<style type="text/css">p { border:5px solid green;}</style>
-<link href="/static/css/two.css" rel="stylesheet" type="text/css">"""
-        self.css_node = CssCompressor(self.css)
+    # Special test variants required since xml.etree holds attributes
+    # as a plain dictionary, e.g. key order is unpredictable.
 
     def test_css_split(self):
-        out = [
-            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css', u'one.css'), u'css/one.css', u'<link href="/static/css/one.css" rel="stylesheet" type="text/css">'),
-            (SOURCE_HUNK, u'p { border:5px solid green;}', None, u'<style type="text/css">p { border:5px solid green;}</style>'),
-            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'css', u'two.css'), u'css/two.css', u'<link href="/static/css/two.css" rel="stylesheet" type="text/css">'),
-        ]
         split = self.css_node.split_contents()
-        split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3])) for x in split]
-        self.assertEqual(out, split)
+        out0 = (
+            SOURCE_FILE,
+            os.path.join(settings.COMPRESS_ROOT, u'css', u'one.css'),
+            u'css/one.css',
+            u'{http://www.w3.org/1999/xhtml}link',
+            {u'rel': u'stylesheet', u'href': u'/static/css/one.css',
+             u'type': u'text/css'},
+        )
+        self.assertEqual(out0, split[0][:3] + (split[0][3].tag,
+                                               split[0][3].attrib))
+        out1 = (
+            SOURCE_HUNK,
+            u'p { border:5px solid green;}',
+            None,
+            u'<style type="text/css">p { border:5px solid green;}</style>',
+        )
+        self.assertEqual(out1, split[1][:3] +
+                         (self.css_node.parser.elem_str(split[1][3]),))
+        out2 = (
+            SOURCE_FILE,
+            os.path.join(settings.COMPRESS_ROOT, u'css', u'two.css'),
+            u'css/two.css',
+            u'{http://www.w3.org/1999/xhtml}link',
+            {u'rel': u'stylesheet', u'href': u'/static/css/two.css',
+             u'type': u'text/css'},
+        )
+        self.assertEqual(out2, split[2][:3] + (split[2][3].tag,
+                                               split[2][3].attrib))
 
     def test_js_split(self):
-        out = [
-            (SOURCE_FILE, os.path.join(settings.COMPRESS_ROOT, u'js', u'one.js'), u'js/one.js', u'<script src="/static/js/one.js" type="text/javascript"></script>'),
-            (SOURCE_HUNK, u'obj.value = "value";', None, u'<script type="text/javascript">obj.value = "value";</script>'),
-        ]
         split = self.js_node.split_contents()
-        split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3])) for x in split]
-        self.assertEqual(out, split)
+        out0 = (
+            SOURCE_FILE,
+            os.path.join(settings.COMPRESS_ROOT, u'js', u'one.js'),
+            u'js/one.js',
+            u'{http://www.w3.org/1999/xhtml}script',
+            {u'src': u'/static/js/one.js', u'type': u'text/javascript'},
+            None,
+        )
+        self.assertEqual(out0, split[0][:3] + (split[0][3].tag,
+                                               split[0][3].attrib,
+                                               split[0][3].text))
+        out1 = (
+            SOURCE_HUNK,
+            u'obj.value = "value";',
+            None,
+            u'{http://www.w3.org/1999/xhtml}script',
+            {u'type': u'text/javascript'},
+            u'obj.value = "value";',
+        )
+        self.assertEqual(out1, split[1][:3] + (split[1][3].tag,
+                                               split[1][3].attrib,
+                                               split[1][3].text))
+
+    def test_css_return_if_off(self):
+        settings.COMPRESS_ENABLED = False
+        # Yes, they are semantically equal but attributes might be
+        # scrambled in unpredictable order. A more elaborate check
+        # would require parsing both arguments with a different parser
+        # and then evaluating the result, which no longer is
+        # a meaningful unit test.
+        self.assertEqual(len(self.css), len(self.css_node.output()))
+
+    def test_js_return_if_off(self):
+        try:
+            enabled = settings.COMPRESS_ENABLED
+            precompilers = settings.COMPRESS_PRECOMPILERS
+            settings.COMPRESS_ENABLED = False
+            settings.COMPRESS_PRECOMPILERS = {}
+            # As above.
+            self.assertEqual(len(self.js), len(self.js_node.output()))
+        finally:
+            settings.COMPRESS_ENABLED = enabled
+            settings.COMPRESS_PRECOMPILERS = precompilers
+
 
 Html5LibParserTests = skipIf(
     html5lib is None, 'html5lib not found')(Html5LibParserTests)
