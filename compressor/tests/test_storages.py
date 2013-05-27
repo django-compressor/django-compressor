@@ -14,13 +14,15 @@ from compressor.tests.test_templatetags import render
 
 class StorageTestCase(TestCase):
     def setUp(self):
-        self._storage = base.default_storage
+        self.old_enabled = settings.COMPRESS_ENABLED
+        settings.COMPRESS_ENABLED = True
+        self.default_storage = base.default_storage
         base.default_storage = get_storage_class(
             'compressor.storage.GzipCompressorFileStorage')()
-        settings.COMPRESS_ENABLED = True
 
     def tearDown(self):
-        base.default_storage = self._storage
+        base.default_storage = self.default_storage
+        settings.COMPRESS_ENABLED = self.old_enabled
 
     def test_css_tag_with_storage(self):
         template = """{% load compress %}{% compress css %}
@@ -44,9 +46,9 @@ class StorageTestCase(TestCase):
 
         try:
             os.remove = race_remove
-            self._storage.save('race.file', ContentFile('Fake ENOENT'))
-            self._storage.delete('race.file')
-            self.assertFalse(self._storage.exists('race.file'))
+            self.default_storage.save('race.file', ContentFile('Fake ENOENT'))
+            self.default_storage.delete('race.file')
+            self.assertFalse(self.default_storage.exists('race.file'))
         finally:
             # Restore os.remove
             os.remove = original_remove
