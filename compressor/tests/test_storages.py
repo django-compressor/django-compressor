@@ -5,6 +5,7 @@ import os
 from django.core.files.base import ContentFile
 from django.core.files.storage import get_storage_class
 from django.test import TestCase
+from django.utils.functional import LazyObject
 
 from compressor import storage
 from compressor.conf import settings
@@ -12,13 +13,17 @@ from compressor.tests.test_base import css_tag
 from compressor.tests.test_templatetags import render
 
 
+class GzipStorage(LazyObject):
+    def _setup(self):
+        self._wrapped = get_storage_class('compressor.storage.GzipCompressorFileStorage')()
+
+
 class StorageTestCase(TestCase):
     def setUp(self):
         self.old_enabled = settings.COMPRESS_ENABLED
         settings.COMPRESS_ENABLED = True
         self.default_storage = storage.default_storage
-        storage.default_storage = get_storage_class(
-            'compressor.storage.GzipCompressorFileStorage')()
+        storage.default_storage = GzipStorage()
 
     def tearDown(self):
         storage.default_storage = self.default_storage
