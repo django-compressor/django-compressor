@@ -5,6 +5,7 @@ python:
   - "3.2"
   - "3.3"
 before_install:
+  - python -c 'import gzip'
   - sudo apt-get update
   - sudo apt-get install csstidy libxml2-dev libxslt-dev
 install:
