@@ -47,8 +47,6 @@ class TemplatetagTestCase(TestCase):
         out = css_tag("/static/CACHE/css/e41ba2cc6982.css")
         self.assertEqual(out, render(template, self.context))
 
-    maxDiff = None
-
     def test_uppercase_rel(self):
         template = """{% load compress %}{% compress css %}
 <link rel="StyleSheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
