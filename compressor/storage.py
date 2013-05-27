@@ -1,7 +1,8 @@
 import errno
 import gzip
-from os import path
+import os
 from datetime import datetime
+import time
 
 from django.core.files.storage import FileSystemStorage, get_storage_class
 from django.utils.functional import LazyObject, SimpleLazyObject
@@ -26,13 +27,13 @@ class CompressorFileStorage(FileSystemStorage):
                                                     *args, **kwargs)
 
     def accessed_time(self, name):
-        return datetime.fromtimestamp(path.getatime(self.path(name)))
+        return datetime.fromtimestamp(os.path.getatime(self.path(name)))
 
     def created_time(self, name):
-        return datetime.fromtimestamp(path.getctime(self.path(name)))
+        return datetime.fromtimestamp(os.path.getctime(self.path(name)))
 
     def modified_time(self, name):
-        return datetime.fromtimestamp(path.getmtime(self.path(name)))
+        return datetime.fromtimestamp(os.path.getmtime(self.path(name)))
 
     def get_available_name(self, name):
         """
@@ -65,9 +66,20 @@ class GzipCompressorFileStorage(CompressorFileStorage):
     """
     def save(self, filename, content):
         filename = super(GzipCompressorFileStorage, self).save(filename, content)
-        out = gzip.open(u'%s.gz' % self.path(filename), 'wb')
-        out.writelines(open(self.path(filename), 'rb'))
+        orig_path = self.path(filename)
+        compressed_path = u'%s.gz' % orig_path
+
+        out = gzip.open(compressed_path, 'wb')
+        out.writelines(open(orig_path, 'rb'))
         out.close()
+
+        # Ensure the file timestamps match.
+        # os.stat() returns nanosecond resolution on Linux, but os.utime()
+        # only sets microsecond resolution.  Set times on both files to
+        # ensure they are equal.
+        stamp = time.time()
+        os.utime(orig_path, (stamp, stamp))
+        os.utime(compressed_path, (stamp, stamp))
         return filename
 
 
