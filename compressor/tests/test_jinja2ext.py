@@ -5,6 +5,7 @@ import sys
 
 from django.test import TestCase
 from django.utils import unittest, six
+from django.test.utils import override_settings
 
 from compressor.conf import settings
 from compressor.tests.test_base import css_tag
@@ -43,9 +44,8 @@ class TestJinja2CompressorExtension(TestCase):
         self.assertRaises(self.jinja2.exceptions.TemplateSyntaxError,
             self.env.from_string, '{% compress css foo %}Foobar{% endcompress %}')
 
+    @override_settings(COMPRESS_ENABLED=False)
     def test_compress_is_disabled(self):
-        org_COMPRESS_ENABLED = settings.COMPRESS_ENABLED
-        settings.COMPRESS_ENABLED = False
         tag_body = '\n'.join([
             '<link rel="stylesheet" href="css/one.css" type="text/css" charset="utf-8">',
             '<style type="text/css">p { border:5px solid green;}</style>',
@@ -54,7 +54,6 @@ class TestJinja2CompressorExtension(TestCase):
         template_string = '{% compress css %}' + tag_body + '{% endcompress %}'
         template = self.env.from_string(template_string)
         self.assertEqual(tag_body, template.render())
-        settings.COMPRESS_ENABLED = org_COMPRESS_ENABLED
 
     def test_empty_tag(self):
         template = self.env.from_string("""{% compress js %}{% block js %}

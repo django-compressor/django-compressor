@@ -144,11 +144,9 @@ class Compressor(object):
             try:
                 return fd.read()
             except IOError as e:
-                print(e)
                 raise UncompressableFileError("IOError while processing "
                                               "'%s': %s" % (filename, e))
             except UnicodeDecodeError as e:
-                print(e)
                 raise UncompressableFileError("UnicodeDecodeError while "
                                               "processing '%s' with "
                                               "charset %s: %s" %

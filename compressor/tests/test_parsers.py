@@ -17,6 +17,7 @@ except ImportError:
     BeautifulSoup = None
 
 from django.utils import unittest
+from django.test.utils import override_settings
 
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
 from compressor.conf import settings
@@ -109,17 +110,10 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
         # a meaningful unit test.
         self.assertEqual(len(self.css), len(self.css_node.output()))
 
+    @override_settings(COMPRESS_PRECOMPILERS=(), COMPRESS_ENABLED=False)
     def test_js_return_if_off(self):
-        try:
-            enabled = settings.COMPRESS_ENABLED
-            precompilers = settings.COMPRESS_PRECOMPILERS
-            settings.COMPRESS_ENABLED = False
-            settings.COMPRESS_PRECOMPILERS = {}
-            # As above.
-            self.assertEqual(len(self.js), len(self.js_node.output()))
-        finally:
-            settings.COMPRESS_ENABLED = enabled
-            settings.COMPRESS_PRECOMPILERS = precompilers
+        # As above.
+        self.assertEqual(len(self.js), len(self.js_node.output()))
 
 
 @unittest.skipIf(BeautifulSoup is None, 'BeautifulSoup not found')

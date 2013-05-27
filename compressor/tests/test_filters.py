@@ -7,6 +7,7 @@ import textwrap
 from django.utils import six
 from django.test import TestCase
 from django.utils import unittest
+from django.test.utils import override_settings
 
 from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
@@ -286,17 +287,11 @@ class CssDataUriTestCase(TestCase):
 
 
 class TemplateTestCase(TestCase):
-    def setUp(self):
-        self.old_context = settings.COMPRESS_TEMPLATE_FILTER_CONTEXT
-
-    def tearDown(self):
-        settings.COMPRESS_TEMPLATE_FILTER_CONTEXT = self.old_context
-
+    @override_settings(COMPRESS_TEMPLATE_FILTER_CONTEXT={
+        'stuff': 'thing',
+        'gimmick': 'bold'
+    })
     def test_template_filter(self):
-        settings.COMPRESS_TEMPLATE_FILTER_CONTEXT = {
-            'stuff': 'thing',
-            'gimmick': 'bold'
-        }
         content = """
         #content {background-image: url("{{ STATIC_URL|default:stuff }}/images/bg.png");}
         #footer {font-weight: {{ gimmick }};}

@@ -11,7 +11,7 @@ from compressor.signals import post_compress
 class PostCompressSignalTestCase(TestCase):
     def setUp(self):
         settings.COMPRESS_ENABLED = True
-        settings.COMPRESS_PRECOMPILERS = {}
+        settings.COMPRESS_PRECOMPILERS = ()
         settings.COMPRESS_DEBUG_TOGGLE = 'nocompress'
         self.css = """\
 <link rel="stylesheet" href="/static/css/one.css" type="text/css" />

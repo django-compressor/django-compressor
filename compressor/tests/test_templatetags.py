@@ -7,6 +7,7 @@ from mock import Mock
 
 from django.template import Template, Context, TemplateSyntaxError
 from django.test import TestCase
+from django.test.utils import override_settings
 
 from compressor.conf import settings
 from compressor.signals import post_compress
@@ -163,104 +164,80 @@ class PrecompilerTemplatetagTestCase(TestCase):
         out = script(src="/static/CACHE/js/ef6b32a54575.js")
         self.assertEqual(out, render(template, self.context))
 
+    @override_settings(COMPRESS_ENABLED=False)
     def test_coffeescript_and_js_tag_with_compress_enabled_equals_false(self):
-        self.old_enabled = settings.COMPRESS_ENABLED
-        settings.COMPRESS_ENABLED = False
-        try:
-            template = """{% load compress %}{% compress js %}
-                <script type="text/coffeescript"># this is a comment.</script>
-                <script type="text/javascript"># this too is a comment.</script>
-                {% endcompress %}"""
-            out = (script('# this is a comment.\n') + '\n' +
-                   script('# this too is a comment.'))
-            self.assertEqual(out, render(template, self.context))
-        finally:
-            settings.COMPRESS_ENABLED = self.old_enabled
+        template = """{% load compress %}{% compress js %}
+            <script type="text/coffeescript"># this is a comment.</script>
+            <script type="text/javascript"># this too is a comment.</script>
+            {% endcompress %}"""
+        out = (script('# this is a comment.\n') + '\n' +
+               script('# this too is a comment.'))
+        self.assertEqual(out, render(template, self.context))
 
+    @override_settings(COMPRESS_ENABLED=False)
     def test_compress_coffeescript_tag_compress_enabled_is_false(self):
-        self.old_enabled = settings.COMPRESS_ENABLED
-        settings.COMPRESS_ENABLED = False
-        try:
-            template = """{% load compress %}{% compress js %}
-                <script type="text/coffeescript"># this is a comment.</script>
-                {% endcompress %}"""
-            out = script("# this is a comment.\n")
-            self.assertEqual(out, render(template, self.context))
-        finally:
-            settings.COMPRESS_ENABLED = self.old_enabled
+        template = """{% load compress %}{% compress js %}
+            <script type="text/coffeescript"># this is a comment.</script>
+            {% endcompress %}"""
+        out = script("# this is a comment.\n")
+        self.assertEqual(out, render(template, self.context))
 
+    @override_settings(COMPRESS_ENABLED=False)
     def test_compress_coffeescript_file_tag_compress_enabled_is_false(self):
-        self.old_enabled = settings.COMPRESS_ENABLED
-        settings.COMPRESS_ENABLED = False
-        try:
-            template = """
-            {% load compress %}{% compress js %}
-            <script type="text/coffeescript" src="{{ STATIC_URL }}js/one.coffee">
-            </script>
-            {% endcompress %}"""
+        template = """
+        {% load compress %}{% compress js %}
+        <script type="text/coffeescript" src="{{ STATIC_URL }}js/one.coffee">
+        </script>
+        {% endcompress %}"""
 
-            out = script(src="/static/CACHE/js/one.95cfb869eead.js")
-            self.assertEqual(out, render(template, self.context))
-        finally:
-            settings.COMPRESS_ENABLED = self.old_enabled
+        out = script(src="/static/CACHE/js/one.95cfb869eead.js")
+        self.assertEqual(out, render(template, self.context))
 
+    @override_settings(COMPRESS_ENABLED=False)
     def test_multiple_file_order_conserved(self):
-        self.old_enabled = settings.COMPRESS_ENABLED
-        settings.COMPRESS_ENABLED = False
-        try:
-            template = """
-            {% load compress %}{% compress js %}
-            <script type="text/coffeescript" src="{{ STATIC_URL }}js/one.coffee">
-            </script>
-            <script src="{{ STATIC_URL }}js/one.js"></script>
-            <script type="text/coffeescript" src="{{ STATIC_URL }}js/one.js">
-            </script>
-            {% endcompress %}"""
+        template = """
+        {% load compress %}{% compress js %}
+        <script type="text/coffeescript" src="{{ STATIC_URL }}js/one.coffee">
+        </script>
+        <script src="{{ STATIC_URL }}js/one.js"></script>
+        <script type="text/coffeescript" src="{{ STATIC_URL }}js/one.js">
+        </script>
+        {% endcompress %}"""
 
-            out = '\n'.join([script(src="/static/CACHE/js/one.95cfb869eead.js"),
-                             script(scripttype="", src="/static/js/one.js"),
-                             script(src="/static/CACHE/js/one.81a2cd965815.js")])
+        out = '\n'.join([script(src="/static/CACHE/js/one.95cfb869eead.js"),
+                         script(scripttype="", src="/static/js/one.js"),
+                         script(src="/static/CACHE/js/one.81a2cd965815.js")])
 
-            self.assertEqual(out, render(template, self.context))
-        finally:
-            settings.COMPRESS_ENABLED = self.old_enabled
+        self.assertEqual(out, render(template, self.context))
 
+    @override_settings(COMPRESS_ENABLED=False)
     def test_css_multiple_files_disabled_compression(self):
-        self.old_enabled = settings.COMPRESS_ENABLED
-        settings.COMPRESS_ENABLED = False
         assert(settings.COMPRESS_PRECOMPILERS)
-        try:
-            template = """
-            {% load compress %}{% compress css %}
-            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/one.css"></link>
-            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/two.css"></link>
-            {% endcompress %}"""
+        template = """
+        {% load compress %}{% compress css %}
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/one.css"></link>
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/two.css"></link>
+        {% endcompress %}"""
 
-            out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css" />',
-                           '<link rel="stylesheet" type="text/css" href="/static/css/two.css" />'])
+        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css" />',
+                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css" />'])
 
-            self.assertEqual(out, render(template, self.context))
-        finally:
-            settings.COMPRESS_ENABLED = self.old_enabled
+        self.assertEqual(out, render(template, self.context))
 
+    @override_settings(COMPRESS_ENABLED=False)
     def test_css_multiple_files_mixed_precompile_disabled_compression(self):
-        self.old_enabled = settings.COMPRESS_ENABLED
-        settings.COMPRESS_ENABLED = False
         assert(settings.COMPRESS_PRECOMPILERS)
-        try:
-            template = """
-            {% load compress %}{% compress css %}
-            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/one.css"/>
-            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/two.css"/>
-            <link rel="stylesheet" type="text/less" href="{{ STATIC_URL }}css/url/test.css"/>
-            {% endcompress %}"""
+        template = """
+        {% load compress %}{% compress css %}
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/one.css"/>
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/two.css"/>
+        <link rel="stylesheet" type="text/less" href="{{ STATIC_URL }}css/url/test.css"/>
+        {% endcompress %}"""
 
-            out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css" />',
-                           '<link rel="stylesheet" type="text/css" href="/static/css/two.css" />',
-                           '<link rel="stylesheet" href="/static/CACHE/css/test.5dddc6c2fb5a.css" type="text/css" />'])
-            self.assertEqual(out, render(template, self.context))
-        finally:
-            settings.COMPRESS_ENABLED = self.old_enabled
+        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css" />',
+                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css" />',
+                       '<link rel="stylesheet" href="/static/CACHE/css/test.5dddc6c2fb5a.css" type="text/css" />'])
+        self.assertEqual(out, render(template, self.context))
 
 
 def script(content="", src="", scripttype="text/javascript"):

@@ -10,6 +10,7 @@ except ImportError:
 from django.utils import six
 from django.core.cache.backends import locmem
 from django.test import SimpleTestCase
+from django.test.utils import override_settings
 
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
 from compressor.conf import settings
@@ -49,7 +50,7 @@ class CompressorTestCase(SimpleTestCase):
 
     def setUp(self):
         settings.COMPRESS_ENABLED = True
-        settings.COMPRESS_PRECOMPILERS = {}
+        settings.COMPRESS_PRECOMPILERS = ()
         settings.COMPRESS_DEBUG_TOGGLE = 'nocompress'
         self.css = """\
 <link rel="stylesheet" href="/static/css/one.css" type="text/css" />
@@ -151,62 +152,45 @@ class CompressorTestCase(SimpleTestCase):
         output = css_tag('/static/CACHE/css/e41ba2cc6982.css')
         self.assertEqual(output, self.css_node.output().strip())
 
+    @override_settings(COMPRESS_PRECOMPILERS=(), COMPRESS_ENABLED=False)
     def test_js_return_if_off(self):
-        try:
-            enabled = settings.COMPRESS_ENABLED
-            precompilers = settings.COMPRESS_PRECOMPILERS
-            settings.COMPRESS_ENABLED = False
-            settings.COMPRESS_PRECOMPILERS = {}
-            self.assertEqual(self.js, self.js_node.output())
-        finally:
-            settings.COMPRESS_ENABLED = enabled
-            settings.COMPRESS_PRECOMPILERS = precompilers
+        self.assertEqual(self.js, self.js_node.output())
 
     def test_js_return_if_on(self):
         output = '<script type="text/javascript" src="/static/CACHE/js/066cd253eada.js"></script>'
         self.assertEqual(output, self.js_node.output())
 
-    def test_custom_output_dir(self):
-        try:
-            old_output_dir = settings.COMPRESS_OUTPUT_DIR
-            settings.COMPRESS_OUTPUT_DIR = 'custom'
-            output = '<script type="text/javascript" src="/static/custom/js/066cd253eada.js"></script>'
-            self.assertEqual(output, JsCompressor(self.js).output())
-            settings.COMPRESS_OUTPUT_DIR = ''
-            output = '<script type="text/javascript" src="/static/js/066cd253eada.js"></script>'
-            self.assertEqual(output, JsCompressor(self.js).output())
-            settings.COMPRESS_OUTPUT_DIR = '/custom/nested/'
-            output = '<script type="text/javascript" src="/static/custom/nested/js/066cd253eada.js"></script>'
-            self.assertEqual(output, JsCompressor(self.js).output())
-        finally:
-            settings.COMPRESS_OUTPUT_DIR = old_output_dir
+    @override_settings(COMPRESS_OUTPUT_DIR='custom')
+    def test_custom_output_dir1(self):
+        output = '<script type="text/javascript" src="/static/custom/js/066cd253eada.js"></script>'
+        self.assertEqual(output, JsCompressor(self.js).output())
 
+    @override_settings(COMPRESS_OUTPUT_DIR='')
+    def test_custom_output_dir2(self):
+        output = '<script type="text/javascript" src="/static/js/066cd253eada.js"></script>'
+        self.assertEqual(output, JsCompressor(self.js).output())
+
+    @override_settings(COMPRESS_OUTPUT_DIR='/custom/nested/')
+    def test_custom_output_dir3(self):
+        output = '<script type="text/javascript" src="/static/custom/nested/js/066cd253eada.js"></script>'
+        self.assertEqual(output, JsCompressor(self.js).output())
+
+    @override_settings(COMPRESS_PRECOMPILERS=(
+        ('text/foobar', 'compressor.tests.test_base.TestPrecompiler'),
+    ), COMPRESS_ENABLED=True)
     def test_precompiler_class_used(self):
-        try:
-            original_precompilers = settings.COMPRESS_PRECOMPILERS
-            settings.COMPRESS_ENABLED = True
-            settings.COMPRESS_PRECOMPILERS = (
-                ('text/foobar', 'compressor.tests.test_base.TestPrecompiler'),
-            )
-            css = '<style type="text/foobar">p { border:10px solid red;}</style>'
-            css_node = CssCompressor(css)
-            output = make_soup(css_node.output('inline'))
-            self.assertEqual(output.text, 'OUTPUT')
-        finally:
-            settings.COMPRESS_PRECOMPILERS = original_precompilers
+        css = '<style type="text/foobar">p { border:10px solid red;}</style>'
+        css_node = CssCompressor(css)
+        output = make_soup(css_node.output('inline'))
+        self.assertEqual(output.text, 'OUTPUT')
 
+    @override_settings(COMPRESS_PRECOMPILERS=(
+        ('text/foobar', 'compressor.tests.test_base.NonexistentFilter'),
+    ), COMPRESS_ENABLED=True)
     def test_nonexistent_precompiler_class_error(self):
-        try:
-            original_precompilers = settings.COMPRESS_PRECOMPILERS
-            settings.COMPRESS_ENABLED = True
-            settings.COMPRESS_PRECOMPILERS = (
-                ('text/foobar', 'compressor.tests.test_base.NonexistentFilter'),
-            )
-            css = '<style type="text/foobar">p { border:10px solid red;}</style>'
-            css_node = CssCompressor(css)
-            self.assertRaises(FilterDoesNotExist, css_node.output, 'inline')
-        finally:
-            settings.COMPRESS_PRECOMPILERS = original_precompilers
+        css = '<style type="text/foobar">p { border:10px solid red;}</style>'
+        css_node = CssCompressor(css)
+        self.assertRaises(FilterDoesNotExist, css_node.output, 'inline')
 
 
 class CssMediaTestCase(SimpleTestCase):
@@ -237,12 +221,10 @@ class CssMediaTestCase(SimpleTestCase):
             links = make_soup(css_node.output()).findAll('link')
         self.assertEqual(media, [l.get('media', None) for l in links])
 
+    @override_settings(COMPRESS_PRECOMPILERS=(
+        ('text/foobar', 'python %s {infile} {outfile}' % os.path.join(test_dir, 'precompiler.py')),
+    ), COMPRESS_ENABLED=False)
     def test_passthough_when_compress_disabled(self):
-        original_precompilers = settings.COMPRESS_PRECOMPILERS
-        settings.COMPRESS_ENABLED = False
-        settings.COMPRESS_PRECOMPILERS = (
-            ('text/foobar', 'python %s {infile} {outfile}' % os.path.join(test_dir, 'precompiler.py')),
-        )
         css = """\
 <link rel="stylesheet" href="/static/css/one.css" type="text/css" media="screen">
 <link rel="stylesheet" href="/static/css/two.css" type="text/css" media="screen">
@@ -256,7 +238,6 @@ class CssMediaTestCase(SimpleTestCase):
                          [l.get('href', None) for l in output])
         self.assertEqual(['screen', 'screen', 'screen'],
                          [l.get('media', None) for l in output])
-        settings.COMPRESS_PRECOMPILERS = original_precompilers
 
 
 class VerboseTestCase(CompressorTestCase):
