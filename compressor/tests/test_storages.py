@@ -29,6 +29,11 @@ class StorageTestCase(TestCase):
         storage.default_storage = self.default_storage
         settings.COMPRESS_ENABLED = self.old_enabled
 
+    def test_gzip_storage(self):
+        storage.default_storage.save('test.txt', ContentFile('yeah yeah'))
+        self.assertTrue(os.path.exists(os.path.join(settings.COMPRESS_ROOT, 'test.txt')))
+        self.assertTrue(os.path.exists(os.path.join(settings.COMPRESS_ROOT, 'test.txt.gz')))
+
     def test_css_tag_with_storage(self):
         template = """{% load compress %}{% compress css %}
         <link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
