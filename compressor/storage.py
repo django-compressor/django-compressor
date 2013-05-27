@@ -1,5 +1,7 @@
+from __future__ import unicode_literals
 import errno
 import gzip
+import os
 from os import path
 from datetime import datetime
 
@@ -49,7 +51,7 @@ class CompressorFileStorage(FileSystemStorage):
         """
         try:
             super(CompressorFileStorage, self).delete(name)
-        except OSError, e:
+        except OSError as e:
             if e.errno != errno.ENOENT:
                 raise
 
@@ -65,9 +67,15 @@ class GzipCompressorFileStorage(CompressorFileStorage):
     """
     def save(self, filename, content):
         filename = super(GzipCompressorFileStorage, self).save(filename, content)
-        out = gzip.open(u'%s.gz' % self.path(filename), 'wb')
-        out.writelines(open(self.path(filename), 'rb'))
-        out.close()
+
+        # workaround for http://bugs.python.org/issue13664
+        name = os.path.basename(filename).encode('latin1', 'replace')
+        f_in = open(self.path(filename), 'rb')
+        f_out = gzip.GzipFile(name, fileobj=open('%s.gz' % self.path(filename), 'wb'))
+        f_out.write(f_in.read())
+        f_out.close()
+        f_in.close()
+
         return filename
 
 
