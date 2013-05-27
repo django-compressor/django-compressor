@@ -12,7 +12,7 @@ from compressor.conf import settings
 from compressor.tests.test_base import css_tag
 
 
-@unittest.skipUnless(sys.version_info[:2] >= (3, 3) or not six.PY3,
+@unittest.skipUnless(not six.PY3 or sys.version_info[:2] >= (3, 3),
                      'Jinja can only run on Python < 3 and >= 3.3')
 class TestJinja2CompressorExtension(TestCase):
     """
