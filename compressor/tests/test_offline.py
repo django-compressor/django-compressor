@@ -3,21 +3,16 @@ import io
 import os
 
 import django
+from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
-from django.utils import six
-from django.core.management.base import CommandError
+from django.utils import six, unittest
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_storage
-
-try:
-    from django.utils import unittest as ut2
-except ImportError:
-    import unittest2 as ut2
 
 if six.PY3:
     # there is an 'io' module in python 2.6+, but io.StringIO does not
@@ -140,13 +135,11 @@ class OfflineGenerationTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
     expected_hash = "a27e1d3a619a"
 
 
+# This test uses {% static %} which was introduced in django 1.4
+@unittest.skipIf(django.VERSION[1] < 4, 'Django 1.4 not found')
 class OfflineGenerationStaticTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_static_templatetag"
     expected_hash = "dfa2bb387fa8"
-# This test uses {% static %} which was introduced in django 1.4
-OfflineGenerationStaticTemplateTagTestCase = ut2.skipIf(
-    django.VERSION[1] < 4, 'Django 1.4 not found'
-)(OfflineGenerationStaticTemplateTagTestCase)
 
 
 class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):

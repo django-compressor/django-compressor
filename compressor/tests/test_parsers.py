@@ -16,15 +16,11 @@ try:
 except ImportError:
     BeautifulSoup = None
 
+from django.utils import unittest
 
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
 from compressor.conf import settings
 from compressor.tests.test_base import CompressorTestCase
-
-try:
-    from django.utils import unittest as ut2
-except ImportError:
-    import unittest2 as ut2
 
 
 class ParserTestCase(object):
@@ -37,12 +33,12 @@ class ParserTestCase(object):
         settings.COMPRESS_PARSER = self.old_parser
 
 
-@ut2.skipIf(lxml is None, 'lxml not found')
+@unittest.skipIf(lxml is None, 'lxml not found')
 class LxmlParserTests(ParserTestCase, CompressorTestCase):
     parser_cls = 'compressor.parser.LxmlParser'
 
 
-@ut2.skipIf(html5lib is None, 'html5lib not found')
+@unittest.skipIf(html5lib is None, 'html5lib not found')
 class Html5LibParserTests(ParserTestCase, CompressorTestCase):
     parser_cls = 'compressor.parser.Html5LibParser'
     # Special test variants required since xml.etree holds attributes
@@ -126,7 +122,7 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
             settings.COMPRESS_PRECOMPILERS = precompilers
 
 
-@ut2.skipIf(BeautifulSoup is None, 'BeautifulSoup not found')
+@unittest.skipIf(BeautifulSoup is None, 'BeautifulSoup not found')
 class BeautifulSoupParserTests(ParserTestCase, CompressorTestCase):
     parser_cls = 'compressor.parser.BeautifulSoupParser'
 

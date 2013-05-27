@@ -6,6 +6,7 @@ import textwrap
 
 from django.utils import six
 from django.test import TestCase
+from django.utils import unittest
 
 from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
@@ -17,14 +18,9 @@ from compressor.filters.css_default import CssAbsoluteFilter
 from compressor.filters.template import TemplateFilter
 from compressor.tests.test_base import test_dir
 
-try:
-    from django.utils import unittest as ut2
-except ImportError:
-    import unittest2 as ut2
 
-
-@ut2.skipIf(find_command(settings.COMPRESS_CSSTIDY_BINARY) is None,
-            'CSStidy binary %r not found' % settings.COMPRESS_CSSTIDY_BINARY)
+@unittest.skipIf(find_command(settings.COMPRESS_CSSTIDY_BINARY) is None,
+                 'CSStidy binary %r not found' % settings.COMPRESS_CSSTIDY_BINARY)
 class CssTidyTestCase(TestCase):
     def test_tidy(self):
         content = textwrap.dedent("""\
