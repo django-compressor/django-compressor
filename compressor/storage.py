@@ -73,7 +73,7 @@ class GzipCompressorFileStorage(CompressorFileStorage):
         compressed_path = '%s.gz' % orig_path
 
         f_in = open(orig_path, 'rb')
-        f_out = open('%s.gz' % compressed_path, 'wb')
+        f_out = open(compressed_path, 'wb')
         try:
             f_out = gzip.GzipFile(name, fileobj=f_out)
             f_out.write(f_in.read())
