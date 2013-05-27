@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement, unicode_literals
 
+import sys
+
 from django.test import TestCase
+from django.utils import unittest, six
 
 import jinja2
 
@@ -9,6 +12,8 @@ from compressor.conf import settings
 from compressor.tests.test_base import css_tag
 
 
+@unittest.skipUnless(sys.version_info[:2] >= (3, 3) or not six.PY3,
+                     'Jinja can only run on Python < 3 and >= 3.3')
 class TestJinja2CompressorExtension(TestCase):
     """
     Test case for jinja2 extension.
