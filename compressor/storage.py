@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 import errno
 import gzip
 import os
-from os import path
 from datetime import datetime
+import time
 
 from django.core.files.storage import FileSystemStorage, get_storage_class
 from django.utils.functional import LazyObject, SimpleLazyObject
@@ -28,13 +28,13 @@ class CompressorFileStorage(FileSystemStorage):
                                                     *args, **kwargs)
 
     def accessed_time(self, name):
-        return datetime.fromtimestamp(path.getatime(self.path(name)))
+        return datetime.fromtimestamp(os.path.getatime(self.path(name)))
 
     def created_time(self, name):
-        return datetime.fromtimestamp(path.getctime(self.path(name)))
+        return datetime.fromtimestamp(os.path.getctime(self.path(name)))
 
     def modified_time(self, name):
-        return datetime.fromtimestamp(path.getmtime(self.path(name)))
+        return datetime.fromtimestamp(os.path.getmtime(self.path(name)))
 
     def get_available_name(self, name):
         """
@@ -67,14 +67,26 @@ class GzipCompressorFileStorage(CompressorFileStorage):
     """
     def save(self, filename, content):
         filename = super(GzipCompressorFileStorage, self).save(filename, content)
-
         # workaround for http://bugs.python.org/issue13664
         name = os.path.basename(filename).encode('latin1', 'replace')
-        f_in = open(self.path(filename), 'rb')
-        f_out = gzip.GzipFile(name, fileobj=open('%s.gz' % self.path(filename), 'wb'))
-        f_out.write(f_in.read())
-        f_out.close()
-        f_in.close()
+        orig_path = self.path(filename)
+        compressed_path = '%s.gz' % orig_path
+
+        f_in = open(orig_path, 'rb')
+        f_out = open('%s.gz' % compressed_path, 'wb')
+        try:
+            f_out = gzip.GzipFile(name, fileobj=f_out)
+            f_out.write(f_in.read())
+        finally:
+            f_out.close()
+            f_in.close()
+            # Ensure the file timestamps match.
+            # os.stat() returns nanosecond resolution on Linux, but os.utime()
+            # only sets microsecond resolution.  Set times on both files to
+            # ensure they are equal.
+            stamp = time.time()
+            os.utime(orig_path, (stamp, stamp))
+            os.utime(compressed_path, (stamp, stamp))
 
         return filename
 
