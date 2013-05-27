@@ -111,6 +111,7 @@ class CompressorMixin(object):
             assert isinstance(rendered_output, six.text_type)
             return rendered_output
         except Exception:
+            raise
             if settings.DEBUG or forced:
                 raise
 
