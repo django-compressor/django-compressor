@@ -50,7 +50,7 @@ class Html5LibParser(ParserBase):
         return elem.attrib
 
     def elem_content(self, elem):
-        return smart_unicode(elem.text)
+        return smart_text(elem.text)
 
     def elem_name(self, elem):
         if '}' in elem.tag:

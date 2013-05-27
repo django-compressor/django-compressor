@@ -126,7 +126,6 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
             settings.COMPRESS_PRECOMPILERS = precompilers
 
 
-
 @ut2.skipIf(BeautifulSoup is None, 'BeautifulSoup not found')
 class BeautifulSoupParserTests(ParserTestCase, CompressorTestCase):
     parser_cls = 'compressor.parser.BeautifulSoupParser'
