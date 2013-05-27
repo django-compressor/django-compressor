@@ -5,6 +5,7 @@ from compressor.filters import FilterBase
 
 
 class TemplateFilter(FilterBase):
+    debug_safe = True
 
     def input(self, filename=None, basename=None, **kwargs):
         template = Template(self.content)

@@ -16,6 +16,8 @@ logger = logging.getLogger("compressor.filters")
 
 
 class FilterBase(object):
+    # Is the output safe for debugging?
+    debug_safe = False
 
     def __init__(self, content, filter_type=None, filename=None, verbose=0):
         self.type = filter_type

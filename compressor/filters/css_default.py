@@ -13,6 +13,7 @@ SCHEMES = ('http://', 'https://', '/', 'data:')
 
 
 class CssAbsoluteFilter(FilterBase):
+    debug_safe = True
 
     def __init__(self, *args, **kwargs):
         super(CssAbsoluteFilter, self).__init__(*args, **kwargs)

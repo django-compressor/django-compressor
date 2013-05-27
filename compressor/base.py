@@ -131,6 +131,10 @@ class Compressor(object):
         return [get_class(filter_cls) for filter_cls in self.filters]
 
     @cached_property
+    def cached_safe_filters(self):
+        return [filter_cls for filter_cls in self.cached_filters if filter_cls.debug_safe]
+
+    @cached_property
     def mtimes(self):
         return [str(get_mtime(value))
                 for kind, value, basename, elem in self.split_contents()
@@ -156,6 +160,7 @@ class Compressor(object):
             charset = attribs.get("charset", self.charset)
             options = {
                 'method': METHOD_INPUT,
+                'safe': not enabled,
                 'elem': elem,
                 'kind': kind,
                 'basename': basename,
@@ -168,22 +173,22 @@ class Compressor(object):
             if self.all_mimetypes:
                 precompiled, value = self.precompile(value, **options)
 
+            modified, value = self.filter(value, **options)
             if enabled:
-                value = self.filter(value, **options)
+                yield smart_unicode(value, charset.lower())
+            elif precompiled or modified:
+                value = self.handle_output(kind, value, forced=True, basename=basename)
                 yield smart_unicode(value, charset.lower())
             else:
-                if precompiled:
-                    value = self.handle_output(kind, value, forced=True, basename=basename)
-                    yield smart_unicode(value, charset.lower())
-                else:
-                    yield self.parser.elem_str(elem)
+                yield self.parser.elem_str(elem)
 
     def filter_output(self, content):
         """
         Passes the concatenated content to the 'output' methods
         of the compressor filters.
         """
-        return self.filter(content, method=METHOD_OUTPUT)
+        modified, value = self.filter(content, method=METHOD_OUTPUT)
+        return value
 
     def filter_input(self, forced=False):
         """
@@ -226,16 +231,20 @@ class Compressor(object):
                                 **kwargs)
         return False, content
 
-    def filter(self, content, method, **kwargs):
-        for filter_cls in self.cached_filters:
+    def filter(self, content, method, safe=False, **kwargs):
+        filters = self.cached_safe_filters if safe else self.cached_filters
+        modified = False
+
+        for filter_cls in filters:
             filter_func = getattr(
                 filter_cls(content, filter_type=self.type), method)
             try:
                 if callable(filter_func):
                     content = filter_func(**kwargs)
+                    modified = True
             except NotImplementedError:
                 pass
-        return content
+        return modified, content
 
     def output(self, mode='file', forced=False):
         """
