@@ -21,15 +21,13 @@ class TestJinja2CompressorExtension(TestCase):
        that we use jinja2 specific controls (*minus* character at block's
        beginning or end). For more information see jinja2 documentation.
     """
-    def setUp(self):
-        import jinja2
-        self.jinja2 = jinja2
-
     def assertStrippedEqual(self, result, expected):
         self.assertEqual(result.strip(), expected.strip(), "%r != %r" % (
             result.strip(), expected.strip()))
 
     def setUp(self):
+        import jinja2
+        self.jinja2 = jinja2
         from compressor.contrib.jinja2ext import CompressorExtension
         self.env = self.jinja2.Environment(extensions=[CompressorExtension])
 
