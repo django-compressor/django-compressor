@@ -7,6 +7,7 @@ from django.template import Context
 from django.template.loader import render_to_string
 from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
+from django.utils.encoding import force_text
 
 try:
     from urllib.request import url2pathname
@@ -309,7 +310,7 @@ class Compressor(object):
         """
         new_filepath = self.get_filepath(content, basename=basename)
         if not self.storage.exists(new_filepath) or forced:
-            self.storage.save(new_filepath, ContentFile(content))
+            self.storage.save(new_filepath, ContentFile(force_text(content)))
         url = mark_safe(self.storage.url(new_filepath))
         return self.render_output(mode, {"url": url})
 

@@ -29,7 +29,7 @@ def simple_cachekey(key):
 
 
 def socket_cachekey(key):
-    return "django_compressor.%s.%s" % (socket.gethostname(), force_text(key))
+    return 'django_compressor.%s.%s' % (socket.gethostname(), force_text(key))
 
 
 def get_cachekey(*args, **kwargs):
