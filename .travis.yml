@@ -5,10 +5,10 @@ python:
   - "3.2"
   - "3.3"
 before_install:
-  - python -c 'import gzip'
   - sudo apt-get update
   - sudo apt-get install csstidy libxml2-dev libxslt-dev
 install:
+  - export CPPFLAGS="-O0"
   - pip install -e .
   - if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then pip install unittest2 BeautifulSoup --use-mirrors; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 3.* ]]; then pip install BeautifulSoup4 --use-mirrors; fi
