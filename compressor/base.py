@@ -18,7 +18,7 @@ from compressor.conf import settings
 from compressor.exceptions import (CompressorError, UncompressableFileError,
         FilterDoesNotExist)
 from compressor.filters import CompilerFilter
-from compressor.storage import default_storage, compressor_file_storage
+from compressor.storage import compressor_file_storage
 from compressor.signals import post_compress
 from compressor.utils import get_class, get_mod_func, staticfiles
 from compressor.utils.decorators import cached_property
@@ -40,12 +40,17 @@ class Compressor(object):
         self.output_prefix = output_prefix or "compressed"
         self.output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
         self.charset = settings.DEFAULT_CHARSET
-        self.storage = default_storage
         self.split_content = []
         self.context = context or {}
         self.extra_context = {}
         self.all_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
         self.finders = staticfiles.finders
+        self._storage = None
+
+    @cached_property
+    def storage(self):
+        from compressor.storage import default_storage
+        return default_storage
 
     def split_contents(self):
         """
