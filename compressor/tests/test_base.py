@@ -5,7 +5,7 @@ import re
 from BeautifulSoup import BeautifulSoup
 
 from django.core.cache.backends import locmem
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from compressor.base import SOURCE_HUNK, SOURCE_FILE
 from compressor.conf import settings
@@ -32,7 +32,7 @@ class TestPrecompiler(object):
 test_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
 
-class CompressorTestCase(TestCase):
+class CompressorTestCase(SimpleTestCase):
 
     def setUp(self):
         settings.COMPRESS_ENABLED = True
@@ -172,7 +172,7 @@ class CompressorTestCase(TestCase):
             settings.COMPRESS_PRECOMPILERS = original_precompilers
 
 
-class CssMediaTestCase(TestCase):
+class CssMediaTestCase(SimpleTestCase):
     def setUp(self):
         self.css = """\
 <link rel="stylesheet" href="/static/css/one.css" type="text/css" media="screen">
