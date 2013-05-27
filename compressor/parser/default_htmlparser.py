@@ -1,13 +1,8 @@
 from django.utils import six
+from django.utils.encoding import smart_text
 
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
-
-try:
-    from django.utils.encoding import smart_text
-except ImportError:
-    # django < 1.4.2
-    from django.utils.encoding import smart_unicode as smart_text
 
 
 class DefaultHtmlParser(ParserBase, six.moves.html_parser.HTMLParser):

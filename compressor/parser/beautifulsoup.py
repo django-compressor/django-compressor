@@ -1,16 +1,11 @@
 from __future__ import absolute_import
 from django.core.exceptions import ImproperlyConfigured
+from django.utils import six
+from django.utils.encoding import smart_text
 
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 from compressor.utils.decorators import cached_property
-from django.utils import six
-
-try:
-    from django.utils.encoding import smart_text
-except ImportError:
-    # django < 1.4.2
-    from django.utils.encoding import smart_unicode as smart_text
 
 
 class BeautifulSoupParser(ParserBase):

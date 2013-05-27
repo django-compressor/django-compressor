@@ -6,14 +6,13 @@ from types import MethodType
 from fnmatch import fnmatch
 from optparse import make_option
 
-from django.core.management.base import  NoArgsCommand, CommandError
+from django.core.management.base import NoArgsCommand, CommandError
 from django.template import (Context, Template,
                              TemplateDoesNotExist, TemplateSyntaxError)
 from django.utils import six
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
-from django.template.defaulttags import IfNode
 from django.template.loader_tags import (ExtendsNode, BlockNode,
                                          BLOCK_CONTEXT_KEY)
 
