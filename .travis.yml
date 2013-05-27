@@ -10,8 +10,8 @@ before_install:
 install:
   - export CPPFLAGS="-O0"
   - pip install -e .
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then pip install unittest2 BeautifulSoup --use-mirrors; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.* ]]; then pip install BeautifulSoup4 --use-mirrors; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then pip install unittest2 BeautifulSoup; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.* ]]; then pip install BeautifulSoup4; fi
   - pip install -r requirements/tests.txt Django==$DJANGO
 script:
   - make test
