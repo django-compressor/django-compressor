@@ -17,7 +17,7 @@ from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
 from django.template.defaulttags import IfNode
-from django.template.loader_tags import (ExtendsNode, BlockNode,
+from django.template.loader_tags import (ExtendsNode, BlockNode, BlockContext,
                                          BLOCK_CONTEXT_KEY)
 
 try:
@@ -158,6 +158,25 @@ class Command(NoArgsCommand):
                 loaders.append(loader)
         return loaders
 
+    def get_template(self, template, context=None):
+        if isinstance(template.nodelist[0], ExtendsNode):
+            extends_node = template.nodelist[0]
+            if not context:
+                context = Context()
+                block_context = BlockContext()
+                context.render_context[BLOCK_CONTEXT_KEY] = block_context
+                block_context.add_blocks(dict([(n.name, n) for n in\
+                      template.nodelist.get_nodes_by_type(BlockNode)]))
+            parent_template = extends_node.get_parent(context)
+            block_context = context.render_context[BLOCK_CONTEXT_KEY]
+            block_context.add_blocks(extends_node.blocks)
+            block_context.add_blocks(dict([(n.name, n) for n in\
+                  parent_template.nodelist.get_nodes_by_type(BlockNode)]))
+            parent_template._context = context
+            return self.get_template(parent_template, context)
+        else:
+            return template
+
     def compress(self, log=None, **options):
         """
         Searches templates containing 'compress' nodes and compresses them
@@ -217,6 +236,9 @@ class Command(NoArgsCommand):
                 try:
                     template = Template(template_file.read().decode(
                                         settings.FILE_CHARSET))
+                    temp_template = self.get_template(template)
+                    if not template is temp_template:
+                        template._parent_template = temp_template
                 finally:
                     template_file.close()
             except IOError:  # unreadable file -> ignore
@@ -235,7 +257,10 @@ class Command(NoArgsCommand):
                 if verbosity > 0:
                     log.write("UnicodeDecodeError while trying to read "
                               "template %s\n" % template_name)
-            nodes = list(self.walk_nodes(template))
+            if hasattr(template, '_parent_template'):
+              nodes = list(self.walk_nodes(template._parent_template))
+            else:
+              nodes = list(self.walk_nodes(template))
             if nodes:
                 template.template_name = template_name
                 compressor_nodes.setdefault(template, []).extend(nodes)
@@ -256,7 +281,11 @@ class Command(NoArgsCommand):
         results = []
         offline_manifest = SortedDict()
         for template, nodes in compressor_nodes.iteritems():
-            context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
+            context = Context()
+            if hasattr(template, '_parent_template'):
+              template = template._parent_template
+              context = template._context
+            context.update(settings.COMPRESS_OFFLINE_CONTEXT)
             template._log = log
             template._log_verbosity = verbosity
             template._render_firstnode = MethodType(patched_render_firstnode, template)
