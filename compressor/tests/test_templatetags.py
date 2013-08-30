@@ -99,6 +99,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}"""
         self.assertRaises(TemplateSyntaxError, render, template, {})
 
+    @override_settings(COMPRESS_DEBUG_TOGGLE='togglecompress')
     def test_debug_toggle(self):
         template = """{% load compress %}{% compress js %}
         <script src="{{ STATIC_URL }}js/one.js" type="text/javascript"></script>
