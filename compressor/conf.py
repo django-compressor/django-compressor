@@ -12,7 +12,7 @@ class CompressorConf(AppConf):
     # Allows changing verbosity from the settings.
     VERBOSE = False
     # GET variable that disables compressor e.g. "nocompress"
-    DEBUG_TOGGLE = 'None'
+    DEBUG_TOGGLE = None
     # the backend to use when parsing the JavaScript or Stylesheet files
     PARSER = 'compressor.parser.AutoSelectParser'
     OUTPUT_DIR = 'CACHE'
