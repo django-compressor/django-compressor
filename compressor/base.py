@@ -190,6 +190,7 @@ class Compressor(object):
                 'kind': kind,
                 'basename': basename,
                 'charset': charset,
+                'enabled': enabled,
             }
 
             if kind == SOURCE_FILE:
@@ -261,6 +262,8 @@ class Compressor(object):
                     filter = precompiler_class(
                         content, attrs, filter_type=self.type, charset=charset,
                         filename=filename)
+                    if hasattr(filter, 'precompile'):
+                        return filter.precompile(**kwargs)
                     return True, filter.input(**kwargs)
 
         return False, content
