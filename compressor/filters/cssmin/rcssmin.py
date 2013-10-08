@@ -103,7 +103,7 @@ def _make_cssmin(python_only=False):
         else:
             return _rcssmin.cssmin
 
-    nl = r'(?:[\n\f]|\r\n?)' # pylint: disable = C0103
+    nl = r'(?:[\n\f]|\r\n?)'  # pylint: disable = C0103
     spacechar = r'[\r\n\f\040\t]'
 
     unicoded = r'[0-9a-fA-F]{1,6}(?:[\040\n\t\f]|\r\n?)?'
@@ -143,14 +143,13 @@ def _make_cssmin(python_only=False):
 
     uri = (r'(?:'
         r'(?:[^\000-\040"\047()\\\177]*'
-            r'(?:%(escape)s[^\000-\040"\047()\\\177]*)*)'
+        r'(?:%(escape)s[^\000-\040"\047()\\\177]*)*)'
+        r'(?:(?:%(spacechar)s+|%(nl_escaped)s+)'
         r'(?:'
-            r'(?:%(spacechar)s+|%(nl_escaped)s+)'
-            r'(?:'
-                r'(?:[^\000-\040"\047()\\\177]|%(escape)s|%(nl_escaped)s)'
-                r'[^\000-\040"\047()\\\177]*'
-                r'(?:%(escape)s[^\000-\040"\047()\\\177]*)*'
-            r')+'
+        r'(?:[^\000-\040"\047()\\\177]|%(escape)s|%(nl_escaped)s)'
+        r'[^\000-\040"\047()\\\177]*'
+        r'(?:%(escape)s[^\000-\040"\047()\\\177]*)*'
+        r')+'
         r')*'
     r')') % locals()
 
@@ -180,14 +179,14 @@ def _make_cssmin(python_only=False):
         r'|(\})'
         r'|(%(strings)s)'
         r'|(?<!%(nmchar)s)url\(%(spacechar)s*('
-                r'%(uri_nl_strings)s'
-                r'|%(uri)s'
-            r')%(spacechar)s*\)'
+        r'%(uri_nl_strings)s'
+        r'|%(uri)s'
+        r')%(spacechar)s*\)'
         r'|(@[mM][eE][dD][iI][aA])(?!%(nmchar)s)'
         r'|(%(ie7hack)s)(%(space)s*)'
         r'|(:[fF][iI][rR][sS][tT]-[lL]'
-            r'(?:[iI][nN][eE]|[eE][tT][tT][eE][rR]))'
-            r'(%(space)s*)(?=[{,])'
+        r'(?:[iI][nN][eE]|[eE][tT][tT][eE][rR]))'
+        r'(%(space)s*)(?=[{,])'
         r'|(%(nl_strings)s)'
         r'|(%(escape)s[^\\"\047u>@\r\n\f\040\t/;:{}]*)'
     ) % locals()).sub
@@ -200,6 +199,7 @@ def _make_cssmin(python_only=False):
 
         if keep_bang_comments:
             space_sub = space_sub_banged
+
             def space_subber(match):
                 """ Space|Comment subber """
                 if match.lastindex:
@@ -222,6 +222,7 @@ def _make_cssmin(python_only=False):
                 return ''
         else:
             space_sub = space_sub_simple
+
             def space_subber(match):
                 """ Space|Comment subber """
                 if match.lastindex:
@@ -292,18 +293,14 @@ def _make_cssmin(python_only=False):
             fn_open,                            # {
             fn_close,                           # }
             lambda g: g(11),                    # string
-            lambda g: 'url(%s)' % uri_space_sub(uri_space_subber, g(12)),
-                                                # url(...)
+            lambda g: 'url(%s)' % uri_space_sub(uri_space_subber, g(12)),  # url(...)
             fn_media,                           # @media
             None,
             fn_ie7hack,                         # ie7hack
             None,
-            lambda g: g(16) + ' ' + space_sub(space_subber, g(17)),
-                                                # :first-line|letter followed
-                                                # by [{,] (apparently space
-                                                # needed for IE6)
+            lambda g: g(16) + ' ' + space_sub(space_subber, g(17)),  # :first-line|letter followed by [{,] (apparently space needed for IE6)
             lambda g: nl_unesc_sub('', g(18)),  # nl_string
-            lambda g: post_esc_sub(' ', g(19)), # escape
+            lambda g: post_esc_sub(' ', g(19)),  # escape
         )
 
         def func(match):
@@ -320,7 +317,7 @@ def _make_cssmin(python_only=False):
 
         return func
 
-    def cssmin(style, keep_bang_comments=False): # pylint: disable = W0621
+    def cssmin(style, keep_bang_comments=False):  # pylint: disable = W0621
         """
         Minify CSS.
 
@@ -352,7 +349,7 @@ if __name__ == '__main__':
         )
         if '-p' in _sys.argv[1:] or '-bp' in _sys.argv[1:] \
                 or '-pb' in _sys.argv[1:]:
-            global cssmin # pylint: disable = W0603
+            global cssmin  # pylint: disable = W0603
             cssmin = _make_cssmin(python_only=True)
         _sys.stdout.write(cssmin(
             _sys.stdin.read(), keep_bang_comments=keep_bang_comments

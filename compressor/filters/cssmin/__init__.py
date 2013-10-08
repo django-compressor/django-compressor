@@ -8,5 +8,6 @@ class CSSMinFilter(CallbackOutputFilter):
     """
     callback = "compressor.filters.cssmin.cssmin.cssmin"
 
+
 class rCSSMinFilter(CallbackOutputFilter):
     callback = "compressor.filters.cssmin.rcssmin.cssmin"
