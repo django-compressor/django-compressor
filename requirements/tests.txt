@@ -1,7 +1,8 @@
 flake8
-django-discover-runner
 coverage
 html5lib
 mock
 jinja2
 lxml
+BeautifulSoup
+unittest2

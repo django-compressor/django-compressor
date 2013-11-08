@@ -1,4 +1,5 @@
 import os
+import django
 
 TEST_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'tests')
 
@@ -27,7 +28,8 @@ TEMPLATE_DIRS = (
     os.path.join(TEST_DIR, 'test_templates'),
 )
 
-TEST_RUNNER = 'discover_runner.DiscoverRunner'
+if django.VERSION[:2] < (1, 6):
+    TEST_RUNNER = 'discover_runner.DiscoverRunner'
 
 SECRET_KEY = "iufoj=mibkpdz*%bob952x(%49rqgv8gg45k36kjcg76&-y5=!"
 
