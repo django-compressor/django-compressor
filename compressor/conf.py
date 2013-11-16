@@ -42,6 +42,9 @@ class CompressorConf(AppConf):
     YUI_BINARY = 'java -jar yuicompressor.jar'
     YUI_CSS_ARGUMENTS = ''
     YUI_JS_ARGUMENTS = ''
+    YUGLIFY_BINARY = 'yuglify'
+    YUGLIFY_CSS_ARGUMENTS = '--terminal'
+    YUGLIFY_JS_ARGUMENTS = '--terminal'
     DATA_URI_MAX_SIZE = 1024
 
     # the cache backend to use

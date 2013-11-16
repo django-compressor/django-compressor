@@ -45,9 +45,10 @@ html5lib_ based parser, as well as an abstract base class that makes it easy to
 write a custom parser.
 
 Django Compressor also comes with built-in support for `CSS Tidy`_,
-`YUI CSS and JS`_ compressor, the Google's `Closure Compiler`_, a Python
-port of Douglas Crockford's JSmin_, a Python port of the YUI CSS Compressor
-cssmin_ and a filter to convert (some) images into `data URIs`_.
+`YUI CSS and JS`_ compressor, `yUglify CSS and JS`_ compressor, the Google's
+`Closure Compiler`_, a Python port of Douglas Crockford's JSmin_, a Python port
+ of the YUI CSS Compressor cssmin_ and a filter to convert (some) images into
+ `data URIs`_.
 
 If your setup requires a different compressor or other post-processing
 tool it will be fairly easy to implement a custom filter. Simply extend
@@ -67,6 +68,7 @@ The `in-development version`_ of Django Compressor can be installed with
 .. _html5lib: http://code.google.com/p/html5lib/
 .. _CSS Tidy: http://csstidy.sourceforge.net/
 .. _YUI CSS and JS: http://developer.yahoo.com/yui/compressor/
+.. _yUglify CSS and JS: https://github.com/yui/yuglify
 .. _Closure Compiler: http://code.google.com/closure/compiler/
 .. _JSMin: http://www.crockford.com/javascript/jsmin.html
 .. _cssmin: https://github.com/zacharyvoase/cssmin

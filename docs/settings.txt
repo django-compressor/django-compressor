@@ -119,6 +119,18 @@ Backend settings
 
          The arguments passed to the compressor.
 
+    - ``compressor.filters.yuglify.YUglifyCSSFilter``
+
+      A filter that passes the CSS content to the `yUglify compressor`_.
+
+      .. attribute:: COMPRESS_YUGLIFY_BINARY
+
+         The yUglify compressor filesystem path.
+
+      .. attribute:: COMPRESS_YUGLIFY_CSS_ARGUMENTS
+
+         The arguments passed to the compressor. Defaults to --terminal.
+
     - ``compressor.filters.cssmin.CSSMinFilter``
 
       A filter that uses Zachary Voase's Python port of the YUI CSS compression
@@ -184,6 +196,18 @@ Backend settings
 
          The arguments passed to the compressor.
 
+    - ``compressor.filters.yuglify.YUglifyJSFilter``
+
+      A filter that passes the JavaScript code to the `yUglify compressor`_.
+
+      .. attribute:: COMPRESS_YUGLIFY_BINARY
+
+         The yUglify compressor filesystem path.
+
+      .. attribute:: COMPRESS_YUGLIFY_JS_ARGUMENTS
+
+         The arguments passed to the compressor.
+
     - ``compressor.filters.template.TemplateFilter``
 
       A filter that renders the JavaScript code with Django templating system.
@@ -195,6 +219,7 @@ Backend settings
     .. _rJSmin: http://opensource.perlig.de/rjsmin/
     .. _`Google Closure compiler`: http://code.google.com/closure/compiler/
     .. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
+    .. _`yUglify compressor`: https://github.com/yui/yuglify
     .. _`Slim It`: http://slimit.org/
 
 .. attribute:: COMPRESS_PRECOMPILERS
