@@ -47,8 +47,8 @@ write a custom parser.
 Django Compressor also comes with built-in support for `CSS Tidy`_,
 `YUI CSS and JS`_ compressor, `yUglify CSS and JS`_ compressor, the Google's
 `Closure Compiler`_, a Python port of Douglas Crockford's JSmin_, a Python port
- of the YUI CSS Compressor cssmin_ and a filter to convert (some) images into
- `data URIs`_.
+of the YUI CSS Compressor cssmin_ and a filter to convert (some) images into
+`data URIs`_.
 
 If your setup requires a different compressor or other post-processing
 tool it will be fairly easy to implement a custom filter. Simply extend
