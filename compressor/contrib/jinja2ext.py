@@ -29,6 +29,10 @@ class CompressorExtension(CompressorMixin, Extension):
         else:
             args.append(nodes.Const('file'))
         body = parser.parse_statements(['name:endcompress'], drop_needle=True)
+
+        # Skip the kind if used in the endblock, by using the kind in the
+        # endblock the templates are slightly more readable.
+        parser.stream.skip_if('name:' + kindarg.value)
         return nodes.CallBlock(self.call_method('_compress', args), [], [],
             body).set_lineno(lineno)
 
