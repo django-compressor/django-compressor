@@ -97,7 +97,7 @@ class CompressorMixin(object):
             if settings.COMPRESS_OFFLINE_MISSING_LOG:
                 error_msg = 'File missing from manfiest'
                 if 'request' in context:
-                    error_msg = 'File missing from manifest at path %s', context['request'].path
+                    error_msg = 'File missing from manifest at path %s' % context['request'].path
                 logger.error(error_msg)
             else:
                 raise
