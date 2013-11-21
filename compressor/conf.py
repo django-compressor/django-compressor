@@ -66,6 +66,10 @@ class CompressorConf(AppConf):
     # The Context to be used when TemplateFilter is used
     TEMPLATE_FILTER_CONTEXT = {}
 
+    # Throw logger error instead of raising error when offline file missing from
+    # manifest
+    OFFLINE_MISSING_LOG = False
+
     class Meta:
         prefix = 'compress'
 

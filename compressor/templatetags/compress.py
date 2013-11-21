@@ -8,12 +8,15 @@ from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.utils import get_class
 
+import logging
+
 register = template.Library()
 
 OUTPUT_FILE = 'file'
 OUTPUT_INLINE = 'inline'
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
 
+logger = logging.getLogger("compressor.compress")
 
 class CompressorMixin(object):
 
@@ -85,10 +88,16 @@ class CompressorMixin(object):
 
     def render_compressed(self, context, kind, mode, forced=False):
 
-        # See if it has been rendered offline
-        cached_offline = self.render_offline(context, forced=forced)
-        if cached_offline:
-            return cached_offline
+        try:
+            # See if it has been rendered offline
+            cached_offline = self.render_offline(context, forced=forced)
+            if cached_offline:
+                return cached_offline
+        except OfflineGenerationError as e:
+            if settings.COMPRESS_OFFLINE_MISSING_LOG:
+                logger.error('File missing from manifest at path %s', context['request'].path)
+            else:
+                raise
 
         # Take a shortcut if we really don't have anything to do
         if ((not settings.COMPRESS_ENABLED and
