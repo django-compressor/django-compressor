@@ -63,6 +63,22 @@ class CompressorTestCase(SimpleTestCase):
 <script type="text/javascript">obj.value = "value";</script>"""
         self.js_node = JsCompressor(self.js)
 
+    def assertEqualCollapsed(self, a, b):
+        """
+        assertEqual with internal newlines collapsed to single, and
+        trailing whitespace removed.
+        """
+        collapse = lambda x: re.sub(r'\n+', '\n', x).rstrip()
+        self.assertEqual(collapse(a), collapse(b))
+
+    def assertEqualSplits(self, a, b):
+        """
+        assertEqual for splits, particularly ignoring the presence of
+        a trailing newline on the content.
+        """
+        mangle = lambda split: [(x[0], x[1], x[2], x[3].rstrip()) for x in split]
+        self.assertEqual(mangle(a), mangle(b))
+
     def test_css_split(self):
         out = [
             (
@@ -85,7 +101,7 @@ class CompressorTestCase(SimpleTestCase):
         ]
         split = self.css_node.split_contents()
         split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3])) for x in split]
-        self.assertEqual(out, split)
+        self.assertEqualSplits(split, out)
 
     def test_css_hunks(self):
         out = ['body { background:#990; }', 'p { border:5px solid green;}', 'body { color:#fff; }']
@@ -104,7 +120,7 @@ class CompressorTestCase(SimpleTestCase):
 
     def test_css_return_if_off(self):
         settings.COMPRESS_ENABLED = False
-        self.assertEqual(self.css, self.css_node.output())
+        self.assertEqualCollapsed(self.css, self.css_node.output())
 
     def test_cachekey(self):
         is_cachekey = re.compile(r'\w{12}')
@@ -132,7 +148,7 @@ class CompressorTestCase(SimpleTestCase):
         ]
         split = self.js_node.split_contents()
         split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3])) for x in split]
-        self.assertEqual(out, split)
+        self.assertEqualSplits(split, out)
 
     def test_js_hunks(self):
         out = ['obj = {};', 'obj.value = "value";']
@@ -154,7 +170,7 @@ class CompressorTestCase(SimpleTestCase):
 
     @override_settings(COMPRESS_PRECOMPILERS=(), COMPRESS_ENABLED=False)
     def test_js_return_if_off(self):
-        self.assertEqual(self.js, self.js_node.output())
+        self.assertEqualCollapsed(self.js, self.js_node.output())
 
     def test_js_return_if_on(self):
         output = '<script type="text/javascript" src="/static/CACHE/js/066cd253eada.js"></script>'
@@ -251,7 +267,7 @@ class CacheBackendTestCase(CompressorTestCase):
 
     def test_correct_backend(self):
         from compressor.cache import cache
-        self.assertEqual(cache.__class__, locmem.CacheClass)
+        self.assertEqual(cache.__class__, locmem.LocMemCache)
 
 
 class JsAsyncDeferTestCase(SimpleTestCase):
