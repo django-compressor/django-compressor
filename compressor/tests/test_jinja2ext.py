@@ -56,8 +56,7 @@ class TestJinja2CompressorExtension(TestCase):
         self.assertEqual(tag_body, template.render())
 
     def test_empty_tag(self):
-        template = self.env.from_string("""{% compress js %}{% block js %}
-        {% endblock %}{% endcompress %}""")
+        template = self.env.from_string("""{% compress js %}{% block js %}{% endblock %}{% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
         self.assertEqual('', template.render(context))
 

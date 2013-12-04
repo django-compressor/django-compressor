@@ -252,3 +252,31 @@ class CacheBackendTestCase(CompressorTestCase):
     def test_correct_backend(self):
         from compressor.cache import cache
         self.assertEqual(cache.__class__, locmem.CacheClass)
+
+
+class JsAsyncDeferTestCase(SimpleTestCase):
+    def setUp(self):
+        self.js = """\
+            <script src="/static/js/one.js" type="text/javascript"></script>
+            <script src="/static/js/two.js" type="text/javascript" async></script>
+            <script src="/static/js/three.js" type="text/javascript" defer></script>
+            <script type="text/javascript">obj.value = "value";</script>
+            <script src="/static/js/one.js" type="text/javascript" async></script>
+            <script src="/static/js/two.js" type="text/javascript" async></script>
+            <script src="/static/js/three.js" type="text/javascript"></script>"""
+
+    def test_js_output(self):
+        def extract_attr(tag):
+            if tag.has_attr('async'):
+                return 'async'
+            if tag.has_attr('defer'):
+                return 'defer'
+        js_node = JsCompressor(self.js)
+        output = [None, 'async', 'defer', None, 'async', None]
+        if six.PY3:
+            scripts = make_soup(js_node.output()).find_all('script')
+            attrs = [extract_attr(i) for i in scripts]
+        else:
+            scripts = make_soup(js_node.output()).findAll('script')
+            attrs = [s.get('async') or s.get('defer') for s in scripts]
+        self.assertEqual(output, attrs)
