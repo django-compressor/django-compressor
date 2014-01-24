@@ -1,3 +1,4 @@
+import json 
 import hashlib
 import os
 import socket
@@ -5,7 +6,7 @@ import time
 
 from django.core.cache import get_cache
 from django.core.files.base import ContentFile
-from django.utils import simplejson
+
 from django.utils.encoding import smart_str
 from django.utils.functional import SimpleLazyObject
 from django.utils.importlib import import_module
@@ -70,7 +71,7 @@ def get_offline_manifest():
     if _offline_manifest is None:
         filename = get_offline_manifest_filename()
         if default_storage.exists(filename):
-            _offline_manifest = simplejson.load(default_storage.open(filename))
+            _offline_manifest = json.load(default_storage.open(filename))
         else:
             _offline_manifest = {}
     return _offline_manifest
@@ -84,7 +85,7 @@ def flush_offline_manifest():
 def write_offline_manifest(manifest):
     filename = get_offline_manifest_filename()
     default_storage.save(filename,
-                         ContentFile(simplejson.dumps(manifest, indent=2)))
+                         ContentFile(json.dumps(manifest, indent=2)))
     flush_offline_manifest()
 
 
