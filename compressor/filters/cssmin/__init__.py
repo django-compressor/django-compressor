@@ -7,3 +7,7 @@ class CSSMinFilter(CallbackOutputFilter):
     the YUI CSS compression algorithm: http://pypi.python.org/pypi/cssmin/
     """
     callback = "compressor.filters.cssmin.cssmin.cssmin"
+
+
+class rCSSMinFilter(CallbackOutputFilter):
+    callback = "compressor.filters.cssmin.rcssmin.cssmin"
