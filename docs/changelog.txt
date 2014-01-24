@@ -44,7 +44,7 @@ v1.2
 
 - Added contributing docs. Be sure to check them out and start contributing!
 
-- Moved CI to Travis: http://travis-ci.org/jezdez/django_compressor
+- Moved CI to Travis: http://travis-ci.org/django-compressor/django-compressor
 
 - Introduced a new ``compressed`` context dictionary that is passed to
   the templates that are responsible for rendering the compressed snippets.

@@ -7,9 +7,9 @@ Django Compressor
 .. image:: https://pypip.in/d/django_compressor/badge.png
         :target: https://pypi.python.org/pypi/django_compressor
 
-.. image:: https://secure.travis-ci.org/jezdez/django_compressor.png?branch=develop
+.. image:: https://secure.travis-ci.org/django-compressor/django-compressor.png?branch=develop
     :alt: Build Status
-    :target: http://travis-ci.org/jezdez/django_compressor
+    :target: http://travis-ci.org/django-compressor/django-compressor
 
 Django Compressor combines and compresses linked and inline Javascript
 or CSS in a Django templates into cacheable static files by using the
@@ -57,7 +57,7 @@ More documentation about the usage and settings of Django Compressor can be
 found on `django-compressor.readthedocs.org`_.
 
 The source code for Django Compressor can be found and contributed to on
-`github.com/jezdez/django_compressor`_. There you can also file tickets.
+`github.com/django-compressor/django-compressor`_. There you can also file tickets.
 
 The `in-development version`_ of Django Compressor can be installed with
 ``pip install django_compressor==dev`` or ``easy_install django_compressor==dev``.
@@ -72,6 +72,6 @@ The `in-development version`_ of Django Compressor can be installed with
 .. _cssmin: https://github.com/zacharyvoase/cssmin
 .. _data URIs: http://en.wikipedia.org/wiki/Data_URI_scheme
 .. _django-compressor.readthedocs.org: http://django-compressor.readthedocs.org/en/latest/
-.. _github.com/jezdez/django_compressor: https://github.com/jezdez/django_compressor
-.. _in-development version: http://github.com/jezdez/django_compressor/tarball/develop#egg=django_compressor-dev
+.. _github.com/django-compressor/django-compressor: https://github.com/django-compressor/django-compressor
+.. _in-development version: http://github.com/django-compressor/django-compressor/tarball/develop#egg=django_compressor-dev
 

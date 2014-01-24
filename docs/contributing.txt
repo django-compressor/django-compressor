@@ -21,7 +21,7 @@ In a nutshell
 Here's what the contribution process looks like, in a bullet-points fashion,
 and only for the stuff we host on github:
 
-#. Django Compressor is hosted on `github`_, at https://github.com/jezdez/django_compressor
+#. Django Compressor is hosted on `github`_, at https://github.com/django-compressor/django-compressor
 #. The best method to contribute back is to create a github account, then fork
    the project. You can use this fork as if it was your own project, and should
    push your changes to it.
@@ -158,7 +158,7 @@ double cookie points. Seriously. You rock.
   This very document is based on the contributing docs of the
   `django CMS`_ project. Many thanks for allowing us to steal it!
 
-.. _Fork: http://github.com/jezdez/django_compressor
+.. _Fork: http://github.com/django-compressor/django-compressor
 .. _Travis: http://travis-ci.org/
 .. _`pull request announcment`: http://about.travis-ci.org/blog/announcing-pull-request-support/
 .. _`Travis documentation`: http://about.travis-ci.org/docs/
