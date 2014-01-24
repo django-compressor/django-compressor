@@ -1,28 +1,21 @@
 language: python
-python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
 before_install:
   - sudo apt-get update
   - sudo apt-get install csstidy libxml2-dev libxslt-dev
 install:
-  - export CPPFLAGS="-O0"
-  - pip install -e .
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then pip install unittest2 BeautifulSoup; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.* ]]; then pip install BeautifulSoup4; fi
-  - pip install -r requirements/tests.txt Django==$DJANGO
+  - pip install tox
 script:
-  - make test
+  - tox
 env:
-  - DJANGO=1.4.5
-  - DJANGO=1.5.1
+  - TOXENV=py33-1.6.X
+  - TOXENV=py32-1.6.X
+  - TOXENV=py27-1.6.X
+  - TOXENV=py26-1.6.X
+  - TOXENV=py33-1.5.X
+  - TOXENV=py32-1.5.X
+  - TOXENV=py27-1.5.X
+  - TOXENV=py26-1.5.X
+  - TOXENV=py27-1.4.X
+  - TOXENV=py26-1.4.X
 notifications:
   irc: "irc.freenode.org#django-compressor"
-matrix:
-  exclude:
-    - python: "3.2"
-      env: DJANGO=1.4.5
-    - python: "3.3"
-      env: DJANGO=1.4.5
