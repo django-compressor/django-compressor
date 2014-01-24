@@ -2,11 +2,10 @@ from __future__ import with_statement, unicode_literals
 import io
 import os
 
-import django
 from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
-from django.utils import six, unittest
+from django.utils import six
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.conf import settings
