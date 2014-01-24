@@ -430,3 +430,19 @@ Offline settings
 
     The name of the file to be used for saving the names of the files
     compressed offline.
+
+.. attribute:: COMPRESS_OFFLINE_IGNORE_FILES
+
+    :Default: ``()``
+
+    The list of the template file name patterns to be ignored during 
+    compressed offline.
+
+    An example.
+
+    .. code-block:: django
+
+        COMPRESS_OFFLINE_IGNORE_FILES = (
+            '.*%s.*'%os.path.join('payment','templates','shop','checkout','google'),
+        )
+

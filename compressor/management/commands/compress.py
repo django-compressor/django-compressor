@@ -1,6 +1,7 @@
 # flake8: noqa
 import os
 import sys
+import re
 from types import MethodType
 from fnmatch import fnmatch
 from optparse import make_option
@@ -169,6 +170,7 @@ class Command(NoArgsCommand):
         extensions = options.get('extensions')
         extensions = self.handle_extensions(extensions or ['html'])
         verbosity = int(options.get("verbosity", 0))
+        ignore_patterns = getattr(settings, 'COMPRESS_OFFLINE_IGNORE_FILES', ())
         if not log:
             log = StringIO()
         if not settings.TEMPLATE_LOADERS:
@@ -202,7 +204,8 @@ class Command(NoArgsCommand):
                     followlinks=options.get('followlinks', False)):
                 templates.update(os.path.join(root, name)
                     for name in files if not name.startswith('.') and
-                        any(fnmatch(name, "*%s" % glob) for glob in extensions))
+                        any(fnmatch(name, "*%s" % glob) for glob in extensions) and
+                        not any(re.match(pattern, os.path.join(root, name)) for pattern in ignore_patterns))
         if not templates:
             raise OfflineGenerationError("No templates found. Make sure your "
                                          "TEMPLATE_LOADERS and TEMPLATE_DIRS "
