@@ -37,7 +37,7 @@ class DataUriFilter(FilterBase):
 
     def data_uri_converter(self, matchobj):
         url = matchobj.group(1).strip(' \'"')
-        if not url.startswith('data:'):
+        if not url.startswith('data:') and not url.startswith('//'):
             path = self.get_file_path(url)
             if os.stat(path).st_size <= settings.COMPRESS_DATA_URI_MAX_SIZE:
                 with open(path, 'rb') as file:
