@@ -108,7 +108,7 @@ class CompressorMixin(object):
             rendered_output = self.render_output(compressor, mode, forced=forced)
             if cache_key:
                 cache_set(cache_key, rendered_output)
-            assert isinstance(rendered_output, six.text_type)
+            assert isinstance(rendered_output, six.string_types)
             return rendered_output
         except Exception:
             if settings.DEBUG or forced:
