@@ -60,8 +60,8 @@ found on `django-compressor.readthedocs.org`_.
 The source code for Django Compressor can be found and contributed to on
 `github.com/django-compressor/django-compressor`_. There you can also file tickets.
 
-The `in-development version`_ of Django Compressor can be installed with
-``pip install django_compressor==dev`` or ``easy_install django_compressor==dev``.
+The in-development version of Django Compressor can be installed with
+``pip install http://github.com/django-compressor/django-compressor/tarball/develop``.
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/
@@ -75,5 +75,4 @@ The `in-development version`_ of Django Compressor can be installed with
 .. _data URIs: http://en.wikipedia.org/wiki/Data_URI_scheme
 .. _django-compressor.readthedocs.org: http://django-compressor.readthedocs.org/en/latest/
 .. _github.com/django-compressor/django-compressor: https://github.com/django-compressor/django-compressor
-.. _in-development version: http://github.com/django-compressor/django-compressor/tarball/develop#egg=django_compressor-dev
 
