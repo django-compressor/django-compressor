@@ -1,5 +1,6 @@
 from django import template
 from django.core.exceptions import ImproperlyConfigured
+from django.utils import six
 
 from compressor.cache import (cache_get, cache_set, get_offline_hexdigest,
                               get_offline_manifest, get_templatetag_cachekey)
@@ -50,7 +51,7 @@ class CompressorMixin(object):
         Check if offline compression is enabled or forced
 
         Defaults to just checking the settings and forced argument,
-        but can be overriden to completely disable compression for
+        but can be overridden to completely disable compression for
         a subclass, for instance.
         """
         return (settings.COMPRESS_ENABLED and
@@ -107,6 +108,7 @@ class CompressorMixin(object):
             rendered_output = self.render_output(compressor, mode, forced=forced)
             if cache_key:
                 cache_set(cache_key, rendered_output)
+            assert isinstance(rendered_output, six.string_types)
             return rendered_output
         except Exception:
             if settings.DEBUG or forced:

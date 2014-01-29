@@ -1,22 +1,18 @@
 # flake8: noqa
+import io
 import os
 import sys
 from types import MethodType
 from fnmatch import fnmatch
 from optparse import make_option
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO  # noqa
-
-from django.core.management.base import  NoArgsCommand, CommandError
+from django.core.management.base import NoArgsCommand, CommandError
 from django.template import (Context, Template,
                              TemplateDoesNotExist, TemplateSyntaxError)
+from django.utils import six
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
-from django.template.defaulttags import IfNode
 from django.template.loader_tags import (ExtendsNode, BlockNode,
                                          BLOCK_CONTEXT_KEY)
 
@@ -29,6 +25,16 @@ from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
+
+if six.PY3:
+    # there is an 'io' module in python 2.6+, but io.StringIO does not
+    # accept regular strings, just unicode objects
+    from io import StringIO
+else:
+    try:
+        from cStringIO import StringIO
+    except ImportError:
+        from StringIO import StringIO
 
 
 def patched_render(self, context):
@@ -213,17 +219,13 @@ class Command(NoArgsCommand):
         compressor_nodes = SortedDict()
         for template_name in templates:
             try:
-                template_file = open(template_name)
-                try:
-                    template = Template(template_file.read().decode(
-                                        settings.FILE_CHARSET))
-                finally:
-                    template_file.close()
+                with io.open(template_name, mode='rb') as file:
+                    template = Template(file.read().decode(settings.FILE_CHARSET))
             except IOError:  # unreadable file -> ignore
                 if verbosity > 0:
                     log.write("Unreadable template at: %s\n" % template_name)
                 continue
-            except TemplateSyntaxError, e:  # broken template -> ignore
+            except TemplateSyntaxError as e:  # broken template -> ignore
                 if verbosity > 0:
                     log.write("Invalid template %s: %s\n" % (template_name, e))
                 continue
@@ -255,7 +257,7 @@ class Command(NoArgsCommand):
         count = 0
         results = []
         offline_manifest = SortedDict()
-        for template, nodes in compressor_nodes.iteritems():
+        for template, nodes in compressor_nodes.items():
             context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
             template._log = log
             template._log_verbosity = verbosity
@@ -275,7 +277,7 @@ class Command(NoArgsCommand):
                 key = get_offline_hexdigest(node.nodelist.render(context))
                 try:
                     result = node.render(context, forced=True)
-                except Exception, e:
+                except Exception as e:
                     raise CommandError("An error occured during rendering %s: "
                                        "%s" % (template.template_name, e))
                 offline_manifest[key] = result
@@ -331,7 +333,7 @@ class Command(NoArgsCommand):
         if not settings.COMPRESS_ENABLED and not options.get("force"):
             raise CommandError(
                 "Compressor is disabled. Set the COMPRESS_ENABLED "
-                "settting or use --force to override.")
+                "setting or use --force to override.")
         if not settings.COMPRESS_OFFLINE:
             if not options.get("force"):
                 raise CommandError(

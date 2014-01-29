@@ -1,18 +1,27 @@
-from __future__ import with_statement
+from __future__ import with_statement, unicode_literals
+import io
 import os
-from StringIO import StringIO
-from unittest2 import skipIf
 
-import django
+from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
-from django.core.management.base import CommandError
+from django.utils import six
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_storage
+
+if six.PY3:
+    # there is an 'io' module in python 2.6+, but io.StringIO does not
+    # accept regular strings, just unicode objects
+    from io import StringIO
+else:
+    try:
+        from cStringIO import StringIO
+    except ImportError:
+        from StringIO import StringIO
 
 
 class OfflineTestCaseMixin(object):
@@ -39,14 +48,14 @@ class OfflineTestCaseMixin(object):
         settings.COMPRESS_ENABLED = True
         settings.COMPRESS_OFFLINE = True
         self.template_path = os.path.join(settings.TEMPLATE_DIRS[0], self.template_name)
-        self.template_file = open(self.template_path)
-        self.template = Template(self.template_file.read().decode(settings.FILE_CHARSET))
+
+        with io.open(self.template_path, encoding=settings.FILE_CHARSET) as file:
+            self.template = Template(file.read())
 
     def tearDown(self):
         settings.COMPRESS_ENABLED = self._old_compress
         settings.COMPRESS_OFFLINE = self._old_compress_offline
         settings.TEMPLATE_DIRS = self._old_template_dirs
-        self.template_file.close()
         manifest_path = os.path.join('CACHE', 'manifest.json')
         if default_storage.exists(manifest_path):
             default_storage.delete(manifest_path)
@@ -55,7 +64,7 @@ class OfflineTestCaseMixin(object):
         count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
         self.assertEqual(1, count)
         self.assertEqual([
-            u'<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
+            '<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
         ], result)
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         self.assertEqual(rendered_template, "".join(result) + "\n")
@@ -97,8 +106,8 @@ class OfflineGenerationBlockSuperTestCaseWithExtraContent(OfflineTestCaseMixin, 
         count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
         self.assertEqual(2, count)
         self.assertEqual([
-            u'<script type="text/javascript" src="/static/CACHE/js/ced14aec5856.js"></script>',
-            u'<script type="text/javascript" src="/static/CACHE/js/7c02d201f69d.js"></script>'
+            '<script type="text/javascript" src="/static/CACHE/js/ced14aec5856.js"></script>',
+            '<script type="text/javascript" src="/static/CACHE/js/7c02d201f69d.js"></script>'
         ], result)
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         self.assertEqual(rendered_template, "".join(result) + "\n")
@@ -128,10 +137,6 @@ class OfflineGenerationTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
 class OfflineGenerationStaticTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_static_templatetag"
     expected_hash = "dfa2bb387fa8"
-# This test uses {% static %} which was introduced in django 1.4
-OfflineGenerationStaticTemplateTagTestCase = skipIf(
-    django.VERSION[1] < 4, 'Django 1.4 not found'
-)(OfflineGenerationStaticTemplateTagTestCase)
 
 
 class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):
@@ -156,8 +161,8 @@ class OfflineGenerationTestCaseErrors(OfflineTestCaseMixin, TestCase):
     def test_offline(self):
         count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
         self.assertEqual(2, count)
-        self.assertIn(u'<script type="text/javascript" src="/static/CACHE/js/3872c9ae3f42.js"></script>', result)
-        self.assertIn(u'<script type="text/javascript" src="/static/CACHE/js/cd8870829421.js"></script>', result)
+        self.assertIn('<script type="text/javascript" src="/static/CACHE/js/3872c9ae3f42.js"></script>', result)
+        self.assertIn('<script type="text/javascript" src="/static/CACHE/js/cd8870829421.js"></script>', result)
 
 
 class OfflineGenerationTestCaseWithError(OfflineTestCaseMixin, TestCase):
@@ -209,7 +214,7 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
             default_storage.delete(manifest_path)
         self.assertEqual(1, count)
         self.assertEqual([
-            u'<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
+            '<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
         ], result)
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         self.assertEqual(rendered_template, "".join(result) + "\n")
@@ -244,7 +249,7 @@ class OfflineGenerationInlineNonAsciiTestCase(OfflineTestCaseMixin, TestCase):
     def setUp(self):
         self.old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
         settings.COMPRESS_OFFLINE_CONTEXT = {
-            'test_non_ascii_value': u'\u2014',
+            'test_non_ascii_value': '\u2014',
         }
         super(OfflineGenerationInlineNonAsciiTestCase, self).setUp()
 

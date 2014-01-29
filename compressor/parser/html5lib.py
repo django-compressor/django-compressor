@@ -1,6 +1,6 @@
 from __future__ import absolute_import
-from django.utils.encoding import smart_unicode
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.encoding import smart_text
 
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
@@ -15,42 +15,45 @@ class Html5LibParser(ParserBase):
         self.html5lib = html5lib
 
     def _serialize(self, elem):
-        fragment = self.html5lib.treebuilders.simpletree.DocumentFragment()
-        fragment.appendChild(elem)
-        return self.html5lib.serialize(fragment,
-            quote_attr_values=True, omit_optional_tags=False)
+        return self.html5lib.serialize(
+            elem, tree="etree", quote_attr_values=True,
+            omit_optional_tags=False, use_trailing_solidus=True,
+        )
 
     def _find(self, *names):
-        for node in self.html.childNodes:
-            if node.type == 5 and node.name in names:
-                yield node
+        for elem in self.html:
+            if elem.tag in names:
+                yield elem
 
     @cached_property
     def html(self):
         try:
-            return self.html5lib.parseFragment(self.content)
-        except ImportError, err:
+            return self.html5lib.parseFragment(self.content, treebuilder="etree")
+        except ImportError as err:
             raise ImproperlyConfigured("Error while importing html5lib: %s" % err)
-        except Exception, err:
+        except Exception as err:
             raise ParserError("Error while initializing Parser: %s" % err)
 
     def css_elems(self):
-        return self._find('style', 'link')
+        return self._find('{http://www.w3.org/1999/xhtml}link',
+                          '{http://www.w3.org/1999/xhtml}style')
 
     def js_elems(self):
-        return self._find('script')
+        return self._find('{http://www.w3.org/1999/xhtml}script')
 
     def elem_attribs(self, elem):
-        return elem.attributes
+        return elem.attrib
 
     def elem_content(self, elem):
-        return elem.childNodes[0].value
+        return smart_text(elem.text)
 
     def elem_name(self, elem):
-        return elem.name
+        if '}' in elem.tag:
+            return elem.tag.split('}')[1]
+        return elem.tag
 
     def elem_str(self, elem):
         # This method serializes HTML in a way that does not pass all tests.
         # However, this method is only called in tests anyway, so it doesn't
         # really matter.
-        return smart_unicode(self._serialize(elem))
+        return smart_text(self._serialize(elem))
