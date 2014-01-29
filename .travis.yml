@@ -3,7 +3,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install csstidy libxml2-dev libxslt-dev
 install:
-  - pip install tox
+  - pip install tox coveralls
 script:
   - tox
 env:
@@ -19,3 +19,4 @@ env:
   - TOXENV=py26-1.4.X
 notifications:
   irc: "irc.freenode.org#django-compressor"
+after_success: coveralls
