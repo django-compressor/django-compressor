@@ -55,17 +55,6 @@ dependencies.
 
       pip install django-appconf
 
-- versiontools_
-
-  Used internally to handle versions better, this is
-  automatically installed when following the above
-  installation instructions.
-
-  In case you're installing Django Compressor differently
-  (e.g. from the Git repo), make sure to install it, e.g.::
-
-      pip install versiontools
-
 Optional
 ^^^^^^^^
 
