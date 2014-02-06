@@ -30,7 +30,7 @@ class CompressorConf(AppConf):
     JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
     PRECOMPILERS = (
         # ('text/coffeescript', 'coffee --compile --stdio'),
-        # ('text/less', 'lessc {infile} {outfile}'),
+        # ('text/less', 'lesscpy {infile}'),
         # ('text/x-sass', 'sass {infile} {outfile}'),
         # ('text/stylus', 'stylus < {infile} > {outfile}'),
         # ('text/x-scss', 'sass --scss {infile} {outfile}'),
