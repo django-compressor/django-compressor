@@ -216,6 +216,21 @@ class CssAbsolutizingTestCase(TestCase):
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
+    def test_css_absolute_filter_filename_outside_compress_root(self):
+        filename = '/foo/bar/baz/test.css'
+        content = self.template % blankdict(url='../qux/')
+        params = blankdict({
+            'url': settings.COMPRESS_URL + 'bar/qux/',
+        })
+        output = self.template % params
+        filter = CssAbsoluteFilter(content)
+        self.assertEqual(output, filter.input(filename=filename, basename='bar/baz/test.css'))
+        settings.COMPRESS_URL = 'https://static.example.com/'
+        params['url'] = settings.COMPRESS_URL + 'bar/qux/'
+        output = self.template % params
+        filter = CssAbsoluteFilter(content)
+        self.assertEqual(output, filter.input(filename=filename, basename='bar/baz/test.css'))
+
     def test_css_hunks(self):
         hash_dict = {
             'hash1': self.hashing_func(os.path.join(settings.COMPRESS_ROOT, 'img/python.png')),
