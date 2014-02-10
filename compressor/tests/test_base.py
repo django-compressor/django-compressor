@@ -71,6 +71,14 @@ class CompressorTestCase(SimpleTestCase):
         collapse = lambda x: re.sub(r'\n+', '\n', x).rstrip()
         self.assertEqual(collapse(a), collapse(b))
 
+    def assertEqualSplits(self, a, b):
+        """
+        assertEqual for splits, particularly ignoring the presence of
+        a trailing newline on the content.
+        """
+        mangle = lambda split: [(x[0], x[1], x[2], x[3].rstrip()) for x in split]
+        self.assertEqual(mangle(a), mangle(b))
+
     def test_css_split(self):
         out = [
             (
@@ -92,8 +100,8 @@ class CompressorTestCase(SimpleTestCase):
             ),
         ]
         split = self.css_node.split_contents()
-        split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3]).rstrip()) for x in split]
-        self.assertEqual(out, split)
+        split = [(x[0], x[1], x[2], self.css_node.parser.elem_str(x[3])) for x in split]
+        self.assertEqualSplits(split, out)
 
     def test_css_hunks(self):
         out = ['body { background:#990; }', 'p { border:5px solid green;}', 'body { color:#fff; }']
@@ -139,8 +147,8 @@ class CompressorTestCase(SimpleTestCase):
             ),
         ]
         split = self.js_node.split_contents()
-        split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3]).rstrip()) for x in split]
-        self.assertEqual(out, split)
+        split = [(x[0], x[1], x[2], self.js_node.parser.elem_str(x[3])) for x in split]
+        self.assertEqualSplits(split, out)
 
     def test_js_hunks(self):
         out = ['obj = {};', 'obj.value = "value";']
