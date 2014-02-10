@@ -28,7 +28,7 @@ compresses it using ``jsmin``.
 
 As the final result the template tag outputs a ``<script>`` or ``<link>``
 tag pointing to the optimized file. These files are stored inside a folder
-and given an unique name based on their content. Alternatively it can also
+and given a unique name based on their content. Alternatively it can also
 return the resulting content to the original template directly.
 
 Since the file name is dependend on the content these files can be given
