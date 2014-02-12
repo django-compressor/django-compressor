@@ -15,7 +15,7 @@ Django Compressor
     :target: http://travis-ci.org/django-compressor/django-compressor
 
 Django Compressor combines and compresses linked and inline Javascript
-or CSS in a Django templates into cacheable static files by using the
+or CSS in a Django template into cacheable static files by using the
 ``compress`` template tag.
 
 HTML in between ``{% compress js/css %}`` and ``{% endcompress %}`` is
@@ -31,7 +31,7 @@ tag pointing to the optimized file. These files are stored inside a folder
 and given a unique name based on their content. Alternatively it can also
 return the resulting content to the original template directly.
 
-Since the file name is dependend on the content these files can be given
+Since the file name is dependent on the content these files can be given
 a far future expiration date without worrying about stale browser caches.
 
 The concatenation and compressing process can also be jump started outside
