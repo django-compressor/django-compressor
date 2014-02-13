@@ -1,3 +1,4 @@
+import json
 import hashlib
 import os
 import socket
@@ -8,11 +9,6 @@ from django.core.files.base import ContentFile
 from django.utils.encoding import force_text, smart_bytes
 from django.utils.functional import SimpleLazyObject
 from django.utils.importlib import import_module
-
-try:
-    import django.utils.simplejson as json
-except ImportError:
-    import json
 
 from compressor.conf import settings
 from compressor.storage import default_storage
