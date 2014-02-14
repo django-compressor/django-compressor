@@ -26,7 +26,7 @@ class FilterBase(object):
     """
     def __init__(self, content, filter_type=None, filename=None, verbose=0,
                  charset=None):
-        self.type = filter_type
+        self.type = filter_type or getattr(self, 'type', None)
         self.content = content
         self.verbose = verbose or settings.COMPRESS_VERBOSE
         self.logger = logger

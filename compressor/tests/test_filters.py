@@ -17,6 +17,10 @@ from compressor.filters.base import CompilerFilter
 from compressor.filters.cssmin import CSSMinFilter
 from compressor.filters.css_default import CssAbsoluteFilter
 from compressor.filters.template import TemplateFilter
+from compressor.filters.closure import ClosureCompilerFilter
+from compressor.filters.csstidy import CSSTidyFilter
+from compressor.filters.yuglify import YUglifyCSSFilter, YUglifyJSFilter
+from compressor.filters.yui import YUICSSFilter, YUIJSFilter
 from compressor.tests.test_base import test_dir
 
 
@@ -30,7 +34,6 @@ class CssTidyTestCase(TestCase):
         color: black;
         }
         """)
-        from compressor.filters.csstidy import CSSTidyFilter
         ret = CSSTidyFilter(content).input()
         self.assertIsInstance(ret, six.text_type)
         self.assertEqual(
@@ -301,3 +304,34 @@ class TemplateTestCase(TestCase):
         #footer {font-weight: bold;}
         """
         self.assertEqual(input, TemplateFilter(content).input())
+
+
+class SpecializedFiltersTest(TestCase):
+    """
+    Test to check the Specializations of filters.
+    """
+    def test_closure_filter(self):
+        filter = ClosureCompilerFilter('')
+        self.assertEqual(filter.options, (('binary', six.text_type('java -jar compiler.jar')), ('args', six.text_type(''))))
+
+    def test_csstidy_filter(self):
+        filter = CSSTidyFilter('')
+        self.assertEqual(filter.options, (('binary', six.text_type('csstidy')), ('args', six.text_type('--template=highest'))))
+
+    def test_yuglify_filters(self):
+        filter = YUglifyCSSFilter('')
+        self.assertEqual(filter.command, '{binary} {args} --type=css')
+        self.assertEqual(filter.options, (('binary', six.text_type('yuglify')), ('args', six.text_type('--terminal'))))
+
+        filter = YUglifyJSFilter('')
+        self.assertEqual(filter.command, '{binary} {args} --type=js')
+        self.assertEqual(filter.options, (('binary', six.text_type('yuglify')), ('args', six.text_type('--terminal'))))
+
+    def test_yui_filters(self):
+        filter = YUICSSFilter('')
+        self.assertEqual(filter.command, '{binary} {args} --type=css')
+        self.assertEqual(filter.options, (('binary', six.text_type('java -jar yuicompressor.jar')), ('args', six.text_type(''))))
+
+        filter = YUIJSFilter('', verbose=1)
+        self.assertEqual(filter.command, '{binary} {args} --type=js --verbose')
+        self.assertEqual(filter.options, (('binary', six.text_type('java -jar yuicompressor.jar')), ('args', six.text_type('')), ('verbose', 1)))
