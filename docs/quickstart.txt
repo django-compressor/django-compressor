@@ -32,6 +32,10 @@ Installation
          'compressor.finders.CompressorFinder',
      )
 
+* Define :attr:`COMPRESS_ROOT <django.conf.settings.COMPRESS_ROOT>` in settings
+  if you don't have already ``STATIC_ROOT`` or if you want it in a different 
+  folder.
+
 .. _staticfiles: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
 .. _django-staticfiles: http://pypi.python.org/pypi/django-staticfiles
 
