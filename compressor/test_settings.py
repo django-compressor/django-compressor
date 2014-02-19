@@ -14,6 +14,7 @@ DATABASES = {
 
 INSTALLED_APPS = [
     'compressor',
+    'sekizai',
 ]
 
 STATIC_URL = '/static/'
