@@ -30,11 +30,15 @@ class JsCompressor(Compressor):
                 script_attrib = None
                 for attr in self.supported_attribs:
                     if attr in attribs:
+                        val = attribs[attr]
                         script_attrib = attr
+                        if val:
+                            script_attrib = "{0}=\"{1}\"".format(attr, val)
                         break
                 script_attrib = script_attrib or ''
-                # check for existing node with same script type
+                # Check for existing node with same script tag
                 append_to_existing = self.script_attribs and script_attrib in self.script_attribs
+                # If a node exists, just add it to existing, otherwise create new one
                 if append_to_existing:
                     self.script_attribs[script_attrib].split_content.append(data)
                 else:
@@ -47,12 +51,11 @@ class JsCompressor(Compressor):
     def output(self, *args, **kwargs):
         if (settings.COMPRESS_ENABLED or settings.COMPRESS_PRECOMPILERS or
                 kwargs.get('forced', False)):
+            # Populate self.split_content
             self.split_contents()
             if hasattr(self, 'script_attribs'):
                 ret = []
                 for attr, node in self.script_attribs.iteritems():
-                    # make use of an empty attrib (async, defer don't take values)
-                    # may need to override as needed
                     node.extra_context.update({'tag': attr})
                     ret.append(node.output(*args, **kwargs))
                 return ''.join(ret)
