@@ -256,6 +256,28 @@ class CssMediaTestCase(SimpleTestCase):
                          [l.get('media', None) for l in output])
 
 
+class JsAsyncDeferTestCase(SimpleTestCase):
+
+    def setUp(self):
+        self.js = """\
+            <script src="/static/js/one.js" type="text/javascript"></script>
+            <script src="/static/js/two.js" type="text/javascript" async></script>
+            <script src="/static/js/three.js" type="text/javascript" defer></script>
+            <script type="text/javascript">obj.value = "value";</script>
+            <script src="/static/js/one.js" type="text/javascript" async></script>
+            <script src="/static/js/two.js" type="text/javascript" async></script>
+            <script src="/static/js/three.js" type="text/javascript"></script>"""
+        self.js_node = JsCompressor(self.js)
+
+    def test_basic(self):
+        tags = [None, 'async', 'defer']
+        if six.PY3:
+            scripts = make_soup(self.js_node.output()).find_all('script')
+        else:
+            scripts = make_soup(self.js_node.output()).findAll('script')
+        self.assertEqual(tags, [l.get('async', l.get('defer', None)) for l in scripts])
+
+
 class VerboseTestCase(CompressorTestCase):
 
     def setUp(self):
