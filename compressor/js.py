@@ -14,7 +14,8 @@ class JsCompressor(Compressor):
     def split_contents(self):
         if self.split_content:
             return self.split_content
-        self.script_attribs = {}
+        seen = []
+        self.script_attribs = []
         for elem in self.parser.js_elems():
             data = None
             attribs = self.parser.elem_attribs(elem)
@@ -30,22 +31,21 @@ class JsCompressor(Compressor):
                 script_attrib = None
                 for attr in self.supported_attribs:
                     if attr in attribs:
-                        val = attribs[attr]
                         script_attrib = attr
-                        if val:
-                            script_attrib = "{0}=\"{1}\"".format(attr, val)
                         break
                 script_attrib = script_attrib or ''
                 # Check for existing node with same script tag
-                append_to_existing = self.script_attribs and script_attrib in self.script_attribs
+                append_to_existing = self.script_attribs and script_attrib in seen
                 # If a node exists, just add it to existing, otherwise create new one
                 if append_to_existing:
-                    self.script_attribs[script_attrib].split_content.append(data)
+                    index = seen.index(script_attrib)
+                    self.script_attribs[index][1].split_content.append(data)
                 else:
                     node = self.__class__(content=self.parser.elem_str(elem),
                                           context=self.context)
                     node.split_content.append(data)
-                    self.script_attribs[script_attrib] = node
+                    seen.append(script_attrib)
+                    self.script_attribs.append((script_attrib, node))
         return self.split_content
 
     def output(self, *args, **kwargs):
@@ -55,7 +55,7 @@ class JsCompressor(Compressor):
             self.split_contents()
             if hasattr(self, 'script_attribs'):
                 ret = []
-                for attr, node in self.script_attribs.iteritems():
+                for attr, node in self.script_attribs:
                     node.extra_context.update({'tag': attr})
                     ret.append(node.output(*args, **kwargs))
                 return ''.join(ret)
