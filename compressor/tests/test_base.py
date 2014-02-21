@@ -275,7 +275,15 @@ class JsAsyncDeferTestCase(SimpleTestCase):
             scripts = make_soup(self.js_node.output()).find_all('script')
         else:
             scripts = make_soup(self.js_node.output()).findAll('script')
-        self.assertEqual(tags, [l.get('async', l.get('defer', None)) for l in scripts])
+        outtags = []
+        for script in scripts:
+            if script.get('async', None) is not None:
+                outtags.append('async')
+            elif script.get('defer', None) is not None:
+                outtags.append('defer')
+            else:
+                outtags.append(None)
+        self.assertEqual(tags, outtags)
 
 
 class VerboseTestCase(CompressorTestCase):
