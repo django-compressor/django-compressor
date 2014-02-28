@@ -72,8 +72,7 @@ class CompressorMixin(object):
                 return offline_manifest[key]
             else:
                 raise OfflineGenerationError('You have offline compression '
-                    'enabled but key "%s" is missing from offline manifest. '
-                    'You may need to run "python manage.py compress".' % key)
+                    'enabled but key "%s" is missing from offline manifest.' % key)
 
     def render_cached(self, compressor, kind, mode, forced=False):
         """
@@ -87,7 +86,6 @@ class CompressorMixin(object):
         return None, None
 
     def render_compressed(self, context, kind, mode, forced=False):
-
         try:
             # See if it has been rendered offline
             cached_offline = self.render_offline(context, forced=forced)
@@ -95,10 +93,11 @@ class CompressorMixin(object):
                 return cached_offline
         except OfflineGenerationError as e:
             if settings.COMPRESS_OFFLINE_MISSING_LOG:
+                msg = e.message
                 error_msg = 'File missing from manfiest'
                 if 'request' in context:
                     error_msg = 'File missing from manifest at path %s' % context['request'].path
-                logger.error(error_msg)
+                logger.error(error_msg + ' err_msg="%s"' % msg)
             else:
                 raise
 
