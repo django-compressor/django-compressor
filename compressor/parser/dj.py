@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import io
 from types import MethodType
 
@@ -25,9 +23,6 @@ def patched_render(self, context):
 
 
 def patched_render_firstnode(self, context):
-    ###from django.template.loader_tags import (ExtendsNode,
-    ###                                        BLOCK_CONTEXT_KEY)
-
     # If this template has a ExtendsNode, we want to find out what
     # should be put in render_context to make the {% block ... %}
     # tags work.

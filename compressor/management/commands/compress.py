@@ -1,5 +1,4 @@
 # flake8: noqa
-import io
 import os
 import sys
 
