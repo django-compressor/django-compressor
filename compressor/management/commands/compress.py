@@ -2,19 +2,17 @@
 import io
 import os
 import sys
-from types import MethodType
+
 from fnmatch import fnmatch
 from optparse import make_option
 
 from django.core.management.base import NoArgsCommand, CommandError
-from django.template import (Context, Template,
-                             TemplateDoesNotExist, TemplateSyntaxError)
+import django.template
+from django.template import Context
 from django.utils import six
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
-from django.template.loader_tags import (ExtendsNode, BlockNode,
-                                         BLOCK_CONTEXT_KEY)
 
 try:
     from django.template.loaders.cached import Loader as CachedLoader
@@ -23,7 +21,8 @@ except ImportError:
 
 from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
-from compressor.exceptions import OfflineGenerationError
+from compressor.exceptions import (OfflineGenerationError, TemplateSyntaxError,
+                                   TemplateDoesNotExist)
 from compressor.templatetags.compress import CompressorNode
 
 if six.PY3:
@@ -35,77 +34,6 @@ else:
         from cStringIO import StringIO
     except ImportError:
         from StringIO import StringIO
-
-
-def patched_render(self, context):
-    # 'Fake' _render method that just returns the context instead of
-    # rendering. It also checks whether the first node is an extend node or
-    # not, to be able to handle complex inheritance chain.
-    self._render_firstnode = MethodType(patched_render_firstnode, self)
-    self._render_firstnode(context)
-
-    # Cleanup, uninstall our _render monkeypatch now that it has been called
-    self._render = self._old_render
-    return context
-
-
-def patched_render_firstnode(self, context):
-    # If this template has a ExtendsNode, we want to find out what
-    # should be put in render_context to make the {% block ... %}
-    # tags work.
-    #
-    # We can't fully render the base template(s) (we don't have the
-    # full context vars - only what's necessary to render the compress
-    # nodes!), therefore we hack the ExtendsNode we found, patching
-    # its get_parent method so that rendering the ExtendsNode only
-    # gives us the blocks content without doing any actual rendering.
-    extra_context = {}
-    try:
-        firstnode = self.nodelist[0]
-    except IndexError:
-        firstnode = None
-    if isinstance(firstnode, ExtendsNode):
-        firstnode._log = self._log
-        firstnode._log_verbosity = self._log_verbosity
-        firstnode._old_get_parent = firstnode.get_parent
-        firstnode.get_parent = MethodType(patched_get_parent, firstnode)
-        try:
-            extra_context = firstnode.render(context)
-            context.render_context = extra_context.render_context
-            # We aren't rendering {% block %} tags, but we want
-            # {{ block.super }} inside {% compress %} inside {% block %}s to
-            # work. Therefore, we need to pop() the last block context for
-            # each block name, to emulate what would have been done if the
-            # {% block %} had been fully rendered.
-            for blockname in firstnode.blocks.keys():
-                context.render_context[BLOCK_CONTEXT_KEY].pop(blockname)
-        except (IOError, TemplateSyntaxError, TemplateDoesNotExist):
-            # That first node we are trying to render might cause more errors
-            # that we didn't catch when simply creating a Template instance
-            # above, so we need to catch that (and ignore it, just like above)
-            # as well.
-            if self._log_verbosity > 0:
-                self._log.write("Caught error when rendering extend node from "
-                                "template %s\n" % getattr(self, 'name', self))
-            return None
-        finally:
-            # Cleanup, uninstall our get_parent monkeypatch now that it has been called
-            firstnode.get_parent = firstnode._old_get_parent
-    return extra_context
-
-
-def patched_get_parent(self, context):
-    # Patch template returned by extendsnode's get_parent to make sure their
-    # _render method is just returning the context instead of actually
-    # rendering stuff.
-    # In addition, this follows the inheritance chain by looking if the first
-    # node of the template is an extend node itself.
-    compiled_template = self._old_get_parent(context)
-    compiled_template._log = self._log
-    compiled_template._log_verbosity = self._log_verbosity
-    compiled_template._old_render = compiled_template._render
-    compiled_template._render = MethodType(patched_render, compiled_template)
-    return compiled_template
 
 
 class Command(NoArgsCommand):
@@ -123,6 +51,9 @@ class Command(NoArgsCommand):
                 "(which defaults to STATIC_ROOT). Be aware that using this "
                 "can lead to infinite recursion if a link points to a parent "
                 "directory of itself.", dest='follow_links'),
+        make_option('--engine', default="django", action="store",
+            help="Specifies the templating engine. jinja2 or django",
+            dest="engine"),
     )
 
     requires_model_validation = False
@@ -140,7 +71,7 @@ class Command(NoArgsCommand):
                 # Force django to calculate template_source_loaders from
                 # TEMPLATE_LOADERS settings, by asking to find a dummy template
                 source, name = finder_func('test')
-            except TemplateDoesNotExist:
+            except django.template.TemplateDoesNotExist:
                 pass
             # Reload template_source_loaders now that it has been calculated ;
             # it should contain the list of valid, instanciated template loaders
@@ -216,11 +147,21 @@ class Command(NoArgsCommand):
         if verbosity > 1:
             log.write("Found templates:\n\t" + "\n\t".join(templates) + "\n")
 
+        engine = options.get("engine", "django")
+        if engine == "jinja2":
+            # TODO load jinja settings
+            from compressor.parser.jinja2 import Jinja2Parser
+            parser = Jinja2Parser(charset=settings.FILE_CHARSET, globals={}, filters={}, options={})
+        elif engine == "django":
+            from compressor.parser.dj import DjangoParser
+            parser = DjangoParser(charset=settings.FILE_CHARSET)
+        else:
+            raise OfflineGenerationError("Invalid templating engine specified.")
+
         compressor_nodes = SortedDict()
         for template_name in templates:
             try:
-                with io.open(template_name, mode='rb') as file:
-                    template = Template(file.read().decode(settings.FILE_CHARSET))
+                template = parser.parse(template_name)
             except IOError:  # unreadable file -> ignore
                 if verbosity > 0:
                     log.write("Unreadable template at: %s\n" % template_name)
@@ -237,7 +178,7 @@ class Command(NoArgsCommand):
                 if verbosity > 0:
                     log.write("UnicodeDecodeError while trying to read "
                               "template %s\n" % template_name)
-            nodes = list(self.walk_nodes(template))
+            nodes = list(parser.walk_nodes(template))
             if nodes:
                 template.template_name = template_name
                 compressor_nodes.setdefault(template, []).extend(nodes)
@@ -261,22 +202,17 @@ class Command(NoArgsCommand):
             context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
             template._log = log
             template._log_verbosity = verbosity
-            template._render_firstnode = MethodType(patched_render_firstnode, template)
-            extra_context = template._render_firstnode(context)
-            if extra_context is None:
-                # Something is wrong - ignore this template
+
+            if not parser.process_template(template, context):
                 continue
+
             for node in nodes:
                 context.push()
-                if extra_context and node._block_name:
-                    # Give a block context to the node if it was found inside
-                    # a {% block %}.
-                    context['block'] = context.render_context[BLOCK_CONTEXT_KEY].get_block(node._block_name)
-                    if context['block']:
-                        context['block'].context = context
-                key = get_offline_hexdigest(node.nodelist.render(context))
+                parser.process_node(template, context, node)
+                rendered = parser.render_nodelist(template, context, node)
+                key = get_offline_hexdigest(rendered)
                 try:
-                    result = node.render(context, forced=True)
+                    result = parser.render_node(template, context, node)
                 except Exception as e:
                     raise CommandError("An error occured during rendering %s: "
                                        "%s" % (template.template_name, e))
@@ -290,23 +226,6 @@ class Command(NoArgsCommand):
         log.write("done\nCompressed %d block(s) from %d template(s).\n" %
                   (count, len(compressor_nodes)))
         return count, results
-
-    def get_nodelist(self, node):
-        # Check if node is an ```if``` switch with true and false branches
-        if hasattr(node, 'nodelist_true') and hasattr(node, 'nodelist_false'):
-            return node.nodelist_true + node.nodelist_false
-        return getattr(node, "nodelist", [])
-
-    def walk_nodes(self, node, block_name=None):
-        for node in self.get_nodelist(node):
-            if isinstance(node, BlockNode):
-                block_name = node.name
-            if isinstance(node, CompressorNode) and node.is_offline_compression_enabled(forced=True):
-                node._block_name = block_name
-                yield node
-            else:
-                for node in self.walk_nodes(node, block_name=block_name):
-                    yield node
 
     def handle_extensions(self, extensions=('html',)):
         """
