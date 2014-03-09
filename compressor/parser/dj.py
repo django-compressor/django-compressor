@@ -6,7 +6,8 @@ from django.template import Template
 from django.template.loader_tags import (ExtendsNode, BlockNode,
                                          BLOCK_CONTEXT_KEY)
 
-from compressor.exceptions import TemplateSyntaxError
+
+from compressor.exceptions import TemplateSyntaxError, TemplateDoesNotExist
 from compressor.templatetags.compress import CompressorNode
 
 
@@ -92,6 +93,8 @@ class DjangoParser(object):
                 return Template(file.read().decode(self.charset))
             except template.TemplateSyntaxError as e:
                 raise TemplateSyntaxError(str(e))
+            except template.TemplateDoesNotExist as e:
+                raise TemplateDoesNotExist(str(e))
 
     def process_template(self, template, context):
         template._render_firstnode = MethodType(patched_render_firstnode, template)
