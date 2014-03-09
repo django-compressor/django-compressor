@@ -1,19 +1,16 @@
+from __future__ import absolute_import
+
 import io
 
 from django.template.defaulttags import IfNode
 
 import jinja2
+import jinja2.ext
+from jinja2 import nodes
+from jinja2.ext import Extension
 from jinja2.nodes import CallBlock, Call, ExtensionAttribute
 
-from compressor.contrib.jinja2ext import CompressorExtension
-from compressor.exceptions import TemplateSyntaxError
-
-# TODO:
-COMPRESSOR_JINJA2_ENV = {
-
-}
-COMPRESSOR_JINJA2_GLOBALS = {}
-COMPRESSOR_JINJA2_FILTERS = {}
+from compressor.exceptions import TemplateSyntaxError, TemplateDoesNotExist
 
 
 def flatten_context(context):
@@ -24,19 +21,57 @@ def flatten_context(context):
             context_dict.update(d)
 
         return context_dict
-    else:
-        return context
+
+    return context
+
+
+class SpacelessExtension(Extension):
+    """
+    Functional "spaceless" extension equivalent to Django's.
+
+    See: https://github.com/django/django/blob/master/django/template/defaulttags.py
+    """
+
+    tags = set(['spaceless'])
+
+    def parse(self, parser):
+        lineno = parser.stream.next().lineno
+        body = parser.parse_statements(['name:endspaceless'], drop_needle=True)
+
+        return nodes.CallBlock(self.call_method('_spaceless', []),
+                               [], [], body).set_lineno(lineno)
+
+    def _spaceless(self, caller):
+        from django.utils.html import strip_spaces_between_tags
+
+        return strip_spaces_between_tags(caller().strip())
+
+
+def url_for(mod, filename):
+    """
+    Incomplete emulation of Flask's url_for.
+    """
+
+    from django.contrib.staticfiles.templatetags import staticfiles
+
+    if mod == "static":
+        return staticfiles.static(filename)
+
+    return ""
 
 
 class Jinja2Parser(object):
     COMPRESSOR_ID = 'compressor.contrib.jinja2ext.CompressorExtension'
 
-    def __init__(self, charset, filters, globals, options):
-        self.charset = charset
-        self.env = jinja2.Environment(extensions=[CompressorExtension],
-                                      **options)
+    def __init__(self, charset, extensions, loader, filters, globals, options):
+        self.env = jinja2.Environment(
+            extensions=extensions,
+            loader=loader,
+            **options
+        )
         self.env.globals.update(globals)
         self.env.filters.update(filters)
+        self.charset = charset
 
     def parse(self, template_name):
         with io.open(template_name, mode='rb') as file:
@@ -44,6 +79,8 @@ class Jinja2Parser(object):
                 template = self.env.parse(file.read().decode(self.charset))
             except jinja2.TemplateSyntaxError as e:
                 raise TemplateSyntaxError(str(e))
+            except jinja2.TemplateNotFound as e:
+                raise TemplateDoesNotExist(str(e))
 
         return template
 
@@ -62,7 +99,7 @@ class Jinja2Parser(object):
         return template.render(flat_context)
 
     def render_node(self, template, context, node):
-        context['compress_forced'] = True
+        context['__compress_forced'] = True
         compiled_node = self.env.compile(jinja2.nodes.Template([node]))
         template = jinja2.Template.from_code(self.env, compiled_node, {})
         flat_context = flatten_context(context)
