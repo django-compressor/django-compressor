@@ -60,8 +60,8 @@ class OfflineTestCaseMixin(object):
         if default_storage.exists(manifest_path):
             default_storage.delete(manifest_path)
 
-    def test_offline(self):
-        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, engine=engine)
         self.assertEqual(1, count)
         self.assertEqual([
             '<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
@@ -69,15 +69,35 @@ class OfflineTestCaseMixin(object):
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         self.assertEqual(rendered_template, "".join(result) + "\n")
 
+    def test_offline_django(self):
+        settings.TEMPLATE_DIRS = (
+            os.path.join(settings.TEST_DIR, 'test_templates', self.templates_dir),
+        )
+        self._test_offline(engine="django")
+
+    def test_offline_jinja2(self):
+        settings.TEMPLATE_DIRS = (
+            os.path.join(settings.TEST_DIR, 'test_templates_jinja2', self.templates_dir),
+        )
+        self._test_offline(engine="jinja2")
+
 
 class OfflineGenerationBlockSuperTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super"
     expected_hash = "7c02d201f69d"
 
+    def test_offline_jinja2(self):
+        # Block.super not supported for Jinja2 yet.
+        pass
+
 
 class OfflineGenerationBlockSuperMultipleTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super_multiple"
     expected_hash = "2f6ef61c488e"
+
+    def test_offline_jinja2(self):
+        # Block.super not supported for Jinja2 yet.
+        pass
 
 
 class OfflineGenerationBlockSuperMultipleWithCachedLoaderTestCase(OfflineTestCaseMixin, TestCase):
@@ -98,12 +118,16 @@ class OfflineGenerationBlockSuperMultipleWithCachedLoaderTestCase(OfflineTestCas
         super(OfflineGenerationBlockSuperMultipleWithCachedLoaderTestCase, self).tearDown()
         settings.TEMPLATE_LOADERS = self._old_template_loaders
 
+    def test_offline_jinja2(self):
+        # Block.super not supported for Jinja2 yet.
+        pass
+
 
 class OfflineGenerationBlockSuperTestCaseWithExtraContent(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super_extra"
 
-    def test_offline(self):
-        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, engine=engine)
         self.assertEqual(2, count)
         self.assertEqual([
             '<script type="text/javascript" src="/static/CACHE/js/ced14aec5856.js"></script>',
@@ -111,6 +135,10 @@ class OfflineGenerationBlockSuperTestCaseWithExtraContent(OfflineTestCaseMixin, 
         ], result)
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         self.assertEqual(rendered_template, "".join(result) + "\n")
+
+    def test_offline_jinja2(self):
+        # Block.super not supported for Jinja2 yet.
+        pass
 
 
 class OfflineGenerationConditionTestCase(OfflineTestCaseMixin, TestCase):
@@ -158,9 +186,21 @@ class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):
 class OfflineGenerationTestCaseErrors(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_error_handling"
 
-    def test_offline(self):
-        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
-        self.assertEqual(2, count)
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, engine=engine)
+
+        if engine == "django":
+            self.assertEqual(2, count)
+        else:
+            # Because we use env.parse in Jinja2Parser, the engine does not
+            # actually load the "extends" and "includes" templates, and so
+            # it is unable to detect that they are missing. So all the "compress"
+            # nodes are processed correctly.
+            self.assertEqual(4, count)
+            self.assertEqual(engine, "jinja2")
+            self.assertIn('<link rel="stylesheet" href="/static/CACHE/css/78bd7a762e2d.css" type="text/css" />', result)
+            self.assertIn('<link rel="stylesheet" href="/static/CACHE/css/e31030430724.css" type="text/css" />', result)
+
         self.assertIn('<script type="text/javascript" src="/static/CACHE/js/3872c9ae3f42.js"></script>', result)
         self.assertIn('<script type="text/javascript" src="/static/CACHE/js/cd8870829421.js"></script>', result)
 
@@ -173,7 +213,7 @@ class OfflineGenerationTestCaseWithError(OfflineTestCaseMixin, TestCase):
         settings.COMPRESS_PRECOMPILERS = (('text/coffeescript', 'non-existing-binary'),)
         super(OfflineGenerationTestCaseWithError, self).setUp()
 
-    def test_offline(self):
+    def _test_offline(self, engine):
         """
         Test that a CommandError is raised with DEBUG being False as well as
         True, as otherwise errors in configuration will never show in
@@ -183,10 +223,10 @@ class OfflineGenerationTestCaseWithError(OfflineTestCaseMixin, TestCase):
 
         try:
             settings.DEBUG = True
-            self.assertRaises(CommandError, CompressCommand().compress)
+            self.assertRaises(CommandError, CompressCommand().compress, engine=engine)
 
             settings.DEBUG = False
-            self.assertRaises(CommandError, CompressCommand().compress)
+            self.assertRaises(CommandError, CompressCommand().compress, engine=engine)
 
         finally:
             settings.DEBUG = self._old_debug
@@ -257,7 +297,26 @@ class OfflineGenerationInlineNonAsciiTestCase(OfflineTestCaseMixin, TestCase):
         self.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
         super(OfflineGenerationInlineNonAsciiTestCase, self).tearDown()
 
-    def test_offline(self):
-        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, engine=engine)
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         self.assertEqual(rendered_template, "".join(result) + "\n")
+
+
+class OfflineGenerationComplexTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = "test_complex"
+    expected_hash = "0e8807bebcee"
+
+    def setUp(self):
+        self.old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
+        settings.COMPRESS_OFFLINE_CONTEXT = {
+            'condition': 'OK!',
+            # Django templating does not allow definition of tuples in the
+            # templates. Make sure this is same as test_templates_jinja2/test_complex.
+            'my_names': ("js/one.js", "js/nonasc.js"),
+        }
+        super(OfflineGenerationComplexTestCase, self).setUp()
+
+    def tearDown(self):
+        self.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
+        super(OfflineGenerationComplexTestCase, self).tearDown()
