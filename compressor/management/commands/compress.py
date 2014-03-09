@@ -94,6 +94,38 @@ class Command(NoArgsCommand):
                 loaders.append(loader)
         return loaders
 
+    def __get_parser(self, engine):
+        if engine == "jinja2":
+            # TODO load jinja settings
+            import jinja2
+            import jinja2.ext
+            from compressor.parser.jinja2 import Jinja2Parser, url_for, SpacelessExtension
+            from compressor.contrib.jinja2ext import CompressorExtension
+
+            extensions = [
+                CompressorExtension,
+                SpacelessExtension,
+                jinja2.ext.with_,
+                jinja2.ext.do,
+            ]
+
+            parser = Jinja2Parser(
+                charset=settings.FILE_CHARSET,
+                extensions=extensions,
+                loader=jinja2.FileSystemLoader(settings.TEMPLATE_DIRS, encoding=settings.FILE_CHARSET),
+                globals={"url_for": url_for},
+                filters={},
+                options={},
+            )
+
+        elif engine == "django":
+            from compressor.parser.dj import DjangoParser
+            parser = DjangoParser(charset=settings.FILE_CHARSET)
+        else:
+            raise OfflineGenerationError("Invalid templating engine specified.")
+
+        return parser
+
     def compress(self, log=None, **options):
         """
         Searches templates containing 'compress' nodes and compresses them
@@ -147,15 +179,7 @@ class Command(NoArgsCommand):
             log.write("Found templates:\n\t" + "\n\t".join(templates) + "\n")
 
         engine = options.get("engine", "django")
-        if engine == "jinja2":
-            # TODO load jinja settings
-            from compressor.parser.jinja2 import Jinja2Parser
-            parser = Jinja2Parser(charset=settings.FILE_CHARSET, globals={}, filters={}, options={})
-        elif engine == "django":
-            from compressor.parser.dj import DjangoParser
-            parser = DjangoParser(charset=settings.FILE_CHARSET)
-        else:
-            raise OfflineGenerationError("Invalid templating engine specified.")
+        parser = self.__get_parser(engine)
 
         compressor_nodes = SortedDict()
         for template_name in templates:
