@@ -2,8 +2,6 @@ from __future__ import absolute_import
 
 import io
 
-from django.template.defaulttags import IfNode
-
 import jinja2
 import jinja2.ext
 from jinja2 import nodes
@@ -107,10 +105,8 @@ class Jinja2Parser(object):
         return template.render(flat_context)
 
     def get_nodelist(self, node):
-        if (isinstance(node, IfNode) and
-          hasattr(node, 'nodelist_true') and
-          hasattr(node, 'nodelist_false')):
-            return node.nodelist_true + node.nodelist_false
+        if isinstance(node, jinja2.nodes.If):
+            return getattr(node, "body", getattr(node, "nodes", [])) + node.else_
         return getattr(node, "body", getattr(node, "nodes", []))
 
     def walk_nodes(self, node, block_name=None):
