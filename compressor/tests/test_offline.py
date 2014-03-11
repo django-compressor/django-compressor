@@ -305,7 +305,6 @@ class OfflineGenerationInlineNonAsciiTestCase(OfflineTestCaseMixin, TestCase):
 
 class OfflineGenerationComplexTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_complex"
-    expected_hash = "0e8807bebcee"
 
     def setUp(self):
         self.old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
@@ -320,3 +319,15 @@ class OfflineGenerationComplexTestCase(OfflineTestCaseMixin, TestCase):
     def tearDown(self):
         self.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
         super(OfflineGenerationComplexTestCase, self).tearDown()
+
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, engine=engine)
+        self.assertEqual(3, count)
+        self.assertEqual([
+            '<script type="text/javascript" src="/static/CACHE/js/0e8807bebcee.js"></script>',
+            '<script type="text/javascript" src="/static/CACHE/js/eed1d222933e.js"></script>',
+            '<script type="text/javascript" src="/static/CACHE/js/262003417d16.js"></script>',
+        ], result)
+        rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
+        result = (result[0], result[2])
+        self.assertEqual(rendered_template, "".join(result) + "\n")

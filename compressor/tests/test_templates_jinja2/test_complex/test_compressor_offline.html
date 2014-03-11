@@ -11,4 +11,14 @@
           {%- endfor %}
         {%- endwith %}
     {% endcompress %}
-{% endif %}{% endspaceless %}
+{% endif %}
+{% if not condition -%}
+    {% compress js %}
+    <script type="text/javascript">var not_ok;</script>
+    {% endcompress %}
+{%- else -%}
+    {% compress js %}
+    <script type="text/javascript">var ok;</script>
+    {% endcompress %}
+{%- endif %}
+{% endspaceless %}
