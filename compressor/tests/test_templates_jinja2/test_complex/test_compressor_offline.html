@@ -3,12 +3,12 @@
 {% if condition %}
     {% compress js%}
         <script type="text/javascript">alert("{{ condition|default("yellow") }}");</script>
-        {% with names=[] %}
-          {% do names.append("js/one.js") %}
-          {% do names.append("js/nonasc.js") %}
-          {% for name in names %}
+        {% with names=[] -%}
+          {%- do names.append("js/one.js") -%}
+          {%- do names.append("js/nonasc.js") -%}
+          {% for name in names -%}
           <script type="text/javascript" src="{{url_for('static', filename=name)}}"></script>
-          {% endfor %}
-        {% endwith %}
+          {%- endfor %}
+        {%- endwith %}
     {% endcompress %}
 {% endif %}{% endspaceless %}
