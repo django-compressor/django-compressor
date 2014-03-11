@@ -76,10 +76,29 @@ class OfflineTestCaseMixin(object):
         self._test_offline(engine="django")
 
     def test_offline_jinja2(self):
+        import jinja2
+        import jinja2.ext
+        from compressor.parser.jinja2 import url_for, SpacelessExtension
+        from compressor.contrib.jinja2ext import CompressorExtension
+
         settings.TEMPLATE_DIRS = (
             os.path.join(settings.TEST_DIR, 'test_templates_jinja2', self.templates_dir),
         )
+        old_jinja2_forced = settings.COMPRESS_JINJA2_FORCED
+        settings.COMPRESS_JINJA2_FORCED = True
+        # Extensions needed for the test cases only.
+        settings.COMPRESS_JINJA2_EXTENSIONS = [
+            CompressorExtension,
+            SpacelessExtension,
+            jinja2.ext.with_,
+            jinja2.ext.do,
+        ]
+        settings.COMPRESS_JINJA2_LOADER = jinja2.FileSystemLoader(settings.TEMPLATE_DIRS, encoding=settings.FILE_CHARSET)
+        settings.COMPRESS_JINJA2_GLOBALS = {"url_for": url_for}
+        settings.COMPRESS_JINJA2_FILTERS = {}
+        settings.COMPRESS_JINJA2_OPTIONS = {}
         self._test_offline(engine="jinja2")
+        settings.COMPRESS_JINJA2_FORCED = old_jinja2_forced
 
 
 class OfflineGenerationBlockSuperTestCase(OfflineTestCaseMixin, TestCase):

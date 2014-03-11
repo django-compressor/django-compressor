@@ -97,7 +97,6 @@ class Jinja2Parser(object):
         return template.render(flat_context)
 
     def render_node(self, template, context, node):
-        context['__compress_forced'] = True
         compiled_node = self.env.compile(jinja2.nodes.Template([node]))
         template = jinja2.Template.from_code(self.env, compiled_node, {})
         flat_context = flatten_context(context)

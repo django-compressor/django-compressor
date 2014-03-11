@@ -96,28 +96,15 @@ class Command(NoArgsCommand):
 
     def __get_parser(self, engine):
         if engine == "jinja2":
-            # TODO load jinja settings
-            import jinja2
-            import jinja2.ext
-            from compressor.parser.jinja2 import Jinja2Parser, url_for, SpacelessExtension
-            from compressor.contrib.jinja2ext import CompressorExtension
-
-            extensions = [
-                CompressorExtension,
-                SpacelessExtension,
-                jinja2.ext.with_,
-                jinja2.ext.do,
-            ]
-
+            from compressor.parser.jinja2 import Jinja2Parser
             parser = Jinja2Parser(
                 charset=settings.FILE_CHARSET,
-                extensions=extensions,
-                loader=jinja2.FileSystemLoader(settings.TEMPLATE_DIRS, encoding=settings.FILE_CHARSET),
-                globals={"url_for": url_for},
-                filters={},
-                options={},
+                extensions=settings.COMPRESS_JINJA2_EXTENSIONS,
+                loader=settings.COMPRESS_JINJA2_LOADER,
+                globals=settings.COMPRESS_JINJA2_GLOBALS,
+                filters=settings.COMPRESS_JINJA2_FILTERS,
+                options=settings.COMPRESS_JINJA2_OPTIONS,
             )
-
         elif engine == "django":
             from compressor.parser.dj import DjangoParser
             parser = DjangoParser(charset=settings.FILE_CHARSET)

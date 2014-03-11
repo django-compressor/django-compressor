@@ -2,6 +2,7 @@ from jinja2 import nodes
 from jinja2.ext import Extension
 from jinja2.exceptions import TemplateSyntaxError
 
+from compressor.conf import settings
 from compressor.templatetags.compress import OUTPUT_FILE, CompressorMixin
 
 
@@ -39,7 +40,7 @@ class CompressorExtension(CompressorMixin, Extension):
             body).set_lineno(lineno)
 
     def _compress(self, kind, mode, context, caller):
-        forced = context.get('__compress_forced', False)
+        forced = settings.COMPRESS_JINJA2_FORCED
 
         mode = mode or OUTPUT_FILE
         original_content = caller()

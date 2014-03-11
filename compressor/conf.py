@@ -68,6 +68,18 @@ class CompressorConf(AppConf):
     OFFLINE_MANIFEST = 'manifest.json'
     # The Context to be used when TemplateFilter is used
     TEMPLATE_FILTER_CONTEXT = {}
+    # Whether to force rendering in the jinja2 compress extension.
+    JINJA2_FORCED = False
+    # Jinja2 extensions needed, not restricted to those in compress blocks.
+    JINJA2_EXTENSIONS = []
+    # Jinja2 template loader; use this to config where to find Jinja2 templates.
+    JINJA2_LOADER = None
+    # Jinja2 template global variables and functions.
+    JINJA2_GLOBALS = {}
+    # Jinja2 template global filters.
+    JINJA2_FILTERS = {}
+    # Jinja2 environment options.
+    JINJA2_OPTIONS = {}
 
     class Meta:
         prefix = 'compress'
