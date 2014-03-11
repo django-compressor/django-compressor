@@ -30,7 +30,6 @@ class CompressorExtension(CompressorMixin, Extension):
         else:
             args.append(nodes.Const('file'))
 
-        args.append(nodes.ContextReference())
         body = parser.parse_statements(['name:endcompress'], drop_needle=True)
 
         # Skip the kind if used in the endblock, by using the kind in the
@@ -39,7 +38,7 @@ class CompressorExtension(CompressorMixin, Extension):
         return nodes.CallBlock(self.call_method('_compress', args), [], [],
             body).set_lineno(lineno)
 
-    def _compress(self, kind, mode, context, caller):
+    def _compress(self, kind, mode, caller):
         forced = settings.COMPRESS_JINJA2_FORCED
 
         mode = mode or OUTPUT_FILE
