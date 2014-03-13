@@ -1,0 +1,11 @@
+{%- load compress -%}
+{% spaceless %}
+    {% compress js%}
+        <script type="text/javascript">alert("{{ condition|default("yellow") }}");
+        var ok = "{% if (25*4) is divisibleby 50 %}ok{% endif %}";
+        </script>
+        {% with "js/one.js" as name -%}
+          <script type="text/javascript" src="{% static name %}"></script>
+        {%- endwith %}
+    {% endcompress %}
+{% endspaceless %}

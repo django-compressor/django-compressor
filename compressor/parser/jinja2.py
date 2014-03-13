@@ -61,15 +61,9 @@ def url_for(mod, filename):
 class Jinja2Parser(object):
     COMPRESSOR_ID = 'compressor.contrib.jinja2ext.CompressorExtension'
 
-    def __init__(self, charset, extensions, loader, filters, globals, options):
-        self.env = jinja2.Environment(
-            extensions=extensions,
-            loader=loader,
-            **options
-        )
-        self.env.globals.update(globals)
-        self.env.filters.update(filters)
+    def __init__(self, charset, env):
         self.charset = charset
+        self.env = env
 
     def parse(self, template_name):
         with io.open(template_name, mode='rb') as file:
@@ -86,8 +80,10 @@ class Jinja2Parser(object):
         return True
 
     def process_node(self, template, context, node):
+        # Don't need to add filters and tests to the context, as Jinja2 will
+        # automatically look for them in self.env.filters and self.env.tests
+        # This is tested by test_complex and test_templatetag.
         context.update(self.env.globals)
-        context.update(self.env.filters)
 
     def render_nodelist(self, template, context, node):
         compiled_node = self.env.compile(jinja2.nodes.Template(node.body))
@@ -114,6 +110,7 @@ class Jinja2Parser(object):
               isinstance(node.call, Call) and
               isinstance(node.call.node, ExtensionAttribute) and
               node.call.node.identifier == self.COMPRESSOR_ID):
+                node.call.node._compress_forced = True
                 yield node
             else:
                 for node in self.walk_nodes(node, block_name=block_name):

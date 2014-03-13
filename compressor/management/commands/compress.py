@@ -97,14 +97,8 @@ class Command(NoArgsCommand):
     def __get_parser(self, engine):
         if engine == "jinja2":
             from compressor.parser.jinja2 import Jinja2Parser
-            parser = Jinja2Parser(
-                charset=settings.FILE_CHARSET,
-                extensions=settings.COMPRESS_JINJA2_EXTENSIONS,
-                loader=settings.COMPRESS_JINJA2_LOADER,
-                globals=settings.COMPRESS_JINJA2_GLOBALS,
-                filters=settings.COMPRESS_JINJA2_FILTERS,
-                options=settings.COMPRESS_JINJA2_OPTIONS,
-            )
+            env = settings.COMPRESS_JINJA2_GET_ENVIRONMENT()
+            parser = Jinja2Parser(charset=settings.FILE_CHARSET, env=env)
         elif engine == "django":
             from compressor.parser.dj import DjangoParser
             parser = DjangoParser(charset=settings.FILE_CHARSET)
@@ -208,6 +202,9 @@ class Command(NoArgsCommand):
         count = 0
         results = []
         offline_manifest = SortedDict()
+        old_forced = settings.COMPRESS_JINJA2_FORCED
+        settings.COMPRESS_JINJA2_FORCED = True
+
         for template, nodes in compressor_nodes.items():
             context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
             template._log = log
@@ -231,6 +228,7 @@ class Command(NoArgsCommand):
                 results.append(result)
                 count += 1
 
+        settings.COMPRESS_JINJA2_FORCED = old_forced
         write_offline_manifest(offline_manifest)
 
         log.write("done\nCompressed %d block(s) from %d template(s).\n" %

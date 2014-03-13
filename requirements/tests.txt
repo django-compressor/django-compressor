@@ -6,3 +6,5 @@ jinja2
 lxml
 BeautifulSoup
 unittest2
+coffin
+jingo
