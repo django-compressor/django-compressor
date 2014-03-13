@@ -175,7 +175,7 @@ class OfflineGenerationBlockSuperTestCaseWithExtraContent(OfflineTestCaseMixin, 
             '<script type="text/javascript" src="/static/CACHE/js/ced14aec5856.js"></script>',
             '<script type="text/javascript" src="/static/CACHE/js/7c02d201f69d.js"></script>'
         ], result)
-        rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
+        rendered_template = self._render_template(engine)
         self.assertEqual(rendered_template, "".join(result) + "\n")
 
 
@@ -284,8 +284,14 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
         self.assertRaises(OfflineGenerationError,
                           self.template.render, Context({}))
 
-    def test_deleting_manifest_does_not_affect_rendering(self):
-        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity)
+    def test_rendering_without_manifest_raises_exception_jinja2(self):
+        # flush cached manifest
+        flush_offline_manifest()
+        self.assertRaises(OfflineGenerationError,
+                          self.template_jinja2.render, {})
+
+    def _test_deleting_manifest_does_not_affect_rendering(self, engine):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, engine=engine)
         get_offline_manifest()
         manifest_path = os.path.join('CACHE', 'manifest.json')
         if default_storage.exists(manifest_path):
@@ -294,8 +300,12 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual([
             '<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
         ], result)
-        rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
+        rendered_template = self._render_template(engine)
         self.assertEqual(rendered_template, "".join(result) + "\n")
+
+    def test_deleting_manifest_does_not_affect_rendering(self):
+        for engine in self.engines:
+            self._test_deleting_manifest_does_not_affect_rendering(engine)
 
     def test_requires_model_validation(self):
         self.assertFalse(CompressCommand.requires_model_validation)
@@ -337,7 +347,7 @@ class OfflineGenerationInlineNonAsciiTestCase(OfflineTestCaseMixin, TestCase):
 
     def _test_offline(self, engine):
         count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, engine=engine)
-        rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
+        rendered_template = self._render_template(engine)
         self.assertEqual(rendered_template, "".join(result) + "\n")
 
 
@@ -366,7 +376,7 @@ class OfflineGenerationComplexTestCase(OfflineTestCaseMixin, TestCase):
             '<script type="text/javascript" src="/static/CACHE/js/eed1d222933e.js"></script>',
             '<script type="text/javascript" src="/static/CACHE/js/00b4baffe335.js"></script>',
         ], result)
-        rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
+        rendered_template = self._render_template(engine)
         result = (result[0], result[2])
         self.assertEqual(rendered_template, "".join(result) + "\n")
 
