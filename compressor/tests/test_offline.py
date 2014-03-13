@@ -345,7 +345,7 @@ class OfflineGenerationComplexTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual([
             '<script type="text/javascript" src="/static/CACHE/js/0e8807bebcee.js"></script>',
             '<script type="text/javascript" src="/static/CACHE/js/eed1d222933e.js"></script>',
-            '<script type="text/javascript" src="/static/CACHE/js/262003417d16.js"></script>',
+            '<script type="text/javascript" src="/static/CACHE/js/00b4baffe335.js"></script>',
         ], result)
         rendered_template = self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
         result = (result[0], result[2])

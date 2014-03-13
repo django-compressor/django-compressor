@@ -18,7 +18,7 @@
     {% endcompress %}
 {%- else -%}
     {% compress js %}
-    <script type="text/javascript">var ok;</script>
+    <script type="text/javascript">var ok = "{% if (25*4) is divisibleby 50 %}ok{% endif %}";</script>
     {% endcompress %}
 {%- endif %}
 {% endspaceless %}
