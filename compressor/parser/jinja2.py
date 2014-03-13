@@ -110,7 +110,6 @@ class Jinja2Parser(object):
               isinstance(node.call, Call) and
               isinstance(node.call.node, ExtensionAttribute) and
               node.call.node.identifier == self.COMPRESSOR_ID):
-                node.call.node._compress_forced = True
                 yield node
             else:
                 for node in self.walk_nodes(node, block_name=block_name):
