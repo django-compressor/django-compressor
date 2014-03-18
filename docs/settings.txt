@@ -418,6 +418,14 @@ Caching settings
         and the ``django.core.context_processors.request`` context processor.
 
     .. _RequestContext: http://docs.djangoproject.com/en/dev/ref/templates/api/#django.template.RequestContext
+    
+.. attribute:: COMPRESS_CACHE_KEY_FUNCTION
+
+    :Default: ``'compressor.cache.simple_cachekey'``
+    
+    The function to use when generating the cache key. The function must take
+    one argument which is the partial key based on the source's hex digest.
+    It must return the full key as a string.
 
 Offline settings
 ----------------
