@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block js %}{% spaceless %}
+    {{ block.super }}
+    <script type="text/javascript">
+        alert("this alert should be included");
+    </script>
+{% endspaceless %}{% endblock %}

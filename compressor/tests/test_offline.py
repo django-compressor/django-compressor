@@ -341,6 +341,43 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
             settings.TEMPLATE_LOADERS = old_loaders
 
 
+class OfflineGenerationBlockSuperBaseCompressed(OfflineTestCaseMixin, TestCase):
+    template_names = ["base.html", "base2.html", "test_compressor_offline.html"]
+    templates_dir = 'test_block_super_base_compressed'
+    expected_hash = ['028c3fc42232', '2e9d3f5545a6', 'f8891c416981']
+    # Block.super not supported for Jinja2 yet.
+    engines = ("django",)
+
+    def setUp(self):
+        super(OfflineGenerationBlockSuperBaseCompressed, self).setUp()
+
+        self.template_paths = []
+        self.templates = []
+        for template_name in self.template_names:
+            template_path = os.path.join(settings.TEMPLATE_DIRS[0], template_name)
+            self.template_paths.append(template_path)
+            with io.open(template_path, encoding=settings.FILE_CHARSET) as file:
+                template = Template(file.read())
+            self.templates.append(template)
+
+    def _render_template(self, template, engine):
+        if engine == "django":
+            return template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
+        elif engine == "jinja2":
+            return template.render(settings.COMPRESS_OFFLINE_CONTEXT) + "\n"
+        else:
+            return None
+
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, engine=engine)
+        self.assertEqual(len(self.expected_hash), count)
+        for expected_hash, template in zip(self.expected_hash, self.templates):
+            expected_output = '<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % (expected_hash, )
+            self.assertIn(expected_output, result)
+            rendered_template = self._render_template(template, engine)
+            self.assertEqual(rendered_template, expected_output + '\n')
+
+
 class OfflineGenerationInlineNonAsciiTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_inline_non_ascii"
 
