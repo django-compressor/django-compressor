@@ -146,7 +146,7 @@ class OfflineGenerationBlockSuperTestCase(OfflineTestCaseMixin, TestCase):
 
 class OfflineGenerationBlockSuperMultipleTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super_multiple"
-    expected_hash = "2f6ef61c488e"
+    expected_hash = "f8891c416981"
     # Block.super not supported for Jinja2 yet.
     engines = ("django",)
 
