@@ -92,24 +92,26 @@ class Jinja2Parser(object):
     def process_node(self, template, context, node):
         pass
 
-    def render_nodelist(self, template, context, node):
-        compiled_node = self.env.compile(jinja2.nodes.Template(node.body))
+    def _render_nodes(self, template, context, nodes):
+        compiled_node = self.env.compile(jinja2.nodes.Template(nodes))
         template = jinja2.Template.from_code(self.env, compiled_node, {})
         flat_context = flatten_context(context)
 
         return template.render(flat_context)
+
+    def render_nodelist(self, template, context, node):
+        return self._render_nodes(template, context, node.body)
 
     def render_node(self, template, context, node):
-        compiled_node = self.env.compile(jinja2.nodes.Template([node]))
-        template = jinja2.Template.from_code(self.env, compiled_node, {})
-        flat_context = flatten_context(context)
-
-        return template.render(flat_context)
+        return self._render_nodes(template, context, [node])
 
     def get_nodelist(self, node):
+        body = getattr(node, "body", getattr(node, "nodes", []))
+
         if isinstance(node, jinja2.nodes.If):
-            return getattr(node, "body", getattr(node, "nodes", [])) + node.else_
-        return getattr(node, "body", getattr(node, "nodes", []))
+            return body + node.else_
+
+        return body
 
     def walk_nodes(self, node, block_name=None):
         for node in self.get_nodelist(node):
