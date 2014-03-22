@@ -104,7 +104,7 @@ class OfflineTestCaseMixin(object):
     def _get_jinja2_env(self):
         import jinja2
         import jinja2.ext
-        from compressor.parser.jinja2 import url_for, SpacelessExtension
+        from compressor.offline.jinja2 import url_for, SpacelessExtension
         from compressor.contrib.jinja2ext import CompressorExtension
 
         # Extensions needed for the test cases only.
@@ -408,7 +408,7 @@ class OfflineGenerationJingoTestCase(OfflineTestCaseMixin, TestCase):
         import jinja2.ext
         from jingo import env
         from compressor.contrib.jinja2ext import CompressorExtension
-        from compressor.parser.jinja2 import SpacelessExtension, url_for
+        from compressor.offline.jinja2 import SpacelessExtension, url_for
 
         # Could have used the env.add_extension method, but it's only available
         # in Jinja2 v2.5
