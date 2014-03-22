@@ -72,8 +72,6 @@ class CompressorConf(AppConf):
     def JINJA2_GET_ENVIRONMENT():
         import jinja2
         return jinja2.Environment()
-    # Whether to force offline generation.
-    JINJA2_FORCED = False
 
     class Meta:
         prefix = 'compress'

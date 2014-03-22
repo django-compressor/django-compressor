@@ -202,8 +202,6 @@ class Command(NoArgsCommand):
         count = 0
         results = []
         offline_manifest = SortedDict()
-        old_forced = settings.COMPRESS_JINJA2_FORCED
-        settings.COMPRESS_JINJA2_FORCED = True
         init_context = parser.get_init_context(settings.COMPRESS_OFFLINE_CONTEXT)
 
         for template, nodes in compressor_nodes.items():
@@ -229,7 +227,6 @@ class Command(NoArgsCommand):
                 results.append(result)
                 count += 1
 
-        settings.COMPRESS_JINJA2_FORCED = old_forced
         write_offline_manifest(offline_manifest)
 
         log.write("done\nCompressed %d block(s) from %d template(s).\n" %

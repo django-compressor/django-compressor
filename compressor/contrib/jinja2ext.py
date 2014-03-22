@@ -2,7 +2,6 @@ from jinja2 import nodes
 from jinja2.ext import Extension
 from jinja2.exceptions import TemplateSyntaxError
 
-from compressor.conf import settings
 from compressor.templatetags.compress import OUTPUT_FILE, CompressorMixin
 
 
@@ -35,12 +34,16 @@ class CompressorExtension(CompressorMixin, Extension):
         # Skip the kind if used in the endblock, by using the kind in the
         # endblock the templates are slightly more readable.
         parser.stream.skip_if('name:' + kindarg.value)
-        return nodes.CallBlock(self.call_method('_compress', args), [], [],
+        return nodes.CallBlock(self.call_method('_compress_normal', args), [], [],
             body).set_lineno(lineno)
 
-    def _compress(self, kind, mode, caller):
-        forced = settings.COMPRESS_JINJA2_FORCED
+    def _compress_forced(self, kind, mode, caller):
+        return self._compress(kind, mode, caller, True)
 
+    def _compress_normal(self, kind, mode, caller):
+        return self._compress(kind, mode, caller, False)
+
+    def _compress(self, kind, mode, caller, forced):
         mode = mode or OUTPUT_FILE
         original_content = caller()
         context = {
