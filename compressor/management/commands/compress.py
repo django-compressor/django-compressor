@@ -96,11 +96,11 @@ class Command(NoArgsCommand):
 
     def __get_parser(self, engine):
         if engine == "jinja2":
-            from compressor.parser.jinja2 import Jinja2Parser
+            from compressor.offline.jinja2 import Jinja2Parser
             env = settings.COMPRESS_JINJA2_GET_ENVIRONMENT()
             parser = Jinja2Parser(charset=settings.FILE_CHARSET, env=env)
         elif engine == "django":
-            from compressor.parser.dj import DjangoParser
+            from compressor.offline.django import DjangoParser
             parser = DjangoParser(charset=settings.FILE_CHARSET)
         else:
             raise OfflineGenerationError("Invalid templating engine specified.")
