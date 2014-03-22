@@ -46,17 +46,16 @@ class OfflineTestCaseMixin(object):
         # Specify both Jinja2 and Django template locations. When the wrong engine
         # is used to parse a template, the TemplateSyntaxError will cause the
         # template to be skipped over.
-        settings.TEMPLATE_DIRS = (
-            os.path.join(settings.TEST_DIR, 'test_templates', self.templates_dir),
-            os.path.join(settings.TEST_DIR, 'test_templates_jinja2', self.templates_dir),
-        )
+        django_template_dir = os.path.join(settings.TEST_DIR, 'test_templates', self.templates_dir)
+        jinja2_template_dir = os.path.join(settings.TEST_DIR, 'test_templates_jinja2', self.templates_dir)
+        settings.TEMPLATE_DIRS = (django_template_dir, jinja2_template_dir)
 
         # Enable offline compress
         settings.COMPRESS_ENABLED = True
         settings.COMPRESS_OFFLINE = True
 
         if "django" in self.engines:
-            self.template_path = os.path.join(settings.TEMPLATE_DIRS[0], self.template_name)
+            self.template_path = os.path.join(django_template_dir, self.template_name)
 
             with io.open(self.template_path, encoding=settings.FILE_CHARSET) as file:
                 self.template = Template(file.read())
@@ -67,7 +66,7 @@ class OfflineTestCaseMixin(object):
             # Setup Jinja2 settings.
             settings.COMPRESS_JINJA2_GET_ENVIRONMENT = lambda: self._get_jinja2_env()
             jinja2_env = settings.COMPRESS_JINJA2_GET_ENVIRONMENT()
-            self.template_path_jinja2 = os.path.join(settings.TEMPLATE_DIRS[1], self.template_name)
+            self.template_path_jinja2 = os.path.join(jinja2_template_dir, self.template_name)
 
             with io.open(self.template_path_jinja2, encoding=settings.FILE_CHARSET) as file:
                 self.template_jinja2 = jinja2_env.from_string(file.read())
