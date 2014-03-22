@@ -108,6 +108,9 @@ class DjangoParser(object):
 
         return True
 
+    def get_init_context(self, offline_context):
+        return offline_context
+
     def process_node(self, template, context, node):
         if template._extra_context and node._block_name:
             # Give a block context to the node if it was found inside

@@ -204,9 +204,10 @@ class Command(NoArgsCommand):
         offline_manifest = SortedDict()
         old_forced = settings.COMPRESS_JINJA2_FORCED
         settings.COMPRESS_JINJA2_FORCED = True
+        init_context = parser.get_init_context(settings.COMPRESS_OFFLINE_CONTEXT)
 
         for template, nodes in compressor_nodes.items():
-            context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
+            context = Context(init_context)
             template._log = log
             template._log_verbosity = verbosity
 

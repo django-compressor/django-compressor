@@ -49,7 +49,6 @@ def url_for(mod, filename):
     """
     Incomplete emulation of Flask's url_for.
     """
-
     from django.contrib.staticfiles.templatetags import staticfiles
 
     if mod == "static":
@@ -79,11 +78,19 @@ class Jinja2Parser(object):
     def process_template(self, template, context):
         return True
 
-    def process_node(self, template, context, node):
+    def get_init_context(self, offline_context):
         # Don't need to add filters and tests to the context, as Jinja2 will
-        # automatically look for them in self.env.filters and self.env.tests
+        # automatically look for them in self.env.filters and self.env.tests.
         # This is tested by test_complex and test_templatetag.
-        context.update(self.env.globals)
+
+        # Allow offline context to override the globals.
+        context = self.env.globals.copy()
+        context.update(offline_context)
+
+        return context
+
+    def process_node(self, template, context, node):
+        pass
 
     def render_nodelist(self, template, context, node):
         compiled_node = self.env.compile(jinja2.nodes.Template(node.body))
