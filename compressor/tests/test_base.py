@@ -1,6 +1,8 @@
 from __future__ import with_statement, unicode_literals
 import os
 import re
+from tempfile import mkdtemp
+from shutil import rmtree, copytree
 
 try:
     from bs4 import BeautifulSoup
@@ -17,6 +19,8 @@ from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
 from compressor.exceptions import FilterDoesNotExist
+from compressor.storage import DefaultStorage
+from compressor.cache import get_hexdigest
 
 
 def make_soup(markup):
@@ -276,3 +280,48 @@ class CacheBackendTestCase(CompressorTestCase):
     def test_correct_backend(self):
         from compressor.cache import cache
         self.assertEqual(cache.__class__, locmem.LocMemCache)
+
+
+class CompressorInDebugModeTestCase(SimpleTestCase):
+
+    def setUp(self):
+        settings.COMPRESS_ENABLED = True
+        settings.COMPRESS_PRECOMPILERS = ()
+        settings.COMPRESS_DEBUG_TOGGLE = 'nocompress'
+        settings.DEBUG = True
+        self.css = '<link rel="stylesheet" href="/static/css/one.css" type="text/css" />'
+        self.tmpdir = mkdtemp()
+        copytree(settings.STATIC_ROOT, os.path.join(self.tmpdir, "static"))
+        self.old_compress_root = settings.COMPRESS_ROOT
+        settings.STATIC_ROOT = settings.COMPRESS_ROOT = os.path.join(self.tmpdir, "static")
+        settings.STATICFILES_DIRS = [ self.old_compress_root ]
+
+    def tearDown(self):
+        rmtree(self.tmpdir)
+        settings.DEBUG = False
+        settings.STATIC_ROOT= settings.COMPRESS_ROOT = self.old_compress_root
+        delattr(settings, "STATICFILES_DIRS")
+
+    def test_filename_in_debug_mode(self):
+        # In debug mode, files should always be compressed based on the app's
+        # static directory, not the global static directory, where files can
+        # be outdated
+        css_filename = os.path.join(settings.COMPRESS_ROOT, "css", "one.css")
+        # Store the hash of the original file's content
+        css_content = open(css_filename).read()
+        hashed = get_hexdigest(css_content, 12)
+        # Now modify the file in the STATIC_ROOT
+        test_css_content = "p { font-family: 'test' }"
+        with open(css_filename, "a") as css:
+            css.write("\n")
+            css.write(test_css_content)
+        # We should generate a link with the hash of the original content, not
+        # the modified one
+        expected = '<link rel="stylesheet" href="/static/CACHE/css/%s.css" type="text/css" />' % hashed
+        compressor = CssCompressor(self.css)
+        compressor.storage = DefaultStorage()
+        output = compressor.output()
+        self.assertEqual(expected, output)
+        result = open(os.path.join(settings.COMPRESS_ROOT, "CACHE", "css",
+                                   "%s.css" % hashed), "r").read()
+        self.assertTrue(test_css_content not in result)
