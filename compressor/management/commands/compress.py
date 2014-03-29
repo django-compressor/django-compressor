@@ -13,11 +13,6 @@ from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
 
-try:
-    from django.template.loaders.cached import Loader as CachedLoader
-except ImportError:
-    CachedLoader = None  # noqa
-
 from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import (OfflineGenerationError, TemplateSyntaxError,
@@ -87,8 +82,10 @@ class Command(NoArgsCommand):
         # )
         # The loaders will return django.template.loaders.filesystem.Loader
         # and django.template.loaders.app_directories.Loader
+        # The cached Loader and similar ones include a 'loaders' attribute
+        # so we look for that.
         for loader in template_source_loaders:
-            if CachedLoader is not None and isinstance(loader, CachedLoader):
+            if hasattr(loader, 'loaders'):
                 loaders.extend(loader.loaders)
             else:
                 loaders.append(loader)
