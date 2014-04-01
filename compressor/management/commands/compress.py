@@ -294,6 +294,7 @@ class Command(NoArgsCommand):
     def get_nodelist(self, node):
         # Check if node is an ```if``` switch with true and false branches
         if hasattr(node, 'nodelist_true') and hasattr(node, 'nodelist_false'):
+            if node.nodelist_false != None:
             return node.nodelist_true + node.nodelist_false
         return getattr(node, "nodelist", [])
 
