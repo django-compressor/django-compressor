@@ -41,7 +41,7 @@ class CssAbsoluteFilter(FilterBase):
             URL_PATTERN.sub(self.url_converter, self.content))
 
     def find(self, basename):
-        if settings.DEBUG and basename and staticfiles.finders:
+        if basename and staticfiles.finders:
             return staticfiles.finders.find(basename)
 
     def guess_filename(self, url):
