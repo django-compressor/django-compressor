@@ -191,7 +191,7 @@ def _make_jsmin(python_only=False):
         r'|%(space)s+'
         r'|(?:%(newline)s%(space)s*)+'
     ) % locals()).sub
-    #print space_sub.__self__.pattern
+    # print space_sub.__self__.pattern
 
     def space_subber(match):
         """ Substitution callback """

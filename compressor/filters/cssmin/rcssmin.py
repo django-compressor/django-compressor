@@ -315,7 +315,7 @@ def _make_cssmin(python_only=False):
             # shortcuts for frequent operations below:
             elif idx == 1:     # not interesting
                 return group(1)
-            #else: # space with token before or at the beginning
+            # else: # space with token before or at the beginning
             return space_sub(space_subber, group(idx))
 
         return func
