@@ -25,7 +25,7 @@ else:
     except ImportError:
         from StringIO import StringIO
 
-_TEST_JINJA2 = not(sys.version_info.major == 3 and sys.version_info.minor == 2)
+_TEST_JINJA2 = not(sys.version_info[0] == 3 and sys.version_info[1] == 2)
 
 
 class OfflineTestCaseMixin(object):
