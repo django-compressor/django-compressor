@@ -382,7 +382,8 @@ class OfflineGenerationComplexTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual(rendered_template, "".join(result) + "\n")
 
 
-@unittest.skipIf(sys.version_info >= (3, 2), "Coffin does not support 3.2")
+@unittest.skipIf(sys.version_info.major == 3 and sys.version_info.minor == 2,
+    "Coffin does not support 3.2")
 class OfflineGenerationCoffinTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_coffin"
     expected_hash = "32c8281e3346"
@@ -401,7 +402,8 @@ class OfflineGenerationCoffinTestCase(OfflineTestCaseMixin, TestCase):
         return env
 
 
-@unittest.skipIf(sys.version_info >= (3, 2), "Jingo does not support 3.2")
+@unittest.skipIf(sys.version_info.major == 3 and sys.version_info.minor == 2,
+    "Jingo does not support 3.2")
 class OfflineGenerationJingoTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_jingo"
     expected_hash = "61ec584468eb"
