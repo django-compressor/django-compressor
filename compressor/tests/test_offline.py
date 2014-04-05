@@ -25,6 +25,8 @@ else:
     except ImportError:
         from StringIO import StringIO
 
+_TEST_JINJA2 = not(sys.version_info.major == 3 and sys.version_info.minor == 2)
+
 
 class OfflineTestCaseMixin(object):
     template_name = "test_compressor_offline.html"
@@ -33,10 +35,10 @@ class OfflineTestCaseMixin(object):
     templates_dir = ""
     expected_hash = ""
     # Engines to test
-    if sys.version_info.major == 3 and sys.version_info.minor == 2:
-        engines = ("django",)
-    else:
+    if _TEST_JINJA2:
         engines = ("django", "jinja2")
+    else:
+        engines = ("django",)
 
     def setUp(self):
         self._old_compress = settings.COMPRESS_ENABLED
@@ -288,6 +290,7 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
         self.assertRaises(OfflineGenerationError,
                           self.template.render, Context({}))
 
+    @unittest.skipUnless(_TEST_JINJA2, "No Jinja2 testing")
     def test_rendering_without_manifest_raises_exception_jinja2(self):
         # flush cached manifest
         flush_offline_manifest()
