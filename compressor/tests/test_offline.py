@@ -290,7 +290,7 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
         self.assertRaises(OfflineGenerationError,
                           self.template.render, Context({}))
 
-    @unittest.skipUnless(_TEST_JINJA2, "No Jinja2 testing")
+    @unittest.skipIf(not _TEST_JINJA2, "No Jinja2 testing")
     def test_rendering_without_manifest_raises_exception_jinja2(self):
         # flush cached manifest
         flush_offline_manifest()
