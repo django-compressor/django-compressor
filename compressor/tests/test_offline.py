@@ -24,6 +24,10 @@ else:
     except ImportError:
         from StringIO import StringIO
 
+# The Jinja2 tests fail on Python 3.2 due to the following:
+# The line in compressor/management/commands/compress.py:
+#     compressor_nodes.setdefault(template, []).extend(nodes)
+# causes the error "unhashable type: 'Template'"
 _TEST_JINJA2 = not(sys.version_info[0] == 3 and sys.version_info[1] == 2)
 
 
@@ -387,6 +391,11 @@ class OfflineGenerationComplexTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual(rendered_template, "".join(result) + "\n")
 
 
+# Coffin does not work on Python 3.2+ due to:
+# The line at coffin/template/__init__.py:15
+#     from library import *
+# causing 'ImportError: No module named library'.
+# It seems there is no evidence nor indicated support for Python 3+.
 @unittest.skipIf(sys.version_info >= (3, 2),
     "Coffin does not support 3.2+")
 class OfflineGenerationCoffinTestCase(OfflineTestCaseMixin, TestCase):
@@ -407,8 +416,12 @@ class OfflineGenerationCoffinTestCase(OfflineTestCaseMixin, TestCase):
         return env
 
 
-@unittest.skipIf(sys.version_info >= (3, 2),
-    "Jingo does not support 3.2+")
+# Jingo does not work when using Python 3.2 due to the use of Unicode string
+# prefix (and possibly other stuff), but it actually works when using Python 3.3
+# since it tolerates the use of the Unicode string prefix. Python 3.3 support
+# is also evident in its tox.ini file.
+@unittest.skipIf(sys.version_info >= (3, 2) and sys.version_info < (3, 3),
+    "Jingo does not support 3.2")
 class OfflineGenerationJingoTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_jingo"
     expected_hash = "61ec584468eb"
