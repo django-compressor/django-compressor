@@ -1,0 +1,7 @@
+{% spaceless %}
+
+{% compress js, inline %}
+    <script type="text/javascript">
+        var value = '{{ test_non_ascii_value }}';
+    </script>
+{% endcompress %}{% endspaceless %}

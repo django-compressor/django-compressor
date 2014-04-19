@@ -141,7 +141,7 @@ class CompilerFilter(FilterBase):
                 self.infile = open(self.filename)
                 options["infile"] = self.filename
 
-        if "{outfile}" in self.command and not "outfile" in options:
+        if "{outfile}" in self.command and "outfile" not in options:
             # create temporary output file if needed
             ext = self.type and ".%s" % self.type or ""
             self.outfile = NamedTemporaryFile(mode='r+', suffix=ext)
