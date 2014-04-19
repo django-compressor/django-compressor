@@ -70,8 +70,11 @@ class CompressorConf(AppConf):
     TEMPLATE_FILTER_CONTEXT = {}
     # Function that returns the Jinja2 environment to use in offline compression.
     def JINJA2_GET_ENVIRONMENT():
-        import jinja2
-        return jinja2.Environment()
+        try:
+            import jinja2
+            return jinja2.Environment()
+        except ImportError:
+            return None
 
     class Meta:
         prefix = 'compress'
