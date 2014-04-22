@@ -392,7 +392,7 @@ Caching settings
     :Default: ``10``
 
     The amount of time (in seconds) to cache the modification timestamp of a
-    file. Disabled by default. Should be smaller than
+    file. Should be smaller than
     :attr:`~django.conf.settings.COMPRESS_REBUILD_TIMEOUT` and
     :attr:`~django.conf.settings.COMPRESS_MINT_DELAY`.
 
