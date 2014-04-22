@@ -134,10 +134,10 @@ def _make_jsmin(python_only=False):
             if last is not None:
                 result.append((first, last))
             return ''.join(['%s%s%s' % (
-                chr(first),
-                last > first + 1 and '-' or '',
-                last != first and chr(last) or ''
-            ) for first, last in result])
+                chr(first2),
+                last2 > first2 + 1 and '-' or '',
+                last2 != first2 and chr(last2) or ''
+            ) for first2, last2 in result])
 
         return _re.sub(r'([\000-\040\047])', # for better portability
             lambda m: '\\%03o' % ord(m.group(1)), (sequentize(result)
@@ -191,7 +191,7 @@ def _make_jsmin(python_only=False):
         r'|%(space)s+'
         r'|(?:%(newline)s%(space)s*)+'
     ) % locals()).sub
-    #print space_sub.__self__.pattern
+    # print space_sub.__self__.pattern
 
     def space_subber(match):
         """ Substitution callback """
