@@ -1,14 +1,45 @@
 Changelog
 =========
 
+v1.4 (as of 04/23/2014)
+-----------------------
+
+- Added Python 3 compatibility.
+
+- Added compatibility with Django 1.6.
+
+- Easier setting up of test environment using Make.
+
+- Allowed data-uri filter to handle external/protocol-relative references
+
+- Made CssCompressor class easier to extend
+
+- Added support for explictly stating the block being ended
+
+- Added rcssmin
+
+- Added offline compression for Jinja2 with Jingo and Coffin integration
+
+- Removed implicit requirement on BeautifulSoup
+
+- Set timestamps of files written by GzipCompressorFileStorage to be equal
+
+- Defaulted to using django's simplejson, if present
+
+- Fixed CompilerFilter to always output Unicode strings
+
+- Fixed compatibility with html5lib 1.0
+
+- Fixed windows line endings in offline compress
+
 v1.3 (03/18/2013)
 -----------------
 
 - *Backward incompatible changes*
 
-  -  Dropped support for Python 2.5. Removed ``any`` and ``walk`` compatibility 
+  -  Dropped support for Python 2.5. Removed ``any`` and ``walk`` compatibility
      functions in ``compressor.utils``.
-  
+
   - Removed compatibility with Django 1.2 for default values of some settings:
 
     - :attr:`~COMPRESS_ROOT` no longer uses ``MEDIA_ROOT`` if ``STATIC_ROOT`` is
@@ -17,7 +48,7 @@ v1.3 (03/18/2013)
     - :attr:`~COMPRESS_URL` no longer uses ``MEDIA_URL`` if ``STATIC_URL`` is
       not defined. It expects ``STATIC_URL`` to be defined instead.
 
-    - :attr:`~COMPRESS_CACHE_BACKEND` no longer uses ``CACHE_BACKEND`` and simply 
+    - :attr:`~COMPRESS_CACHE_BACKEND` no longer uses ``CACHE_BACKEND`` and simply
       defaults to ``default``.
 
 - Added precompiler class support. This enables you to write custom precompilers
@@ -29,8 +60,8 @@ v1.3 (03/18/2013)
 - Removed a ``fsync()`` call in ``CompilerFilter`` to improve performance.
   We already called ``self.infile.flush()`` so that call was not necessary.
 
-- Added an extension to provide django-sekizai support. 
-  See :ref:`django-sekizai Support <django-sekizai_support>` for more 
+- Added an extension to provide django-sekizai support.
+  See :ref:`django-sekizai Support <django-sekizai_support>` for more
   information.
 
 - Fixed a ``DeprecationWarning`` regarding the use of ``django.utils.hashcompat``
