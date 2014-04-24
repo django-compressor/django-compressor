@@ -294,12 +294,12 @@ class CompressorInDebugModeTestCase(SimpleTestCase):
         copytree(settings.STATIC_ROOT, os.path.join(self.tmpdir, "static"))
         self.old_compress_root = settings.COMPRESS_ROOT
         settings.STATIC_ROOT = settings.COMPRESS_ROOT = os.path.join(self.tmpdir, "static")
-        settings.STATICFILES_DIRS = [ self.old_compress_root ]
+        settings.STATICFILES_DIRS = [self.old_compress_root]
 
     def tearDown(self):
         rmtree(self.tmpdir)
         settings.DEBUG = False
-        settings.STATIC_ROOT= settings.COMPRESS_ROOT = self.old_compress_root
+        settings.STATIC_ROOT = settings.COMPRESS_ROOT = self.old_compress_root
         delattr(settings, "STATICFILES_DIRS")
 
     def test_filename_in_debug_mode(self):
