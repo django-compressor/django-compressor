@@ -231,7 +231,7 @@ Backend settings
     item:
 
     #. mimetype
-        The mimetype of the file or inline code should that should be compiled.
+        The mimetype of the file or inline code that should be compiled.
 
     #. command_or_filter
         The command to call on each of the files. Modern Python string
