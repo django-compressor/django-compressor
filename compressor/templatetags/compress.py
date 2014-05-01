@@ -98,6 +98,7 @@ class CompressorMixin(object):
                 if 'request' in context:
                     error_msg = 'File missing from manifest at path %s' % context['request'].path
                 logger.error(error_msg + ' err_msg="%s"' % msg)
+                logger.debug('missing content: %s', self.get_original_content(context))
             else:
                 raise
 
