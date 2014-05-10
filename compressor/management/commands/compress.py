@@ -179,6 +179,7 @@ class Command(NoArgsCommand):
                 if verbosity > 0:
                     log.write("UnicodeDecodeError while trying to read "
                               "template %s\n" % template_name)
+                continue
             nodes = list(parser.walk_nodes(template))
             if nodes:
                 template.template_name = template_name
