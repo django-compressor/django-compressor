@@ -12,7 +12,7 @@ In order to use Django Compressor's Jinja2 extension we would need to pass
     import jinja2
     from compressor.contrib.jinja2ext import CompressorExtension
 
-    env = jinja2.environment(extensions=[CompressorExtension])
+    env = jinja2.Environment(extensions=[CompressorExtension])
 
 From now on, you can use same code you'd normally use within Django templates::
 
