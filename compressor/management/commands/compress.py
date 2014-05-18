@@ -220,6 +220,10 @@ class Command(NoArgsCommand):
                 parser.process_node(template, context, node)
                 rendered = parser.render_nodelist(template, context, node)
                 key = get_offline_hexdigest(rendered)
+
+                if key in offline_manifest:
+                    continue
+
                 try:
                     result = parser.render_node(template, context, node)
                 except Exception as e:
