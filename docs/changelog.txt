@@ -1,36 +1,42 @@
 Changelog
 =========
 
-v1.4 (as of 04/23/2014)
------------------------
+v1.4
+----
 
 - Added Python 3 compatibility.
 
-- Added compatibility with Django 1.6.
+- Added compatibility with Django 1.6.x.
 
-- Easier setting up of test environment using Make.
+- Fixed compatibility with html5lib 1.0.
 
-- Allowed data-uri filter to handle external/protocol-relative references
+- Added offline compression for Jinja2 with Jingo and Coffin integration.
 
-- Made CssCompressor class easier to extend
+- Improved support for template inheritance in offline compression.
 
-- Added support for explictly stating the block being ended
+- Made offline compression avoid compressing the same block multiple times.
 
-- Added rcssmin
+- Added a ``testenv`` target in the Makefile to make it easier to set up the
+  test environment.
 
-- Added offline compression for Jinja2 with Jingo and Coffin integration
+- Allowed data-uri filter to handle external/protocol-relative references.
 
-- Removed implicit requirement on BeautifulSoup
+- Made ``CssCompressor`` class easier to extend.
 
-- Set timestamps of files written by GzipCompressorFileStorage to be equal
+- Added support for explictly stating the block being ended.
 
-- Defaulted to using django's simplejson, if present
+- Added rcssmin and updated rjsmin.
 
-- Fixed CompilerFilter to always output Unicode strings
+- Removed implicit requirement on BeautifulSoup.
 
-- Fixed compatibility with html5lib 1.0
+- Made GzipCompressorFileStorage set access and modified times to the same time
+  as the corresponding base file.
 
-- Fixed windows line endings in offline compress
+- Defaulted to using django's simplejson, if present.
+
+- Fixed CompilerFilter to always output Unicode strings.
+
+- Fixed windows line endings in offline compression.
 
 v1.3 (03/18/2013)
 -----------------
