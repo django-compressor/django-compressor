@@ -179,7 +179,13 @@ class Command(NoArgsCommand):
                 if verbosity > 0:
                     log.write("UnicodeDecodeError while trying to read "
                               "template %s\n" % template_name)
-            nodes = list(parser.walk_nodes(template))
+            try:
+                nodes = list(parser.walk_nodes(template))
+            except (TemplateDoesNotExist, TemplateSyntaxError) as e:
+                # Could be an error in some base template
+                if verbosity > 0:
+                    log.write("Error parsing template %s: %s\n" % (template_name, e))
+                continue
             if nodes:
                 template.template_name = template_name
                 compressor_nodes.setdefault(template, []).extend(nodes)

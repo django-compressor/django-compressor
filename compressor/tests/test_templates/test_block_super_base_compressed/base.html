@@ -1,0 +1,10 @@
+{% load compress %}{% spaceless %}
+
+{% compress js %}
+{% block js %}
+    <script type="text/javascript">
+        alert("test using multiple inheritance and block.super");
+    </script>
+{% endblock %}
+{% endcompress %}
+{% endspaceless %}

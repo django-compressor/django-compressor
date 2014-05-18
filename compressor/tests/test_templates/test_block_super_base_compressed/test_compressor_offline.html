@@ -1,10 +1,8 @@
-{% extends "base.html" %}
+{% extends "base2.html" %}
 
 {% block js %}{% spaceless %}
     {{ block.super }}
     <script type="text/javascript">
-        alert("this alert should be included");
+        alert("this alert shouldn't be alone!");
     </script>
 {% endspaceless %}{% endblock %}
-
-{% block css %}{% endblock %}
