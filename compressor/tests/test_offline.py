@@ -137,6 +137,25 @@ class OfflineTestCaseMixin(object):
         return loader
 
 
+class OfflineGenerationSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = "test_duplicate"
+
+    # We don't need to test multiples engines here.
+    engines = ("django",)
+
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, engine=engine)
+        # Only one block compressed, the second identical one was skipped.
+        self.assertEqual(1, count)
+        # Only 1 <script> block in returned result as well.
+        self.assertEqual([
+            '<script type="text/javascript" src="/static/CACHE/js/f5e179b8eca4.js"></script>',
+        ], result)
+        rendered_template = self._render_template(engine)
+        # But rendering the template returns both (identical) scripts.
+        self.assertEqual(rendered_template, "".join(result * 2) + "\n")
+
+
 class OfflineGenerationBlockSuperTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_block_super"
     expected_hash = "7c02d201f69d"
