@@ -119,6 +119,18 @@ Backend settings
 
          The arguments passed to the compressor.
 
+    - ``compressor.filters.yuglify.YUglifyCSSFilter``
+
+      A filter that passes the CSS content to the `yUglify compressor`_.
+
+      .. attribute:: COMPRESS_YUGLIFY_BINARY
+
+         The yUglify compressor filesystem path.
+
+      .. attribute:: COMPRESS_YUGLIFY_CSS_ARGUMENTS
+
+         The arguments passed to the compressor. Defaults to --terminal.
+
     - ``compressor.filters.cssmin.CSSMinFilter``
 
       A filter that uses Zachary Voase's Python port of the YUI CSS compression
@@ -184,6 +196,18 @@ Backend settings
 
          The arguments passed to the compressor.
 
+    - ``compressor.filters.yuglify.YUglifyJSFilter``
+
+      A filter that passes the JavaScript code to the `yUglify compressor`_.
+
+      .. attribute:: COMPRESS_YUGLIFY_BINARY
+
+         The yUglify compressor filesystem path.
+
+      .. attribute:: COMPRESS_YUGLIFY_JS_ARGUMENTS
+
+         The arguments passed to the compressor.
+
     - ``compressor.filters.template.TemplateFilter``
 
       A filter that renders the JavaScript code with Django templating system.
@@ -195,6 +219,7 @@ Backend settings
     .. _rJSmin: http://opensource.perlig.de/rjsmin/
     .. _`Google Closure compiler`: http://code.google.com/closure/compiler/
     .. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
+    .. _`yUglify compressor`: https://github.com/yui/yuglify
     .. _`Slim It`: http://slimit.org/
 
 .. attribute:: COMPRESS_PRECOMPILERS
@@ -206,7 +231,7 @@ Backend settings
     item:
 
     #. mimetype
-        The mimetype of the file or inline code should that should be compiled.
+        The mimetype of the file or inline code that should be compiled.
 
     #. command_or_filter
         The command to call on each of the files. Modern Python string
@@ -334,7 +359,7 @@ Caching settings
 
 .. attribute:: COMPRESS_CACHE_BACKEND
 
-    :Default: ``"default"`` or ``CACHE_BACKEND``
+    :Default: ``CACHES["default"]`` or ``CACHE_BACKEND``
 
     The backend to use for caching, in case you want to use a different cache
     backend for Django Compressor.
@@ -367,7 +392,7 @@ Caching settings
     :Default: ``10``
 
     The amount of time (in seconds) to cache the modification timestamp of a
-    file. Disabled by default. Should be smaller than
+    file. Should be smaller than
     :attr:`~django.conf.settings.COMPRESS_REBUILD_TIMEOUT` and
     :attr:`~django.conf.settings.COMPRESS_MINT_DELAY`.
 
@@ -393,6 +418,14 @@ Caching settings
         and the ``django.core.context_processors.request`` context processor.
 
     .. _RequestContext: http://docs.djangoproject.com/en/dev/ref/templates/api/#django.template.RequestContext
+    
+.. attribute:: COMPRESS_CACHE_KEY_FUNCTION
+
+    :Default: ``'compressor.cache.simple_cachekey'``
+    
+    The function to use when generating the cache key. The function must take
+    one argument which is the partial key based on the source's hex digest.
+    It must return the full key as a string.
 
 Offline settings
 ----------------

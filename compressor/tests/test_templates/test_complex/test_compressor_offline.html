@@ -1,0 +1,20 @@
+{% load compress static %}{% spaceless %}
+
+{% if condition %}
+    {% compress js%}
+        <script type="text/javascript">alert("{{ condition|default:"yellow" }}");</script>
+        {% with names=my_names %}{% spaceless %}
+          {% for name in names %}
+          <script type="text/javascript" src="{% static name %}"></script>
+          {% endfor %}
+        {% endspaceless %}{% endwith %}
+    {% endcompress %}
+{% endif %}{% if not condition %}
+    {% compress js %}
+    <script type="text/javascript">var not_ok;</script>
+    {% endcompress %}
+{% else %}
+    {% compress js %}
+    <script type="text/javascript">var ok = "ok";</script>
+    {% endcompress %}
+{% endif %}{% endspaceless %}

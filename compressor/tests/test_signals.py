@@ -11,7 +11,7 @@ from compressor.signals import post_compress
 class PostCompressSignalTestCase(TestCase):
     def setUp(self):
         settings.COMPRESS_ENABLED = True
-        settings.COMPRESS_PRECOMPILERS = {}
+        settings.COMPRESS_PRECOMPILERS = ()
         settings.COMPRESS_DEBUG_TOGGLE = 'nocompress'
         self.css = """\
 <link rel="stylesheet" href="/static/css/one.css" type="text/css" />
@@ -34,9 +34,9 @@ class PostCompressSignalTestCase(TestCase):
         post_compress.connect(callback)
         self.js_node.output()
         args, kwargs = callback.call_args
-        self.assertEquals(JsCompressor, kwargs['sender'])
-        self.assertEquals('js', kwargs['type'])
-        self.assertEquals('file', kwargs['mode'])
+        self.assertEqual(JsCompressor, kwargs['sender'])
+        self.assertEqual('js', kwargs['type'])
+        self.assertEqual('file', kwargs['mode'])
         context = kwargs['context']
         assert 'url' in context['compressed']
 
@@ -47,9 +47,9 @@ class PostCompressSignalTestCase(TestCase):
         post_compress.connect(callback)
         self.css_node.output()
         args, kwargs = callback.call_args
-        self.assertEquals(CssCompressor, kwargs['sender'])
-        self.assertEquals('css', kwargs['type'])
-        self.assertEquals('file', kwargs['mode'])
+        self.assertEqual(CssCompressor, kwargs['sender'])
+        self.assertEqual('css', kwargs['type'])
+        self.assertEqual('file', kwargs['mode'])
         context = kwargs['context']
         assert 'url' in context['compressed']
 
@@ -65,4 +65,4 @@ class PostCompressSignalTestCase(TestCase):
         callback = Mock(wraps=listener)
         post_compress.connect(callback)
         css_node.output()
-        self.assertEquals(3, callback.call_count)
+        self.assertEqual(3, callback.call_count)

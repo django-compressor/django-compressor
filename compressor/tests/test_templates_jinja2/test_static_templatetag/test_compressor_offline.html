@@ -1,0 +1,6 @@
+{% spaceless %}
+
+{% compress js %}
+    <script>alert('amazing');</script>
+    <script type="text/javascript" src="{{ url_for('static', filename="js/one.js") }}"></script>
+{% endcompress %}{% endspaceless %}

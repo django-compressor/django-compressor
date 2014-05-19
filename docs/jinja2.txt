@@ -1,5 +1,5 @@
-Jinja2 Support
-==============
+Jinja2 In-Request Support
+=========================
 
 Django Compressor comes with support for Jinja2_ via an extension.
 
@@ -12,7 +12,7 @@ In order to use Django Compressor's Jinja2 extension we would need to pass
     import jinja2
     from compressor.contrib.jinja2ext import CompressorExtension
 
-    env = jinja2.environment(extensions=[CompressorExtension])
+    env = jinja2.Environment(extensions=[CompressorExtension])
 
 From now on, you can use same code you'd normally use within Django templates::
 
@@ -37,5 +37,139 @@ module::
 
 And that's it - our extension is loaded and ready to be used.
 
+
+Jinja2 Offline Compression Support
+==================================
+You'd need to configure ``COMPRESS_JINJA2_GET_ENVIRONMENT`` so that
+Compressor can retrieve the Jinja2 environment for rendering.
+This can be a lamda or function that returns a Jinja2 environment.
+
+Usage
+-----
+Run the following compress command along with an ``-engine`` parameter. The
+parameter can be either jinja2 or django (default). For example,
+"./manage.py compress -engine jinja2".
+
+Using both Django and Jinja2 templates
+--------------------------------------
+There may be a chance that the Jinja2 parser is used to parse Django templates
+if you have a mixture of Django and Jinja2 templates in the same location(s).
+This should not be a problem since the Jinja2 parser will likely raise a
+template syntax error, causing Compressor to skip the errorneous
+template safely. (Vice versa for Django parser).
+
+A typical usage could be :
+
+- "./manage.py compress" for processing Django templates first, skipping
+  Jinja2 templates.
+- "./manage.py compress -engine jinja2" for processing Jinja2 templates,
+  skipping Django templates.
+
+However, it is still recommended that you do not mix Django and Jinja2
+templates in the same project.
+
+Limitations
+-----------
+- Does not support ``{% import %}`` and similar blocks within
+  ``{% compress %}``  blocks.
+- Does not support ``{{super()}}``.
+- All other filters, globals and language constructs such as
+  ``{% if %}``, ``{% with %}`` and ``{% for %}`` are tested and
+  should run fine.
+
+Jinja2 templates location
+-------------------------
+IMPORTANT: For Compressor to discover the templates for offline compression,
+there must be a template loader that implements the ``get_template_sources``
+method, and is in the ``TEMPLATE_LOADERS`` setting.
+
+If you're using Jinja2, you're likely to have a Jinja2 template loader in the
+``TEMPLATE_LOADERS`` setting, otherwise Django won't know how to load Jinja2
+templates. You could use Jingo_ or your own custom loader. Coffin_ works
+differently by providing a custom rendering method instead of a custom loader.
+
+Unfortunately, Jingo_ does not implement such a method in its loader;
+Coffin_ does not seem to have a template loader in the first place.
+Read on to understand how to make Compressor work nicely with Jingo_
+and Coffin_.
+
+By default, if you don't override the ``TEMPLATE_LOADERS`` setting,
+it will include the app directories loader that searches for templates under
+the ``templates`` directory in each app. If the app directories loader is in use
+and your Jinja2 templates are in the ``<app>/templates`` directories,
+Compressor will be able to find the Jinja2 templates.
+
+However, if you have Jinja2 templates in other location(s), you could include
+the filesystem loader (``django.template.loaders.filesystem.Loader``) in the
+``TEMPLATE_LOADERS`` setting and specify the custom location in the
+``TEMPLATE_DIRS`` setting.
+
+For Jingo users
+---------------
+You should configure ``TEMPLATE_LOADERS`` as such::
+
+    TEMPLATE_LOADERS = (
+        'jingo.Loader',
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )
+
+    def COMPRESS_JINJA2_GET_ENVIRONMENT():
+        # TODO: ensure the CompressorExtension is installed with Jingo via
+        # Jingo's JINJA_CONFIG setting.
+        # Additional globals, filters, tests,
+        # and extensions used within {%compress%} blocks must be configured
+        # with Jingo.
+        from jingo import env
+
+        return env
+
+This will enable the Jingo_ loader to load Jinja2 templates and the other
+loaders to report the templates location(s).
+
+For Coffin users
+----------------
+You might want to configure ``TEMPLATE_LOADERS`` as such::
+
+    TEMPLATE_LOADERS = (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )
+
+    def COMPRESS_JINJA2_GET_ENVIRONMENT():
+        # TODO: ensure the CompressorExtension is installed with Coffin
+        # as described in the "In-Request Support" section above.
+        # Additional globals, filters, tests,
+        # and extensions used within {%compress%} blocks must be configured
+        # with Coffin.
+        from coffin.common import env
+
+        return env
+
+Again, if you have the Jinja2 templates in the app template directories, you're
+done here. Otherwise, specify the location in ``TEMPLATE_DIRS``.
+
+Using your custom loader
+------------------------
+You should configure ``TEMPLATE_LOADERS`` as such::
+
+    TEMPLATE_LOADERS = (
+        'your_app.Loader',
+        ... other loaders (optional) ...
+    )
+
+You could implement the `get_template_sources` method in your loader or make
+use of the Django's builtin loaders to report the Jinja2 template location(s).
+
+Python 3 Support
+----------------
+Jingo with Jinja2 are tested and work on Python 2.6, 2.7, and 3.3.
+Coffin with Jinja2 are tested and work on Python 2.6 and 2.7 only.
+Jinja2 alone (with custom loader) are tested and work on Python 2.6, 2.7 and
+3.3 only.
+
+
 .. _Jinja2: http://jinja.pocoo.org/docs/
 .. _Coffin: http://pypi.python.org/pypi/Coffin
+.. _Jingo: https://jingo.readthedocs.org/en/latest/
+

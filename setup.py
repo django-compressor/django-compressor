@@ -1,23 +1,31 @@
+from __future__ import print_function
+import ast
 import os
-import re
 import sys
 import codecs
 from fnmatch import fnmatchcase
 from distutils.util import convert_path
 from setuptools import setup, find_packages
 
+class VersionFinder(ast.NodeVisitor):
+    def __init__(self):
+        self.version = None
+
+    def visit_Assign(self, node):
+        if node.targets[0].id == '__version__':
+            self.version = node.value.s
+
 
 def read(*parts):
-    return codecs.open(os.path.join(os.path.dirname(__file__), *parts)).read()
+    filename = os.path.join(os.path.dirname(__file__), *parts)
+    with codecs.open(filename, encoding='utf-8') as fp:
+        return fp.read()
 
 
-def find_version(*file_paths):
-    version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
-    if version_match:
-        return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
+def find_version(*parts):
+    finder = VersionFinder()
+    finder.visit(ast.parse(read(*parts)))
+    return finder.version
 
 
 # Provided as an attribute, so you can append to these instead
@@ -76,9 +84,8 @@ def find_package_data(where='.', package='',
                     if (fnmatchcase(name, pattern) or fn.lower() == pattern.lower()):
                         bad_name = True
                         if show_ignored:
-                            print >> sys.stderr, (
-                                "Directory %s ignored by pattern %s"
-                                % (fn, pattern))
+                            print("Directory %s ignored by pattern %s" %
+                                  (fn, pattern), file=sys.stderr)
                         break
                 if bad_name:
                     continue
@@ -97,9 +104,8 @@ def find_package_data(where='.', package='',
                     if (fnmatchcase(name, pattern) or fn.lower() == pattern.lower()):
                         bad_name = True
                         if show_ignored:
-                            print >> sys.stderr, (
-                                "File %s ignored by pattern %s"
-                                % (fn, pattern))
+                            print("File %s ignored by pattern %s" %
+                                  (fn, pattern), file=sys.stderr)
                         break
                 if bad_name:
                     continue
@@ -124,8 +130,12 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
         'Topic :: Internet :: WWW/HTTP',
     ],
     zip_safe=False,

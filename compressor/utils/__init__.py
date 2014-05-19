@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import os
+
+from django.utils import six
 
 from compressor.exceptions import FilterError
 
@@ -10,15 +13,14 @@ def get_class(class_string, exception=FilterError):
     """
     if not hasattr(class_string, '__bases__'):
         try:
-            class_string = class_string.encode('ascii')
+            class_string = str(class_string)
             mod_name, class_name = get_mod_func(class_string)
-            if class_name != '':
-                cls = getattr(__import__(mod_name, {}, {}, ['']), class_name)
+            if class_name:
+                return getattr(__import__(mod_name, {}, {}, [str('')]), class_name)
         except (ImportError, AttributeError):
-            pass
-        else:
-            return cls
-    raise exception('Failed to import %s' % class_string)
+            raise exception('Failed to import %s' % class_string)
+
+        raise exception("Invalid class path '%s'" % class_string)
 
 
 def get_mod_func(callback):
@@ -48,7 +50,7 @@ def find_command(cmd, paths=None, pathext=None):
     """
     if paths is None:
         paths = os.environ.get('PATH', '').split(os.pathsep)
-    if isinstance(paths, basestring):
+    if isinstance(paths, six.string_types):
         paths = [paths]
     # check if there are funny path extensions for executables, e.g. Windows
     if pathext is None:

@@ -10,7 +10,7 @@ class CompressorExtension(CompressorMixin, Extension):
     tags = set(['compress'])
 
     def parse(self, parser):
-        lineno = parser.stream.next().lineno
+        lineno = next(parser.stream).lineno
         kindarg = parser.parse_expression()
         # Allow kind to be defined as jinja2 name node
         if isinstance(kindarg, nodes.Name):
@@ -28,14 +28,22 @@ class CompressorExtension(CompressorMixin, Extension):
                 args.append(modearg)
         else:
             args.append(nodes.Const('file'))
+
         body = parser.parse_statements(['name:endcompress'], drop_needle=True)
-        return nodes.CallBlock(self.call_method('_compress', args), [], [],
+
+        # Skip the kind if used in the endblock, by using the kind in the
+        # endblock the templates are slightly more readable.
+        parser.stream.skip_if('name:' + kindarg.value)
+        return nodes.CallBlock(self.call_method('_compress_normal', args), [], [],
             body).set_lineno(lineno)
 
-    def _compress(self, kind, mode, caller):
-        # This extension assumes that we won't force compression
-        forced = False
+    def _compress_forced(self, kind, mode, caller):
+        return self._compress(kind, mode, caller, True)
 
+    def _compress_normal(self, kind, mode, caller):
+        return self._compress(kind, mode, caller, False)
+
+    def _compress(self, kind, mode, caller, forced):
         mode = mode or OUTPUT_FILE
         original_content = caller()
         context = {

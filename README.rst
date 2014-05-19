@@ -1,12 +1,21 @@
 Django Compressor
 =================
 
-.. image:: https://secure.travis-ci.org/jezdez/django_compressor.png?branch=develop
+.. image:: https://coveralls.io/repos/django-compressor/django-compressor/badge.png?branch=develop 
+  :target: https://coveralls.io/r/django-compressor/django-compressor?branch=develop
+
+.. image:: https://pypip.in/v/django_compressor/badge.png
+        :target: https://pypi.python.org/pypi/django_compressor
+
+.. image:: https://pypip.in/d/django_compressor/badge.png
+        :target: https://pypi.python.org/pypi/django_compressor
+
+.. image:: https://secure.travis-ci.org/django-compressor/django-compressor.png?branch=develop
     :alt: Build Status
-    :target: http://travis-ci.org/jezdez/django_compressor
+    :target: http://travis-ci.org/django-compressor/django-compressor
 
 Django Compressor combines and compresses linked and inline Javascript
-or CSS in a Django templates into cacheable static files by using the
+or CSS in a Django template into cacheable static files by using the
 ``compress`` template tag.
 
 HTML in between ``{% compress js/css %}`` and ``{% endcompress %}`` is
@@ -19,10 +28,10 @@ compresses it using ``jsmin``.
 
 As the final result the template tag outputs a ``<script>`` or ``<link>``
 tag pointing to the optimized file. These files are stored inside a folder
-and given an unique name based on their content. Alternatively it can also
+and given a unique name based on their content. Alternatively it can also
 return the resulting content to the original template directly.
 
-Since the file name is dependend on the content these files can be given
+Since the file name is dependent on the content these files can be given
 a far future expiration date without worrying about stale browser caches.
 
 The concatenation and compressing process can also be jump started outside
@@ -39,9 +48,10 @@ html5lib_ based parser, as well as an abstract base class that makes it easy to
 write a custom parser.
 
 Django Compressor also comes with built-in support for `CSS Tidy`_,
-`YUI CSS and JS`_ compressor, the Google's `Closure Compiler`_, a Python
-port of Douglas Crockford's JSmin_, a Python port of the YUI CSS Compressor
-cssmin_ and a filter to convert (some) images into `data URIs`_.
+`YUI CSS and JS`_ compressor, `yUglify CSS and JS`_ compressor, the Google's
+`Closure Compiler`_, a Python port of Douglas Crockford's JSmin_, a Python port
+of the YUI CSS Compressor cssmin_ and a filter to convert (some) images into
+`data URIs`_.
 
 If your setup requires a different compressor or other post-processing
 tool it will be fairly easy to implement a custom filter. Simply extend
@@ -51,21 +61,21 @@ More documentation about the usage and settings of Django Compressor can be
 found on `django-compressor.readthedocs.org`_.
 
 The source code for Django Compressor can be found and contributed to on
-`github.com/jezdez/django_compressor`_. There you can also file tickets.
+`github.com/django-compressor/django-compressor`_. There you can also file tickets.
 
-The `in-development version`_ of Django Compressor can be installed with
-``pip install django_compressor==dev`` or ``easy_install django_compressor==dev``.
+The in-development version of Django Compressor can be installed with
+``pip install http://github.com/django-compressor/django-compressor/tarball/develop``.
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/
 .. _html5lib: http://code.google.com/p/html5lib/
 .. _CSS Tidy: http://csstidy.sourceforge.net/
 .. _YUI CSS and JS: http://developer.yahoo.com/yui/compressor/
+.. _yUglify CSS and JS: https://github.com/yui/yuglify
 .. _Closure Compiler: http://code.google.com/closure/compiler/
 .. _JSMin: http://www.crockford.com/javascript/jsmin.html
 .. _cssmin: https://github.com/zacharyvoase/cssmin
 .. _data URIs: http://en.wikipedia.org/wiki/Data_URI_scheme
 .. _django-compressor.readthedocs.org: http://django-compressor.readthedocs.org/en/latest/
-.. _github.com/jezdez/django_compressor: https://github.com/jezdez/django_compressor
-.. _in-development version: http://github.com/jezdez/django_compressor/tarball/develop#egg=django_compressor-dev
+.. _github.com/django-compressor/django-compressor: https://github.com/django-compressor/django-compressor
 

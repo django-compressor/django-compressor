@@ -1,13 +1,13 @@
-from HTMLParser import HTMLParser
-from django.utils.encoding import smart_unicode
+from django.utils import six
+from django.utils.encoding import smart_text
+
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 
 
-class DefaultHtmlParser(ParserBase, HTMLParser):
-
+class DefaultHtmlParser(ParserBase, six.moves.html_parser.HTMLParser):
     def __init__(self, content):
-        HTMLParser.__init__(self)
+        six.moves.html_parser.HTMLParser.__init__(self)
         self.content = content
         self._css_elems = []
         self._js_elems = []
@@ -15,7 +15,7 @@ class DefaultHtmlParser(ParserBase, HTMLParser):
         try:
             self.feed(self.content)
             self.close()
-        except Exception, err:
+        except Exception as err:
             lineno = err.lineno
             line = self.content.splitlines()[lineno]
             raise ParserError("Error while initializing HtmlParser: %s (line: %s)" % (err, repr(line)))
@@ -65,7 +65,7 @@ class DefaultHtmlParser(ParserBase, HTMLParser):
         return elem['attrs_dict']
 
     def elem_content(self, elem):
-        return smart_unicode(elem['text'])
+        return smart_text(elem['text'])
 
     def elem_str(self, elem):
         tag = {}

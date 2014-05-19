@@ -74,9 +74,9 @@ class Command(NoArgsCommand):
 
         if keys_to_delete:
             cache.delete_many(list(keys_to_delete))
-            print "Deleted mtimes of %d files from the cache." % len(keys_to_delete)
+            print("Deleted mtimes of %d files from the cache." % len(keys_to_delete))
 
         if files_to_add:
             for filename in files_to_add:
                 get_mtime(filename)
-            print "Added mtimes of %d files to cache." % len(files_to_add)
+            print("Added mtimes of %d files to cache." % len(files_to_add))

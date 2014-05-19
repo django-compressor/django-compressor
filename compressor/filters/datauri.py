@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import os
 import re
 import mimetypes
@@ -36,10 +37,11 @@ class DataUriFilter(FilterBase):
 
     def data_uri_converter(self, matchobj):
         url = matchobj.group(1).strip(' \'"')
-        if not url.startswith('data:'):
+        if not url.startswith('data:') and not url.startswith('//'):
             path = self.get_file_path(url)
             if os.stat(path).st_size <= settings.COMPRESS_DATA_URI_MAX_SIZE:
-                data = b64encode(open(path, 'rb').read())
+                with open(path, 'rb') as file:
+                    data = b64encode(file.read()).decode('ascii')
                 return 'url("data:%s;base64,%s")' % (
                     mimetypes.guess_type(path)[0], data)
         return 'url("%s")' % url
