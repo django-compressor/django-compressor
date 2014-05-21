@@ -1,18 +1,21 @@
 Django Compressor
 =================
 
-.. image:: https://coveralls.io/repos/django-compressor/django-compressor/badge.png?branch=develop 
+.. image:: https://coveralls.io/repos/django-compressor/django-compressor/badge.svg?branch=develop 
   :target: https://coveralls.io/r/django-compressor/django-compressor?branch=develop
 
-.. image:: https://pypip.in/v/django_compressor/badge.png
+.. image:: https://pypip.in/v/django_compressor/badge.svg
         :target: https://pypi.python.org/pypi/django_compressor
 
-.. image:: https://pypip.in/d/django_compressor/badge.png
+.. image:: https://pypip.in/d/django_compressor/badge.svg
         :target: https://pypi.python.org/pypi/django_compressor
 
-.. image:: https://secure.travis-ci.org/django-compressor/django-compressor.png?branch=develop
+.. image:: https://secure.travis-ci.org/django-compressor/django-compressor.svg?branch=develop
     :alt: Build Status
     :target: http://travis-ci.org/django-compressor/django-compressor
+
+.. image:: https://caniusepython3.com/project/django_compressor.svg
+    :target: https://caniusepython3.com/project/django_compressor
 
 Django Compressor combines and compresses linked and inline Javascript
 or CSS in a Django template into cacheable static files by using the
