@@ -1,13 +1,12 @@
 from __future__ import absolute_import
-import io
 from copy import copy
 
 from django import template
 from django.conf import settings
-from django.template import Template
 from django.template import Context
 from django.template.base import Node, VariableNode, TextNode, NodeList
 from django.template.defaulttags import IfNode
+from django.template.loader import get_template
 from django.template.loader_tags import ExtendsNode, BlockNode, BlockContext
 
 
@@ -93,13 +92,12 @@ class DjangoParser(object):
         self.charset = charset
 
     def parse(self, template_name):
-        with io.open(template_name, mode='rb') as file:
-            try:
-                return Template(file.read().decode(self.charset))
-            except template.TemplateSyntaxError as e:
-                raise TemplateSyntaxError(str(e))
-            except template.TemplateDoesNotExist as e:
-                raise TemplateDoesNotExist(str(e))
+        try:
+            return get_template(template_name)
+        except template.TemplateSyntaxError as e:
+            raise TemplateSyntaxError(str(e))
+        except template.TemplateDoesNotExist as e:
+            raise TemplateDoesNotExist(str(e))
 
     def process_template(self, template, context):
         return True
