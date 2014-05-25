@@ -81,10 +81,11 @@ Backend settings
 
       .. attribute:: COMPRESS_CSS_HASHING_METHOD
 
-         The method to use when calculating the hash to append to
-         processed URLs. Either ``'mtime'`` (default) or ``'content'``.
-         Use the latter in case you're using multiple server to serve your
-         static files.
+         The method to use when calculating the suffix to append to URLs in
+         your processed CSS files. Either ``None``, ``'mtime'`` (default) or
+         ``'content'``. Use the ``None`` if you want to completely disable that
+         feature, and the ``'content'`` in case you're using multiple servers
+         to serve your content.
 
     - ``compressor.filters.csstidy.CSSTidyFilter``
 
