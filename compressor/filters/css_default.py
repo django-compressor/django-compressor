@@ -70,6 +70,8 @@ class CssAbsoluteFilter(FilterBase):
                 suffix = get_hashed_mtime(filename)
             elif settings.COMPRESS_CSS_HASHING_METHOD in ("hash", "content"):
                 suffix = get_hashed_content(filename)
+            elif settings.COMPRESS_CSS_HASHING_METHOD is None:
+                suffix = None
             else:
                 raise FilterError('COMPRESS_CSS_HASHING_METHOD is configured '
                                   'with an unknown method (%s).' %
