@@ -18,10 +18,8 @@ Installation
 * See the list of :ref:`settings` to modify Django Compressor's
   default behaviour and make adjustments for your website.
 
-* In case you use Django's staticfiles_ contrib app (or its standalone
-  counterpart django-staticfiles_) you have to add Django Compressor's file
-  finder to the ``STATICFILES_FINDERS`` setting, for example with
-  ``django.contrib.staticfiles``:
+* In case you use Django's staticfiles_ contrib app you have to add Django
+  Compressor's file finder to the ``STATICFILES_FINDERS`` setting, like this:
 
   .. code-block:: python
 
