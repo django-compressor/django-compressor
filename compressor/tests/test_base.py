@@ -267,4 +267,4 @@ class CacheBackendTestCase(CompressorTestCase):
 
     def test_correct_backend(self):
         from compressor.cache import cache
-        self.assertEqual(cache.__class__, locmem.CacheClass)
+        self.assertEqual(cache.__class__, locmem.LocMemCache)
