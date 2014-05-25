@@ -8,18 +8,55 @@ class JsCompressor(Compressor):
         super(JsCompressor, self).__init__(content, output_prefix, context)
         self.filters = list(settings.COMPRESS_JS_FILTERS)
         self.type = output_prefix
+        self.supported_attribs = getattr(settings, 'JS_SCRIPT_ATTRIBS',
+                                           ['async', 'defer'])
 
     def split_contents(self):
         if self.split_content:
             return self.split_content
+        seen = []
+        self.script_attribs = []
         for elem in self.parser.js_elems():
+            data = None
             attribs = self.parser.elem_attribs(elem)
             if 'src' in attribs:
                 basename = self.get_basename(attribs['src'])
                 filename = self.get_filename(basename)
-                content = (SOURCE_FILE, filename, basename, elem)
-                self.split_content.append(content)
+                data = (SOURCE_FILE, filename, basename, elem)
             else:
                 content = self.parser.elem_content(elem)
-                self.split_content.append((SOURCE_HUNK, content, None, elem))
+                data = (SOURCE_HUNK, content, None, elem)
+            if data:
+                self.split_content.append(data)
+                script_attrib = None
+                for attr in self.supported_attribs:
+                    if attr in attribs:
+                        script_attrib = attr
+                        break
+                script_attrib = script_attrib or ''
+                # Check for existing node with same script tag
+                append_to_existing = self.script_attribs and script_attrib in seen
+                # If a node exists, just add it to existing, otherwise create new one
+                if append_to_existing:
+                    index = seen.index(script_attrib)
+                    self.script_attribs[index][1].split_content.append(data)
+                else:
+                    node = self.__class__(content=self.parser.elem_str(elem),
+                                          context=self.context)
+                    node.split_content.append(data)
+                    seen.append(script_attrib)
+                    self.script_attribs.append((script_attrib, node))
         return self.split_content
+
+    def output(self, *args, **kwargs):
+        if (settings.COMPRESS_ENABLED or settings.COMPRESS_PRECOMPILERS or
+                kwargs.get('forced', False)):
+            # Populate self.split_content
+            self.split_contents()
+            if hasattr(self, 'script_attribs'):
+                ret = []
+                for attr, node in self.script_attribs:
+                    node.extra_context.update({'tag': attr})
+                    ret.append(node.output(*args, **kwargs))
+                return ''.join(ret)
+        return super(JsCompressor, self).output(*args, **kwargs)
