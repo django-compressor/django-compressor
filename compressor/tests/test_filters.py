@@ -275,6 +275,20 @@ p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/static/img/
             filter = CssAbsoluteFilter(content)
             self.assertEqual(path, filter.guess_filename(url))
 
+    def test_with_commented_urls(self):
+        # TODO: fix this test.
+        settings.COMPRESS_CSS_HASHING_METHOD = None
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/commented.css')
+        params = {
+            'url': settings.COMPRESS_URL,
+        }
+        output = ("p { background: url('%(url)simg/python.png') }"
+                  "/*"
+                  "p { background: url('/static/images/image.gif') }"
+                  "*/") % params
+        filter = CssAbsoluteFilter(self.content)
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/commented.css'))
+
 
 class CssAbsolutizingTestCaseWithHash(CssAbsolutizingTestCase):
     hashing_method = 'content'
