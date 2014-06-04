@@ -22,15 +22,17 @@ class CssAbsoluteFilter(FilterBase):
         self.has_scheme = False
 
     def input(self, filename=None, basename=None, **kwargs):
-        if filename is not None:
-            filename = os.path.normcase(os.path.abspath(filename))
-        if (not (filename and filename.startswith(self.root)) and
+        if self.url.startswith(('http://', 'https://')):
+            self.has_scheme = True
+        if filename is None:  # like inline css
+            return self.content
+        filename = os.path.normcase(os.path.abspath(filename))
+        if (not self.has_scheme and not (filename and filename.startswith(self.root)) and
                 not self.find(basename)):
             return self.content
         self.path = basename.replace(os.sep, '/')
         self.path = self.path.lstrip('/')
-        if self.url.startswith(('http://', 'https://')):
-            self.has_scheme = True
+        if self.has_scheme:
             parts = self.url.split('/')
             self.url = '/'.join(parts[2:])
             self.url_path = '/%s' % '/'.join(parts[3:])

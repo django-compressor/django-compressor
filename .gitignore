@@ -1,4 +1,5 @@
 build
+venv
 compressor/tests/static/CACHE
 compressor/tests/static/custom
 compressor/tests/static/js/066cd253eada.js
