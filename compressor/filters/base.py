@@ -31,7 +31,7 @@ class FilterBase(object):
         self.content = content
         self.verbose = verbose or settings.COMPRESS_VERBOSE
         self.logger = logger
-        self.filename = pipes.quote(filename)
+        self.filename = filename
         self.charset = charset
 
     def input(self, **kwargs):
@@ -132,7 +132,7 @@ class CompilerFilter(FilterBase):
                 self.infile = NamedTemporaryFile(mode='wb')
                 self.infile.write(self.content.encode(encoding))
                 self.infile.flush()
-                options["infile"] = self.infile.name
+                infile_name = self.infile.name
             else:
                 # we use source file directly, which may be encoded using
                 # something different than utf8. If that's the case file will
@@ -140,7 +140,8 @@ class CompilerFilter(FilterBase):
                 # charset will be available as filter's charset attribute
                 encoding = self.charset  # or self.default_encoding
                 self.infile = open(self.filename)
-                options["infile"] = self.filename
+                infile_name = self.filename
+            options["infile"] = pipes.quote(infile_name)
 
         if "{outfile}" in self.command and "outfile" not in options:
             # create temporary output file if needed
