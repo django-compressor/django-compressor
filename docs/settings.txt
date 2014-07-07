@@ -149,12 +149,24 @@ Backend settings
 
          The arguments passed to clean-css.
 
+    - ``compressor.filters.csso.CSSOFilter``
+
+      A filter that passes the CSS content to the `CSSO`_ tool.
+
+      .. attribute:: CSSO_BINARY
+
+         The CSSO binary filesystem path.
+
+      .. attribute:: CSSO_ARGUMENTS
+
+         The arguments passed to CSSO.
+
 
     .. _CSSTidy: http://csstidy.sourceforge.net/
     .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
     .. _cssmin: http://pypi.python.org/pypi/cssmin/
     .. _`clean-css`: https://github.com/GoalSmashers/clean-css/
-
+    .. _`CSSO`: https://github.com/css/csso
 
     - ``compressor.filters.template.TemplateFilter``
 
