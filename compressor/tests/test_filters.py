@@ -21,6 +21,7 @@ from compressor.filters.closure import ClosureCompilerFilter
 from compressor.filters.csstidy import CSSTidyFilter
 from compressor.filters.yuglify import YUglifyCSSFilter, YUglifyJSFilter
 from compressor.filters.yui import YUICSSFilter, YUIJSFilter
+from compressor.filters.csso import CSSOFilter
 from compressor.tests.test_base import test_dir
 
 
@@ -351,3 +352,7 @@ class SpecializedFiltersTest(TestCase):
         filter = YUIJSFilter('', verbose=1)
         self.assertEqual(filter.command, '{binary} {args} --type=js --verbose')
         self.assertEqual(filter.options, (('binary', six.text_type('java -jar yuicompressor.jar')), ('args', six.text_type('')), ('verbose', 1)))
+
+    def test_csso_filter(self):
+        filter = CSSOFilter('')
+        self.assertEqual(filter.options, (('binary', six.text_type('csso')), ('args', six.text_type(''))))
