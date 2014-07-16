@@ -131,19 +131,17 @@ class CssAbsolutizingTestCase(TestCase):
     def test_css_no_hash(self):
         settings.COMPRESS_CSS_HASHING_METHOD = None
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
-        params = {
+        content = self.template % blankdict(url='../../')
+        params = blankdict({
             'url': settings.COMPRESS_URL,
-        }
-        output = ("p { background: url('%(url)simg/python.png') }"
-                  "p { filter: Alpha(src='%(url)simg/python.png') }") % params
-        filter = CssAbsoluteFilter(self.content)
+        })
+        output = self.template % params
+        filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
         settings.COMPRESS_URL = params['url'] = 'http://static.example.com/'
-        filter = CssAbsoluteFilter(self.content)
-        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
-        output = ("p { background: url('%(url)simg/python.png') }"
-                  "p { filter: Alpha(src='%(url)simg/python.png') }") % params
+        output = self.template % params
+        filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
 
     def test_css_absolute_filter(self):
