@@ -3,6 +3,11 @@ import io
 import logging
 import subprocess
 
+try:
+    from shlex import quote as shell_quote  # Python 3
+except ImportError:
+    from pipes import quote as shell_quote  # Python 2
+
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 from django.utils.importlib import import_module
@@ -146,6 +151,12 @@ class CompilerFilter(FilterBase):
             ext = self.type and ".%s" % self.type or ""
             self.outfile = NamedTemporaryFile(mode='r+', suffix=ext)
             options["outfile"] = self.outfile.name
+
+        # Quote infile and outfile for spaces etc.
+        if "infile" in options:
+            options["infile"] = shell_quote(options["infile"])
+        if "outfile" in options:
+            options["outfile"] = shell_quote(options["outfile"])
 
         try:
             command = self.command.format(**options)

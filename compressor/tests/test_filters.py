@@ -47,10 +47,13 @@ class CssTidyTestCase(TestCase):
 
 class PrecompilerTestCase(TestCase):
     def setUp(self):
-        self.filename = os.path.join(test_dir, 'static/css/one.css')
+        self.test_precompiler = os.path.join(test_dir, 'precompiler.py')
+        self.setup_infile()
+
+    def setup_infile(self, filename='static/css/one.css'):
+        self.filename = os.path.join(test_dir, filename)
         with io.open(self.filename, encoding=settings.FILE_CHARSET) as file:
             self.content = file.read()
-        self.test_precompiler = os.path.join(test_dir, 'precompiler.py')
 
     def test_precompiler_infile_outfile(self):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
@@ -58,6 +61,14 @@ class PrecompilerTestCase(TestCase):
             content=self.content, filename=self.filename,
             charset=settings.FILE_CHARSET, command=command)
         self.assertEqual("body { color:#990; }", compiler.input())
+
+    def test_precompiler_infile_with_spaces(self):
+        self.setup_infile('static/css/filename with spaces.css')
+        command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
+        compiler = CompilerFilter(
+            content=self.content, filename=self.filename,
+            charset=settings.FILE_CHARSET, command=command)
+        self.assertEqual("body { color:#424242; }", compiler.input())
 
     def test_precompiler_infile_stdout(self):
         command = '%s %s -f {infile}' % (sys.executable, self.test_precompiler)
