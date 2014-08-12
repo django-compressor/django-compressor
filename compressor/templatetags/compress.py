@@ -17,6 +17,9 @@ OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
 
 class CompressorMixin(object):
 
+    def enabled(self):
+        return settings.COMPRESS_ENABLED
+
     def get_original_content(self, context):
         raise NotImplementedError
 
@@ -54,8 +57,7 @@ class CompressorMixin(object):
         but can be overridden to completely disable compression for
         a subclass, for instance.
         """
-        return (settings.COMPRESS_ENABLED and
-                settings.COMPRESS_OFFLINE) or forced
+        return (self.enabled() and settings.COMPRESS_OFFLINE) or forced
 
     def render_offline(self, context, forced):
         """
@@ -77,7 +79,7 @@ class CompressorMixin(object):
         If enabled checks the cache for the given compressor's cache key
         and return a tuple of cache key and output
         """
-        if settings.COMPRESS_ENABLED and not forced:
+        if self.enabled() and not forced:
             cache_key = get_templatetag_cachekey(compressor, mode, kind)
             cache_content = cache_get(cache_key)
             return cache_key, cache_content
@@ -91,8 +93,7 @@ class CompressorMixin(object):
             return cached_offline
 
         # Take a shortcut if we really don't have anything to do
-        if ((not settings.COMPRESS_ENABLED and
-             not settings.COMPRESS_PRECOMPILERS) and not forced):
+        if not forced and not settings.COMPRESS_PRECOMPILERS and not self.enabled():
             return self.get_original_content(context)
 
         context['compressed'] = {'name': getattr(self, 'name', None)}
@@ -123,11 +124,16 @@ class CompressorMixin(object):
 
 class CompressorNode(CompressorMixin, template.Node):
 
-    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE, name=None):
+    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE, name=None,
+                 enabled=False):
         self.nodelist = nodelist
         self.kind = kind
         self.mode = mode
         self.name = name
+        self._enabled = enabled
+
+    def enabled(self):
+        return settings.COMPRESS_ENABLED or self._enabled
 
     def get_original_content(self, context):
         return self.nodelist.render(context)
@@ -193,22 +199,36 @@ def compress(parser, token):
 
     args = token.split_contents()
 
-    if not len(args) in (2, 3, 4):
-        raise template.TemplateSyntaxError(
-            "%r tag requires either one, two or three arguments." % args[0])
+    # 3 -> enabled | mode
+    # 4 -> mode, enabled | name
+    # 5 -> mode, name, enabled
 
     kind = args[1]
+    mode = OUTPUT_FILE
+    name = None
+    enabled = False
 
-    if len(args) >= 3:
-        mode = args[2]
-        if mode not in OUTPUT_MODES:
-            raise template.TemplateSyntaxError(
-                "%r's second argument must be '%s' or '%s'." %
-                (args[0], OUTPUT_FILE, OUTPUT_INLINE))
-    else:
-        mode = OUTPUT_FILE
-    if len(args) == 4:
-        name = args[3]
-    else:
-        name = None
-    return CompressorNode(nodelist, kind, mode, name)
+    length = len(args)
+    if length == 3:
+        if args[2] == 'enabled':
+            enabled = True
+        else:
+            name = args[2]
+    elif length == 4:
+        mode, enabled_or_name = args[2:]
+        if enabled_or_name == 'enabled':
+            enabled = True
+        else:
+            name = enabled_or_name
+    elif length == 5:
+        mode, name, enabled = args[2:]
+    elif length != 2:
+        raise template.TemplateSyntaxError(
+            "%r tag requires one to five arguments." % args[0])
+
+    if mode not in OUTPUT_MODES:
+        raise template.TemplateSyntaxError(
+            "%r's second argument must be '%s' or '%s'." %
+            (args[0], OUTPUT_FILE, OUTPUT_INLINE))
+
+    return CompressorNode(nodelist, kind, mode, name, enabled=enabled)
