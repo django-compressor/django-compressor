@@ -4,7 +4,6 @@ import os
 import socket
 import time
 
-from django.core.cache import get_cache
 from django.core.files.base import ContentFile
 from django.utils.encoding import force_text, smart_bytes
 from django.utils.functional import SimpleLazyObject
@@ -148,4 +147,9 @@ def cache_set(key, val, refreshed=False, timeout=None):
     return cache.set(key, packed_val, real_timeout)
 
 
-cache = SimpleLazyObject(lambda: get_cache(settings.COMPRESS_CACHE_BACKEND))
+try:
+    from django.core.cache import caches
+    cache = SimpleLazyObject(lambda: caches[settings.COMPRESS_CACHE_BACKEND])
+except ImportError:
+    from django.core.cache import get_cache
+    cache = SimpleLazyObject(lambda: get_cache(settings.COMPRESS_CACHE_BACKEND))
