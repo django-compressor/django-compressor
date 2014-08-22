@@ -137,9 +137,24 @@ Backend settings
       A filter that uses Zachary Voase's Python port of the YUI CSS compression
       algorithm cssmin_.
 
+    - ``compressor.filters.cleancss.CleanCSSFilter``
+
+      A filter that passes the CSS content to the `clean-css`_ tool.
+
+      .. attribute:: CLEAN_CSS_BINARY
+
+         The clean-css binary filesystem path.
+
+      .. attribute:: CLEAN_CSS_ARGUMENTS
+
+         The arguments passed to clean-css.
+
+
     .. _CSSTidy: http://csstidy.sourceforge.net/
     .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
     .. _cssmin: http://pypi.python.org/pypi/cssmin/
+    .. _`clean-css`: https://github.com/GoalSmashers/clean-css/
+
 
     - ``compressor.filters.template.TemplateFilter``
 
