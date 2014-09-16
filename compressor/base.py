@@ -14,7 +14,7 @@ except ImportError:
     from urllib import url2pathname
 
 from compressor.cache import get_hexdigest, get_mtime
-from compressor.conf import settings
+from compressor.conf import settings, CompressorConf as compressor_settings
 from compressor.exceptions import (CompressorError, UncompressableFileError,
         FilterDoesNotExist)
 from compressor.filters import CompilerFilter
@@ -114,6 +114,7 @@ class Compressor(object):
         get_filename('css/one.css') -> '/full/path/to/static/css/one.css'
         """
         filename = None
+        storage_is_remote = False
         # first try finding the file in the root
         try:
             # call path first so remote storages don't make it to exists,
@@ -123,11 +124,17 @@ class Compressor(object):
                 filename = None
         except NotImplementedError:
             # remote storages don't implement path, access the file locally
+            storage_is_remote = True
             if compressor_file_storage.exists(basename):
                 filename = compressor_file_storage.path(basename)
         # secondly try to find it with staticfiles (in debug mode)
         if not filename and self.finders:
             filename = self.finders.find(url2pathname(basename))
+        # third, attempt to find the file remotely if the compressor storage
+        # is remote and the 'COMPRESS_PULL_FROM_REMOTE' setting is True
+        if not filename and storage_is_remote and compressor_settings.PULL_FROM_REMOTE and self.storage.exists(basename):
+            compressor_file_storage.save(basename, self.storage.open(basename))
+            filename = compressor_file_storage.path(basename)
         if filename:
             return filename
         # or just raise an exception as the last resort
