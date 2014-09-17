@@ -3,10 +3,18 @@ import io
 import logging
 import subprocess
 
-try:
-    from shlex import quote as shell_quote  # Python 3
-except ImportError:
-    from pipes import quote as shell_quote  # Python 2
+from platform import system
+
+if system() != "Windows":
+    try:
+        from shlex import quote as shell_quote  # Python 3
+    except ImportError:
+        from pipes import quote as shell_quote  # Python 2
+else:
+    from subprocess import list2cmdline
+    def shell_quote(s):
+        # shlex.quote/pipes.quote is not compatible with Windows
+        return list2cmdline([s])
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
