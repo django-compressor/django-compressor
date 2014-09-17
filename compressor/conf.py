@@ -17,7 +17,7 @@ class CompressorConf(AppConf):
     PARSER = 'compressor.parser.AutoSelectParser'
     OUTPUT_DIR = 'CACHE'
     STORAGE = 'compressor.storage.CompressorFileStorage'
-    
+
     # if a static file cannot be found locally, should we pull from the remote storage?
     FETCH_FROM_REMOTE = False
 
