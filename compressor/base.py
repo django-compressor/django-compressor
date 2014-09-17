@@ -131,8 +131,8 @@ class Compressor(object):
         if not filename and self.finders:
             filename = self.finders.find(url2pathname(basename))
         # third, attempt to find the file remotely if the compressor storage
-        # is remote and the 'COMPRESS_PULL_FROM_REMOTE' setting is True
-        if not filename and storage_is_remote and compressor_settings.PULL_FROM_REMOTE and self.storage.exists(basename):
+        # is remote and the 'COMPRESS_FETCH_FROM_REMOTE' setting is True
+        if not filename and storage_is_remote and compressor_settings.FETCH_FROM_REMOTE and self.storage.exists(basename):
             compressor_file_storage.save(basename, self.storage.open(basename))
             filename = compressor_file_storage.path(basename)
         if filename:
