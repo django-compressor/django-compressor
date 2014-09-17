@@ -95,6 +95,6 @@ Optional
 .. _lxml: http://codespeak.net/lxml/
 .. _libxml2: http://xmlsoft.org/
 .. _html5lib: http://code.google.com/p/html5lib/
-.. _`Slim It`: http://slimit.org/
+.. _`Slim It`: https://github.com/rspivak/slimit
 .. _django-appconf: http://pypi.python.org/pypi/django-appconf/
 .. _versiontools: http://pypi.python.org/pypi/versiontools/

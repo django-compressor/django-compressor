@@ -7,6 +7,10 @@ install:
 script:
   - tox
 env:
+  - TOXENV=py34-1.7.X
+  - TOXENV=py33-1.7.X
+  - TOXENV=py32-1.7.X
+  - TOXENV=py27-1.7.X
   - TOXENV=py33-1.6.X
   - TOXENV=py32-1.6.X
   - TOXENV=py27-1.6.X
