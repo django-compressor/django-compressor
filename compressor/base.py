@@ -140,6 +140,9 @@ class Compressor(object):
         """
         Reads file contents using given `charset` and returns it as text.
         """
+        if charset == 'utf-8':
+            # Removes BOM
+            charset = 'utf-8-sig'
         with codecs.open(filename, 'r', charset) as fd:
             try:
                 return fd.read()
