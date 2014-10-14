@@ -132,6 +132,18 @@ Backend settings
 
          The arguments passed to the compressor. Defaults to --terminal.
 
+    - ``compressor.filters.csso.CSSOFilter``
+
+      A filter that passes the CSS content to the `CSSO`_ tool.
+
+      .. attribute:: COMPRESS_CSSO_BINARY
+
+         The CSSO binary filesystem path.
+
+      .. attribute:: COMPRESS_CSSO_ARGUMENTS
+
+         The arguments passed to CSSO.
+
     - ``compressor.filters.cssmin.CSSMinFilter``
 
       A filter that uses Zachary Voase's Python port of the YUI CSS compression
@@ -140,6 +152,7 @@ Backend settings
     .. _CSSTidy: http://csstidy.sourceforge.net/
     .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
     .. _cssmin: http://pypi.python.org/pypi/cssmin/
+    .. _`CSSO`: https://github.com/css/csso
 
     - ``compressor.filters.template.TemplateFilter``
 
