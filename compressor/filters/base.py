@@ -83,7 +83,7 @@ class CallbackOutputFilter(FilterBase):
         try:
             mod_name, func_name = get_mod_func(self.callback)
             func = getattr(import_module(mod_name), func_name)
-        except ImportError:
+        except (ImportError, TypeError):
             if self.dependencies:
                 if len(self.dependencies) == 1:
                     warning = "dependency (%s) is" % self.dependencies[0]

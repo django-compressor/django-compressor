@@ -12,11 +12,13 @@ from django.core.cache.backends import locmem
 from django.test import SimpleTestCase
 from django.test.utils import override_settings
 
-from compressor.base import SOURCE_HUNK, SOURCE_FILE
+from compressor import cache as cachemod
+from compressor.base import SOURCE_FILE, SOURCE_HUNK
+from compressor.cache import get_cachekey
 from compressor.conf import settings
 from compressor.css import CssCompressor
+from compressor.exceptions import FilterDoesNotExist, FilterError
 from compressor.js import JsCompressor
-from compressor.exceptions import FilterDoesNotExist
 
 
 def make_soup(markup):
@@ -216,6 +218,14 @@ class CompressorTestCase(SimpleTestCase):
         css_node = CssCompressor(css)
         self.assertRaises(FilterDoesNotExist, css_node.output, 'inline')
 
+    @override_settings(COMPRESS_PRECOMPILERS=(
+        ('text/foobar', './foo -I ./bar/baz'),
+    ), COMPRESS_ENABLED=True)
+    def test_command_with_dot_precompiler(self):
+        css = '<style type="text/foobar">p { border:10px solid red;}</style>'
+        css_node = CssCompressor(css)
+        self.assertRaises(FilterError, css_node.output, 'inline')
+
 
 class CssMediaTestCase(SimpleTestCase):
     def setUp(self):
@@ -304,3 +314,20 @@ class JsAsyncDeferTestCase(SimpleTestCase):
             scripts = make_soup(js_node.output()).findAll('script')
             attrs = [s.get('async') or s.get('defer') for s in scripts]
         self.assertEqual(output, attrs)
+
+
+class CacheTestCase(SimpleTestCase):
+
+    def setUp(self):
+        cachemod._cachekey_func = None
+
+    def test_get_cachekey_basic(self):
+        self.assertEqual(get_cachekey("foo"), "django_compressor.foo")
+
+    @override_settings(COMPRESS_CACHE_KEY_FUNCTION='.leading.dot')
+    def test_get_cachekey_leading_dot(self):
+        self.assertRaises(ImportError, lambda: get_cachekey("foo"))
+
+    @override_settings(COMPRESS_CACHE_KEY_FUNCTION='invalid.module')
+    def test_get_cachekey_invalid_mod(self):
+        self.assertRaises(ImportError, lambda: get_cachekey("foo"))
