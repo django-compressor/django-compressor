@@ -5,4 +5,9 @@
     <script type="text/javascript">
         alert("this alert shouldn't be alone!");
     </script>
+    {% block orphan %}
+        {{ block.super }}
+        An 'orphan' block that refers to a non-existent super block.
+        Contents of this block are ignored.
+    {% endblock %}
 {% endspaceless %}{% endblock %}
