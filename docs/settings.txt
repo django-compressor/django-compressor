@@ -153,11 +153,11 @@ Backend settings
 
       A filter that passes the CSS content to the `CSSO`_ tool.
 
-      .. attribute:: COMPRESS_CSSO_BINARY
+      .. attribute:: CSSO_BINARY
 
          The CSSO binary filesystem path.
 
-      .. attribute:: COMPRESS_CSSO_ARGUMENTS
+      .. attribute:: CSSO_ARGUMENTS
 
          The arguments passed to CSSO.
 
