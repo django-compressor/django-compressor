@@ -16,12 +16,19 @@ INSTALLED_APPS = [
     'compressor',
     'coffin',
     'jingo',
+    'django.contrib.staticfiles',
 ]
 
 STATIC_URL = '/static/'
 
 
 STATIC_ROOT = os.path.join(TEST_DIR, 'static')
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
 
 TEMPLATE_DIRS = (
     # Specifically choose a name that will not be considered
