@@ -147,7 +147,7 @@ class CompilerFilter(FilterBase):
             # create temporary output file if needed
             ext = self.type and ".%s" % self.type or ""
             self.outfile = NamedTemporaryFile(mode='r+', suffix=ext)
-            options["outfile"] = self.outfile.name
+            options["outfile"] = pipes.quote(self.outfile.name)
 
         try:
             command = self.command.format(**options)
