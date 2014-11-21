@@ -112,6 +112,14 @@ class CompressorTestCase(SimpleTestCase):
         hunks = '\n'.join([h for h in self.css_node.hunks()])
         self.assertEqual(out, hunks)
 
+    def test_css_output_with_bom_input(self):
+        out = 'body { background:#990; }\n.compress-test {color: red;}'
+        css = ("""<link rel="stylesheet" href="/static/css/one.css" type="text/css" />
+        <link rel="stylesheet" href="/static/css/utf-8_with-BOM.css" type="text/css" />""")
+        css_node_with_bom = CssCompressor(css)
+        hunks = '\n'.join([h for h in css_node_with_bom.hunks()])
+        self.assertEqual(out, hunks)
+
     def test_css_mtimes(self):
         is_date = re.compile(r'^\d{10}[\.\d]+$')
         for date in self.css_node.mtimes:
