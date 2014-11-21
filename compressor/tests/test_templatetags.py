@@ -165,6 +165,15 @@ class PrecompilerTemplatetagTestCase(TestCase):
         out = script(src="/static/CACHE/js/ef6b32a54575.js")
         self.assertEqual(out, render(template, self.context))
 
+    def test_compress_coffeescript_tag_with_else(self):
+        template = """{% load compress %}{% compress js %}
+            <script type="text/coffeescript"># this is a comment.</script>
+            {% else %}
+            <marquee>Roulette</marquee>
+            {% endcompress %}"""
+        out = script(src="/static/CACHE/js/e920d58f166d.js")
+        self.assertEqual(out, render(template, self.context))
+
     @override_settings(COMPRESS_ENABLED=False)
     def test_coffeescript_and_js_tag_with_compress_enabled_equals_false(self):
         template = """{% load compress %}{% compress js %}
@@ -184,6 +193,16 @@ class PrecompilerTemplatetagTestCase(TestCase):
         self.assertEqual(out, render(template, self.context))
 
     @override_settings(COMPRESS_ENABLED=False)
+    def test_compress_coffeescript_tag_compress_enabled_is_false_with_else(self):
+        template = """{% load compress %}{% compress js %}
+            <script type="text/coffeescript"># this is a comment.</script>
+            {% else %}
+            <script type="text/javascript"># this is a comment in JS.</script>
+            {% endcompress %}"""
+        out = script("# this is a comment in JS.")
+        self.assertEqual(out, render(template, self.context))
+
+    @override_settings(COMPRESS_ENABLED=False)
     def test_compress_coffeescript_file_tag_compress_enabled_is_false(self):
         template = """
         {% load compress %}{% compress js %}
@@ -192,6 +211,19 @@ class PrecompilerTemplatetagTestCase(TestCase):
         {% endcompress %}"""
 
         out = script(src="/static/CACHE/js/one.95cfb869eead.js")
+        self.assertEqual(out, render(template, self.context))
+
+    @override_settings(COMPRESS_ENABLED=False)
+    def test_compress_coffeescript_file_tag_compress_enabled_is_false_with_else(self):
+        template = """
+        {% load compress %}{% compress js %}
+        <script type="text/coffeescript" src="{{ STATIC_URL }}js/one.coffee">
+        </script>
+        {% else %}
+        <script type="text/javascript" src="{{ STATIC_URL }}js/one.js"></script>
+        {% endcompress %}"""
+
+        out = script(src="/static/js/one.js")
         self.assertEqual(out, render(template, self.context))
 
     @override_settings(COMPRESS_ENABLED=False)

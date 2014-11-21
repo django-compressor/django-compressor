@@ -8,7 +8,11 @@ Usage
     {% load compress %}
     {% compress <js/css> [<file/inline> [block_name]] %}
     <html of inline or linked JS/CSS>
+    {% else %}
+    <html of inline or linked JS/CSS if compression is disabled>
     {% endcompress %}
+
+The else part is optional.
 
 Examples
 --------
