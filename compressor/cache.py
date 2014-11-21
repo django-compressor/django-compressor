@@ -149,7 +149,7 @@ def cache_set(key, val, refreshed=False, timeout=None):
 
 try:
     from django.core.cache import caches
-    cache = SimpleLazyObject(lambda: caches[settings.COMPRESS_CACHE_BACKEND])
+    cache = SimpleLazyObject(lambda: caches[settings.COMPRESS_CACHE_ALIAS])
 except ImportError:
     from django.core.cache import get_cache
-    cache = SimpleLazyObject(lambda: get_cache(settings.COMPRESS_CACHE_BACKEND))
+    cache = SimpleLazyObject(lambda: get_cache(settings.COMPRESS_CACHE_ALIAS))

@@ -76,7 +76,7 @@ exception. If DEBUG is ``False`` these files will be silently stripped.
     For production sites it is **strongly recommended** to use a real cache
     backend such as memcached_ to speed up the checks of compressed files.
     Make sure you set your Django cache backend appropriately (also see
-    :attr:`~django.conf.settings.COMPRESS_CACHE_BACKEND` and
+    :attr:`~django.conf.settings.COMPRESS_CACHE_ALIAS` and
     Django's `caching documentation`_).
 
 The compress template tag supports a second argument specifying the output
