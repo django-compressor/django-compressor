@@ -4,11 +4,21 @@ import os
 import socket
 import time
 
-from django.core.cache import get_cache
+try:
+    from django.core.cache import caches
+    def get_cache(name):
+        return caches[name]
+except ImportError:
+    from django.core.cache import get_cache
+    
 from django.core.files.base import ContentFile
 from django.utils.encoding import force_text, smart_bytes
 from django.utils.functional import SimpleLazyObject
-from django.utils.importlib import import_module
+
+try:
+    from importlib import import_module
+except:
+    from django.utils.importlib import import_module
 
 from compressor.conf import settings
 from compressor.storage import default_storage
