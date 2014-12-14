@@ -5,7 +5,10 @@ import codecs
 from django.core.files.base import ContentFile
 from django.template import Context
 from django.template.loader import render_to_string
-from django.utils.importlib import import_module
+try:
+    from importlib import import_module
+except:
+    from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
 
 try:
