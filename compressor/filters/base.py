@@ -10,7 +10,12 @@ except ImportError:
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
-from django.utils.importlib import import_module
+
+try:
+    from importlib import import_module
+except ImportError:
+    from django.utils.importlib import import_module
+
 from django.utils.encoding import smart_text
 from django.utils import six
 
