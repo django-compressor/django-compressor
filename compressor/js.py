@@ -44,7 +44,7 @@ class JsCompressor(Compressor):
         if (settings.COMPRESS_ENABLED or settings.COMPRESS_PRECOMPILERS or
                 kwargs.get('forced', False)):
             self.split_contents()
-            if hasattr(self, 'nodes'):
+            if hasattr(self, 'extra_nodes'):
                 ret = []
                 for extra, subnode in self.extra_nodes:
                     subnode.extra_context.update({'extra': extra})
