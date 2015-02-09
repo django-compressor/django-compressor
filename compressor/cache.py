@@ -7,7 +7,11 @@ import time
 from django.core.files.base import ContentFile
 from django.utils.encoding import force_text, smart_bytes
 from django.utils.functional import SimpleLazyObject
-from django.utils.importlib import import_module
+
+try:
+    from importlib import import_module
+except:
+    from django.utils.importlib import import_module
 
 from compressor.conf import settings
 from compressor.storage import default_storage

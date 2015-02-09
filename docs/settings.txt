@@ -321,7 +321,7 @@ Backend settings
         <link rel="stylesheet" href="/static/CACHE/css/8ccf8d877f18.css" type="text/css" charset="utf-8">
 
     .. _less: http://lesscss.org/
-    .. _CoffeeScript: http://jashkenas.github.com/coffee-script/
+    .. _CoffeeScript: http://coffeescript.org/
 
 .. attribute:: COMPRESS_STORAGE
 

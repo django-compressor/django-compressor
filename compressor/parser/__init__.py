@@ -1,6 +1,9 @@
 from django.utils import six
 from django.utils.functional import LazyObject
-from django.utils.importlib import import_module
+try:
+    from importlib import import_module
+except ImportError:
+    from django.utils.importlib import import_module
 
 # support legacy parser module usage
 from compressor.parser.base import ParserBase  # noqa
