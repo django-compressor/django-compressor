@@ -274,8 +274,8 @@ Backend settings
     .. note::
         Depending on the implementation, some precompilers might not support
         outputting to something else than ``stdout``, so you'll need to omit the
-        ``{outfile}`` parameter when working with those. For instance, if you 
-        are using the Ruby version of lessc, you'll need to set up the 
+        ``{outfile}`` parameter when working with those. For instance, if you
+        are using the Ruby version of lessc, you'll need to set up the
         precompiler like this::
 
             ('text/less', 'lessc {infile}'),
@@ -373,20 +373,17 @@ Backend settings
 Caching settings
 ----------------
 
-.. attribute:: COMPRESS_CACHE_BACKEND
+.. attribute:: COMPRESS_CACHE_ALIAS
 
-    :Default: ``CACHES["default"]`` or ``CACHE_BACKEND``
+    :Default: ``'default'``
 
     The backend to use for caching, in case you want to use a different cache
     backend for Django Compressor.
 
     If you have set the ``CACHES`` setting (new in Django 1.3),
-    ``COMPRESS_CACHE_BACKEND`` defaults to ``"default"``, which is the alias for
+    ``COMPRESS_CACHE_ALIAS`` defaults to ``'default'``, which is the alias for
     the default cache backend. You can set it to a different alias that you have
     configured in your ``CACHES`` setting.
-
-    If you have not set ``CACHES`` and are using the old ``CACHE_BACKEND``
-    setting, ``COMPRESS_CACHE_BACKEND`` defaults to the ``CACHE_BACKEND`` setting.
 
 .. attribute:: COMPRESS_REBUILD_TIMEOUT
 
@@ -434,11 +431,11 @@ Caching settings
         and the ``django.core.context_processors.request`` context processor.
 
     .. _RequestContext: http://docs.djangoproject.com/en/dev/ref/templates/api/#django.template.RequestContext
-    
+
 .. attribute:: COMPRESS_CACHE_KEY_FUNCTION
 
     :Default: ``'compressor.cache.simple_cachekey'``
-    
+
     The function to use when generating the cache key. The function must take
     one argument which is the partial key based on the source's hex digest.
     It must return the full key as a string.

@@ -53,24 +53,29 @@ class Command(NoArgsCommand):
     requires_model_validation = False
 
     def get_loaders(self):
-        from django.template.loader import template_source_loaders
-        if template_source_loaders is None:
-            try:
-                from django.template.loader import (
-                    find_template as finder_func)
-            except ImportError:
-                from django.template.loader import (
-                    find_template_source as finder_func)  # noqa
-            try:
-                # Force django to calculate template_source_loaders from
-                # TEMPLATE_LOADERS settings, by asking to find a dummy template
-                source, name = finder_func('test')
-            except django.template.TemplateDoesNotExist:
-                pass
-            # Reload template_source_loaders now that it has been calculated ;
-            # it should contain the list of valid, instanciated template loaders
-            # to use.
+        try:
+            # Newest function to list template loaders, see Django commit 9eeb788cfb70d07d87b3d07434d6a149ab2d7471
+            from django.template.loaders.utils import get_template_loaders
+        except ImportError:
             from django.template.loader import template_source_loaders
+            if template_source_loaders is None:
+                try:
+                    from django.template.loader import (
+                        find_template as finder_func)
+                except ImportError:
+                    from django.template.loader import (
+                        find_template_source as finder_func)  # noqa
+                try:
+                    # Force django to calculate template_source_loaders from
+                    # TEMPLATE_LOADERS settings, by asking to find a dummy template
+                    source, name = finder_func('test')
+                except django.template.TemplateDoesNotExist:
+                    pass
+                # Reload template_source_loaders now that it has been calculated ;
+                # it should contain the list of valid, instanciated template loaders
+                # to use.
+                from django.template.loader import template_source_loaders
+            get_template_loaders = lambda: template_source_loaders
         loaders = []
         # If template loader is CachedTemplateLoader, return the loaders
         # that it wraps around. So if we have
@@ -84,7 +89,7 @@ class Command(NoArgsCommand):
         # and django.template.loaders.app_directories.Loader
         # The cached Loader and similar ones include a 'loaders' attribute
         # so we look for that.
-        for loader in template_source_loaders:
+        for loader in get_template_loaders():
             if hasattr(loader, 'loaders'):
                 loaders.extend(loader.loaders)
             else:

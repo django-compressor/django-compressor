@@ -68,7 +68,8 @@ class CompressorTestCase(SimpleTestCase):
         assertEqual with internal newlines collapsed to single, and
         trailing whitespace removed.
         """
-        collapse = lambda x: re.sub(r'\n+', '\n', x).rstrip()
+        def collapse(x):
+            return re.sub(r'\n+', '\n', x).rstrip()
         self.assertEqual(collapse(a), collapse(b))
 
     def assertEqualSplits(self, a, b):
@@ -76,7 +77,8 @@ class CompressorTestCase(SimpleTestCase):
         assertEqual for splits, particularly ignoring the presence of
         a trailing newline on the content.
         """
-        mangle = lambda split: [(x[0], x[1], x[2], x[3].rstrip()) for x in split]
+        def mangle(split):
+            return [(x[0], x[1], x[2], x[3].rstrip()) for x in split]
         self.assertEqual(mangle(a), mangle(b))
 
     def test_css_split(self):
@@ -124,7 +126,7 @@ class CompressorTestCase(SimpleTestCase):
         is_date = re.compile(r'^\d{10}[\.\d]+$')
         for date in self.css_node.mtimes:
             self.assertTrue(is_date.match(str(float(date))),
-                "mtimes is returning something that doesn't look like a date: %s" % date)
+                            "mtimes is returning something that doesn't look like a date: %s" % date)
 
     def test_css_return_if_off(self):
         settings.COMPRESS_ENABLED = False
@@ -133,7 +135,7 @@ class CompressorTestCase(SimpleTestCase):
     def test_cachekey(self):
         is_cachekey = re.compile(r'\w{12}')
         self.assertTrue(is_cachekey.match(self.css_node.cachekey),
-            "cachekey is returning something that doesn't look like r'\w{12}'")
+                        "cachekey is returning something that doesn't look like r'\w{12}'")
 
     def test_css_return_if_on(self):
         output = css_tag('/static/CACHE/css/e41ba2cc6982.css')

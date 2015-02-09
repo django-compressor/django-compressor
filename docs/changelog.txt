@@ -1,6 +1,14 @@
 Changelog
 =========
 
+v1.5 (21/11/2014)
+-----------------
+
+- *Backward incompatible changes*
+
+  - Replaced :attr:`~COMPRESS_CACHE_BACKEND` by :attr:`~COMPRESS_CACHE_ALIAS`
+    to retrieve cache backend by alias, ``get_cache(BACKEND)`` is deprecated.
+
 v1.4 (06/20/2014)
 -----------------
 

@@ -50,7 +50,7 @@ class CompressorConf(AppConf):
     DATA_URI_MAX_SIZE = 1024
 
     # the cache backend to use
-    CACHE_BACKEND = None
+    CACHE_ALIAS = 'default'
     # the dotted path to the function that creates the cache key
     CACHE_KEY_FUNCTION = 'compressor.cache.simple_cachekey'
     # rebuilds the cache every 30 days if nothing has changed.
