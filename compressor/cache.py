@@ -137,7 +137,7 @@ def cache_get(key):
         # Store the stale value while the cache
         # revalidates for another MINT_DELAY seconds.
         cache_set(key, val, refreshed=True,
-            timeout=settings.COMPRESS_MINT_DELAY)
+                  timeout=settings.COMPRESS_MINT_DELAY)
         return None
     return val
 

@@ -12,6 +12,7 @@ if system() != "Windows":
         from pipes import quote as shell_quote  # Python 2
 else:
     from subprocess import list2cmdline
+
     def shell_quote(s):
         # shlex.quote/pipes.quote is not compatible with Windows
         return list2cmdline([s])

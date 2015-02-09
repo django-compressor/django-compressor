@@ -58,7 +58,7 @@ class LxmlParser(ParserBase):
 
     def css_elems(self):
         return self.tree.xpath('//link[re:test(@rel, "^stylesheet$", "i")]|style',
-            namespaces={"re": "http://exslt.org/regular-expressions"})
+                               namespaces={"re": "http://exslt.org/regular-expressions"})
 
     def js_elems(self):
         return self.tree.findall('script')

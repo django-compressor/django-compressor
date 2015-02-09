@@ -159,7 +159,9 @@ def _make_cssmin(python_only=False):
     uri_space_sub = _re.compile((
         r'(%(escape)s+)|%(spacechar)s+|%(nl_escaped)s+'
     ) % locals()).sub
-    uri_space_subber = lambda m: m.groups()[0] or ''
+
+    def uri_space_subber(m):
+        return m.groups()[0] or ''
 
     space_sub_simple = _re.compile((
         r'[\r\n\f\040\t;]+|(%(comment)s+)'

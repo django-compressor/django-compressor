@@ -7,6 +7,7 @@ from fnmatch import fnmatchcase
 from distutils.util import convert_path
 from setuptools import setup, find_packages
 
+
 class VersionFinder(ast.NodeVisitor):
     def __init__(self):
         self.version = None
