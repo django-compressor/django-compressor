@@ -54,7 +54,8 @@ def remove_block_nodes(nodelist, block_stack, block_context):
             if var_name == 'block.super':
                 if not block_stack:
                     continue
-                node = block_context.get_block(block_stack[-1].name)
+                new_node = block_context.get_block(block_stack[-1].name)
+                node = new_node if new_node is not None else node
         if isinstance(node, BlockNode):
             expanded_block = expand_blocknode(node, block_stack, block_context)
             new_nodelist.extend(expanded_block)
