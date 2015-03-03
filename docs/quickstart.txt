@@ -32,6 +32,10 @@ Installation
          'compressor.finders.CompressorFinder',
      )
 
+* Define :attr:`COMPRESS_ROOT <django.conf.settings.COMPRESS_ROOT>` in settings
+  if you don't have already ``STATIC_ROOT`` or if you want it in a different 
+  folder.
+
 .. _staticfiles: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
 .. _django-staticfiles: http://pypi.python.org/pypi/django-staticfiles
 
@@ -54,17 +58,6 @@ dependencies.
   installation instructions.
 
       pip install django-appconf
-
-- versiontools_
-
-  Used internally to handle versions better, this is
-  automatically installed when following the above
-  installation instructions.
-
-  In case you're installing Django Compressor differently
-  (e.g. from the Git repo), make sure to install it, e.g.::
-
-      pip install versiontools
 
 Optional
 ^^^^^^^^

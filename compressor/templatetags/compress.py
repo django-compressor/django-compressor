@@ -120,7 +120,7 @@ class CompressorMixin(object):
             rendered_output = self.render_output(compressor, mode, forced=forced)
             if cache_key:
                 cache_set(cache_key, rendered_output)
-            assert isinstance(rendered_output, six.text_type)
+            assert isinstance(rendered_output, six.string_types)
             return rendered_output
         except Exception:
             if settings.DEBUG or forced:
@@ -213,7 +213,7 @@ def compress(parser, token):
 
     if len(args) >= 3:
         mode = args[2]
-        if not mode in OUTPUT_MODES:
+        if mode not in OUTPUT_MODES:
             raise template.TemplateSyntaxError(
                 "%r's second argument must be '%s' or '%s'." %
                 (args[0], OUTPUT_FILE, OUTPUT_INLINE))

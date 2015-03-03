@@ -1,0 +1,10 @@
+{% extends "base2.html" %}
+
+{% block js %}{% spaceless %}
+	{% compress js %}
+	    {{ super() }}
+	    <script type="text/javascript">
+	        alert("this alert shouldn't be alone!");
+	    </script>
+	{% endcompress %}
+{% endspaceless %}{% endblock %}

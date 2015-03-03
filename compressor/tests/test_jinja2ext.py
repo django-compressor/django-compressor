@@ -40,6 +40,10 @@ class TestJinja2CompressorExtension(TestCase):
         self.assertRaises(self.jinja2.exceptions.TemplateSyntaxError,
             self.env.from_string, '{% compress foo %}Foobar{% endcompress %}')
 
+    def test_error_raised_if_wrong_closing_kind_given(self):
+        self.assertRaises(self.jinja2.exceptions.TemplateSyntaxError,
+            self.env.from_string, '{% compress js %}Foobar{% endcompress css %}')
+
     def test_error_raised_if_wrong_mode_given(self):
         self.assertRaises(self.jinja2.exceptions.TemplateSyntaxError,
             self.env.from_string, '{% compress css foo %}Foobar{% endcompress %}')
@@ -55,9 +59,20 @@ class TestJinja2CompressorExtension(TestCase):
         template = self.env.from_string(template_string)
         self.assertEqual(tag_body, template.render())
 
+        # Test with explicit kind
+        template_string = '{% compress css %}' + tag_body + '{% endcompress css %}'
+        template = self.env.from_string(template_string)
+        self.assertEqual(tag_body, template.render())
+
     def test_empty_tag(self):
         template = self.env.from_string("""{% compress js %}{% block js %}
         {% endblock %}{% endcompress %}""")
+        context = {'STATIC_URL': settings.COMPRESS_URL}
+        self.assertEqual('', template.render(context))
+
+    def test_empty_tag_with_kind(self):
+        template = self.env.from_string("""{% compress js %}{% block js %}
+        {% endblock %}{% endcompress js %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
         self.assertEqual('', template.render(context))
 

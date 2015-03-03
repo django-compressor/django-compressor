@@ -1,0 +1,11 @@
+{% spaceless %}
+    {% compress js%}
+        <script type="text/javascript">alert("{{ condition|default("yellow") }}");
+        var ok = "{% if (25*4) is divisibleby 50 %}ok{% endif %}";
+        var text = "{{"hello\nworld"|nl2br}}";
+        </script>
+        {% with name="js/one.js" -%}
+          <script type="text/javascript" src="{{ 8|ifeq(2*4, url_for('static', name)) }}"></script>
+        {%- endwith %}
+    {% endcompress %}
+{% endspaceless %}

@@ -1,0 +1,7 @@
+{% spaceless %}
+
+{% if condition %}
+    {% compress js%}
+        <script type="text/javascript">alert("{{ condition|default("yellow") }}");</script>
+    {% endcompress %}
+{% endif %}{% endspaceless %}

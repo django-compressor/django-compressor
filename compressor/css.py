@@ -33,7 +33,7 @@ class CssCompressor(Compressor):
                 if append_to_previous and settings.COMPRESS_ENABLED:
                     self.media_nodes[-1][1].split_content.append(data)
                 else:
-                    node = CssCompressor(content=self.parser.elem_str(elem),
+                    node = self.__class__(content=self.parser.elem_str(elem),
                                          context=self.context)
                     node.split_content.append(data)
                     self.media_nodes.append((media, node))

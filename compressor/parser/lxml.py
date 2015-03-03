@@ -29,7 +29,7 @@ class LxmlParser(ParserBase):
             try:
                 from lxml.html import soupparser
             except ImportError as err:
-                raise ImportError("Error while importing lxml: %s" % err)
+                soupparser = None
             except Exception as err:
                 raise ParserError("Error while initializing parser: %s" % err)
         else:
