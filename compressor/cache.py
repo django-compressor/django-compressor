@@ -10,7 +10,7 @@ try:
         return caches[name]
 except ImportError:
     from django.core.cache import get_cache
-    
+
 from django.core.files.base import ContentFile
 from django.utils.encoding import force_text, smart_bytes
 from django.utils.functional import SimpleLazyObject
