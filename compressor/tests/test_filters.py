@@ -108,11 +108,12 @@ class CssMinTestCase(TestCase):
 
 
         background: rgb(51,102,153) url('../../images/image.gif');
-
+        color:     calc(1px + 3% + 43em +5pt)
 
         }
         """
-        output = "p{background:#369 url('../../images/image.gif')}"
+        output = "p{background:#369 url('../../images/image.gif');" \
+                 "color:calc(1px + 3% + 43em +5pt)}"
         self.assertEqual(output, CSSMinFilter(content).output())
 
 

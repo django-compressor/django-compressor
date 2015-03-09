@@ -77,6 +77,11 @@ def remove_unnecessary_whitespace(css):
 
         Translates 'p :link' into 'p ___PSEUDOCLASSCOLON___link'; this is
         translated back again later.
+
+        Arguments:
+        :param css: CSS data
+        :type css: str
+        :returns: str
         """
 
         regex = re.compile(r"(^|\})(([^\{\:])+\:)+([^\{]*\{)")
@@ -89,9 +94,43 @@ def remove_unnecessary_whitespace(css):
             match = regex.search(css)
         return css
 
+    calc_dict = {}  # used to assist preservecalc() when restoring values
+
+    def preservecalc(css):
+        """
+        Prevents the white space in calc() CSS rules from being removed.
+
+        Each calc() rule is replaced by a unique string that corresponds to a
+        key in calc_dict which stores the original rule. The original values 
+        are restored towards the end of remove_unnecessary_whitespace().
+
+        Arguments:
+        :param css: CSS data
+        :type css: str
+        :returns: str
+        """
+
+        regex = re.compile(r"calc\(([0-9a-zA-Z*%\/\s+\-]*)\)")
+        match = regex.search(css)
+
+        i = 0   # iterator to assure unique dict value
+        while match:
+            placeholder_text = "___CALCPOSITION-%d___" % i
+            calc_dict[placeholder_text] = match.group()
+            css = ''.join([
+                css[:match.start()],
+                match.group().replace(match.group(), placeholder_text),
+                css[match.end():]])
+            match = regex.search(css)
+
+            i += 1
+
+        return css
+
     css = pseudoclasscolon(css)
+    css = preservecalc(css)
     # Remove spaces from before things.
-    css = re.sub(r"\s+([!{};:>+\(\)\],])", r"\1", css)
+    css = re.sub(r"\s([!{};:>+\(\)\],])", r"\1", css)
 
     # If there is a `@charset`, then only allow one, and move to the beginning.
     css = re.sub(r"^(.*)(@charset \"[^\"]*\";)", r"\2\1", css)
@@ -106,6 +145,10 @@ def remove_unnecessary_whitespace(css):
 
     # Remove spaces from after things.
     css = re.sub(r"([!{}:;>+\(\[,])\s+", r"\1", css)
+
+    # Restore the original calc() rules
+    for key, val in calc_dict.iteritems():
+        css = css.replace(key, val)
 
     return css
 
