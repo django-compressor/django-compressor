@@ -3,7 +3,13 @@ import django
 
 TEST_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'tests')
 
-COMPRESS_CACHE_BACKEND = 'django.core.cache.backends.locmem.LocMemCache'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}
 
 DATABASES = {
     'default': {
