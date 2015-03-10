@@ -101,7 +101,7 @@ def remove_unnecessary_whitespace(css):
         Prevents the white space in calc() CSS rules from being removed.
 
         Each calc() rule is replaced by a unique string that corresponds to a
-        key in calc_dict which stores the original rule. The original values 
+        key in calc_dict which stores the original rule. The original values
         are restored towards the end of remove_unnecessary_whitespace().
 
         Arguments:
