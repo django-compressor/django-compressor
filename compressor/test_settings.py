@@ -21,8 +21,9 @@ DATABASES = {
 INSTALLED_APPS = [
     'compressor',
     'coffin',
-    'jingo',
 ]
+if django.VERSION < (1, 8):
+    INSTALLED_APPS.append('jingo')
 
 STATIC_URL = '/static/'
 
