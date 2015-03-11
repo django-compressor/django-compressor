@@ -5,7 +5,7 @@ import sys
 
 import django
 from django.core.management.base import CommandError
-from django.template import Template, Context
+from django.template import Template, Context, EngineHandler
 from django.test import TestCase
 from django.utils import six, unittest
 
@@ -47,6 +47,8 @@ class OfflineTestCaseMixin(object):
         engines = ("django",)
 
     def setUp(self):
+        if django.VERSION >= (1, 8):
+            django.template.engines = EngineHandler()
         self._old_compress = settings.COMPRESS_ENABLED
         self._old_compress_offline = settings.COMPRESS_OFFLINE
         self._old_template_dirs = settings.TEMPLATE_DIRS
