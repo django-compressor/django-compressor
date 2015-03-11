@@ -5,7 +5,11 @@ import sys
 
 import django
 from django.core.management.base import CommandError
-from django.template import Template, Context, EngineHandler
+from django.template import Template, Context
+try:
+    from django.template import EngineHandler
+except ImportError:
+    pass
 from django.test import TestCase
 from django.utils import six, unittest
 
