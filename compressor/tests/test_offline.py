@@ -3,6 +3,7 @@ import io
 import os
 import sys
 
+import django
 from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
@@ -29,6 +30,8 @@ else:
 #     compressor_nodes.setdefault(template, []).extend(nodes)
 # causes the error "unhashable type: 'Template'"
 _TEST_JINJA2 = not(sys.version_info[0] == 3 and sys.version_info[1] == 2)
+if django.VERSION >= (1, 8):
+    _TEST_JINJA2 = False
 
 
 class OfflineTestCaseMixin(object):
@@ -454,6 +457,8 @@ class OfflineGenerationComplexTestCase(OfflineTestCaseMixin, TestCase):
 # It seems there is no evidence nor indicated support for Python 3+.
 @unittest.skipIf(sys.version_info >= (3, 2),
     "Coffin does not support 3.2+")
+@unittest.skipIf(django.VERSION >= (1, 8),
+    "Import error on 1.8")
 class OfflineGenerationCoffinTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_coffin"
     expected_hash = "32c8281e3346"
@@ -478,6 +483,8 @@ class OfflineGenerationCoffinTestCase(OfflineTestCaseMixin, TestCase):
 # is also evident in its tox.ini file.
 @unittest.skipIf(sys.version_info >= (3, 2) and sys.version_info < (3, 3),
     "Jingo does not support 3.2")
+@unittest.skipIf(django.VERSION >= (1, 8),
+    "Import error on 1.8")
 class OfflineGenerationJingoTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_jingo"
     expected_hash = "61ec584468eb"
