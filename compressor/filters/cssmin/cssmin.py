@@ -94,7 +94,7 @@ def remove_unnecessary_whitespace(css):
             match = regex.search(css)
         return css
 
-    calc_dict = {}  # used to assist preservecalc() when restoring values
+    calcdict = {}  # used to assist preservecalc() when restoring values
 
     def preservecalc(css):
         """
@@ -116,7 +116,7 @@ def remove_unnecessary_whitespace(css):
         i = 0   # iterator to assure unique dict value
         while match:
             placeholder_text = "___CALCPOSITION-%d___" % i
-            calc_dict[placeholder_text] = match.group()
+            calcdict[placeholder_text] = match.group()
             css = ''.join([
                 css[:match.start()],
                 match.group().replace(match.group(), placeholder_text),
@@ -146,8 +146,12 @@ def remove_unnecessary_whitespace(css):
     # Remove spaces from after things.
     css = re.sub(r"([!{}:;>+\(\[,])\s+", r"\1", css)
 
+    # Retain python 2/3 compatibility with a minimal footprint
+    calcitems = calcdict.iteritems if hasattr(calcdict, 'iteritems') \
+        else calcdict.items
+
     # Restore the original calc() rules
-    for key, val in calc_dict.items():
+    for key, val in calcitems():
         css = css.replace(key, val)
 
     return css
