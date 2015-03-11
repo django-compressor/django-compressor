@@ -147,7 +147,7 @@ def remove_unnecessary_whitespace(css):
     css = re.sub(r"([!{}:;>+\(\[,])\s+", r"\1", css)
 
     # Restore the original calc() rules
-    for key, val in calc_dict.iteritems():
+    for key, val in calc_dict.items():
         css = css.replace(key, val)
 
     return css
