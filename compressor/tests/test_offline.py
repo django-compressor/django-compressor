@@ -30,8 +30,6 @@ else:
 #     compressor_nodes.setdefault(template, []).extend(nodes)
 # causes the error "unhashable type: 'Template'"
 _TEST_JINJA2 = not(sys.version_info[0] == 3 and sys.version_info[1] == 2)
-if django.VERSION >= (1, 8):
-    _TEST_JINJA2 = False
 
 
 class OfflineTestCaseMixin(object):
