@@ -19,5 +19,9 @@ env:
   - TOXENV=py32-1.7.X
   - TOXENV=py33-1.7.X
   - TOXENV=py34-1.7.X
+  - TOXENV=py27-1.8.X
+  - TOXENV=py32-1.8.X
+  - TOXENV=py33-1.8.X
+  - TOXENV=py34-1.8.X
 notifications:
   irc: "irc.freenode.org#django-compressor"
