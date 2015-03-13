@@ -80,6 +80,8 @@ class CompressorConf(AppConf):
 
     class Meta:
         prefix = 'compress'
+        holder = os.environ['DJANGO_SETTINGS_MODULE']
+
 
     def configure_root(self, value):
         # Uses Django's STATIC_ROOT by default
