@@ -45,10 +45,6 @@ class OfflineTestCaseMixin(object):
         engines = ("django",)
 
     def setUp(self):
-        self._old_compress = settings.COMPRESS_ENABLED
-        self._old_compress_offline = settings.COMPRESS_OFFLINE
-        self._old_template_dirs = settings.TEMPLATE_DIRS
-        self._old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
         self.log = StringIO()
 
         # Reset template dirs, because it enables us to force compress to
@@ -60,15 +56,17 @@ class OfflineTestCaseMixin(object):
         django_template_dir = os.path.join(settings.TEST_DIR, 'test_templates', self.templates_dir)
         jinja2_template_dir = os.path.join(settings.TEST_DIR, 'test_templates_jinja2', self.templates_dir)
 
-        if django.VERSION >= (1, 8):
-            self.override_template_dirs = self.settings(TEMPLATE_DIRS=(django_template_dir, jinja2_template_dir))
-            self.override_template_dirs.__enter__()
-        else:
-            settings.TEMPLATE_DIRS = (django_template_dir, jinja2_template_dir)
+        override_settings = {
+            'TEMPLATE_DIRS': (django_template_dir, jinja2_template_dir,),
+            'COMPRESS_ENABLED': True,
+            'COMPRESS_OFFLINE': True
+        }
 
-        # Enable offline compress
-        settings.COMPRESS_ENABLED = True
-        settings.COMPRESS_OFFLINE = True
+        if "jinja2" in self.engines:
+            override_settings["COMPRESS_JINJA2_GET_ENVIRONMENT"] = lambda: self._get_jinja2_env()
+
+        self.override_template_dirs = self.settings(**override_settings)
+        self.override_template_dirs.__enter__()
 
         if "django" in self.engines:
             self.template_path = os.path.join(django_template_dir, self.template_name)
@@ -76,26 +74,16 @@ class OfflineTestCaseMixin(object):
             with io.open(self.template_path, encoding=settings.FILE_CHARSET) as file:
                 self.template = Template(file.read())
 
-        self._old_jinja2_get_environment = settings.COMPRESS_JINJA2_GET_ENVIRONMENT
-
         if "jinja2" in self.engines:
-            # Setup Jinja2 settings.
-            settings.COMPRESS_JINJA2_GET_ENVIRONMENT = lambda: self._get_jinja2_env()
-            jinja2_env = settings.COMPRESS_JINJA2_GET_ENVIRONMENT()
+            jinja2_env = override_settings["COMPRESS_JINJA2_GET_ENVIRONMENT"]()
             self.template_path_jinja2 = os.path.join(jinja2_template_dir, self.template_name)
 
             with io.open(self.template_path_jinja2, encoding=settings.FILE_CHARSET) as file:
                 self.template_jinja2 = jinja2_env.from_string(file.read())
 
     def tearDown(self):
-        if django.VERSION >= (1, 8):
-            self.override_template_dirs.__exit__(None, None, None)
-        else:
-            settings.TEMPLATE_DIRS = self._old_template_dirs
+        self.override_template_dirs.__exit__(None, None, None)
 
-        settings.COMPRESS_JINJA2_GET_ENVIRONMENT = self._old_jinja2_get_environment
-        settings.COMPRESS_ENABLED = self._old_compress
-        settings.COMPRESS_OFFLINE = self._old_compress_offline
         manifest_path = os.path.join('CACHE', 'manifest.json')
         if default_storage.exists(manifest_path):
             default_storage.delete(manifest_path)
