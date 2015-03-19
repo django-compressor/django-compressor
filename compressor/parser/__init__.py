@@ -33,5 +33,5 @@ class AutoSelectParser(LazyObject):
                 import_module(dependency)
                 self._wrapped = parser(content)
                 break
-            except ImportError:
+            except (ImportError, TypeError):
                 continue

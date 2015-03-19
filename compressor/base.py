@@ -253,7 +253,7 @@ class Compressor(object):
                 mod_name, cls_name = get_mod_func(filter_or_command)
                 try:
                     mod = import_module(mod_name)
-                except ImportError:
+                except (ImportError, TypeError):
                     filter = CompilerFilter(
                         content, filter_type=self.type, filename=filename,
                         charset=charset, command=filter_or_command)
