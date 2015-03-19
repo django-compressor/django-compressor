@@ -19,11 +19,18 @@ DATABASES = {
 }
 
 INSTALLED_APPS = [
+    'django.contrib.staticfiles',
     'compressor',
     'coffin',
 ]
 if django.VERSION < (1, 8):
     INSTALLED_APPS.append('jingo')
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+]
 
 STATIC_URL = '/static/'
 
