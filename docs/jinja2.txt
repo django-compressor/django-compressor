@@ -42,13 +42,13 @@ Jinja2 Offline Compression Support
 ==================================
 You'd need to configure ``COMPRESS_JINJA2_GET_ENVIRONMENT`` so that
 Compressor can retrieve the Jinja2 environment for rendering.
-This can be a lamda or function that returns a Jinja2 environment.
+This can be a lambda or function that returns a Jinja2 environment.
 
 Usage
 -----
 Run the following compress command along with an ``--engine`` parameter. The
 parameter can be either jinja2 or django (default). For example,
-"./manage.py compress --engine jinja2".
+``./manage.py compress --engine jinja2``.
 
 Using both Django and Jinja2 templates
 --------------------------------------
@@ -60,9 +60,9 @@ template safely. (Vice versa for Django parser).
 
 A typical usage could be :
 
-- "./manage.py compress" for processing Django templates first, skipping
+- ``./manage.py compress`` for processing Django templates first, skipping
   Jinja2 templates.
-- "./manage.py compress --engine jinja2" for processing Jinja2 templates,
+- ``./manage.py compress --engine jinja2`` for processing Jinja2 templates,
   skipping Django templates.
 
 However, it is still recommended that you do not mix Django and Jinja2
