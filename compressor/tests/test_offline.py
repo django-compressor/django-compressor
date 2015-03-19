@@ -65,8 +65,8 @@ class OfflineTestCaseMixin(object):
         if "jinja2" in self.engines:
             override_settings["COMPRESS_JINJA2_GET_ENVIRONMENT"] = lambda: self._get_jinja2_env()
 
-        self.override_template_dirs = self.settings(**override_settings)
-        self.override_template_dirs.__enter__()
+        self.override_settings = self.settings(**override_settings)
+        self.override_settings.__enter__()
 
         if "django" in self.engines:
             self.template_path = os.path.join(django_template_dir, self.template_name)
@@ -82,7 +82,7 @@ class OfflineTestCaseMixin(object):
                 self.template_jinja2 = jinja2_env.from_string(file.read())
 
     def tearDown(self):
-        self.override_template_dirs.__exit__(None, None, None)
+        self.override_settings.__exit__(None, None, None)
 
         manifest_path = os.path.join('CACHE', 'manifest.json')
         if default_storage.exists(manifest_path):
