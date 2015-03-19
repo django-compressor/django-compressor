@@ -42,7 +42,7 @@ Jinja2 Offline Compression Support
 ==================================
 You'd need to configure ``COMPRESS_JINJA2_GET_ENVIRONMENT`` so that
 Compressor can retrieve the Jinja2 environment for rendering.
-This can be a lamda or function that returns a Jinja2 environment.
+This can be a lambda or function that returns a Jinja2 environment.
 
 Usage
 -----
