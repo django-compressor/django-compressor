@@ -132,7 +132,9 @@ class DjangoParser(object):
         nodelist = []
         if isinstance(node, Node):
             for attr in node.child_nodelists:
-                nodelist += getattr(node, attr, [])
+                # see https://github.com/django-compressor/django-compressor/pull/825
+                # and linked issues/PRs for a discussion on the `None) or []` part
+                nodelist += getattr(node, attr, None) or []
         else:
             nodelist = getattr(node, 'nodelist', [])
         return nodelist
