@@ -4,11 +4,77 @@ Changelog
 v1.5 (03/27/2015)
 -----------------
 
-- Added compatibility with Django 1.7.x and 1.8.x
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/1.4...HEAD>`_
 
-- Fixed various other issues. See full `Changes for 1.5`_ on GitHub
+- Fix typo and restyle manage command examples `\#604 <https://github.com/django-compressor/django-compressor/pull/604>`_ (`alimony <https://github.com/alimony>`_)
 
-.. _Changes for 1.5: https://github.com/django-compressor/django-compressor/compare/1.4...develop
+- Fix compress command for 1.8 `\#601 <https://github.com/django-compressor/django-compressor/pull/601>`_ (`carltongibson <https://github.com/carltongibson>`_)
+
+- Fix build `\#599 <https://github.com/django-compressor/django-compressor/pull/599>`_ (`carltongibson <https://github.com/carltongibson>`_)
+
+- Update settings.txt `\#584 <https://github.com/django-compressor/django-compressor/pull/584>`_ (`johnfraney <https://github.com/johnfraney>`_)
+
+- Fix Django 1.8 warnings  `\#583 <https://github.com/django-compressor/django-compressor/pull/583>`_ (`sdfsdhgjkbmnmxc <https://github.com/sdfsdhgjkbmnmxc>`_)
+
+- Handle TypeError from import\_module `\#571 <https://github.com/django-compressor/django-compressor/pull/571>`_ (`blueyed <https://github.com/blueyed>`_)
+
+- Fix reading UTF-8 files which have BOM `\#568 <https://github.com/django-compressor/django-compressor/pull/568>`_ (`JereMalinen <https://github.com/JereMalinen>`_)
+
+- shlex.quote/pipes.quote is not compatible with Windows `\#561 <https://github.com/django-compressor/django-compressor/pull/561>`_ (`thenewguy <https://github.com/thenewguy>`_)
+
+- Run automated tests on Django 1.7 `\#556 <https://github.com/django-compressor/django-compressor/pull/556>`_ (`frewsxcv <https://github.com/frewsxcv>`_)
+
+- Patch 1 `\#555 <https://github.com/django-compressor/django-compressor/pull/555>`_ (`francescozaia <https://github.com/francescozaia>`_)
+
+- Fix AttributeError in offline compression `\#554 <https://github.com/django-compressor/django-compressor/pull/554>`_ (`cbjadwani <https://github.com/cbjadwani>`_)
+
+- Support for clean-css `\#551 <https://github.com/django-compressor/django-compressor/pull/551>`_ (`vovanbo <https://github.com/vovanbo>`_)
+
+- Types at readme \(-engine should be --engine\) `\#540 <https://github.com/django-compressor/django-compressor/pull/540>`_ (`lukaszb <https://github.com/lukaszb>`_)
+
+- Fix typo `\#539 <https://github.com/django-compressor/django-compressor/pull/539>`_ (`alimony <https://github.com/alimony>`_)
+
+- Fix link markup `\#530 <https://github.com/django-compressor/django-compressor/pull/530>`_ (`merwok <https://github.com/merwok>`_)
+
+- Add support for COMPRESS\_CSS\_HASHING\_METHOD = None `\#526 <https://github.com/django-compressor/django-compressor/pull/526>`_ (`diox <https://github.com/diox>`_)
+
+- Remove compatibility with old 'staticfiles' app `\#525 <https://github.com/django-compressor/django-compressor/pull/525>`_ (`diox <https://github.com/diox>`_)
+
+- Use get\_template\(\) when dealing with django templates `\#524 <https://github.com/django-compressor/django-compressor/pull/524>`_ (`diox <https://github.com/diox>`_)
+
+- Fix FilterBase clears self.type for subclasses `\#479 <https://github.com/django-compressor/django-compressor/pull/479>`_ (`iknite <https://github.com/iknite>`_)
+
+- Remove unnecessary filename and existence checks in CssAbsoluteFilter `\#471 <https://github.com/django-compressor/django-compressor/pull/471>`_ (`agriffis <https://github.com/agriffis>`_)
+
+- Fix minor typographical error in docs/index `\#594 <https://github.com/django-compressor/django-compressor/pull/594>`_ (`varunsharma <https://github.com/varunsharma>`_)
+
+- Fix deprecation warning `\#548 <https://github.com/django-compressor/django-compressor/pull/548>`_ (`davidfischer-ch <https://github.com/davidfischer-ch>`_)
+
+- Add "enabled" override to compress template tag `\#547 <https://github.com/django-compressor/django-compressor/pull/547>`_ (`davidfischer-ch <https://github.com/davidfischer-ch>`_)
+
+- CSSO support `\#538 <https://github.com/django-compressor/django-compressor/pull/538>`_ (`vovanbo <https://github.com/vovanbo>`_)
+
+- quote filename in command  `\#536 <https://github.com/django-compressor/django-compressor/pull/536>`_ (`MikeAmy <https://github.com/MikeAmy>`_)
+
+- quote filename e.g. in case it contains spaces `\#535 <https://github.com/django-compressor/django-compressor/pull/535>`_ (`MikeAmy <https://github.com/MikeAmy>`_)
+
+- Put charset back into kwargs `\#523 <https://github.com/django-compressor/django-compressor/pull/523>`_ (`zmetcalf <https://github.com/zmetcalf>`_)
+
+- Fix bug with css compress for static files `\#504 <https://github.com/django-compressor/django-compressor/pull/504>`_ (`rogaha <https://github.com/rogaha>`_)
+
+- Support for async/defer tags `\#482 <https://github.com/django-compressor/django-compressor/pull/482>`_ (`hkpeprah <https://github.com/hkpeprah>`_)
+
+- resolve \[issue 171\] : offline compressor to compress 'compress tags' if those are not in child template but in parent template. `\#436 <https://github.com/django-compressor/django-compressor/pull/436>`_ (`sjiitr <https://github.com/sjiitr>`_)
+
+- Don't leave `compressed` in the render context `\#354 <https://github.com/django-compressor/django-compressor/pull/354>`_ (`gavinwahl <https://github.com/gavinwahl>`_)
+
+- Adding support to ignore some file paths during offline compression `\#335 <https://github.com/django-compressor/django-compressor/pull/335>`_ (`ayadav <https://github.com/ayadav>`_)
+
+- Use django.template.loader.get\_template\(\) in compress management command `\#282 <https://github.com/django-compressor/django-compressor/pull/282>`_ (`mattpatey <https://github.com/mattpatey>`_)
+
+- Compress selected templates `\#248 <https://github.com/django-compressor/django-compressor/pull/248>`_ (`jaap3 <https://github.com/jaap3>`_)
+
+- re-implementing default documented behaviour for uncompressable files, fixes \#241 `\#246 <https://github.com/django-compressor/django-compressor/pull/246>`_ (`ssaboum <https://github.com/ssaboum>`_)
 
 
 v1.4 (06/20/2014)
