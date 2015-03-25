@@ -1,6 +1,16 @@
 Changelog
 =========
 
+v1.5 (03/27/2015)
+-----------------
+
+- Added compatibility with Django 1.7.x and 1.8.x
+
+- Fixed various other issues. See full `Changes for 1.5`_ on GitHub
+
+.. _Changes for 1.5: https://github.com/django-compressor/django-compressor/compare/1.4...develop
+
+
 v1.4 (06/20/2014)
 -----------------
 
