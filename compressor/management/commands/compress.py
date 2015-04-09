@@ -1,5 +1,6 @@
 # flake8: noqa
 import os
+import re
 import sys
 
 from fnmatch import fnmatch
@@ -226,7 +227,7 @@ class Command(NoArgsCommand):
                 context.push()
                 parser.process_node(template, context, node)
                 rendered = parser.render_nodelist(template, context, node)
-                key = get_offline_hexdigest(rendered)
+                key = get_offline_hexdigest(re.sub("https?://[^/]+", "", rendered))
 
                 if key in offline_manifest:
                     continue
