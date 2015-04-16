@@ -1,6 +1,40 @@
 Changelog
 =========
 
+v1.5 (03/27/2015)
+-----------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/1.4...HEAD>`_
+
+- Fix compress command and run automated tests for Django 1.8
+
+- Fix Django 1.8 warnings
+
+- Handle TypeError from import_module
+
+- Fix reading UTF-8 files which have BOM
+
+- Fix incompatibility with Windows (shell_quote is not supported)
+
+- Run automated tests on Django 1.7
+
+- Ignore non-existent {{ block.super }} in offline compression instead of raising AttributeError
+
+- Support for clean-css
+
+- Fix link markup
+
+- Add support for COMPRESS_CSS_HASHING_METHOD = None
+
+- Remove compatibility with old 'staticfiles' app
+
+- In compress command, use get_template() instead of opening template files manually, fixing compatibility issues with custom template loaders
+
+- Fix FilterBase so that does not override self.type for subclasses if filter_type is not specified at init
+
+- Remove unnecessary filename and existence checks in CssAbsoluteFilter
+
+
 v1.4 (06/20/2014)
 -----------------
 
