@@ -4,7 +4,7 @@ Changelog
 v1.5 (03/27/2015)
 -----------------
 
-`Full Changelog <https://github.com/django-compressor/django-compressor/compare/1.4...HEAD>`_
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/1.4...1.5>`_
 
 - Fix compress command and run automated tests for Django 1.8
 
