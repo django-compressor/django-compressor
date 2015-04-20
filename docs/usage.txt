@@ -48,7 +48,7 @@ Which would be rendered something like:
 
 .. note::
 
-    Remember that django-compressor will try to :ref:`group ouputs by media <css_notes>`.
+    Remember that django-compressor will try to :ref:`group outputs by media <css_notes>`.
 
 Linked files **must** be accessible via
 :attr:`~django.conf.settings.COMPRESS_URL`.

@@ -12,11 +12,13 @@ from django.core.cache.backends import locmem
 from django.test import SimpleTestCase
 from django.test.utils import override_settings
 
-from compressor.base import SOURCE_HUNK, SOURCE_FILE
+from compressor import cache as cachemod
+from compressor.base import SOURCE_FILE, SOURCE_HUNK
+from compressor.cache import get_cachekey
 from compressor.conf import settings
 from compressor.css import CssCompressor
+from compressor.exceptions import FilterDoesNotExist, FilterError
 from compressor.js import JsCompressor
-from compressor.exceptions import FilterDoesNotExist
 
 
 def make_soup(markup):
@@ -110,6 +112,14 @@ class CompressorTestCase(SimpleTestCase):
     def test_css_output(self):
         out = 'body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }'
         hunks = '\n'.join([h for h in self.css_node.hunks()])
+        self.assertEqual(out, hunks)
+
+    def test_css_output_with_bom_input(self):
+        out = 'body { background:#990; }\n.compress-test {color: red;}'
+        css = ("""<link rel="stylesheet" href="/static/css/one.css" type="text/css" />
+        <link rel="stylesheet" href="/static/css/utf-8_with-BOM.css" type="text/css" />""")
+        css_node_with_bom = CssCompressor(css)
+        hunks = '\n'.join([h for h in css_node_with_bom.hunks()])
         self.assertEqual(out, hunks)
 
     def test_css_mtimes(self):
@@ -208,6 +218,14 @@ class CompressorTestCase(SimpleTestCase):
         css_node = CssCompressor(css)
         self.assertRaises(FilterDoesNotExist, css_node.output, 'inline')
 
+    @override_settings(COMPRESS_PRECOMPILERS=(
+        ('text/foobar', './foo -I ./bar/baz'),
+    ), COMPRESS_ENABLED=True)
+    def test_command_with_dot_precompiler(self):
+        css = '<style type="text/foobar">p { border:10px solid red;}</style>'
+        css_node = CssCompressor(css)
+        self.assertRaises(FilterError, css_node.output, 'inline')
+
 
 class CssMediaTestCase(SimpleTestCase):
     def setUp(self):
@@ -267,4 +285,49 @@ class CacheBackendTestCase(CompressorTestCase):
 
     def test_correct_backend(self):
         from compressor.cache import cache
-        self.assertEqual(cache.__class__, locmem.CacheClass)
+        self.assertEqual(cache.__class__, locmem.LocMemCache)
+
+
+class JsAsyncDeferTestCase(SimpleTestCase):
+    def setUp(self):
+        self.js = """\
+            <script src="/static/js/one.js" type="text/javascript"></script>
+            <script src="/static/js/two.js" type="text/javascript" async></script>
+            <script src="/static/js/three.js" type="text/javascript" defer></script>
+            <script type="text/javascript">obj.value = "value";</script>
+            <script src="/static/js/one.js" type="text/javascript" async></script>
+            <script src="/static/js/two.js" type="text/javascript" async></script>
+            <script src="/static/js/three.js" type="text/javascript"></script>"""
+
+    def test_js_output(self):
+        def extract_attr(tag):
+            if tag.has_attr('async'):
+                return 'async'
+            if tag.has_attr('defer'):
+                return 'defer'
+        js_node = JsCompressor(self.js)
+        output = [None, 'async', 'defer', None, 'async', None]
+        if six.PY3:
+            scripts = make_soup(js_node.output()).find_all('script')
+            attrs = [extract_attr(i) for i in scripts]
+        else:
+            scripts = make_soup(js_node.output()).findAll('script')
+            attrs = [s.get('async') or s.get('defer') for s in scripts]
+        self.assertEqual(output, attrs)
+
+
+class CacheTestCase(SimpleTestCase):
+
+    def setUp(self):
+        cachemod._cachekey_func = None
+
+    def test_get_cachekey_basic(self):
+        self.assertEqual(get_cachekey("foo"), "django_compressor.foo")
+
+    @override_settings(COMPRESS_CACHE_KEY_FUNCTION='.leading.dot')
+    def test_get_cachekey_leading_dot(self):
+        self.assertRaises(ImportError, lambda: get_cachekey("foo"))
+
+    @override_settings(COMPRESS_CACHE_KEY_FUNCTION='invalid.module')
+    def test_get_cachekey_invalid_mod(self):
+        self.assertRaises(ImportError, lambda: get_cachekey("foo"))

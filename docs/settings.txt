@@ -81,10 +81,11 @@ Backend settings
 
       .. attribute:: COMPRESS_CSS_HASHING_METHOD
 
-         The method to use when calculating the hash to append to
-         processed URLs. Either ``'mtime'`` (default) or ``'content'``.
-         Use the latter in case you're using multiple server to serve your
-         static files.
+         The method to use when calculating the suffix to append to URLs in
+         your processed CSS files. Either ``None``, ``'mtime'`` (default) or
+         ``'content'``. Use the ``None`` if you want to completely disable that
+         feature, and the ``'content'`` in case you're using multiple servers
+         to serve your content.
 
     - ``compressor.filters.csstidy.CSSTidyFilter``
 
@@ -136,9 +137,24 @@ Backend settings
       A filter that uses Zachary Voase's Python port of the YUI CSS compression
       algorithm cssmin_.
 
+    - ``compressor.filters.cleancss.CleanCSSFilter``
+
+      A filter that passes the CSS content to the `clean-css`_ tool.
+
+      .. attribute:: CLEAN_CSS_BINARY
+
+         The clean-css binary filesystem path.
+
+      .. attribute:: CLEAN_CSS_ARGUMENTS
+
+         The arguments passed to clean-css.
+
+
     .. _CSSTidy: http://csstidy.sourceforge.net/
     .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
     .. _cssmin: http://pypi.python.org/pypi/cssmin/
+    .. _`clean-css`: https://github.com/GoalSmashers/clean-css/
+
 
     - ``compressor.filters.template.TemplateFilter``
 
@@ -220,7 +236,7 @@ Backend settings
     .. _`Google Closure compiler`: http://code.google.com/closure/compiler/
     .. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
     .. _`yUglify compressor`: https://github.com/yui/yuglify
-    .. _`Slim It`: http://slimit.org/
+    .. _`Slim It`: https://github.com/rspivak/slimit
 
 .. attribute:: COMPRESS_PRECOMPILERS
 
@@ -305,7 +321,7 @@ Backend settings
         <link rel="stylesheet" href="/static/CACHE/css/8ccf8d877f18.css" type="text/css" charset="utf-8">
 
     .. _less: http://lesscss.org/
-    .. _CoffeeScript: http://jashkenas.github.com/coffee-script/
+    .. _CoffeeScript: http://coffeescript.org/
 
 .. attribute:: COMPRESS_STORAGE
 

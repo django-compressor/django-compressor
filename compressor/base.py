@@ -5,7 +5,10 @@ import codecs
 from django.core.files.base import ContentFile
 from django.template import Context
 from django.template.loader import render_to_string
-from django.utils.importlib import import_module
+try:
+    from importlib import import_module
+except:
+    from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
 
 try:
@@ -140,6 +143,9 @@ class Compressor(object):
         """
         Reads file contents using given `charset` and returns it as text.
         """
+        if charset == 'utf-8':
+            # Removes BOM
+            charset = 'utf-8-sig'
         with codecs.open(filename, 'r', charset) as fd:
             try:
                 return fd.read()
@@ -247,7 +253,7 @@ class Compressor(object):
                 mod_name, cls_name = get_mod_func(filter_or_command)
                 try:
                     mod = import_module(mod_name)
-                except ImportError:
+                except (ImportError, TypeError):
                     filter = CompilerFilter(
                         content, filter_type=self.type, filename=filename,
                         charset=charset, command=filter_or_command)

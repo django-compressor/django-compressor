@@ -3,9 +3,27 @@ import io
 import logging
 import subprocess
 
+from platform import system
+
+if system() != "Windows":
+    try:
+        from shlex import quote as shell_quote  # Python 3
+    except ImportError:
+        from pipes import quote as shell_quote  # Python 2
+else:
+    from subprocess import list2cmdline
+    def shell_quote(s):
+        # shlex.quote/pipes.quote is not compatible with Windows
+        return list2cmdline([s])
+
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
-from django.utils.importlib import import_module
+
+try:
+    from importlib import import_module
+except ImportError:
+    from django.utils.importlib import import_module
+
 from django.utils.encoding import smart_text
 from django.utils import six
 
@@ -26,7 +44,7 @@ class FilterBase(object):
     """
     def __init__(self, content, filter_type=None, filename=None, verbose=0,
                  charset=None):
-        self.type = filter_type
+        self.type = filter_type or getattr(self, 'type', None)
         self.content = content
         self.verbose = verbose or settings.COMPRESS_VERBOSE
         self.logger = logger
@@ -65,7 +83,7 @@ class CallbackOutputFilter(FilterBase):
         try:
             mod_name, func_name = get_mod_func(self.callback)
             func = getattr(import_module(mod_name), func_name)
-        except ImportError:
+        except (ImportError, TypeError):
             if self.dependencies:
                 if len(self.dependencies) == 1:
                     warning = "dependency (%s) is" % self.dependencies[0]
@@ -146,6 +164,12 @@ class CompilerFilter(FilterBase):
             ext = self.type and ".%s" % self.type or ""
             self.outfile = NamedTemporaryFile(mode='r+', suffix=ext)
             options["outfile"] = self.outfile.name
+
+        # Quote infile and outfile for spaces etc.
+        if "infile" in options:
+            options["infile"] = shell_quote(options["infile"])
+        if "outfile" in options:
+            options["outfile"] = shell_quote(options["outfile"])
 
         try:
             command = self.command.format(**options)

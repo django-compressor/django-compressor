@@ -3,7 +3,13 @@ import django
 
 TEST_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'tests')
 
-COMPRESS_CACHE_BACKEND = 'locmem://'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}
 
 DATABASES = {
     'default': {
@@ -13,9 +19,17 @@ DATABASES = {
 }
 
 INSTALLED_APPS = [
+    'django.contrib.staticfiles',
     'compressor',
     'coffin',
-    'jingo',
+]
+if django.VERSION < (1, 8):
+    INSTALLED_APPS.append('jingo')
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
 ]
 
 STATIC_URL = '/static/'
@@ -38,3 +52,5 @@ SECRET_KEY = "iufoj=mibkpdz*%bob952x(%49rqgv8gg45k36kjcg76&-y5=!"
 PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
 )
+
+MIDDLEWARE_CLASSES = []
