@@ -11,9 +11,9 @@ Community
 
 People interested in developing for the Django Compressor should:
 
-1. Head over to #django-compressor on the `freenode`_ IRC network for help and to
-discuss the development.
-2. Open an issue on GitHub explaining your ideas.
+#. Head over to #django-compressor on the `freenode`_ IRC network for help and to
+   discuss the development.
+#. Open an issue on GitHub explaining your ideas.
 
 
 In a nutshell
