@@ -5,7 +5,6 @@ import posixpath
 from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
-from compressor.utils import staticfiles
 
 URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 SRC_PATTERN = re.compile(r'src=([\'"])(.+?)\1')
@@ -22,10 +21,7 @@ class CssAbsoluteFilter(FilterBase):
         self.has_scheme = False
 
     def input(self, filename=None, basename=None, **kwargs):
-        if filename is not None:
-            filename = os.path.normcase(os.path.abspath(filename))
-        if (not (filename and filename.startswith(self.root)) and
-                not self.find(basename)):
+        if not filename:
             return self.content
         self.path = basename.replace(os.sep, '/')
         self.path = self.path.lstrip('/')
@@ -39,10 +35,6 @@ class CssAbsoluteFilter(FilterBase):
         self.directory_name = '/'.join((self.url, os.path.dirname(self.path)))
         return SRC_PATTERN.sub(self.src_converter,
             URL_PATTERN.sub(self.url_converter, self.content))
-
-    def find(self, basename):
-        if settings.DEBUG and basename and staticfiles.finders:
-            return staticfiles.finders.find(basename)
 
     def guess_filename(self, url):
         local_path = url
@@ -70,6 +62,8 @@ class CssAbsoluteFilter(FilterBase):
                 suffix = get_hashed_mtime(filename)
             elif settings.COMPRESS_CSS_HASHING_METHOD in ("hash", "content"):
                 suffix = get_hashed_content(filename)
+            elif settings.COMPRESS_CSS_HASHING_METHOD is None:
+                suffix = None
             else:
                 raise FilterError('COMPRESS_CSS_HASHING_METHOD is configured '
                                   'with an unknown method (%s).' %

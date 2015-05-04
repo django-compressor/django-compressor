@@ -39,12 +39,11 @@ The storage backend to save the compressed files needs to be changed, too::
 Using staticfiles
 ^^^^^^^^^^^^^^^^^
 
-If you are using Django's staticfiles_ contrib app or the standalone
-app django-staticfiles_, you'll need to use a temporary filesystem cache
-for Django Compressor to know which files to compress. Since staticfiles
-provides a management command to collect static files from various
-locations which uses a storage backend, this is where both apps can be
-integrated.
+If you are using Django's staticfiles_ contrib app, you'll need to use a
+temporary filesystem cache for Django Compressor to know which files to
+compress. Since staticfiles provides a management command to collect static
+files from various locations which uses a storage backend, this is where both
+apps can be integrated.
 
 #. Make sure the :attr:`~django.conf.settings.COMPRESS_ROOT` and STATIC_ROOT_
    settings are equal since both apps need to look at the same directories
@@ -84,7 +83,6 @@ integrated.
 .. _Amazon S3: https://s3.amazonaws.com/
 .. _boto: http://boto.cloudhackers.com/
 .. _django-storages: http://code.welldev.org/django-storages/
-.. _django-staticfiles: http://github.com/jezdez/django-staticfiles/
 .. _staticfiles: http://docs.djangoproject.com/en/dev/howto/static-files/
 .. _STATIC_ROOT: http://docs.djangoproject.com/en/dev/ref/settings/#static-root
 .. _STATIC_URL: http://docs.djangoproject.com/en/dev/ref/settings/#static-url
