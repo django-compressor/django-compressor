@@ -123,6 +123,13 @@ class CompressorMixin(object):
             assert isinstance(rendered_output, six.string_types)
             return rendered_output
         except Exception:
+            logger.error(
+                'error in rendering compressor output at path %s for content %s' % (
+                    context['request'].path,
+                    self.get_original_content(context)
+                ),
+                exc_info=True
+            )
             if settings.DEBUG or forced:
                 raise
 
