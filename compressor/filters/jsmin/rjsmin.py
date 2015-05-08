@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: ascii -*-
+# -*- coding: utf-8 -*-
 #
 # Copyright 2011 - 2013
 # Andr\xe9 Malo or his licensors, as applicable
