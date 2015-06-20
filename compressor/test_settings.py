@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'compressor',
     'coffin',
+    'sekizai',
 ]
 if django.VERSION < (1, 8):
     INSTALLED_APPS.append('jingo')
