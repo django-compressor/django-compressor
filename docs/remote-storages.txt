@@ -82,7 +82,7 @@ apps can be integrated.
 .. _CDN: http://en.wikipedia.org/wiki/Content_delivery_network
 .. _Amazon S3: https://s3.amazonaws.com/
 .. _boto: http://boto.cloudhackers.com/
-.. _django-storages: http://code.welldev.org/django-storages/
+.. _django-storages: https://django-storages.readthedocs.org
 .. _staticfiles: http://docs.djangoproject.com/en/dev/howto/static-files/
 .. _STATIC_ROOT: http://docs.djangoproject.com/en/dev/ref/settings/#static-root
 .. _STATIC_URL: http://docs.djangoproject.com/en/dev/ref/settings/#static-url
