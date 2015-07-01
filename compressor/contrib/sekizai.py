@@ -6,7 +6,7 @@
  and: https://github.com/ojii/django-sekizai.git@0.6 or later
 """
 from compressor.templatetags.compress import CompressorNode
-from django.template.base import Template
+from django.template.base import TextNode
 
 
 def compress(context, data, name):
@@ -15,4 +15,4 @@ def compress(context, data, name):
     Name is either 'js' or 'css' (the sekizai namespace)
     Basically passes the string through the {% compress 'js' %} template tag
     """
-    return CompressorNode(nodelist=Template(data).nodelist, kind=name, mode='file').render(context=context)
+    return CompressorNode(nodelist=TextNode(data), kind=name, mode='file').render(context=context)
