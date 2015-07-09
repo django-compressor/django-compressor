@@ -43,5 +43,6 @@ Contents
  behind-the-scenes
  jinja2
  django-sekizai
+ reactjs
  contributing
  changelog
