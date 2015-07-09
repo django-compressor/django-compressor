@@ -12,7 +12,8 @@ Requirements
 * A Javascript runtime : options include PyV8, Node.js, PhantomJS among others
 
 
-The full list of supported javascript engines can be found here: https://github.com/doloopwhile/PyExecJS
+The full list of supported javascript engines can be found here:
+    https://github.com/doloopwhile/PyExecJS
 
 
 Installation
