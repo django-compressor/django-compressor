@@ -3,7 +3,7 @@
 Facebook React Support
 ======================
 
-Compiling React's jsx files can be done by creating a custom precompressor
+Compiling React's jsx files can be done by creating a custom precompressor.
 
 Requirements
 ------------
@@ -12,12 +12,15 @@ Requirements
 * A Javascript runtime : options include PyV8, Node.js, PhantomJS among others
 
 
-Full list of supported javascript engines found here https://github.com/doloopwhile/PyExecJS
+The full list of supported javascript engines can be found here: https://github.com/doloopwhile/PyExecJS
 
 
 Installation
 ------------
-1. Place the following code in a python file (ex: third_party/react_compressor.py) also make sure third_party/__init__.py exists
+1. Place the following code in a Python file (e.g.
+   ``third_party/react_compressor.py``).  Also make sure that
+   ``third_party/__init__.py`` exists so the directory is recognized as a
+   Python package.
 
 .. code-block:: django
 
@@ -36,7 +39,7 @@ Installation
             return jsx.transform_string(self.content)
 
 
-2. In your django settings file add the following line
+2. In your Django settings, add the following line:
 
 .. code-block:: django
 
@@ -44,14 +47,15 @@ Installation
         ('text/jsx', 'third_party.react_compressor.ReactFilter'),
     )
 
-Where ``third_party.react_compressor.ReactFilter`` is the full name of your ``ReactFilter`` class
+Where ``third_party.react_compressor.ReactFilter`` is the full name of your ``ReactFilter`` class.
 
 
 Troubleshooting
---------------
-If you get file not found errors open your python command line and make sure
-you are able to import your ``ReactFilter`` class
+---------------
+If you get "file not found" errors, open your Python command line and make sure
+you are able to import your ``ReactFilter`` class:
 
 .. code-block:: django
     
     __import__('third_party.react_compressor.ReactFilter')
+
