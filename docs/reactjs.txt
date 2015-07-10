@@ -3,8 +3,9 @@
 Facebook React Support
 ======================
 
-Assuming you have `npm` available by following the `react-tools installation instructions`_ and
-adding an appropriate ``COMPRESS_PRECOMPILERS`` setting:
+Assuming you have `npm` available, you can integrate React with Django Compressor by following the
+`react-tools installation instructions`_ and adding an appropriate ``COMPRESS_PRECOMPILERS``
+setting:
 
 .. code-block:: django
 
