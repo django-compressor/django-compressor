@@ -3,7 +3,20 @@
 Facebook React Support
 ======================
 
-Compiling React's jsx files can be done by creating a custom precompressor.
+Assuming you have `npm` available by following the `react-tools installation instructions`_ and
+adding an appropriate ``COMPRESS_PRECOMPILERS`` setting:
+
+.. code-block:: django
+
+    COMPRESS_PRECOMPILERS = (
+       ('text/jsx', 'cat {infile} | jsx > {outfile}'),
+    )
+
+
+.. _react-tools installation instructions: http://facebook.github.io/react/docs/tooling-integration.html#productionizing-precompiled-jsx
+
+If the above approach is not suitable for you, compiling React's jsx files can be done by creating
+a custom precompressor.
 
 Requirements
 ------------
@@ -57,6 +70,6 @@ If you get "file not found" errors, open your Python command line and make sure
 you are able to import your ``ReactFilter`` class:
 
 .. code-block:: django
-    
+
     __import__('third_party.react_compressor.ReactFilter')
 
