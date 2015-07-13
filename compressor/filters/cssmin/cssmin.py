@@ -91,7 +91,7 @@ def remove_unnecessary_whitespace(css):
 
     css = pseudoclasscolon(css)
     # Remove spaces from before things.
-    css = re.sub(r"\s+([!{};:>+\(\)\],])", r"\1", css)
+    css = re.sub(r"\s+([!{};:>\(\)\],])", r"\1", css)
 
     # If there is a `@charset`, then only allow one, and move to the beginning.
     css = re.sub(r"^(.*)(@charset \"[^\"]*\";)", r"\2\1", css)
@@ -105,7 +105,7 @@ def remove_unnecessary_whitespace(css):
     css = css.replace('___PSEUDOCLASSCOLON___', ':')
 
     # Remove spaces from after things.
-    css = re.sub(r"([!{}:;>+\(\[,])\s+", r"\1", css)
+    css = re.sub(r"([!{}:;>\(\[,])\s+", r"\1", css)
 
     return css
 
