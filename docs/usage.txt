@@ -105,7 +105,7 @@ of that particular compress tag.  This is then added to the context so you can
 access it in the `post_compress signal <signals>`.
 
 .. _memcached: http://memcached.org/
-.. _caching documentation: http://docs.djangoproject.com/en/1.2/topics/cache/#memcached
+.. _caching documentation: https://docs.djangoproject.com/en/1.8/topics/cache/#memcached
 
 .. _pre-compression:
 
