@@ -234,8 +234,7 @@ class Command(NoArgsCommand):
                 try:
                     result = parser.render_node(template, context, node)
                 except Exception as e:
-                    raise CommandError("An error occured during rendering %s: "
-                                       "%s" % (template.template_name, e))
+                    raise CommandError("An error occured during rendering {template}: {error}".format(template=template.template_name, error=e))
                 offline_manifest[key] = result
                 context.pop()
                 results.append(result)
