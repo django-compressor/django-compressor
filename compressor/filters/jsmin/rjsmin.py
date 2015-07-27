@@ -146,10 +146,10 @@ def _make_jsmin(python_only=False):
             if last is not None:
                 result.append((first, last))
             return ''.join(['%s%s%s' % (
-                chr(first),
-                last > first + 1 and '-' or '',
-                last != first and chr(last) or ''
-            ) for first, last in result])
+                chr(first2),
+                last2 > first2 + 1 and '-' or '',
+                last2 != first2 and chr(last2) or ''
+            ) for first2, last2 in result])
 
         return _re.sub(
             r'([\000-\040\047])',  # \047 for better portability
@@ -207,7 +207,7 @@ def _make_jsmin(python_only=False):
         r'|%(space)s+'
         r'|(?:%(newline)s%(space)s*)+'
     ) % locals()).sub
-    #print space_sub_simple.__self__.pattern
+    # print space_sub_simple.__self__.pattern
 
     def space_subber_simple(match):
         """ Substitution callback """
@@ -250,7 +250,7 @@ def _make_jsmin(python_only=False):
         r'|%(space)s+'
         r'|(?:%(newline)s%(space)s*)+'
     ) % dict(locals(), space=space_nobang)).sub
-    #print space_sub_banged.__self__.pattern
+    # print space_sub_banged.__self__.pattern
 
     def space_subber_banged(match):
         """ Substitution callback """
@@ -436,7 +436,6 @@ if __name__ == '__main__':
             or '-bp' in _sys.argv[1:]
             or '-pb' in _sys.argv[1:]
         )
-        print _sys.argv[1:]
         if '-p' in _sys.argv[1:] or '-bp' in _sys.argv[1:] \
                 or '-pb' in _sys.argv[1:]:
             global jsmin  # pylint: disable = W0603
