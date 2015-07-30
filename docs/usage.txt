@@ -153,7 +153,7 @@ the commonly used setting to refer to saved files ``STATIC_URL``.
 
 The result of running the ``compress`` management command will be cached
 in a file called ``manifest.json`` using the :attr:`configured storage
-<django.conf.settings.COMPRESS_STORAGE>` to be able to be transfered from your developement
+<django.conf.settings.COMPRESS_STORAGE>` to be able to be transferred from your development
 computer to the server easily.
 
 .. _TEMPLATE_LOADERS: http://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
