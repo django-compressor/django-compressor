@@ -114,10 +114,10 @@ def _make_cssmin(python_only=False):
     escape = r'(?:\\(?:%(unicoded)s|%(escaped)s))' % locals()
 
     nmchar = r'[^\000-\054\056\057\072-\100\133-\136\140\173-\177]'
-    #nmstart = r'[^\000-\100\133-\136\140\173-\177]'
-    #ident = (r'(?:'
-    #    r'-?(?:%(nmstart)s|%(escape)s)%(nmchar)s*(?:%(escape)s%(nmchar)s*)*'
-    #r')') % locals()
+    # nmstart = r'[^\000-\100\133-\136\140\173-\177]'
+    # ident = (r'(?:'
+    #     r'-?(?:%(nmstart)s|%(escape)s)%(nmchar)s*(?:%(escape)s%(nmchar)s*)*'
+    # r')') % locals()
 
     comment = r'(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)'
 
@@ -205,7 +205,7 @@ def _make_cssmin(python_only=False):
         r'|(%(escape)s[^\\"\047u>@\r\n\f\040\t/;:{}]*)'
     ) % locals()).sub
 
-    #print main_sub.__self__.pattern
+    # print main_sub.__self__.pattern
 
     def main_subber(keep_bang_comments):
         """ Make main subber """
@@ -329,7 +329,7 @@ def _make_cssmin(python_only=False):
             # shortcuts for frequent operations below:
             elif idx == 1:     # not interesting
                 return group(1)
-            #else: # space with token before or at the beginning
+            # else: # space with token before or at the beginning
             return space_sub(space_subber, group(idx))
 
         return func
