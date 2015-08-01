@@ -17,6 +17,7 @@ from compressor.utils import find_command
 from compressor.filters.base import CompilerFilter
 from compressor.filters.cssmin import CSSMinFilter, rCSSMinFilter
 from compressor.filters.css_default import CssAbsoluteFilter
+from compressor.filters.jsmin import JSMinFilter
 from compressor.filters.template import TemplateFilter
 from compressor.filters.closure import ClosureCompilerFilter
 from compressor.filters.csstidy import CSSTidyFilter
@@ -139,6 +140,20 @@ class rCssMinTestCase(TestCase):
  * Copyright (c) 2009-2014 Django Compressor authors
  */p{background:rgb(51,102,153) url('../../images/image.gif')}"""
         self.assertEqual(output, rCSSMinFilter(content).output())
+
+
+class JsMinTestCase(TestCase):
+    def test_jsmin_filter(self):
+        content = """/*!
+ * django-compressor
+ * Copyright (c) 2009-2014 Django Compressor authors
+ */
+        var foo = "bar";"""
+        output = """/*!
+ * django-compressor
+ * Copyright (c) 2009-2014 Django Compressor authors
+ */var foo="bar";"""
+        self.assertEqual(output, JSMinFilter(content).output())
 
 
 class CssAbsolutizingTestCase(TestCase):
