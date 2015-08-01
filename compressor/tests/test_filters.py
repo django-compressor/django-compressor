@@ -104,7 +104,11 @@ class PrecompilerTestCase(TestCase):
 
 class CssMinTestCase(TestCase):
     def test_cssmin_filter(self):
-        content = """p {
+        content = """/*!
+ * django-compressor
+ * Copyright (c) 2009-2014 Django Compressor authors
+ */
+        p {
 
 
         background: rgb(51,102,153) url('../../images/image.gif');
@@ -112,7 +116,7 @@ class CssMinTestCase(TestCase):
 
         }
         """
-        output = "p{background:#369 url('../../images/image.gif')}"
+        output = "/*!* django-compressor * Copyright(c) 2009-2014 Django Compressor authors */ p{background:#369 url('../../images/image.gif')}"
         self.assertEqual(output, CSSMinFilter(content).output())
 
 
