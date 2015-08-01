@@ -1,20 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-# Copyright 2011, 2012
-# Andr\xe9 Malo or his licensors, as applicable
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# -*- coding: ascii -*-
 r"""
 ==============
  CSS Minifier
@@ -22,8 +7,27 @@ r"""
 
 CSS Minifier.
 
-The minifier is based on the semantics of the `YUI compressor`_\, which itself
-is based on `the rule list by Isaac Schlueter`_\.
+The minifier is based on the semantics of the `YUI compressor`_\\, which
+itself is based on `the rule list by Isaac Schlueter`_\\.
+
+:Copyright:
+
+ Copyright 2011 - 2014
+ Andr\xe9 Malo or his licensors, as applicable
+
+:License:
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
 
 This module is a re-implementation aiming for speed instead of maximum
 compression, so it can be used at runtime (rather than during a preprocessing
@@ -51,7 +55,7 @@ Here's a feature list:
 - CSS Hacks supported:
 
   - IE7 hack (``>/**/``)
-  - Mac-IE5 hack (``/*\*/.../**/``)
+  - Mac-IE5 hack (``/*\\*/.../**/``)
   - The boxmodelhack is supported naturally because it relies on valid CSS2
     strings
   - Between ``:first-line`` and the following comma or curly brace a space is
@@ -59,19 +63,22 @@ Here's a feature list:
   - Same for ``:first-letter``
 
 rcssmin.c is a reimplementation of rcssmin.py in C and improves runtime up to
-factor 50 or so (depending on the input).
+factor 100 or so (depending on the input). docs/BENCHMARKS in the source
+distribution contains the details.
 
 Both python 2 (>= 2.4) and python 3 are supported.
 
 .. _YUI compressor: https://github.com/yui/yuicompressor/
 
-.. _the rule list by Isaac Schlueter: https://github.com/isaacs/cssmin/tree/
+.. _the rule list by Isaac Schlueter: https://github.com/isaacs/cssmin/
 """
-__author__ = "Andr\xe9 Malo"
-__author__ = getattr(__author__, 'decode', lambda x: __author__)('latin-1')
+if __doc__:
+    # pylint: disable = W0622
+    __doc__ = __doc__.encode('ascii').decode('unicode_escape')
+__author__ = r"Andr\xe9 Malo".encode('ascii').decode('unicode_escape')
 __docformat__ = "restructuredtext en"
 __license__ = "Apache License, Version 2.0"
-__version__ = '1.0.2'
+__version__ = '1.0.5'
 __all__ = ['cssmin']
 
 import re as _re
@@ -89,11 +96,7 @@ def _make_cssmin(python_only=False):
     :Return: Minifier
     :Rtype: ``callable``
     """
-    # pylint: disable = W0612
-    # ("unused" variables)
-
-    # pylint: disable = R0911, R0912, R0914, R0915
-    # (too many anything)
+    # pylint: disable = R0912, R0914, W0612
 
     if not python_only:
         try:
@@ -103,7 +106,7 @@ def _make_cssmin(python_only=False):
         else:
             return _rcssmin.cssmin
 
-    nl = r'(?:[\n\f]|\r\n?)' # pylint: disable = C0103
+    nl = r'(?:[\n\f]|\r\n?)'  # pylint: disable = C0103
     spacechar = r'[\r\n\f\040\t]'
 
     unicoded = r'[0-9a-fA-F]{1,6}(?:[\040\n\t\f]|\r\n?)?'
@@ -113,7 +116,7 @@ def _make_cssmin(python_only=False):
     nmchar = r'[^\000-\054\056\057\072-\100\133-\136\140\173-\177]'
     # nmstart = r'[^\000-\100\133-\136\140\173-\177]'
     # ident = (r'(?:'
-    #    r'-?(?:%(nmstart)s|%(escape)s)%(nmchar)s*(?:%(escape)s%(nmchar)s*)*'
+    #     r'-?(?:%(nmstart)s|%(escape)s)%(nmchar)s*(?:%(escape)s%(nmchar)s*)*'
     # r')') % locals()
 
     comment = r'(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)'
@@ -142,6 +145,7 @@ def _make_cssmin(python_only=False):
     ie7hack = r'(?:>/\*\*/)'
 
     uri = (r'(?:'
+        # noqa pylint: disable = C0330
         r'(?:[^\000-\040"\047()\\\177]*'
             r'(?:%(escape)s[^\000-\040"\047()\\\177]*)*)'
         r'(?:'
@@ -171,6 +175,7 @@ def _make_cssmin(python_only=False):
     post_esc_sub = _re.compile(r'[\r\n\f\t]+').sub
 
     main_sub = _re.compile((
+        # noqa pylint: disable = C0330
         r'([^\\"\047u>@\r\n\f\040\t/;:{}]+)'
         r'|(?<=[{}(=:>+[,!])(%(space)s+)'
         r'|^(%(space)s+)'
@@ -183,7 +188,15 @@ def _make_cssmin(python_only=False):
                 r'%(uri_nl_strings)s'
                 r'|%(uri)s'
             r')%(spacechar)s*\)'
-        r'|(@[mM][eE][dD][iI][aA])(?!%(nmchar)s)'
+        r'|(@(?:'
+              r'[mM][eE][dD][iI][aA]'
+              r'|[sS][uU][pP][pP][oO][rR][tT][sS]'
+              r'|[dD][oO][cC][uU][mM][eE][nN][tT]'
+              r'|(?:-(?:'
+                  r'[wW][eE][bB][kK][iI][tT]|[mM][oO][zZ]|[oO]|[mM][sS]'
+                r')-)?'
+                r'[kK][eE][yY][fF][rR][aA][mM][eE][sS]'
+            r'))(?!%(nmchar)s)'
         r'|(%(ie7hack)s)(%(space)s*)'
         r'|(:[fF][iI][rR][sS][tT]-[lL]'
             r'(?:[iI][nN][eE]|[eE][tT][tT][eE][rR]))'
@@ -196,10 +209,11 @@ def _make_cssmin(python_only=False):
 
     def main_subber(keep_bang_comments):
         """ Make main subber """
-        in_macie5, in_rule, at_media = [0], [0], [0]
+        in_macie5, in_rule, at_group = [0], [0], [0]
 
         if keep_bang_comments:
             space_sub = space_sub_banged
+
             def space_subber(match):
                 """ Space|Comment subber """
                 if match.lastindex:
@@ -222,6 +236,7 @@ def _make_cssmin(python_only=False):
                 return ''
         else:
             space_sub = space_sub_simple
+
             def space_subber(match):
                 """ Space|Comment subber """
                 if match.lastindex:
@@ -238,7 +253,7 @@ def _make_cssmin(python_only=False):
         def fn_space_post(group):
             """ space with token after """
             if group(5) is None or (
-                    group(6) == ':' and not in_rule[0] and not at_media[0]):
+                    group(6) == ':' and not in_rule[0] and not at_group[0]):
                 return ' ' + space_sub(space_subber, group(4))
             return space_sub(space_subber, group(4))
 
@@ -252,58 +267,57 @@ def _make_cssmin(python_only=False):
                 return space_sub(space_subber, group(7))
             return ';' + space_sub(space_subber, group(7))
 
-        def fn_open(group):
+        def fn_open(_):
             """ { handler """
-            # pylint: disable = W0613
-            if at_media[0]:
-                at_media[0] -= 1
+            if at_group[0]:
+                at_group[0] -= 1
             else:
                 in_rule[0] = 1
             return '{'
 
-        def fn_close(group):
+        def fn_close(_):
             """ } handler """
-            # pylint: disable = W0613
             in_rule[0] = 0
             return '}'
 
-        def fn_media(group):
-            """ @media handler """
-            at_media[0] += 1
+        def fn_at_group(group):
+            """ @xxx group handler """
+            at_group[0] += 1
             return group(13)
 
         def fn_ie7hack(group):
             """ IE7 Hack handler """
-            if not in_rule[0] and not at_media[0]:
+            if not in_rule[0] and not at_group[0]:
                 in_macie5[0] = 0
                 return group(14) + space_sub(space_subber, group(15))
             return '>' + space_sub(space_subber, group(15))
 
         table = (
+            # noqa pylint: disable = C0330
             None,
             None,
             None,
             None,
-            fn_space_post,                      # space with token after
-            fn_space_post,                      # space with token after
-            fn_space_post,                      # space with token after
-            fn_semicolon,                       # semicolon
-            fn_semicolon2,                      # semicolon
-            fn_open,                            # {
-            fn_close,                           # }
-            lambda g: g(11),                    # string
+            fn_space_post,                       # space with token after
+            fn_space_post,                       # space with token after
+            fn_space_post,                       # space with token after
+            fn_semicolon,                        # semicolon
+            fn_semicolon2,                       # semicolon
+            fn_open,                             # {
+            fn_close,                            # }
+            lambda g: g(11),                     # string
             lambda g: 'url(%s)' % uri_space_sub(uri_space_subber, g(12)),
-                                                # url(...)
-            fn_media,                           # @media
+                                                 # url(...)
+            fn_at_group,                         # @xxx expecting {...}
             None,
-            fn_ie7hack,                         # ie7hack
+            fn_ie7hack,                          # ie7hack
             None,
             lambda g: g(16) + ' ' + space_sub(space_subber, g(17)),
-                                                # :first-line|letter followed
-                                                # by [{,] (apparently space
-                                                # needed for IE6)
-            lambda g: nl_unesc_sub('', g(18)),  # nl_string
-            lambda g: post_esc_sub(' ', g(19)), # escape
+                                                 # :first-line|letter followed
+                                                 # by [{,] (apparently space
+                                                 # needed for IE6)
+            lambda g: nl_unesc_sub('', g(18)),   # nl_string
+            lambda g: post_esc_sub(' ', g(19)),  # escape
         )
 
         def func(match):
@@ -320,7 +334,7 @@ def _make_cssmin(python_only=False):
 
         return func
 
-    def cssmin(style, keep_bang_comments=False): # pylint: disable = W0621
+    def cssmin(style, keep_bang_comments=False):  # pylint: disable = W0621
         """
         Minify CSS.
 
@@ -352,7 +366,7 @@ if __name__ == '__main__':
         )
         if '-p' in _sys.argv[1:] or '-bp' in _sys.argv[1:] \
                 or '-pb' in _sys.argv[1:]:
-            global cssmin # pylint: disable = W0603
+            global cssmin  # pylint: disable = W0603
             cssmin = _make_cssmin(python_only=True)
         _sys.stdout.write(cssmin(
             _sys.stdin.read(), keep_bang_comments=keep_bang_comments
