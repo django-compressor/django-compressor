@@ -234,7 +234,7 @@ class Command(NoArgsCommand):
                 try:
                     result = parser.render_node(template, context, node)
                 except Exception as e:
-                    raise CommandError("An error occured during rendering %s: "
+                    raise CommandError("An error occurred during rendering %s: "
                                        "%s" % (template.template_name, e))
                 offline_manifest[key] = result
                 context.pop()
@@ -253,7 +253,7 @@ class Command(NoArgsCommand):
         passed by using --extension/-e multiple times.
 
         for example: running 'django-admin compress -e js,txt -e xhtml -a'
-        would result in a extension list: ['.js', '.txt', '.xhtml']
+        would result in an extension list: ['.js', '.txt', '.xhtml']
 
         >>> handle_extensions(['.html', 'html,js,py,py,py,.py', 'py,.py'])
         ['.html', '.js']

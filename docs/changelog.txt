@@ -57,7 +57,7 @@ v1.4 (06/20/2014)
 
 - Made ``CssCompressor`` class easier to extend.
 
-- Added support for explictly stating the block being ended.
+- Added support for explicitly stating the block being ended.
 
 - Added rcssmin and updated rjsmin.
 
@@ -368,7 +368,7 @@ v0.6.1
 ------
 
 - Fixed staticfiles support to also use its finder API to find files during
-  developement -- when the static files haven't been collected in
+  development -- when the static files haven't been collected in
   ``STATIC_ROOT``.
 
 - Fixed regression with the ``COMPRESS`` setting, pre-compilation and
@@ -394,7 +394,7 @@ Major improvements and a lot of bugfixes, some of which are:
   compress template tag does. See the
   :ref:`pre-compression <pre-compression>` docs for more information.
 
-- Various perfomance improvements by better caching and mtime cheking.
+- Various performance improvements by better caching and mtime cheking.
 
 - Deprecated ``COMPRESS_LESSC_BINARY`` setting because it's now
   superseded by the :attr:`~django.conf.settings.COMPRESS_PRECOMPILERS`

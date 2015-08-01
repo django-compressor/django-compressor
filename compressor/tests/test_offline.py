@@ -49,7 +49,7 @@ class OfflineTestCaseMixin(object):
 
         # Reset template dirs, because it enables us to force compress to
         # consider only a specific directory (helps us make true,
-        # independant unit tests).
+        # independent unit tests).
         # Specify both Jinja2 and Django template locations. When the wrong engine
         # is used to parse a template, the TemplateSyntaxError will cause the
         # template to be skipped over.

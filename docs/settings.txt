@@ -135,7 +135,12 @@ Backend settings
     - ``compressor.filters.cssmin.CSSMinFilter``
 
       A filter that uses Zachary Voase's Python port of the YUI CSS compression
-      algorithm cssmin_.
+      algorithm cssmin_ (included, no external dependencies).
+
+    - ``compressor.filters.cssmin.rCSSMinFilter``
+
+      A filter that uses the cssmin implementation rCSSmin_ to compress CSS
+      (included, no external dependencies).
 
     - ``compressor.filters.cleancss.CleanCSSFilter``
 
@@ -153,6 +158,7 @@ Backend settings
     .. _CSSTidy: http://csstidy.sourceforge.net/
     .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
     .. _cssmin: http://pypi.python.org/pypi/cssmin/
+    .. _rCSSmin: http://opensource.perlig.de/rcssmin/
     .. _`clean-css`: https://github.com/GoalSmashers/clean-css/
 
 
@@ -178,7 +184,7 @@ Backend settings
     - ``compressor.filters.jsmin.JSMinFilter``
 
       A filter that uses the jsmin implementation rJSmin_ to compress
-      JavaScript code.
+      JavaScript code (included, no external dependencies).
 
     .. _slimit_filter:
 
