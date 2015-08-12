@@ -146,11 +146,11 @@ Backend settings
 
       A filter that passes the CSS content to the `clean-css`_ tool.
 
-      .. attribute:: CLEAN_CSS_BINARY
+      .. attribute:: COMPRESS_CLEAN_CSS_BINARY
 
          The clean-css binary filesystem path.
 
-      .. attribute:: CLEAN_CSS_ARGUMENTS
+      .. attribute:: COMPRESS_CLEAN_CSS_ARGUMENTS
 
          The arguments passed to clean-css.
 
