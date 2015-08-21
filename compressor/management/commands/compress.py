@@ -11,7 +11,10 @@ import django.template
 from django.template import Context
 from django.utils import six
 from django.utils.datastructures import SortedDict
-from django.utils.importlib import import_module
+try:
+    from importlib import import_module
+except:
+    from django.utils.importlib import import_module
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
 
 from compressor.cache import get_offline_hexdigest, write_offline_manifest
