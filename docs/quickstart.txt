@@ -90,9 +90,9 @@ Optional
       pip install slimit
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
-.. _lxml: http://codespeak.net/lxml/
+.. _lxml: http://lxml.de/
 .. _libxml2: http://xmlsoft.org/
-.. _html5lib: http://code.google.com/p/html5lib/
+.. _html5lib: https://github.com/html5lib
 .. _`Slim It`: https://github.com/rspivak/slimit
 .. _django-appconf: http://pypi.python.org/pypi/django-appconf/
 .. _versiontools: http://pypi.python.org/pypi/versiontools/
