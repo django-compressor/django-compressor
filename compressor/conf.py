@@ -18,6 +18,9 @@ class CompressorConf(AppConf):
     OUTPUT_DIR = 'CACHE'
     STORAGE = 'compressor.storage.CompressorFileStorage'
 
+    # if a static file cannot be found locally, should we pull from the remote storage?
+    FETCH_FROM_REMOTE = False
+
     CSS_COMPRESSOR = 'compressor.css.CssCompressor'
     JS_COMPRESSOR = 'compressor.js.JsCompressor'
 
