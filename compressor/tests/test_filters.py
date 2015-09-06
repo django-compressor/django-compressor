@@ -51,6 +51,9 @@ class PrecompilerTestCase(TestCase):
     def setUp(self):
         self.test_precompiler = os.path.join(test_dir, 'precompiler.py')
         self.setup_infile()
+        self.cached_precompiler_args = dict(
+            content=self.content, charset=settings.FILE_CHARSET,
+            filename=self.filename, mimetype='text/css')
         settings.COMPRESS_CACHEABLE_PRECOMPILERS = ('text/css',)
 
     def setup_infile(self, filename='static/css/one.css'):
@@ -105,29 +108,30 @@ class PrecompilerTestCase(TestCase):
 
     def test_precompiler_cache(self):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
-        compiler = CachedCompilerFilter(content=self.content, filename=self.filename, command=command, mimetype='text/css')
-        self.assertEqual(u"body { color:#990; }", compiler.input())
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
         # We tell whether the precompiler actually ran by inspecting compiler.infile. If not None, the compiler had to
         # write the input out to the file for the external command. If None, it was in the cache and thus skipped.
         self.assertIsNotNone(compiler.infile)  # Not cached
 
-        compiler = CachedCompilerFilter(content=self.content, filename=self.filename, command=command, mimetype='text/css')
-        self.assertEqual(u"body { color:#990; }", compiler.input())
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
         self.assertIsNone(compiler.infile)  # Cached
 
-        self.content += ' '  # Invalidate cache by slightly changing content
-        compiler = CachedCompilerFilter(content=self.content, filename=self.filename, command=command, mimetype='text/css')
-        self.assertEqual(u"body { color:#990; }", compiler.input())
+        self.cached_precompiler_args['content'] += ' '  # Invalidate cache by slightly changing content
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
         self.assertIsNotNone(compiler.infile)  # Not cached
 
     def test_precompiler_not_cacheable(self):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
-        compiler = CachedCompilerFilter(content=self.content, filename=self.filename, command=command, mimetype='text/different')
-        self.assertEqual(u"body { color:#990; }", compiler.input())
+        self.cached_precompiler_args['mimetype'] = 'text/different'
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
         self.assertIsNotNone(compiler.infile)  # Not cached
 
-        compiler = CachedCompilerFilter(content=self.content, filename=self.filename, command=command, mimetype='text/different')
-        self.assertEqual(u"body { color:#990; }", compiler.input())
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
         self.assertIsNotNone(compiler.infile)  # Not cached
 
 
