@@ -136,7 +136,7 @@ def get_hashed_content(filename, length=12):
 
 
 def get_precompiler_cachekey(command, contents):
-    return hashlib.sha1('precompiler.%s.%s' % (command, contents)).hexdigest()
+    return hashlib.sha1(smart_bytes('precompiler.%s.%s' % (command, contents))).hexdigest()
 
 
 def cache_get(key):

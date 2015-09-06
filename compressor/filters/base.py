@@ -233,4 +233,4 @@ class CachedCompilerFilter(CompilerFilter):
             return super(CachedCompilerFilter, self).input(**kwargs)
 
     def get_cache_key(self):
-        return get_precompiler_cachekey(self.command, self.content.encode('utf8'))
+        return get_precompiler_cachekey(self.command, self.content)
