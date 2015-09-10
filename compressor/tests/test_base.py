@@ -14,7 +14,7 @@ from django.test.utils import override_settings
 
 from compressor import cache as cachemod
 from compressor.base import SOURCE_FILE, SOURCE_HUNK
-from compressor.cache import get_cachekey
+from compressor.cache import get_cachekey, get_precompiler_cachekey
 from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.exceptions import FilterDoesNotExist, FilterError
@@ -331,3 +331,9 @@ class CacheTestCase(SimpleTestCase):
     @override_settings(COMPRESS_CACHE_KEY_FUNCTION='invalid.module')
     def test_get_cachekey_invalid_mod(self):
         self.assertRaises(ImportError, lambda: get_cachekey("foo"))
+
+    def test_get_precompiler_cachekey(self):
+        try:
+            get_precompiler_cachekey("asdf", "asdf")
+        except TypeError:
+            self.fail("get_precompiler_cachekey raised TypeError unexpectedly")

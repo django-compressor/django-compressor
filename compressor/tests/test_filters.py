@@ -10,11 +10,11 @@ from django.test import TestCase
 from django.utils import unittest
 from django.test.utils import override_settings
 
-from compressor.cache import get_hashed_mtime, get_hashed_content
+from compressor.cache import cache, get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.utils import find_command
-from compressor.filters.base import CompilerFilter
+from compressor.filters.base import CompilerFilter, CachedCompilerFilter
 from compressor.filters.cssmin import CSSMinFilter, rCSSMinFilter
 from compressor.filters.css_default import CssAbsoluteFilter
 from compressor.filters.jsmin import JSMinFilter
@@ -51,6 +51,10 @@ class PrecompilerTestCase(TestCase):
     def setUp(self):
         self.test_precompiler = os.path.join(test_dir, 'precompiler.py')
         self.setup_infile()
+        self.cached_precompiler_args = dict(
+            content=self.content, charset=settings.FILE_CHARSET,
+            filename=self.filename, mimetype='text/css')
+        settings.COMPRESS_CACHEABLE_PRECOMPILERS = ('text/css',)
 
     def setup_infile(self, filename='static/css/one.css'):
         self.filename = os.path.join(test_dir, filename)
@@ -101,6 +105,43 @@ class PrecompilerTestCase(TestCase):
         command = '%s %s' % (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
         self.assertEqual(type(compiler.input()), six.text_type)
+
+    def test_precompiler_cache(self):
+        command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
+        # We tell whether the precompiler actually ran by inspecting compiler.infile. If not None, the compiler had to
+        # write the input out to the file for the external command. If None, it was in the cache and thus skipped.
+        self.assertIsNotNone(compiler.infile)  # Not cached
+
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
+        self.assertIsNone(compiler.infile)  # Cached
+
+        self.cached_precompiler_args['content'] += ' '  # Invalidate cache by slightly changing content
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
+        self.assertIsNotNone(compiler.infile)  # Not cached
+
+    def test_precompiler_not_cacheable(self):
+        command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
+        self.cached_precompiler_args['mimetype'] = 'text/different'
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
+        self.assertIsNotNone(compiler.infile)  # Not cached
+
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
+        self.assertIsNotNone(compiler.infile)  # Not cached
+
+    def test_precompiler_caches_empty_files(self):
+        command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
+
+        cache.set(compiler.get_cache_key(), "")
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("", compiler.input())
 
 
 class CssMinTestCase(TestCase):

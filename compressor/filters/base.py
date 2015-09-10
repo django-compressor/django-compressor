@@ -27,6 +27,8 @@ except ImportError:
 from django.utils.encoding import smart_text
 from django.utils import six
 
+from compressor.cache import cache, get_precompiler_cachekey
+
 from compressor.conf import settings
 from compressor.exceptions import FilterError
 from compressor.utils import get_mod_func
@@ -140,6 +142,7 @@ class CompilerFilter(FilterBase):
         self.infile = self.outfile = None
 
     def input(self, **kwargs):
+
         encoding = self.default_encoding
         options = dict(self.options)
 
@@ -208,5 +211,26 @@ class CompilerFilter(FilterBase):
                 self.infile.close()
             if self.outfile is not None:
                 self.outfile.close()
-
         return smart_text(filtered)
+
+
+class CachedCompilerFilter(CompilerFilter):
+
+    def __init__(self, mimetype, **kwargs):
+        self.mimetype = mimetype
+        super(CachedCompilerFilter, self).__init__(**kwargs)
+
+    def input(self, **kwargs):
+        if self.mimetype in settings.COMPRESS_CACHEABLE_PRECOMPILERS:
+            key = self.get_cache_key()
+            data = cache.get(key)
+            if data is not None:
+                return data
+            filtered = super(CachedCompilerFilter, self).input(**kwargs)
+            cache.set(key, filtered, settings.COMPRESS_REBUILD_TIMEOUT)
+            return filtered
+        else:
+            return super(CachedCompilerFilter, self).input(**kwargs)
+
+    def get_cache_key(self):
+        return get_precompiler_cachekey(self.command, self.content)

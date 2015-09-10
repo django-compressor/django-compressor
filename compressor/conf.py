@@ -35,6 +35,7 @@ class CompressorConf(AppConf):
         # ('text/stylus', 'stylus < {infile} > {outfile}'),
         # ('text/x-scss', 'sass --scss {infile} {outfile}'),
     )
+    CACHEABLE_PRECOMPILERS = ()
     CLOSURE_COMPILER_BINARY = 'java -jar compiler.jar'
     CLOSURE_COMPILER_ARGUMENTS = ''
     CSSTIDY_BINARY = 'csstidy'
