@@ -224,7 +224,7 @@ class CachedCompilerFilter(CompilerFilter):
         if self.mimetype in settings.COMPRESS_CACHEABLE_PRECOMPILERS:
             key = self.get_cache_key()
             data = cache.get(key)
-            if data:
+            if data is not None:
                 return data
             filtered = super(CachedCompilerFilter, self).input(**kwargs)
             cache.set(key, filtered, settings.COMPRESS_REBUILD_TIMEOUT)

@@ -10,7 +10,7 @@ from django.test import TestCase
 from django.utils import unittest
 from django.test.utils import override_settings
 
-from compressor.cache import get_hashed_mtime, get_hashed_content
+from compressor.cache import cache, get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.utils import find_command
@@ -133,6 +133,15 @@ class PrecompilerTestCase(TestCase):
         compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
         self.assertEqual("body { color:#990; }", compiler.input())
         self.assertIsNotNone(compiler.infile)  # Not cached
+
+    def test_precompiler_caches_empty_files(self):
+        command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
+
+        cache.set(compiler.get_cache_key(), "")
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("", compiler.input())
 
 
 class CssMinTestCase(TestCase):
