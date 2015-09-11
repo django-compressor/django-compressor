@@ -5,10 +5,8 @@ from compressor.conf import settings
 class CssCompressor(Compressor):
 
     def __init__(self, content=None, output_prefix="css", context=None):
-        super(CssCompressor, self).__init__(content=content,
-            output_prefix=output_prefix, context=context)
-        self.filters = list(settings.COMPRESS_CSS_FILTERS)
-        self.type = output_prefix
+        filters = list(settings.COMPRESS_CSS_FILTERS)
+        super(CssCompressor, self).__init__(content, output_prefix, context, filters)
 
     def split_contents(self):
         if self.split_content:

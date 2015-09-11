@@ -36,15 +36,17 @@ class Compressor(object):
     Base compressor object to be subclassed for content type
     depending implementations details.
     """
-    type = None
 
-    def __init__(self, content=None, output_prefix=None, context=None, *args, **kwargs):
+    def __init__(self, content=None, output_prefix=None,
+                 context=None, filters=None, *args, **kwargs):
         self.content = content or ""  # rendered contents of {% compress %} tag
         self.output_prefix = output_prefix or "compressed"
         self.output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
         self.charset = settings.DEFAULT_CHARSET
         self.split_content = []
         self.context = context or {}
+        self.type = output_prefix or ""
+        self.filters = filters or []
         self.extra_context = {}
         self.precompiler_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
         self.finders = staticfiles.finders
