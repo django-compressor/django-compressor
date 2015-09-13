@@ -40,8 +40,7 @@ class CompressorMixin(object):
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
-            # Only check for the debug parameter
-            # if a RequestContext was used
+            # Only check for the debug parameter if a RequestContext was used
             request = context.get('request', None)
             if request is not None:
                 return settings.COMPRESS_DEBUG_TOGGLE in request.GET
@@ -103,14 +102,11 @@ class CompressorMixin(object):
         if cache_content is not None:
             return cache_content
 
-        rendered_output = self.render_output(compressor, mode, forced=forced)
+        rendered_output = compressor.output(mode, forced=forced)
         assert isinstance(rendered_output, six.string_types)
         if cache_key:
             cache_set(cache_key, rendered_output)
         return rendered_output
-
-    def render_output(self, compressor, mode, forced=False):
-        return compressor.output(mode, forced=forced)
 
 
 class CompressorNode(CompressorMixin, template.Node):
@@ -123,14 +119,6 @@ class CompressorNode(CompressorMixin, template.Node):
 
     def get_original_content(self, context):
         return self.nodelist.render(context)
-
-    def debug_mode(self, context):
-        if settings.COMPRESS_DEBUG_TOGGLE:
-            # Only check for the debug parameter
-            # if a RequestContext was used
-            request = context.get('request', None)
-            if request is not None:
-                return settings.COMPRESS_DEBUG_TOGGLE in request.GET
 
     def render(self, context, forced=False):
 
