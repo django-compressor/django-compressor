@@ -46,7 +46,7 @@ class Compressor(object):
         self.split_content = []
         self.context = context or {}
         self.extra_context = {}
-        self.all_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
+        self.precompiler_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
         self.finders = staticfiles.finders
         self._storage = None
 
@@ -205,7 +205,7 @@ class Compressor(object):
                 options = dict(options, filename=value)
                 value = self.get_filecontent(value, charset)
 
-            if self.all_mimetypes:
+            if self.precompiler_mimetypes:
                 precompiled, value = self.precompile(value, **options)
 
             if enabled:
@@ -245,34 +245,33 @@ class Compressor(object):
             return False, content
         attrs = self.parser.elem_attribs(elem)
         mimetype = attrs.get("type", None)
-        if mimetype:
-            filter_or_command = self.all_mimetypes.get(mimetype)
-            if filter_or_command is None:
-                if mimetype not in ("text/css", "text/javascript"):
-                    raise CompressorError("Couldn't find any precompiler in "
-                                          "COMPRESS_PRECOMPILERS setting for "
-                                          "mimetype '%s'." % mimetype)
-            else:
-                mod_name, cls_name = get_mod_func(filter_or_command)
-                try:
-                    mod = import_module(mod_name)
-                except (ImportError, TypeError):
-                    filter = CachedCompilerFilter(
-                        content=content, filter_type=self.type, filename=filename,
-                        charset=charset, command=filter_or_command, mimetype=mimetype)
-                    return True, filter.input(**kwargs)
-                try:
-                    precompiler_class = getattr(mod, cls_name)
-                except AttributeError:
-                    raise FilterDoesNotExist('Could not find "%s".' %
-                            filter_or_command)
-                else:
-                    filter = precompiler_class(
-                        content, attrs, filter_type=self.type, charset=charset,
-                        filename=filename)
-                    return True, filter.input(**kwargs)
+        if mimetype is None:
+            return False, content
 
-        return False, content
+        filter_or_command = self.precompiler_mimetypes.get(mimetype)
+        if filter_or_command is None:
+            if mimetype in ("text/css", "text/javascript"):
+                return False, content
+            raise CompressorError("Couldn't find any precompiler in "
+                                  "COMPRESS_PRECOMPILERS setting for "
+                                  "mimetype '%s'." % mimetype)
+
+        mod_name, cls_name = get_mod_func(filter_or_command)
+        try:
+            mod = import_module(mod_name)
+        except (ImportError, TypeError):
+            filter = CachedCompilerFilter(
+                content=content, filter_type=self.type, filename=filename,
+                charset=charset, command=filter_or_command, mimetype=mimetype)
+            return True, filter.input(**kwargs)
+        try:
+            precompiler_class = getattr(mod, cls_name)
+        except AttributeError:
+            raise FilterDoesNotExist('Could not find "%s".' % filter_or_command)
+        filter = precompiler_class(
+            content, attrs, filter_type=self.type, charset=charset,
+            filename=filename)
+        return True, filter.input(**kwargs)
 
     def filter(self, content, method, **kwargs):
         for filter_cls in self.cached_filters:
