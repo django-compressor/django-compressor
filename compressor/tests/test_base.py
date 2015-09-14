@@ -128,8 +128,8 @@ class CompressorTestCase(SimpleTestCase):
             self.assertTrue(is_date.match(str(float(date))),
                 "mtimes is returning something that doesn't look like a date: %s" % date)
 
+    @override_settings(COMPRESS_ENABLED=False)
     def test_css_return_if_off(self):
-        settings.COMPRESS_ENABLED = False
         self.assertEqualCollapsed(self.css, self.css_node.output())
 
     def test_cachekey(self):

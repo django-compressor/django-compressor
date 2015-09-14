@@ -1,18 +1,20 @@
 from django.test import TestCase
+from django.test.utils import override_settings
 
 from mock import Mock
 
-from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.js import JsCompressor
 from compressor.signals import post_compress
 
 
+@override_settings(
+    COMPRESS_ENABLED=True,
+    COMPRESS_PRECOMPILERS=(),
+    COMPRESS_DEBUG_TOGGLE='nocompress'
+)
 class PostCompressSignalTestCase(TestCase):
     def setUp(self):
-        settings.COMPRESS_ENABLED = True
-        settings.COMPRESS_PRECOMPILERS = ()
-        settings.COMPRESS_DEBUG_TOGGLE = 'nocompress'
         self.css = """\
 <link rel="stylesheet" href="/static/css/one.css" type="text/css" />
 <style type="text/css">p { border:5px solid green;}</style>

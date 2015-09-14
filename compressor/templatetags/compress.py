@@ -103,19 +103,11 @@ class CompressorMixin(object):
         if cache_content is not None:
             return cache_content
 
-        # call compressor output method and handle exceptions
-        try:
-            rendered_output = self.render_output(compressor, mode, forced=forced)
-            if cache_key:
-                cache_set(cache_key, rendered_output)
-            assert isinstance(rendered_output, six.string_types)
-            return rendered_output
-        except Exception:
-            if settings.DEBUG or forced:
-                raise
-
-        # Or don't do anything in production
-        return self.get_original_content(context)
+        rendered_output = self.render_output(compressor, mode, forced=forced)
+        assert isinstance(rendered_output, six.string_types)
+        if cache_key:
+            cache_set(cache_key, rendered_output)
+        return rendered_output
 
     def render_output(self, compressor, mode, forced=False):
         return compressor.output(mode, forced=forced)
