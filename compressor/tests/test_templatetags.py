@@ -25,14 +25,10 @@ def render(template_string, context_dict=None):
     return t.render(c).strip()
 
 
+@override_settings(COMPRESS_ENABLED=True)
 class TemplatetagTestCase(TestCase):
     def setUp(self):
-        self.old_enabled = settings.COMPRESS_ENABLED
-        settings.COMPRESS_ENABLED = True
         self.context = {'STATIC_URL': settings.COMPRESS_URL}
-
-    def tearDown(self):
-        settings.COMPRESS_ENABLED = self.old_enabled
 
     def test_empty_tag(self):
         template = """{% load compress %}{% compress js %}{% block js %}

@@ -101,8 +101,8 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
                                                split[1][3].attrib,
                                                split[1][3].text))
 
+    @override_settings(COMPRESS_ENABLED=False)
     def test_css_return_if_off(self):
-        settings.COMPRESS_ENABLED = False
         # Yes, they are semantically equal but attributes might be
         # scrambled in unpredictable order. A more elaborate check
         # would require parsing both arguments with a different parser

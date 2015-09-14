@@ -217,7 +217,7 @@ class OfflineGenerationConditionTestCase(OfflineTestCaseMixin, TestCase):
         super(OfflineGenerationConditionTestCase, self).setUp()
 
     def tearDown(self):
-        self.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
+        settings.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
         super(OfflineGenerationConditionTestCase, self).tearDown()
 
 
@@ -406,7 +406,7 @@ class OfflineGenerationInlineNonAsciiTestCase(OfflineTestCaseMixin, TestCase):
         super(OfflineGenerationInlineNonAsciiTestCase, self).setUp()
 
     def tearDown(self):
-        self.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
+        settings.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
         super(OfflineGenerationInlineNonAsciiTestCase, self).tearDown()
 
     def _test_offline(self, engine):
@@ -429,7 +429,7 @@ class OfflineGenerationComplexTestCase(OfflineTestCaseMixin, TestCase):
         super(OfflineGenerationComplexTestCase, self).setUp()
 
     def tearDown(self):
-        self.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
+        settings.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
         super(OfflineGenerationComplexTestCase, self).tearDown()
 
     def _test_offline(self, engine):
