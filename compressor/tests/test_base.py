@@ -345,27 +345,30 @@ class CacheTestCase(SimpleTestCase):
 class CompressorInDebugModeTestCase(SimpleTestCase):
 
     def setUp(self):
-        settings.COMPRESS_ENABLED = True
-        settings.COMPRESS_PRECOMPILERS = ()
-        settings.COMPRESS_DEBUG_TOGGLE = 'nocompress'
-        settings.DEBUG = True
         self.css = '<link rel="stylesheet" href="/static/css/one.css" type="text/css" />'
         self.tmpdir = mkdtemp()
-        copytree(settings.STATIC_ROOT, os.path.join(self.tmpdir, "static"))
-        self.old_compress_root = settings.COMPRESS_ROOT
-        settings.STATIC_ROOT = settings.COMPRESS_ROOT = os.path.join(self.tmpdir, "static")
-        settings.STATICFILES_DIRS = [self.old_compress_root]
+        new_static_root = os.path.join(self.tmpdir, "static")
+        copytree(settings.STATIC_ROOT, new_static_root)
+
+        self.override_settings = self.settings(
+            COMPRESS_ENABLED=True,
+            COMPRESS_PRECOMPILERS=(),
+            COMPRESS_DEBUG_TOGGLE='nocompress',
+            DEBUG=True,
+            STATIC_ROOT=new_static_root,
+            COMPRESS_ROOT=new_static_root,
+            STATICFILES_DIRS=[settings.COMPRESS_ROOT]
+        )
+        self.override_settings.__enter__()
 
     def tearDown(self):
         rmtree(self.tmpdir)
-        settings.DEBUG = False
-        settings.STATIC_ROOT = settings.COMPRESS_ROOT = self.old_compress_root
-        delattr(settings, "STATICFILES_DIRS")
+        self.override_settings.__exit__(None, None, None)
 
     def test_filename_in_debug_mode(self):
-        # In debug mode, files should always be compressed based on the app's
-        # static directory, not the global static directory, where files can
-        # be outdated
+        # In debug mode, compressor should look for files using staticfiles
+        # finders only, and not look into the global static directory, where
+        # files can be outdated
         css_filename = os.path.join(settings.COMPRESS_ROOT, "css", "one.css")
         # Store the hash of the original file's content
         css_content = open(css_filename).read()
