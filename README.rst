@@ -1,8 +1,8 @@
 Django Compressor
 =================
 
-.. image:: https://coveralls.io/repos/django-compressor/django-compressor/badge.png?branch=develop 
-  :target: https://coveralls.io/r/django-compressor/django-compressor?branch=develop
+.. image:: http://codecov.io/github/django-compressor/django-compressor/coverage.svg?branch=develop
+    :target: http://codecov.io/github/django-compressor/django-compressor?branch=develop
 
 .. image:: https://pypip.in/v/django_compressor/badge.svg
         :target: https://pypi.python.org/pypi/django_compressor
