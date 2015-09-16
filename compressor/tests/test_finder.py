@@ -12,4 +12,4 @@ class FinderTestCase(TestCase):
 
     def test_list_returns_empty_list(self):
         finder = CompressorFinder()
-        self.assertEquals(finder.list([]), [])
+        self.assertEqual(finder.list([]), [])
