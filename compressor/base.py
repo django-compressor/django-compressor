@@ -117,18 +117,21 @@ class Compressor(object):
         get_filename('css/one.css') -> '/full/path/to/static/css/one.css'
         """
         filename = None
-        # first try finding the file in the root
-        try:
-            # call path first so remote storages don't make it to exists,
-            # which would cause network I/O
-            filename = self.storage.path(basename)
-            if not self.storage.exists(basename):
-                filename = None
-        except NotImplementedError:
-            # remote storages don't implement path, access the file locally
-            if compressor_file_storage.exists(basename):
-                filename = compressor_file_storage.path(basename)
-        # secondly try to find it with staticfiles (in debug mode)
+        # First try finding the file using the storage class.
+        # This is skipped in DEBUG mode as files might be outdated in
+        # compressor's final destination (COMPRESS_ROOT) during development
+        if not settings.DEBUG:
+            try:
+                # call path first so remote storages don't make it to exists,
+                # which would cause network I/O
+                filename = self.storage.path(basename)
+                if not self.storage.exists(basename):
+                    filename = None
+            except NotImplementedError:
+                # remote storages don't implement path, access the file locally
+                if compressor_file_storage.exists(basename):
+                    filename = compressor_file_storage.path(basename)
+        # secondly try to find it with staticfiles
         if not filename and self.finders:
             filename = self.finders.find(url2pathname(basename))
         if filename:
