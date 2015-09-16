@@ -23,3 +23,7 @@ env:
   - TOXENV=py34-1.8.X
 notifications:
   irc: "irc.freenode.org#django-compressor"
+
+after_success:
+  - pip install codecov
+  - codecov
