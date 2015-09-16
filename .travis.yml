@@ -6,13 +6,7 @@ script:
   - tox
 env:
   - TOXENV=py26-1.4.X
-  - TOXENV=py26-1.5.X
   - TOXENV=py27-1.4.X
-  - TOXENV=py27-1.5.X
-  - TOXENV=py26-1.6.X
-  - TOXENV=py27-1.6.X
-  - TOXENV=py32-1.6.X
-  - TOXENV=py33-1.6.X
   - TOXENV=py27-1.7.X
   - TOXENV=py32-1.7.X
   - TOXENV=py33-1.7.X
