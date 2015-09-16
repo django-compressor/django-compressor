@@ -56,51 +56,49 @@ class CompressorMixin(object):
         return (settings.COMPRESS_ENABLED and
                 settings.COMPRESS_OFFLINE) or forced
 
-    def render_offline(self, context, forced):
+    def render_offline(self, context):
         """
         If enabled and in offline mode, and not forced check the offline cache
         and return the result if given
         """
-        if self.is_offline_compression_enabled(forced) and not forced:
-            key = get_offline_hexdigest(self.get_original_content(context))
-            offline_manifest = get_offline_manifest()
-            if key in offline_manifest:
-                return offline_manifest[key]
-            else:
-                raise OfflineGenerationError('You have offline compression '
-                    'enabled but key "%s" is missing from offline manifest. '
-                    'You may need to run "python manage.py compress".' % key)
+        key = get_offline_hexdigest(self.get_original_content(context))
+        offline_manifest = get_offline_manifest()
+        if key in offline_manifest:
+            return offline_manifest[key]
+        else:
+            raise OfflineGenerationError('You have offline compression '
+                'enabled but key "%s" is missing from offline manifest. '
+                'You may need to run "python manage.py compress".' % key)
 
-    def render_cached(self, compressor, kind, mode, forced=False):
+    def render_cached(self, compressor, kind, mode):
         """
         If enabled checks the cache for the given compressor's cache key
         and return a tuple of cache key and output
         """
-        if settings.COMPRESS_ENABLED and not forced:
-            cache_key = get_templatetag_cachekey(compressor, mode, kind)
-            cache_content = cache_get(cache_key)
-            return cache_key, cache_content
-        return None, None
+        cache_key = get_templatetag_cachekey(compressor, mode, kind)
+        cache_content = cache_get(cache_key)
+        return cache_key, cache_content
 
     def render_compressed(self, context, kind, mode, forced=False):
 
         # See if it has been rendered offline
-        cached_offline = self.render_offline(context, forced=forced)
-        if cached_offline:
-            return cached_offline
+        if self.is_offline_compression_enabled(forced) and not forced:
+            return self.render_offline(context)
 
         # Take a shortcut if we really don't have anything to do
-        if ((not settings.COMPRESS_ENABLED and
-             not settings.COMPRESS_PRECOMPILERS) and not forced):
+        if (not settings.COMPRESS_ENABLED and
+                not settings.COMPRESS_PRECOMPILERS and not forced):
             return self.get_original_content(context)
 
         context['compressed'] = {'name': getattr(self, 'name', None)}
         compressor = self.get_compressor(context, kind)
 
-        # Prepare the actual compressor and check cache
-        cache_key, cache_content = self.render_cached(compressor, kind, mode, forced=forced)
-        if cache_content is not None:
-            return cache_content
+        # Check cache
+        cache_key = None
+        if settings.COMPRESS_ENABLED and not forced:
+            cache_key, cache_content = self.render_cached(compressor, kind, mode)
+            if cache_content is not None:
+                return cache_content
 
         rendered_output = compressor.output(mode, forced=forced)
         assert isinstance(rendered_output, six.string_types)
