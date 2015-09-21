@@ -3,14 +3,14 @@
 Facebook React Support
 ======================
 
-Assuming you have `npm` available, you can integrate React with Django Compressor by following the
-`react-tools installation instructions`_ and adding an appropriate ``COMPRESS_PRECOMPILERS``
-setting:
+Assuming you have `npm` available, you can install `babel` via `npm install -g babel` and integrate React with
+Django Compressor by following the `react-tools installation instructions`_ and adding an appropriate
+``COMPRESS_PRECOMPILERS`` setting:
 
 .. code-block:: django
 
     COMPRESS_PRECOMPILERS = (
-       ('text/jsx', 'cat {infile} | jsx > {outfile}'),
+       ('text/jsx', 'cat {infile} | babel > {outfile}'),
     )
 
 
