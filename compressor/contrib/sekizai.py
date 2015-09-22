@@ -15,4 +15,10 @@ def compress(context, data, name):
     Name is either 'js' or 'css' (the sekizai namespace)
     Basically passes the string through the {% compress 'js' %} template tag
     """
+    # Handle multiple namespaces, like "js_page" or "css_extra".
+    if name not in ('js', 'css'):
+        if name.startswith('js'):
+            name = 'js'
+        elif name.startswith('css'):
+            name = 'css'
     return CompressorNode(nodelist=Template(data).nodelist, kind=name, mode='file').render(context=context)
