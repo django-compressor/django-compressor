@@ -8,3 +8,4 @@ BeautifulSoup==3.2.1
 unittest2==1.0.0
 coffin==0.4.0
 jingo==0.7
+django-sekizai==0.8.2

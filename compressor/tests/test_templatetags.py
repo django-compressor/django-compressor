@@ -13,14 +13,18 @@ from compressor.conf import settings
 from compressor.signals import post_compress
 from compressor.tests.test_base import css_tag, test_dir
 
+from sekizai.context import SekizaiContext
 
-def render(template_string, context_dict=None):
+
+def render(template_string, context_dict=None, context=None):
     """
     A shortcut for testing template output.
     """
     if context_dict is None:
         context_dict = {}
-    c = Context(context_dict)
+    if context is None:
+        context = Context
+    c = context(context_dict)
     t = Template(template_string)
     return t.render(c).strip()
 
@@ -125,6 +129,14 @@ class TemplatetagTestCase(TestCase):
         args, kwargs = callback.call_args
         context = kwargs['context']
         self.assertEqual('foo', context['compressed']['name'])
+
+    def test_sekizai_only_once(self):
+        template = """{% load sekizai_tags %}{% addtoblock "js" %}
+        <script type="text/javascript">var tmpl="{% templatetag openblock %} if x == 3 %}x IS 3{% templatetag openblock %} endif %}"</script>
+        {% endaddtoblock %}{% render_block "js" postprocessor "compressor.contrib.sekizai.compress" %}
+        """
+        out = '<script type="text/javascript" src="/static/CACHE/js/e9fce10d884d.js"></script>'
+        self.assertEqual(out, render(template, self.context, SekizaiContext))
 
 
 class PrecompilerTemplatetagTestCase(TestCase):
