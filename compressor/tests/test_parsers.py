@@ -11,11 +11,6 @@ try:
 except ImportError:
     html5lib = None
 
-try:
-    from BeautifulSoup import BeautifulSoup
-except ImportError:
-    BeautifulSoup = None
-
 from django.utils import unittest
 from django.test.utils import override_settings
 
@@ -116,7 +111,6 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
         self.assertEqual(len(self.js), len(self.js_node.output()))
 
 
-@unittest.skipIf(BeautifulSoup is None, 'BeautifulSoup not found')
 class BeautifulSoupParserTests(ParserTestCase, CompressorTestCase):
     parser_cls = 'compressor.parser.BeautifulSoupParser'
 
