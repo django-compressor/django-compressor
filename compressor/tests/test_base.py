@@ -48,7 +48,53 @@ class TestPrecompiler(object):
         return 'OUTPUT'
 
 
+class PassthroughPrecompiler(object):
+    """A filter whose outputs the input unmodified """
+    def __init__(self, content, attrs, filter_type=None, filename=None,
+                 charset=None):
+        self.content = content
+
+    def input(self, **kwargs):
+        return self.content
+
+
 test_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+
+
+class PrecompilerAndAbsoluteFilterTestCase(SimpleTestCase):
+
+    def setUp(self):
+        self.html_orig = '<link rel="stylesheet" href="/static/css/relative_url.css" type="text/css" />'
+        self.html_link_to_precompiled_css = '<link rel="stylesheet" href="/static/CACHE/css/relative_url.41a74f6d5864.css" type="text/css" />'
+        self.html_link_to_absolutized_css = '<link rel="stylesheet" href="/static/CACHE/css/relative_url.9b8fd415e521.css" type="text/css" />'
+        self.css_orig = "p { background: url('../img/python.png'); }" # content of relative_url.css
+        self.css_absolutized = "p { background: url('/static/img/python.png?c2281c83670e'); }"
+
+    def helper(self, enabled, use_precompiler, use_absolute_filter, expected_output):
+        precompiler = (('text/css', 'compressor.tests.test_base.PassthroughPrecompiler'),) if use_precompiler else ()
+        filters = ('compressor.filters.css_default.CssAbsoluteFilter',) if use_absolute_filter else ()
+
+        with self.settings(COMPRESS_ENABLED=enabled, COMPRESS_PRECOMPILERS=precompiler, COMPRESS_CSS_FILTERS=filters):
+            css_node = CssCompressor(self.html_orig)
+            output = list(css_node.hunks())[0]
+            self.assertEqual(output, expected_output)
+
+    @override_settings(COMPRESS_CSS_HASHING_METHOD="content")
+    def test_precompiler_enables_absolute(self):
+        """
+        Tests whether specifying a precompiler also runs the CssAbsoluteFilter even if
+        compression is disabled, but only if the CssAbsoluteFilter is actually contained
+        in the filters setting.
+        While at it, ensure that everything runs as expected when compression is enabled.
+        """
+        self.helper(enabled=False, use_precompiler=False, use_absolute_filter=False, expected_output=self.html_orig)
+        self.helper(enabled=False, use_precompiler=False, use_absolute_filter=True, expected_output=self.html_orig)
+        self.helper(enabled=False, use_precompiler=True, use_absolute_filter=False, expected_output=self.html_link_to_precompiled_css)
+        self.helper(enabled=False, use_precompiler=True, use_absolute_filter=True, expected_output=self.html_link_to_absolutized_css)
+        self.helper(enabled=True, use_precompiler=False, use_absolute_filter=False, expected_output=self.css_orig)
+        self.helper(enabled=True, use_precompiler=False, use_absolute_filter=True, expected_output=self.css_absolutized)
+        self.helper(enabled=True, use_precompiler=True, use_absolute_filter=False, expected_output=self.css_orig)
+        self.helper(enabled=True, use_precompiler=True, use_absolute_filter=True, expected_output=self.css_absolutized)
 
 
 class CompressorTestCase(SimpleTestCase):
