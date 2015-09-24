@@ -358,6 +358,24 @@ class OfflineGenerationTestCase(OfflineTestCaseMixin, TestCase):
             settings.TEMPLATE_LOADERS = old_loaders
 
 
+class OfflineGenerationEmptyTag(OfflineTestCaseMixin, TestCase):
+    """
+        In case of a compress template tag with no content, an entry
+        will be added to the manifest with an empty string as value.
+        This test makes sure there is no recompression happening when
+        compressor encounters such an emptystring in the manifest.
+    """
+    templates_dir = "basic"
+    expected_hash = "f5e179b8eca4"
+    engines = ("django",)
+
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, engine=engine)
+        manifest = get_offline_manifest()
+        manifest[list(manifest)[0]] = ""
+        self.assertEqual(self._render_template(engine), "\n")
+
+
 class OfflineGenerationBlockSuperBaseCompressed(OfflineTestCaseMixin, TestCase):
     template_names = ["base.html", "base2.html", "test_compressor_offline.html"]
     templates_dir = 'test_block_super_base_compressed'
