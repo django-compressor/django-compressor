@@ -113,6 +113,44 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
 
 class BeautifulSoupParserTests(ParserTestCase, CompressorTestCase):
     parser_cls = 'compressor.parser.BeautifulSoupParser'
+    # just like in the Html5LibParserTests, provide special tests because
+    # in bs4 attributes are held in dictionaries
+
+    def test_css_split(self):
+        split = self.css_node.split_contents()
+        out0 = (
+            SOURCE_FILE,
+            os.path.join(settings.COMPRESS_ROOT, 'css', 'one.css'),
+            'css/one.css',
+            None,
+            None,
+        )
+        self.assertEqual(out0, split[0][:3] + (split[0][3].tag,
+                                               split[0][3].attrib))
+        out1 = (
+            SOURCE_HUNK,
+            'p { border:5px solid green;}',
+            None,
+            '<style type="text/css">p { border:5px solid green;}</style>',
+        )
+        self.assertEqual(out1, split[1][:3] +
+                         (self.css_node.parser.elem_str(split[1][3]),))
+        out2 = (
+            SOURCE_FILE,
+            os.path.join(settings.COMPRESS_ROOT, 'css', 'two.css'),
+            'css/two.css',
+            None,
+            None,
+        )
+        self.assertEqual(out2, split[2][:3] + (split[2][3].tag,
+                                               split[2][3].attrib))
+
+    @override_settings(COMPRESS_ENABLED=False)
+    def test_css_return_if_off(self):
+        # in addition to unspecified attribute order,
+        # bs4 output doesn't have the extra space, so we add that here
+        fixed_output = self.css_node.output().replace('"/>', '" />')
+        self.assertEqual(len(self.css), len(fixed_output))
 
 
 class HtmlParserTests(ParserTestCase, CompressorTestCase):
