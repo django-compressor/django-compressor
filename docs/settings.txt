@@ -492,6 +492,37 @@ Offline settings
 
     If available, the ``STATIC_URL`` setting is also added to the context.
 
+    .. note::
+
+        It is also possible to perform offline compression for multiple
+        contexts by providing a list or tuple of dictionaries, or by providing
+        a dotted string pointing to a generator function.
+
+        This makes it easier to generate contexts dynamically for situations
+        where a user might be able to select a different theme in their user
+        profile, or be served different stylesheets based on other criteria.
+
+        An example of multiple offline contexts by providing a list or tuple::
+
+            # project/settings.py:
+            COMPRESS_OFFLINE_CONTEXT = [
+                {'THEME': 'plain', 'STATIC_URL': STATIC_URL},
+                {'THEME': 'fancy', 'STATIC_URL': STATIC_URL},
+                # ...
+            ]
+
+        An example of multiple offline contexts generated dynamically::
+
+            # project/settings.py:
+            COMPRESS_OFFLINE_CONTEXT = 'project.module.offline_context'
+
+            # project/module.py:
+            from django.conf import settings
+            def offline_context():
+                from project.models import Company
+                for theme in set(Company.objects.values_list('theme', flat=True)):
+                    yield {'THEME': theme, 'STATIC_URL': settings.STATIC_URL}
+
 .. attribute:: COMPRESS_OFFLINE_MANIFEST
 
     :Default: ``manifest.json``

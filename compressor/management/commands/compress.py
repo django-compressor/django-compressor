@@ -22,6 +22,7 @@ from compressor.conf import settings
 from compressor.exceptions import (OfflineGenerationError, TemplateSyntaxError,
                                    TemplateDoesNotExist)
 from compressor.templatetags.compress import CompressorNode
+from compressor.utils import get_mod_func
 
 if six.PY3:
     # there is an 'io' module in python 2.6+, but io.StringIO does not
@@ -211,44 +212,58 @@ class Command(NoArgsCommand):
                       "\n\t".join((t.template_name
                                    for t in compressor_nodes.keys())) + "\n")
 
+        contexts = settings.COMPRESS_OFFLINE_CONTEXT
+        if isinstance(contexts, six.string_types):
+            try:
+                module, function = get_mod_func(contexts)
+                contexts = getattr(import_module(module), function)()
+            except (AttributeError, ImportError, TypeError) as e:
+                raise ImportError("Couldn't import offline context function %s: %s" %
+                                  (settings.COMPRESS_OFFLINE_CONTEXT, e))
+        elif not isinstance(contexts, (list, tuple)):
+            contexts = [contexts]
+
         log.write("Compressing... ")
-        count = 0
+        block_count = context_count = 0
         results = []
         offline_manifest = SortedDict()
-        init_context = parser.get_init_context(settings.COMPRESS_OFFLINE_CONTEXT)
 
-        for template, nodes in compressor_nodes.items():
-            context = Context(init_context)
-            template._log = log
-            template._log_verbosity = verbosity
+        for context_dict in contexts:
+            context_count += 1
+            init_context = parser.get_init_context(context_dict)
 
-            if not parser.process_template(template, context):
-                continue
+            for template, nodes in compressor_nodes.items():
+                context = Context(init_context)
+                template._log = log
+                template._log_verbosity = verbosity
 
-            for node in nodes:
-                context.push()
-                parser.process_node(template, context, node)
-                rendered = parser.render_nodelist(template, context, node)
-                key = get_offline_hexdigest(rendered)
-
-                if key in offline_manifest:
+                if not parser.process_template(template, context):
                     continue
 
-                try:
-                    result = parser.render_node(template, context, node)
-                except Exception as e:
-                    raise CommandError("An error occurred during rendering %s: "
-                                       "%s" % (template.template_name, e))
-                offline_manifest[key] = result
-                context.pop()
-                results.append(result)
-                count += 1
+                for node in nodes:
+                    context.push()
+                    parser.process_node(template, context, node)
+                    rendered = parser.render_nodelist(template, context, node)
+                    key = get_offline_hexdigest(rendered)
+
+                    if key in offline_manifest:
+                        continue
+
+                    try:
+                        result = parser.render_node(template, context, node)
+                    except Exception as e:
+                        raise CommandError("An error occurred during rendering %s: "
+                                           "%s" % (template.template_name, e))
+                    offline_manifest[key] = result
+                    context.pop()
+                    results.append(result)
+                    block_count += 1
 
         write_offline_manifest(offline_manifest)
 
-        log.write("done\nCompressed %d block(s) from %d template(s).\n" %
-                  (count, len(compressor_nodes)))
-        return count, results
+        log.write("done\nCompressed %d block(s) from %d template(s) for %d context(s).\n" %
+                  (block_count, len(compressor_nodes), context_count))
+        return block_count, results
 
     def handle_extensions(self, extensions=('html',)):
         """

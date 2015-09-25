@@ -8,12 +8,14 @@ from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
 from django.utils import six, unittest
+from django.utils.importlib import import_module
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_storage
+from compressor.utils import get_mod_func
 
 if six.PY3:
     # there is an 'io' module in python 2.6+, but io.StringIO does not
@@ -30,6 +32,11 @@ else:
 #     compressor_nodes.setdefault(template, []).extend(nodes)
 # causes the error "unhashable type: 'Template'"
 _TEST_JINJA2 = not(sys.version_info[0] == 3 and sys.version_info[1] == 2)
+
+
+def offline_context_generator():
+    for i in range(1, 4):
+        yield {'content': 'OK %d!' % i}
 
 
 class OfflineTestCaseMixin(object):
@@ -88,22 +95,30 @@ class OfflineTestCaseMixin(object):
         if default_storage.exists(manifest_path):
             default_storage.delete(manifest_path)
 
+    def _prepare_contexts(self, engine):
+        if engine == 'django':
+            return [Context(settings.COMPRESS_OFFLINE_CONTEXT)]
+        if engine == 'jinja2':
+            return [settings.COMPRESS_OFFLINE_CONTEXT]
+        return None
+
     def _render_template(self, engine):
-        if engine == "django":
-            return self.template.render(Context(settings.COMPRESS_OFFLINE_CONTEXT))
-        elif engine == "jinja2":
-            return self.template_jinja2.render(settings.COMPRESS_OFFLINE_CONTEXT) + "\n"
-        else:
-            return None
+        contexts = self._prepare_contexts(engine)
+        if engine == 'django':
+            return ''.join(self.template.render(c) for c in contexts)
+        if engine == 'jinja2':
+            return '\n'.join(self.template_jinja2.render(c) for c in contexts) + "\n"
+        return None
 
     def _test_offline(self, engine):
+        hashes = self.expected_hash
+        if not isinstance(hashes, (list, tuple)):
+            hashes = [hashes]
         count, result = CompressCommand().compress(log=self.log, verbosity=self.verbosity, engine=engine)
-        self.assertEqual(1, count)
-        self.assertEqual([
-            '<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % (self.expected_hash, ),
-        ], result)
+        self.assertEqual(len(hashes), count)
+        self.assertEqual(['<script type="text/javascript" src="/static/CACHE/js/%s.js"></script>' % h for h in hashes], result)
         rendered_template = self._render_template(engine)
-        self.assertEqual(rendered_template, "".join(result) + "\n")
+        self.assertEqual(rendered_template, '\n'.join(result) + '\n')
 
     def test_offline(self):
         for engine in self.engines:
@@ -245,6 +260,84 @@ class OfflineGenerationTestCaseWithContext(OfflineTestCaseMixin, TestCase):
     def tearDown(self):
         settings.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
         super(OfflineGenerationTestCaseWithContext, self).tearDown()
+
+
+class OfflineGenerationTestCaseWithContextList(OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_with_context'
+    expected_hash = ['f8bcaea049b3', 'db12749b1e80', 'e9f4a0054a06']
+
+    def setUp(self):
+        self.old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
+        settings.COMPRESS_OFFLINE_CONTEXT = [{'content': 'OK %d!' % i} for i in range(1, 4)]
+        super(OfflineGenerationTestCaseWithContextList, self).setUp()
+
+    def tearDown(self):
+        settings.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
+        super(OfflineGenerationTestCaseWithContextList, self).tearDown()
+
+    def _prepare_contexts(self, engine):
+        if engine == 'django':
+            return [Context(c) for c in settings.COMPRESS_OFFLINE_CONTEXT]
+        if engine == 'jinja2':
+            return settings.COMPRESS_OFFLINE_CONTEXT
+        return None
+
+
+class OfflineGenerationTestCaseWithContextGenerator(OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_with_context'
+    expected_hash = ['f8bcaea049b3', 'db12749b1e80', 'e9f4a0054a06']
+
+    def setUp(self):
+        self.old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
+        settings.COMPRESS_OFFLINE_CONTEXT = 'compressor.tests.test_offline.offline_context_generator'
+        super(OfflineGenerationTestCaseWithContextGenerator, self).setUp()
+
+    def tearDown(self):
+        settings.COMPRESS_OFFLINE_CONTEXT = self.old_offline_context
+        super(OfflineGenerationTestCaseWithContextGenerator, self).tearDown()
+
+    def _prepare_contexts(self, engine):
+        module, function = get_mod_func(settings.COMPRESS_OFFLINE_CONTEXT)
+        contexts = getattr(import_module(module), function)()
+        if engine == 'django':
+            return (Context(c) for c in contexts)
+        if engine == 'jinja2':
+            return contexts
+        return None
+
+
+class OfflineGenerationTestCaseWithContextGeneratorImportError(OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_with_context'
+
+    def _test_offline(self, engine):
+        old_offline_context = settings.COMPRESS_OFFLINE_CONTEXT
+
+        try:
+            # Path with invalid module name -- ImportError:
+            settings.COMPRESS_OFFLINE_CONTEXT = 'invalid_module.invalid_function'
+            self.assertRaises(ImportError, CompressCommand().compress, engine=engine)
+
+            # Module name only without function -- AttributeError:
+            settings.COMPRESS_OFFLINE_CONTEXT = 'compressor'
+            self.assertRaises(ImportError, CompressCommand().compress, engine=engine)
+
+            # Path with invalid function name -- AttributeError:
+            settings.COMPRESS_OFFLINE_CONTEXT = 'compressor.tests.invalid_function'
+            self.assertRaises(ImportError, CompressCommand().compress, engine=engine)
+
+            # Path without function attempts call on module -- TypeError:
+            settings.COMPRESS_OFFLINE_CONTEXT = 'compressor.tests.test_offline'
+            self.assertRaises(ImportError, CompressCommand().compress, engine=engine)
+
+            # Valid path to generator function -- no ImportError:
+            settings.COMPRESS_OFFLINE_CONTEXT = 'compressor.tests.test_offline.offline_context_generator'
+            try:
+                CompressCommand().compress(engine=engine)
+            except ImportError:
+                self.fail("Valid path to offline context generator mustn't raise ImportError.")
+
+        finally:
+            settings.COMPRESS_OFFLINE_CONTEXT = old_offline_context
 
 
 class OfflineGenerationTestCaseErrors(OfflineTestCaseMixin, TestCase):
