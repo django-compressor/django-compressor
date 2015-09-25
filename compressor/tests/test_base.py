@@ -6,10 +6,11 @@ from shutil import rmtree, copytree
 
 try:
     from bs4 import BeautifulSoup
+    use_bs4 = True
 except ImportError:
     from BeautifulSoup import BeautifulSoup
+    use_bs4 = False
 
-from django.utils import six
 from django.core.cache.backends import locmem
 from django.test import SimpleTestCase
 from django.test.utils import override_settings
@@ -25,11 +26,17 @@ from compressor.storage import DefaultStorage
 
 
 def make_soup(markup):
-    # we use html.parser instead of lxml because it doesn't work on python 3.3
-    if six.PY3:
-        return BeautifulSoup(markup, 'html.parser')
+    if use_bs4:
+        return BeautifulSoup(markup, "html.parser")
     else:
         return BeautifulSoup(markup)
+
+
+def soup_find_all(markup, name):
+    if use_bs4:
+        return make_soup(markup).find_all(name)
+    else:
+        return make_soup(markup).findAll(name)
 
 
 def css_tag(href, **kwargs):
@@ -286,10 +293,7 @@ class CssMediaTestCase(SimpleTestCase):
 
     def test_css_output(self):
         css_node = CssCompressor(self.css)
-        if six.PY3:
-            links = make_soup(css_node.output()).find_all('link')
-        else:
-            links = make_soup(css_node.output()).findAll('link')
+        links = soup_find_all(css_node.output(), 'link')
         media = ['screen', 'print', 'all', None]
         self.assertEqual(len(links), 4)
         self.assertEqual(media, [l.get('media', None) for l in links])
@@ -298,10 +302,7 @@ class CssMediaTestCase(SimpleTestCase):
         css = self.css + '<style type="text/css" media="print">p { border:10px solid red;}</style>'
         css_node = CssCompressor(css)
         media = ['screen', 'print', 'all', None, 'print']
-        if six.PY3:
-            links = make_soup(css_node.output()).find_all('link')
-        else:
-            links = make_soup(css_node.output()).findAll('link')
+        links = soup_find_all(css_node.output(), 'link')
         self.assertEqual(media, [l.get('media', None) for l in links])
 
     @override_settings(COMPRESS_PRECOMPILERS=(
@@ -313,10 +314,7 @@ class CssMediaTestCase(SimpleTestCase):
 <link rel="stylesheet" href="/static/css/two.css" type="text/css" media="screen">
 <style type="text/foobar" media="screen">h1 { border:5px solid green;}</style>"""
         css_node = CssCompressor(css)
-        if six.PY3:
-            output = make_soup(css_node.output()).find_all(['link', 'style'])
-        else:
-            output = make_soup(css_node.output()).findAll(['link', 'style'])
+        output = soup_find_all(css_node.output(), ['link', 'style'])
         self.assertEqual(['/static/css/one.css', '/static/css/two.css', None],
                          [l.get('href', None) for l in output])
         self.assertEqual(['screen', 'screen', 'screen'],
@@ -356,11 +354,10 @@ class JsAsyncDeferTestCase(SimpleTestCase):
                 return 'defer'
         js_node = JsCompressor(self.js)
         output = [None, 'async', 'defer', None, 'async', None]
-        if six.PY3:
-            scripts = make_soup(js_node.output()).find_all('script')
+        scripts = soup_find_all(js_node.output(), 'script')
+        if use_bs4:
             attrs = [extract_attr(i) for i in scripts]
         else:
-            scripts = make_soup(js_node.output()).findAll('script')
             attrs = [s.get('async') or s.get('defer') for s in scripts]
         self.assertEqual(output, attrs)
 
