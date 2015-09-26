@@ -44,8 +44,8 @@ class FilterBase(object):
     Subclasses should implement `input` and/or `output` methods which must
     return a string (unicode under python 2) or raise a NotImplementedError.
     """
-    def __init__(self, content, filter_type=None, filename=None, verbose=0,
-                 charset=None):
+    def __init__(self, content, attrs=None, filter_type=None, filename=None,
+                 verbose=0, charset=None, **kwargs):
         self.type = filter_type or getattr(self, 'type', None)
         self.content = content
         self.verbose = verbose or settings.COMPRESS_VERBOSE
@@ -118,8 +118,8 @@ class CompilerFilter(FilterBase):
     options = ()
     default_encoding = settings.FILE_CHARSET
 
-    def __init__(self, content, command=None, *args, **kwargs):
-        super(CompilerFilter, self).__init__(content, *args, **kwargs)
+    def __init__(self, content, command=None, **kwargs):
+        super(CompilerFilter, self).__init__(content, **kwargs)
         self.cwd = None
 
         if command:
@@ -216,9 +216,9 @@ class CompilerFilter(FilterBase):
 
 class CachedCompilerFilter(CompilerFilter):
 
-    def __init__(self, mimetype, **kwargs):
+    def __init__(self, mimetype, *args, **kwargs):
         self.mimetype = mimetype
-        super(CachedCompilerFilter, self).__init__(**kwargs)
+        super(CachedCompilerFilter, self).__init__(*args, **kwargs)
 
     def input(self, **kwargs):
         if self.mimetype in settings.COMPRESS_CACHEABLE_PRECOMPILERS:
