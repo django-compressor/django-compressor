@@ -282,6 +282,15 @@ class CompressorTestCase(SimpleTestCase):
         css_node = CssCompressor(css)
         self.assertRaises(FilterError, css_node.output, 'inline')
 
+    @override_settings(COMPRESS_PRECOMPILERS=(
+        ('text/django', 'compressor.filters.template.TemplateFilter'),
+    ), COMPRESS_ENABLED=True)
+    def test_template_precompiler(self):
+        css = '<style type="text/django">p { border:10px solid {% if 1 %}green{% else %}red{% endif %};}</style>'
+        css_node = CssCompressor(css)
+        output = make_soup(css_node.output('inline'))
+        self.assertEqual(output.text, 'p { border:10px solid green;}')
+
 
 class CssMediaTestCase(SimpleTestCase):
     def setUp(self):

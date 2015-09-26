@@ -276,7 +276,7 @@ class Compressor(object):
         except AttributeError:
             raise FilterDoesNotExist('Could not find "%s".' % filter_or_command)
         filter = precompiler_class(
-            content, attrs, filter_type=self.type, charset=charset,
+            content, attrs=attrs, filter_type=self.type, charset=charset,
             filename=filename)
         return True, filter.input(**kwargs)
 
