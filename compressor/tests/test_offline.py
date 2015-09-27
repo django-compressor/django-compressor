@@ -517,3 +517,10 @@ class OfflineGenerationJingoTestCase(OfflineTestCaseMixin, TestCase):
         env.globals['url_for'] = url_for
 
         return env
+
+
+class OfflineGenerationOverextendsTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = "test_overextends"
+    expected_hash = "e993b2a53994"
+    # overextends not supported for Jinja2 yet.
+    engines = ("django",)
