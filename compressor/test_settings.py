@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'compressor',
     'coffin',
     'sekizai',
+    'overextends',
 ]
 if django.VERSION < (1, 8):
     INSTALLED_APPS.append('jingo')

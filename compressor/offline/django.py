@@ -26,7 +26,7 @@ def handle_extendsnode(extendsnode, block_context=None, original=None):
                   extendsnode.nodelist.get_nodes_by_type(BlockNode))
     block_context.add_blocks(blocks)
 
-    context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
+    context = Context(dict(settings.COMPRESS_OFFLINE_CONTEXT))
     if original is not None:
         context.template = original
 
