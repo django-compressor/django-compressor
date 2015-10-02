@@ -1,0 +1,7 @@
+{% spaceless %}
+{% block js %}
+    <script type="text/javascript">
+        alert("{{ content|default:"Ooops!" }}");
+    </script>
+{% endblock %}
+{% endspaceless %}

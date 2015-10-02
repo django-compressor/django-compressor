@@ -323,12 +323,23 @@ class OfflineCompressTestCaseWithContext(OfflineTestCaseMixin, TestCase):
     }
 
 
+class OfflineCompressTestCaseWithContextSuper(OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_with_context_super'
+    expected_hash = 'b1d0a333a4ef'
+    additional_test_settings = {
+        'COMPRESS_OFFLINE_CONTEXT': {
+            'content': 'OK!',
+        }
+    }
+    # Block.super not supported for Jinja2 yet.
+    engines = ('django',)
+
+
 class OfflineCompressTestCaseWithContextList(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_with_context'
     expected_hash = ['f8bcaea049b3', 'db12749b1e80', 'e9f4a0054a06']
     additional_test_settings = {
-        'COMPRESS_OFFLINE_CONTEXT': [{
-            'content': 'OK %d!' % i} for i in range(1, 4)]
+        'COMPRESS_OFFLINE_CONTEXT': list(offline_context_generator())
     }
 
     def _prepare_contexts(self, engine):
@@ -337,6 +348,17 @@ class OfflineCompressTestCaseWithContextList(OfflineTestCaseMixin, TestCase):
         if engine == 'jinja2':
             return settings.COMPRESS_OFFLINE_CONTEXT
         return None
+
+
+class OfflineCompressTestCaseWithContextListSuper(
+        OfflineCompressTestCaseWithContextList):
+    templates_dir = 'test_with_context_super'
+    expected_hash = ['b11543f1e174', 'aedf6d2a7ec7', '0dbb8c29f23a']
+    additional_test_settings = {
+        'COMPRESS_OFFLINE_CONTEXT': list(offline_context_generator())
+    }
+    # Block.super not supported for Jinja2 yet.
+    engines = ('django',)
 
 
 class OfflineCompressTestCaseWithContextGenerator(
@@ -356,6 +378,18 @@ class OfflineCompressTestCaseWithContextGenerator(
         if engine == 'jinja2':
             return contexts
         return None
+
+
+class OfflineCompressTestCaseWithContextGeneratorSuper(
+        OfflineCompressTestCaseWithContextGenerator):
+    templates_dir = 'test_with_context_super'
+    expected_hash = ['b11543f1e174', 'aedf6d2a7ec7', '0dbb8c29f23a']
+    additional_test_settings = {
+        'COMPRESS_OFFLINE_CONTEXT': 'compressor.tests.test_offline.'
+                                    'offline_context_generator'
+    }
+    # Block.super not supported for Jinja2 yet.
+    engines = ('django',)
 
 
 class OfflineCompressTestCaseWithContextGeneratorImportError(
