@@ -3,7 +3,6 @@ from copy import copy
 
 import django
 from django import template
-from django.conf import settings
 from django.template import Context
 from django.template.base import Node, VariableNode, TextNode, NodeList
 from django.template.defaulttags import IfNode
@@ -26,7 +25,10 @@ def handle_extendsnode(extendsnode, block_context=None, original=None):
                   extendsnode.nodelist.get_nodes_by_type(BlockNode))
     block_context.add_blocks(blocks)
 
-    context = Context(dict(settings.COMPRESS_OFFLINE_CONTEXT))
+    # Note: we pass an empty context when we find the parent, this breaks
+    # inheritance using variables ({% extends template_var %}) but a refactor
+    # will be needed to support that use-case with multiple offline contexts.
+    context = Context()
     if original is not None:
         context.template = original
 
