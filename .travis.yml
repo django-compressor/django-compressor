@@ -15,9 +15,16 @@ env:
   - TOXENV=py32-1.8.X
   - TOXENV=py33-1.8.X
   - TOXENV=py34-1.8.X
+  - TOXENV=py27-1.9.X
+  - TOXENV=py34-1.9.X
+  - TOXENV=py35-1.9.X
+matrix:
+    # Python 3.5 not yet available on travis, watch this to see when it is.
+  fast_finish: true
+  allow_failures:
+    - env: TOXENV=py35-1.9.X
 notifications:
   irc: "irc.freenode.org#django-compressor"
-
 after_success:
   - pip install codecov
   - codecov
