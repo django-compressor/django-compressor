@@ -10,7 +10,12 @@ from django.core.management.base import NoArgsCommand, CommandError
 import django.template
 from django.template import Context
 from django.utils import six
-from django.utils.datastructures import SortedDict
+
+try:
+    from collections import OrderedDict
+except ImportError:
+    from django.utils.datastructures import SortedDict as OrderedDict
+
 try:
     from importlib import import_module
 except:
@@ -170,7 +175,7 @@ class Command(NoArgsCommand):
         engine = options.get("engine", "django")
         parser = self.__get_parser(engine)
 
-        compressor_nodes = SortedDict()
+        compressor_nodes = OrderedDict()
         for template_name in templates:
             try:
                 template = parser.parse(template_name)
@@ -226,7 +231,7 @@ class Command(NoArgsCommand):
         log.write("Compressing... ")
         block_count = context_count = 0
         results = []
-        offline_manifest = SortedDict()
+        offline_manifest = OrderedDict()
 
         for context_dict in contexts:
             context_count += 1
