@@ -22,7 +22,7 @@ matrix:
     # Python 3.5 not yet available on travis, watch this to see when it is.
   fast_finish: true
   allow_failures:
-    - env: TOX_ENV=py35-1.9.X
+    - env: TOXENV=py35-1.9.X
 notifications:
   irc: "irc.freenode.org#django-compressor"
 after_success:
