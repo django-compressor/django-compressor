@@ -10,7 +10,7 @@ runtests:
 	coverage run --branch --source=compressor `which django-admin.py` test --settings=compressor.test_settings compressor
 
 coveragereport:
-	coverage report --omit=compressor/test*,compressor/filters/jsmin/rjsmin*,compressor/filters/cssmin/cssmin*,compressor/utils/stringformat*
+	coverage report --omit=compressor/test*,compressor/filters/jsmin/rjsmin*,compressor/filters/cssmin/cssmin*
 
 test: flake8 runtests coveragereport
 
