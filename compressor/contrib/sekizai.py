@@ -16,3 +16,19 @@ def compress(context, data, name):
     Basically passes the string through the {% compress 'js' %} template tag
     """
     return CompressorNode(nodelist=TextNode(data), kind=name, mode='file').render(context=context)
+
+
+def compressJs(context, data, name):
+    """
+    Data is the string from the template
+    Name is the sekizai namespace
+    """
+    return CompressorNode(nodelist=TextNode(data), kind='js', mode='file').render(context=context)
+
+
+def compressCss(context, data, name):
+    """
+    Data is the string from the template
+    Name is the sekizai namespace
+    """
+    return CompressorNode(nodelist=TextNode(data), kind='css', mode='file').render(context=context)
