@@ -36,7 +36,7 @@ class CompressorFileStorage(FileSystemStorage):
     def modified_time(self, name):
         return datetime.fromtimestamp(os.path.getmtime(self.path(name)))
 
-    def get_available_name(self, name):
+    def get_available_name(self, name, max_length=None):
         """
         Deletes the given file if it exists.
         """
