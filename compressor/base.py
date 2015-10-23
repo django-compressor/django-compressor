@@ -2,9 +2,8 @@ from __future__ import with_statement, unicode_literals
 import os
 import codecs
 
+import django
 from django.core.files.base import ContentFile
-from django.template import Context
-from django.template.loader import render_to_string
 try:
     from importlib import import_module
 except:
@@ -30,6 +29,18 @@ from compressor.utils.decorators import cached_property
 # Some constants for nicer handling.
 SOURCE_HUNK, SOURCE_FILE = 'inline', 'file'
 METHOD_INPUT, METHOD_OUTPUT = 'input', 'output'
+
+
+if django.VERSION < (1, 8):
+    # Provide render_to_string that is similar to Django 1.8 version, for our
+    # needs, using what < 1.8 provides:
+    from django.template.loader import render_to_string as django_render_to_string
+
+    def render_to_string(template_name, context=None):
+        return django_render_to_string(template_name, dictionary=context)
+
+else:
+    from django.template.loader import render_to_string
 
 
 class Compressor(object):
@@ -347,8 +358,14 @@ class Compressor(object):
 
         self.context['compressed'].update(context or {})
         self.context['compressed'].update(self.extra_context)
-        final_context = Context(self.context)
+        if hasattr(self.context, 'flatten'):
+            # Django 1.8 complains about Context being passed to its
+            # Template.render function.
+            final_context = self.context.flatten()
+        else:
+            final_context = self.context
+
         post_compress.send(sender=self.__class__, type=self.type,
                            mode=mode, context=final_context)
         template_name = self.get_template_name(mode)
-        return render_to_string(template_name, context_instance=final_context)
+        return render_to_string(template_name, context=final_context)
