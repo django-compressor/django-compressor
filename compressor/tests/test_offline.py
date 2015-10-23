@@ -201,9 +201,6 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
         for engine in self.engines:
             self._test_deleting_manifest_does_not_affect_rendering(engine)
 
-    def test_requires_model_validation(self):
-        self.assertFalse(CompressCommand.requires_model_validation)
-
     def test_get_loaders(self):
         TEMPLATE_LOADERS = (
             ('django.template.loaders.cached.Loader', (

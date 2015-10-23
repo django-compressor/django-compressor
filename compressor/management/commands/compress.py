@@ -60,8 +60,6 @@ class Command(NoArgsCommand):
             dest="engine"),
     )
 
-    requires_model_validation = False
-
     def get_loaders(self):
         if django.VERSION < (1, 8):
             from django.template.loader import template_source_loaders
@@ -302,3 +300,9 @@ class Command(NoArgsCommand):
                     "Offline compression is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
         self.compress(sys.stdout, **options)
+
+
+if django.VERSION < (1, 7):
+    Command.requires_model_validation = False
+else:
+    Command.requires_system_checks = False
