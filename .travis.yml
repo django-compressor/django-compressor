@@ -15,6 +15,12 @@ env:
   - TOXENV=py32-1.8.X
   - TOXENV=py33-1.8.X
   - TOXENV=py34-1.8.X
+# https://github.com/travis-ci/travis-ci/issues/4794
+matrix:
+  include:
+    - python: 3.5
+      env:
+        - TOXENV=py35-1.8.X
 notifications:
   irc: "irc.freenode.org#django-compressor"
 
