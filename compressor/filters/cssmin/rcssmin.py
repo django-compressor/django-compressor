@@ -12,7 +12,7 @@ itself is based on `the rule list by Isaac Schlueter`_\\.
 
 :Copyright:
 
- Copyright 2011 - 2014
+ Copyright 2011 - 2015
  Andr\xe9 Malo or his licensors, as applicable
 
 :License:
@@ -40,10 +40,10 @@ Here's a feature list:
 
 - Strings are kept, except that escaped newlines are stripped
 - Space/Comments before the very end or before various characters are
-  stripped: ``:{});=>+],!`` (The colon (``:``) is a special case, a single
+  stripped: ``:{});=>],!`` (The colon (``:``) is a special case, a single
   space is kept if it's outside a ruleset.)
 - Space/Comments at the very beginning or after various characters are
-  stripped: ``{}(=:>+[,!``
+  stripped: ``{}(=:>[,!``
 - Optional space after unicode escapes is kept, resp. replaced by a simple
   space
 - whitespaces inside ``url()`` definitions are stripped
@@ -78,7 +78,7 @@ if __doc__:
 __author__ = r"Andr\xe9 Malo".encode('ascii').decode('unicode_escape')
 __docformat__ = "restructuredtext en"
 __license__ = "Apache License, Version 2.0"
-__version__ = '1.0.5'
+__version__ = '1.0.6'
 __all__ = ['cssmin']
 
 import re as _re
@@ -176,19 +176,19 @@ def _make_cssmin(python_only=False):
 
     main_sub = _re.compile((
         # noqa pylint: disable = C0330
-        r'([^\\"\047u>@\r\n\f\040\t/;:{}]+)'
-        r'|(?<=[{}(=:>+[,!])(%(space)s+)'
-        r'|^(%(space)s+)'
-        r'|(%(space)s+)(?=(([:{});=>+\],!])|$)?)'
-        r'|;(%(space)s*(?:;%(space)s*)*)(?=(\})?)'
-        r'|(\{)'
-        r'|(\})'
-        r'|(%(strings)s)'
-        r'|(?<!%(nmchar)s)url\(%(spacechar)s*('
+        r'([^\\"\047u>@\r\n\f\040\t/;:{}+]+)'             # 1
+        r'|(?<=[{}(=:>[,!])(%(space)s+)'                  # 2
+        r'|^(%(space)s+)'                                 # 3
+        r'|(%(space)s+)(?=(([:{});=>\],!])|$)?)'          # 4, 5, 6
+        r'|;(%(space)s*(?:;%(space)s*)*)(?=(\})?)'        # 7, 8
+        r'|(\{)'                                          # 9
+        r'|(\})'                                          # 10
+        r'|(%(strings)s)'                                 # 11
+        r'|(?<!%(nmchar)s)url\(%(spacechar)s*('           # 12
                 r'%(uri_nl_strings)s'
                 r'|%(uri)s'
             r')%(spacechar)s*\)'
-        r'|(@(?:'
+        r'|(@(?:'                                         # 13
               r'[mM][eE][dD][iI][aA]'
               r'|[sS][uU][pP][pP][oO][rR][tT][sS]'
               r'|[dD][oO][cC][uU][mM][eE][nN][tT]'
@@ -197,12 +197,12 @@ def _make_cssmin(python_only=False):
                 r')-)?'
                 r'[kK][eE][yY][fF][rR][aA][mM][eE][sS]'
             r'))(?!%(nmchar)s)'
-        r'|(%(ie7hack)s)(%(space)s*)'
-        r'|(:[fF][iI][rR][sS][tT]-[lL]'
+        r'|(%(ie7hack)s)(%(space)s*)'                     # 14, 15
+        r'|(:[fF][iI][rR][sS][tT]-[lL]'                   # 16
             r'(?:[iI][nN][eE]|[eE][tT][tT][eE][rR]))'
-            r'(%(space)s*)(?=[{,])'
-        r'|(%(nl_strings)s)'
-        r'|(%(escape)s[^\\"\047u>@\r\n\f\040\t/;:{}]*)'
+            r'(%(space)s*)(?=[{,])'                       # 17
+        r'|(%(nl_strings)s)'                              # 18
+        r'|(%(escape)s[^\\"\047u>@\r\n\f\040\t/;:{}+]*)'  # 19
     ) % locals()).sub
 
     # print main_sub.__self__.pattern
