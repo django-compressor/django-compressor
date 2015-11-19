@@ -1,6 +1,28 @@
 Changelog
 =========
 
+v1.6 (11/19/2015)
+-----------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/1.5...1.6>`_
+
+- Upgrade rcssmin and rjsmin
+
+- Apply CssAbsoluteFilter to precompiled css even when compression is disabled
+
+- Add optional caching to CompilerFilter to avoid re-compiling unchanged files
+
+- Fix various deprecation warnings on Django 1.7 / 1.8
+
+- Fix TemplateFilter
+
+- Fix double-rendering bug with sekizai extension
+
+- Fix debug mode using destination directory instead of staticfiles finders first
+
+- Removed some silent exception catching in compress command
+
+
 v1.5 (03/27/2015)
 -----------------
 
