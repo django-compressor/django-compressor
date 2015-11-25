@@ -80,14 +80,15 @@ def remove_unnecessary_whitespace(css):
         """
 
         regex = re.compile(r"(^|\})(([^\{\:])+\:)+([^\{]*\{)")
-        match = regex.search(css)
-        while match:
-            css = ''.join([
-                css[:match.start()],
-                match.group().replace(":", "___PSEUDOCLASSCOLON___"),
-                css[match.end():]])
-            match = regex.search(css)
-        return css
+        fragments = []
+        offset = 0
+        for match in regex.finditer(css):
+            start, end = match.span()
+            fragments.append(css[offset:start])
+            fragments.append(match.group().replace(":", "___PSEUDOCLASSCOLON___"))
+            offset = end
+        fragments.append(css[offset:])
+        return ''.join(fragments)
 
     css = pseudoclasscolon(css)
     # Remove spaces from before things.
