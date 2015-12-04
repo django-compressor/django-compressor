@@ -87,18 +87,6 @@ Backend settings
          feature, and the ``'content'`` in case you're using multiple servers
          to serve your content.
 
-    - ``compressor.filters.csstidy.CSSTidyFilter``
-
-      A filter that passes the CSS content to the CSSTidy_ tool.
-
-      .. attribute:: COMPRESS_CSSTIDY_BINARY
-
-         The CSSTidy binary filesystem path.
-
-      .. attribute:: COMPRESS_CSSTIDY_ARGUMENTS
-
-         The arguments passed to CSSTidy.
-
     - ``compressor.filters.datauri.CssDataUriFilter``
 
       A filter for embedding media as `data: URIs`_ in the CSS.
@@ -155,7 +143,6 @@ Backend settings
          The arguments passed to clean-css.
 
 
-    .. _CSSTidy: http://csstidy.sourceforge.net/
     .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
     .. _cssmin: http://pypi.python.org/pypi/cssmin/
     .. _rCSSmin: http://opensource.perlig.de/rcssmin/
@@ -280,8 +267,8 @@ Backend settings
     .. note::
         Depending on the implementation, some precompilers might not support
         outputting to something else than ``stdout``, so you'll need to omit the
-        ``{outfile}`` parameter when working with those. For instance, if you 
-        are using the Ruby version of lessc, you'll need to set up the 
+        ``{outfile}`` parameter when working with those. For instance, if you
+        are using the Ruby version of lessc, you'll need to set up the
         precompiler like this::
 
             ('text/less', 'lessc {infile}'),
@@ -453,11 +440,11 @@ Caching settings
         and the ``django.core.context_processors.request`` context processor.
 
     .. _RequestContext: http://docs.djangoproject.com/en/dev/ref/templates/api/#django.template.RequestContext
-    
+
 .. attribute:: COMPRESS_CACHE_KEY_FUNCTION
 
     :Default: ``'compressor.cache.simple_cachekey'``
-    
+
     The function to use when generating the cache key. The function must take
     one argument which is the partial key based on the source's hex digest.
     It must return the full key as a string.

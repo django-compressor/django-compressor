@@ -38,8 +38,6 @@ class CompressorConf(AppConf):
     CACHEABLE_PRECOMPILERS = ()
     CLOSURE_COMPILER_BINARY = 'java -jar compiler.jar'
     CLOSURE_COMPILER_ARGUMENTS = ''
-    CSSTIDY_BINARY = 'csstidy'
-    CSSTIDY_ARGUMENTS = '--template=highest'
     YUI_BINARY = 'java -jar yuicompressor.jar'
     YUI_CSS_ARGUMENTS = ''
     YUI_JS_ARGUMENTS = ''

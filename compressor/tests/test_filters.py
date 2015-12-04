@@ -20,7 +20,6 @@ from compressor.filters.css_default import CssAbsoluteFilter
 from compressor.filters.jsmin import JSMinFilter
 from compressor.filters.template import TemplateFilter
 from compressor.filters.closure import ClosureCompilerFilter
-from compressor.filters.csstidy import CSSTidyFilter
 from compressor.filters.yuglify import YUglifyCSSFilter, YUglifyJSFilter
 from compressor.filters.yui import YUICSSFilter, YUIJSFilter
 from compressor.filters.cleancss import CleanCSSFilter
@@ -29,22 +28,6 @@ from compressor.tests.test_base import test_dir
 
 def blankdict(*args, **kwargs):
     return defaultdict(lambda: '', *args, **kwargs)
-
-
-@unittest.skipIf(find_command(settings.COMPRESS_CSSTIDY_BINARY) is None,
-                 'CSStidy binary %r not found' % settings.COMPRESS_CSSTIDY_BINARY)
-class CssTidyTestCase(TestCase):
-    def test_tidy(self):
-        content = textwrap.dedent("""\
-        /* Some comment */
-        font,th,td,p{
-        color: black;
-        }
-        """)
-        ret = CSSTidyFilter(content).input()
-        self.assertIsInstance(ret, six.text_type)
-        self.assertEqual(
-            "font,th,td,p{color:#000;}", CSSTidyFilter(content).input())
 
 
 @override_settings(COMPRESS_CACHEABLE_PRECOMPILERS=('text/css',))
@@ -439,10 +422,6 @@ class SpecializedFiltersTest(TestCase):
     def test_closure_filter(self):
         filter = ClosureCompilerFilter('')
         self.assertEqual(filter.options, (('binary', six.text_type('java -jar compiler.jar')), ('args', six.text_type(''))))
-
-    def test_csstidy_filter(self):
-        filter = CSSTidyFilter('')
-        self.assertEqual(filter.options, (('binary', six.text_type('csstidy')), ('args', six.text_type('--template=highest'))))
 
     def test_yuglify_filters(self):
         filter = YUglifyCSSFilter('')

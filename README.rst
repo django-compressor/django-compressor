@@ -50,7 +50,7 @@ default. As an alternative Django Compressor provides a BeautifulSoup_ and a
 html5lib_ based parser, as well as an abstract base class that makes it easy to
 write a custom parser.
 
-Django Compressor also comes with built-in support for `CSS Tidy`_,
+Django Compressor also comes with built-in support for
 `YUI CSS and JS`_ compressor, `yUglify CSS and JS`_ compressor, the Google's
 `Closure Compiler`_, a Python port of Douglas Crockford's JSmin_, a Python port
 of the YUI CSS Compressor cssmin_ and a filter to convert (some) images into
@@ -72,7 +72,6 @@ The in-development version of Django Compressor can be installed with
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/
 .. _html5lib: http://code.google.com/p/html5lib/
-.. _CSS Tidy: http://csstidy.sourceforge.net/
 .. _YUI CSS and JS: http://developer.yahoo.com/yui/compressor/
 .. _yUglify CSS and JS: https://github.com/yui/yuglify
 .. _Closure Compiler: http://code.google.com/closure/compiler/
@@ -81,4 +80,3 @@ The in-development version of Django Compressor can be installed with
 .. _data URIs: http://en.wikipedia.org/wiki/Data_URI_scheme
 .. _django-compressor.readthedocs.org: http://django-compressor.readthedocs.org/en/latest/
 .. _github.com/django-compressor/django-compressor: https://github.com/django-compressor/django-compressor
-
