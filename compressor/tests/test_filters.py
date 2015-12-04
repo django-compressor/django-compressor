@@ -3,17 +3,14 @@ from collections import defaultdict
 import io
 import os
 import sys
-import textwrap
 
 from django.utils import six
 from django.test import TestCase
-from django.utils import unittest
 from django.test.utils import override_settings
 
 from compressor.cache import cache, get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.css import CssCompressor
-from compressor.utils import find_command
 from compressor.filters.base import CompilerFilter, CachedCompilerFilter
 from compressor.filters.cssmin import CSSCompressorFilter, rCSSMinFilter
 from compressor.filters.css_default import CssAbsoluteFilter

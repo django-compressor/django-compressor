@@ -12,7 +12,7 @@ class BeautifulSoupParser(ParserBase):
         try:
             from bs4 import BeautifulSoup
             self.soup = BeautifulSoup(self.content, "html.parser")
-        except ImportError:
+        except ImportError as err:
             raise ImproperlyConfigured("Error while importing BeautifulSoup: %s" % err)
 
     def css_elems(self):
