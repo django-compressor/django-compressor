@@ -4,12 +4,7 @@ import re
 from tempfile import mkdtemp
 from shutil import rmtree, copytree
 
-try:
-    from bs4 import BeautifulSoup
-    use_bs4 = True
-except ImportError:
-    from BeautifulSoup import BeautifulSoup
-    use_bs4 = False
+from bs4 import BeautifulSoup
 
 from django.core.cache.backends import locmem
 from django.test import SimpleTestCase
@@ -26,17 +21,7 @@ from compressor.storage import DefaultStorage
 
 
 def make_soup(markup):
-    if use_bs4:
-        return BeautifulSoup(markup, "html.parser")
-    else:
-        return BeautifulSoup(markup)
-
-
-def soup_find_all(markup, name):
-    if use_bs4:
-        return make_soup(markup).find_all(name)
-    else:
-        return make_soup(markup).findAll(name)
+    return BeautifulSoup(markup, "html.parser")
 
 
 def css_tag(href, **kwargs):
@@ -302,7 +287,7 @@ class CssMediaTestCase(SimpleTestCase):
 
     def test_css_output(self):
         css_node = CssCompressor(self.css)
-        links = soup_find_all(css_node.output(), 'link')
+        links = make_soup(css_node.output()).find_all('link')
         media = ['screen', 'print', 'all', None]
         self.assertEqual(len(links), 4)
         self.assertEqual(media, [l.get('media', None) for l in links])
@@ -311,7 +296,7 @@ class CssMediaTestCase(SimpleTestCase):
         css = self.css + '<style type="text/css" media="print">p { border:10px solid red;}</style>'
         css_node = CssCompressor(css)
         media = ['screen', 'print', 'all', None, 'print']
-        links = soup_find_all(css_node.output(), 'link')
+        links = make_soup(css_node.output()).find_all('link')
         self.assertEqual(media, [l.get('media', None) for l in links])
 
     @override_settings(COMPRESS_PRECOMPILERS=(
@@ -323,7 +308,7 @@ class CssMediaTestCase(SimpleTestCase):
 <link rel="stylesheet" href="/static/css/two.css" type="text/css" media="screen">
 <style type="text/foobar" media="screen">h1 { border:5px solid green;}</style>"""
         css_node = CssCompressor(css)
-        output = soup_find_all(css_node.output(), ['link', 'style'])
+        output = make_soup(css_node.output()).find_all(['link', 'style'])
         self.assertEqual(['/static/css/one.css', '/static/css/two.css', None],
                          [l.get('href', None) for l in output])
         self.assertEqual(['screen', 'screen', 'screen'],
@@ -363,11 +348,8 @@ class JsAsyncDeferTestCase(SimpleTestCase):
                 return 'defer'
         js_node = JsCompressor(self.js)
         output = [None, 'async', 'defer', None, 'async', None]
-        scripts = soup_find_all(js_node.output(), 'script')
-        if use_bs4:
-            attrs = [extract_attr(i) for i in scripts]
-        else:
-            attrs = [s.get('async') or s.get('defer') for s in scripts]
+        scripts = make_soup(js_node.output()).find_all('script')
+        attrs = [extract_attr(s) for s in scripts]
         self.assertEqual(output, attrs)
 
 
