@@ -39,26 +39,8 @@ Installation
 
 .. _dependencies:
 
-Dependencies
+Optional Dependencies
 ------------
-
-Required
-^^^^^^^^
-
-In case you're installing Django Compressor differently
-(e.g. from the Git repo), make sure to install the following
-dependencies.
-
-- django-appconf_
-
-  Used internally to handle Django's settings, this is
-  automatically installed when following the above
-  installation instructions.
-
-      pip install django-appconf
-
-Optional
-^^^^^^^^
 
 - BeautifulSoup_
 
