@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 from compressor.filters import CallbackOutputFilter
-from compressor.filters.jsmin.slimit import SlimItFilter  # noqa
 
 
 class rJSMinFilter(CallbackOutputFilter):
@@ -12,3 +11,11 @@ class rJSMinFilter(CallbackOutputFilter):
 
 # This is for backwards compatibility
 JSMinFilter = rJSMinFilter
+
+
+class SlimItFilter(CallbackOutputFilter):
+    dependencies = ["slimit"]
+    callback = "slimit.minify"
+    kwargs = {
+        "mangle": True,
+    }
