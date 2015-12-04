@@ -1,16 +1,18 @@
 from compressor.filters import CallbackOutputFilter
 
 
-class CSSMinFilter(CallbackOutputFilter):
+class CSSCompressorFilter(CallbackOutputFilter):
     """
-    A filter that utilizes Zachary Voase's Python port of
-    the YUI CSS compression algorithm: http://pypi.python.org/pypi/cssmin/
+    A filter that utilizes Yury Selivanov's Python port of
+    the YUI CSS compression algorithm: https://pypi.python.org/pypi/csscompressor
     """
-    callback = "compressor.filters.cssmin.cssmin.cssmin"
+    callback = "csscompressor.compress"
+    dependencies = ["csscompressor"]
 
 
 class rCSSMinFilter(CallbackOutputFilter):
-    callback = "compressor.filters.cssmin.rcssmin.cssmin"
+    callback = "rcssmin.cssmin"
+    dependencies = ["rcssmin"]
     kwargs = {
         "keep_bang_comments": True
     }

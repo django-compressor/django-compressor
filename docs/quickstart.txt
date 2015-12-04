@@ -31,7 +31,7 @@ Installation
      )
 
 * Define :attr:`COMPRESS_ROOT <django.conf.settings.COMPRESS_ROOT>` in settings
-  if you don't have already ``STATIC_ROOT`` or if you want it in a different 
+  if you don't have already ``STATIC_ROOT`` or if you want it in a different
   folder.
 
 .. _staticfiles: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
@@ -39,26 +39,8 @@ Installation
 
 .. _dependencies:
 
-Dependencies
+Optional Dependencies
 ------------
-
-Required
-^^^^^^^^
-
-In case you're installing Django Compressor differently
-(e.g. from the Git repo), make sure to install the following
-dependencies.
-
-- django-appconf_
-
-  Used internally to handle Django's settings, this is
-  automatically installed when following the above
-  installation instructions.
-
-      pip install django-appconf
-
-Optional
-^^^^^^^^
 
 - BeautifulSoup_
 
@@ -88,6 +70,13 @@ Optional
   ``compressor.filters.jsmin.SlimItFilter``::
 
       pip install slimit
+
+- `csscompressor`_
+
+  For the :ref:`csscompressor filter <csscompressor_filter>`
+  ``compressor.filters.cssmin.CSSCompressorFilter``::
+
+      pip install csscompressor
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/

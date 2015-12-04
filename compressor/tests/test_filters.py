@@ -3,24 +3,20 @@ from collections import defaultdict
 import io
 import os
 import sys
-import textwrap
 
 from django.utils import six
 from django.test import TestCase
-from django.utils import unittest
 from django.test.utils import override_settings
 
 from compressor.cache import cache, get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.css import CssCompressor
-from compressor.utils import find_command
 from compressor.filters.base import CompilerFilter, CachedCompilerFilter
-from compressor.filters.cssmin import CSSMinFilter, rCSSMinFilter
+from compressor.filters.cssmin import CSSCompressorFilter, rCSSMinFilter
 from compressor.filters.css_default import CssAbsoluteFilter
 from compressor.filters.jsmin import JSMinFilter
 from compressor.filters.template import TemplateFilter
 from compressor.filters.closure import ClosureCompilerFilter
-from compressor.filters.csstidy import CSSTidyFilter
 from compressor.filters.yuglify import YUglifyCSSFilter, YUglifyJSFilter
 from compressor.filters.yui import YUICSSFilter, YUIJSFilter
 from compressor.filters.cleancss import CleanCSSFilter
@@ -29,22 +25,6 @@ from compressor.tests.test_base import test_dir
 
 def blankdict(*args, **kwargs):
     return defaultdict(lambda: '', *args, **kwargs)
-
-
-@unittest.skipIf(find_command(settings.COMPRESS_CSSTIDY_BINARY) is None,
-                 'CSStidy binary %r not found' % settings.COMPRESS_CSSTIDY_BINARY)
-class CssTidyTestCase(TestCase):
-    def test_tidy(self):
-        content = textwrap.dedent("""\
-        /* Some comment */
-        font,th,td,p{
-        color: black;
-        }
-        """)
-        ret = CSSTidyFilter(content).input()
-        self.assertIsInstance(ret, six.text_type)
-        self.assertEqual(
-            "font,th,td,p{color:#000;}", CSSTidyFilter(content).input())
 
 
 @override_settings(COMPRESS_CACHEABLE_PRECOMPILERS=('text/css',))
@@ -144,8 +124,8 @@ class PrecompilerTestCase(TestCase):
         self.assertEqual("", compiler.input())
 
 
-class CssMinTestCase(TestCase):
-    def test_cssmin_filter(self):
+class CSSCompressorTestCase(TestCase):
+    def test_csscompressor_filter(self):
         content = """/*!
  * django-compressor
  * Copyright (c) 2009-2014 Django Compressor authors
@@ -158,8 +138,11 @@ class CssMinTestCase(TestCase):
 
         }
         """
-        output = "/*!* django-compressor * Copyright(c) 2009-2014 Django Compressor authors */ p{background:#369 url('../../images/image.gif')}"
-        self.assertEqual(output, CSSMinFilter(content).output())
+        output = """/*!
+ * django-compressor
+ * Copyright (c) 2009-2014 Django Compressor authors
+ */p{background:#369 url('../../images/image.gif')}"""
+        self.assertEqual(output, CSSCompressorFilter(content).output())
 
 
 class rCssMinTestCase(TestCase):
@@ -439,10 +422,6 @@ class SpecializedFiltersTest(TestCase):
     def test_closure_filter(self):
         filter = ClosureCompilerFilter('')
         self.assertEqual(filter.options, (('binary', six.text_type('java -jar compiler.jar')), ('args', six.text_type(''))))
-
-    def test_csstidy_filter(self):
-        filter = CSSTidyFilter('')
-        self.assertEqual(filter.options, (('binary', six.text_type('csstidy')), ('args', six.text_type('--template=highest'))))
 
     def test_yuglify_filters(self):
         filter = YUglifyCSSFilter('')
