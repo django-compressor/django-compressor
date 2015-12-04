@@ -120,10 +120,12 @@ Backend settings
 
          The arguments passed to the compressor. Defaults to --terminal.
 
-    - ``compressor.filters.cssmin.CSSMinFilter``
+    .. _csscompressor_filter:
 
-      A filter that uses Zachary Voase's Python port of the YUI CSS compression
-      algorithm cssmin_ (included, no external dependencies).
+    - ``compressor.filters.cssmin.CSSCompressorFilter``
+
+      A filter that uses Yury Selivanov's Python port of the YUI CSS compression
+      algorithm csscompressor_.
 
     - ``compressor.filters.cssmin.rCSSMinFilter``
 
@@ -144,7 +146,7 @@ Backend settings
 
 
     .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
-    .. _cssmin: http://pypi.python.org/pypi/cssmin/
+    .. _csscompressor: http://pypi.python.org/pypi/csscompressor/
     .. _rCSSmin: http://opensource.perlig.de/rcssmin/
     .. _`clean-css`: https://github.com/GoalSmashers/clean-css/
 

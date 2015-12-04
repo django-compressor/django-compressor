@@ -53,7 +53,7 @@ write a custom parser.
 Django Compressor also comes with built-in support for
 `YUI CSS and JS`_ compressor, `yUglify CSS and JS`_ compressor, the Google's
 `Closure Compiler`_, a Python port of Douglas Crockford's JSmin_, a Python port
-of the YUI CSS Compressor cssmin_ and a filter to convert (some) images into
+of the YUI CSS Compressor csscompressor_ and a filter to convert (some) images into
 `data URIs`_.
 
 If your setup requires a different compressor or other post-processing
@@ -76,7 +76,7 @@ The in-development version of Django Compressor can be installed with
 .. _yUglify CSS and JS: https://github.com/yui/yuglify
 .. _Closure Compiler: http://code.google.com/closure/compiler/
 .. _JSMin: http://www.crockford.com/javascript/jsmin.html
-.. _cssmin: https://github.com/zacharyvoase/cssmin
+.. _csscompressor: https://github.com/sprymix/csscompressor
 .. _data URIs: http://en.wikipedia.org/wiki/Data_URI_scheme
 .. _django-compressor.readthedocs.org: http://django-compressor.readthedocs.org/en/latest/
 .. _github.com/django-compressor/django-compressor: https://github.com/django-compressor/django-compressor

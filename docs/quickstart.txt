@@ -31,7 +31,7 @@ Installation
      )
 
 * Define :attr:`COMPRESS_ROOT <django.conf.settings.COMPRESS_ROOT>` in settings
-  if you don't have already ``STATIC_ROOT`` or if you want it in a different 
+  if you don't have already ``STATIC_ROOT`` or if you want it in a different
   folder.
 
 .. _staticfiles: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
@@ -88,6 +88,13 @@ Optional
   ``compressor.filters.jsmin.SlimItFilter``::
 
       pip install slimit
+
+- `csscompressor`_
+
+  For the :ref:`csscompressor filter <csscompressor_filter>`
+  ``compressor.filters.cssmin.CSSCompressorFilter``::
+
+      pip install csscompressor
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/
