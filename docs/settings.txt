@@ -130,7 +130,7 @@ Backend settings
     - ``compressor.filters.cssmin.rCSSMinFilter``
 
       A filter that uses the cssmin implementation rCSSmin_ to compress CSS
-      (included, no external dependencies).
+      (installed by default).
 
     - ``compressor.filters.cleancss.CleanCSSFilter``
 
@@ -173,7 +173,7 @@ Backend settings
     - ``compressor.filters.jsmin.JSMinFilter``
 
       A filter that uses the jsmin implementation rJSmin_ to compress
-      JavaScript code (included, no external dependencies).
+      JavaScript code (installed by default).
 
     .. _slimit_filter:
 

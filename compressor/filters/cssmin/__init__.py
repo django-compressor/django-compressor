@@ -11,7 +11,8 @@ class CSSCompressorFilter(CallbackOutputFilter):
 
 
 class rCSSMinFilter(CallbackOutputFilter):
-    callback = "compressor.filters.cssmin.rcssmin.cssmin"
+    callback = "rcssmin.cssmin"
+    dependencies = ["rcssmin"]
     kwargs = {
         "keep_bang_comments": True
     }

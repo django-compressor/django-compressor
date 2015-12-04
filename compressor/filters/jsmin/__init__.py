@@ -4,7 +4,8 @@ from compressor.filters.jsmin.slimit import SlimItFilter  # noqa
 
 
 class rJSMinFilter(CallbackOutputFilter):
-    callback = "compressor.filters.jsmin.rjsmin.jsmin"
+    callback = "rjsmin.jsmin"
+    dependencies = ["rjsmin"]
     kwargs = {
         "keep_bang_comments": True
     }

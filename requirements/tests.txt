@@ -11,3 +11,5 @@ jingo==0.7
 django-sekizai==0.8.2
 django-overextends==0.4.0
 csscompressor==0.9.4
+rcssmin==1.0.6
+rjsmin==1.0.12
