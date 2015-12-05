@@ -158,7 +158,7 @@ class Command(NoArgsCommand):
             log.write("Considering paths:\n\t" + "\n\t".join(paths) + "\n")
         templates = set()
         for path in paths:
-            for root, dirs, files in os.walk(path,
+            for root, dirs, files in os.walk(str(path),
                     followlinks=options.get('followlinks', False)):
                 templates.update(os.path.join(root, name)
                     for name in files if not name.startswith('.') and
