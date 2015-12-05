@@ -590,35 +590,6 @@ class OfflineCompressComplexTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual(rendered_template, ''.join(result) + '\n')
 
 
-# Jingo does not work when using Python 3.2 due to the use of Unicode string
-# prefix (and possibly other stuff), but it actually works when using Python
-# 3.3 since it tolerates the use of the Unicode string prefix. Python 3.3
-# support is also evident in its tox.ini file.
-@unittest.skipIf(sys.version_info >= (3, 2) and sys.version_info < (3, 3),
-                 'Jingo does not support 3.2')
-@unittest.skipIf(django.VERSION >= (1, 8), 'Import error on 1.8')
-class OfflineCompressJingoTestCase(OfflineTestCaseMixin, TestCase):
-    templates_dir = 'test_jingo'
-    expected_hash = '61ec584468eb'
-    engines = ('jinja2',)
-
-    def _get_jinja2_env(self):
-        import jinja2
-        import jinja2.ext
-        from jingo import env
-        from compressor.contrib.jinja2ext import CompressorExtension
-        from compressor.offline.jinja2 import SpacelessExtension, url_for
-
-        # Could have used the env.add_extension method, but it's only available
-        # in Jinja2 v2.5
-        new_env = jinja2.Environment(extensions=[
-            CompressorExtension, SpacelessExtension, jinja2.ext.with_])
-        env.extensions.update(new_env.extensions)
-        env.globals['url_for'] = url_for
-
-        return env
-
-
 @unittest.skipIf(django.VERSION >= (1, 9), 'overextends does not yet support django 1.9')
 class OfflineGenerationOverextendsTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_overextends"

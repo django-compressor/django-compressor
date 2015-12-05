@@ -72,10 +72,7 @@ method, and is in the ``TEMPLATE_LOADERS`` setting.
 
 If you're using Jinja2, you're likely to have a Jinja2 template loader in the
 ``TEMPLATE_LOADERS`` setting, otherwise Django won't know how to load Jinja2
-templates. You could use Jingo_ or your own custom loader.
-
-Unfortunately, Jingo_ does not implement such a method in its loader,
-read on to understand how to make Compressor work nicely with Jingo_.
+templates.
 
 By default, if you don't override the ``TEMPLATE_LOADERS`` setting,
 it will include the app directories loader that searches for templates under
@@ -87,29 +84,6 @@ However, if you have Jinja2 templates in other location(s), you could include
 the filesystem loader (``django.template.loaders.filesystem.Loader``) in the
 ``TEMPLATE_LOADERS`` setting and specify the custom location in the
 ``TEMPLATE_DIRS`` setting.
-
-For Jingo users
----------------
-You should configure ``TEMPLATE_LOADERS`` as such::
-
-    TEMPLATE_LOADERS = (
-        'jingo.Loader',
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-    )
-
-    def COMPRESS_JINJA2_GET_ENVIRONMENT():
-        # TODO: ensure the CompressorExtension is installed with Jingo via
-        # Jingo's JINJA_CONFIG setting.
-        # Additional globals, filters, tests,
-        # and extensions used within {%compress%} blocks must be configured
-        # with Jingo.
-        from jingo import env
-
-        return env
-
-This will enable the Jingo_ loader to load Jinja2 templates and the other
-loaders to report the templates location(s).
 
 Using your custom loader
 ------------------------
@@ -123,12 +97,6 @@ You should configure ``TEMPLATE_LOADERS`` as such::
 You could implement the `get_template_sources` method in your loader or make
 use of the Django's builtin loaders to report the Jinja2 template location(s).
 
-Python 3 Support
-----------------
-Jingo with Jinja2 are tested and work on Python 2.6, 2.7, and 3.3.
-Jinja2 alone (with custom loader) are tested and work on Python 2.6, 2.7 and
-3.3 only.
 
 
 .. _Jinja2: http://jinja.pocoo.org/docs/
-.. _Jingo: https://jingo.readthedocs.org/en/latest/

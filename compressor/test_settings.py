@@ -23,8 +23,6 @@ INSTALLED_APPS = [
     'compressor',
     'sekizai',
 ]
-if django.VERSION < (1, 8):
-    INSTALLED_APPS.append('jingo')
 
  # currently, we can't use overextends and django 1.9 since that would
  # require updating the templates settings to the new format.
