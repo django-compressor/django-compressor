@@ -643,6 +643,7 @@ class OfflineCompressJingoTestCase(OfflineTestCaseMixin, TestCase):
         return env
 
 
+@unittest.skipIf(django.VERSION >= (1, 9), 'overextends does not yet support django 1.9')
 class OfflineGenerationOverextendsTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_overextends"
     expected_hash = "e993b2a53994"

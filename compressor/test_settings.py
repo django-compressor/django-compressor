@@ -23,10 +23,14 @@ INSTALLED_APPS = [
     'compressor',
     'coffin',
     'sekizai',
-    'overextends',
 ]
 if django.VERSION < (1, 8):
     INSTALLED_APPS.append('jingo')
+
+ # currently, we can't use overextends and django 1.9 since that would
+ # require updating the templates settings to the new format.
+if django.VERSION < (1, 9):
+    INSTALLED_APPS.append('overextends')
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
