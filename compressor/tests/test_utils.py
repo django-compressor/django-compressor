@@ -1,4 +1,5 @@
-from django.utils import unittest
+import unittest
+
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.conf import settings
