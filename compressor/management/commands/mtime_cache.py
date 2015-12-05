@@ -2,15 +2,15 @@ import fnmatch
 import os
 from optparse import make_option
 
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import BaseCommand, CommandError
 
 from compressor.conf import settings
 from compressor.cache import cache, get_mtime, get_mtime_cachekey
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     help = "Add or remove all mtime values from the cache"
-    option_list = NoArgsCommand.option_list + (
+    option_list = BaseCommand.option_list + (
         make_option('-i', '--ignore', action='append', default=[],
             dest='ignore_patterns', metavar='PATTERN',
             help="Ignore files or directories matching this glob-style "

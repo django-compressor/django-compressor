@@ -6,7 +6,7 @@ from fnmatch import fnmatch
 from optparse import make_option
 
 import django
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import BaseCommand, CommandError
 import django.template
 from django.template import Context
 from django.utils import six
@@ -40,9 +40,9 @@ else:
         from StringIO import StringIO
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     help = "Compress content outside of the request/response cycle"
-    option_list = NoArgsCommand.option_list + (
+    option_list = BaseCommand.option_list + (
         make_option('--extension', '-e', action='append', dest='extensions',
             help='The file extension(s) to examine (default: ".html", '
                 'separate multiple extensions with commas, or use -e '
