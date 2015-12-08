@@ -84,7 +84,10 @@ class Command(NoArgsCommand):
             from django.template import engines
             template_source_loaders = []
             for e in engines.all():
-                template_source_loaders.extend(e.engine.get_template_loaders(e.engine.loaders))
+                if hasattr(e, 'engine'):
+                    template_source_loaders.extend(
+                        e.engine.get_template_loaders(e.engine.loaders)
+                    )
         loaders = []
         # If template loader is CachedTemplateLoader, return the loaders
         # that it wraps around. So if we have
@@ -136,6 +139,8 @@ class Command(NoArgsCommand):
                                          "must set TEMPLATE_LOADERS in your "
                                          "settings.")
         paths = set()
+        engine = options.get("engine", "django")
+
         for loader in self.get_loaders():
             try:
                 module = import_module(loader.__module__)
@@ -147,15 +152,9 @@ class Command(NoArgsCommand):
             except (ImportError, AttributeError, TypeError):
                 # Yeah, this didn't work out so well, let's move on
                 pass
-        if not paths:
-            raise OfflineGenerationError("No template paths found. None of "
-                                         "the configured template loaders "
-                                         "provided template paths. See "
-                                         "https://docs.djangoproject.com/en/1.8/topics/templates/ "
-                                         "for more information on template "
-                                         "loaders.")
         if verbosity > 1:
             log.write("Considering paths:\n\t" + "\n\t".join(paths) + "\n")
+
         templates = set()
         for path in paths:
             for root, dirs, files in os.walk(path,
@@ -163,6 +162,11 @@ class Command(NoArgsCommand):
                 templates.update(os.path.join(root, name)
                     for name in files if not name.startswith('.') and
                         any(fnmatch(name, "*%s" % glob) for glob in extensions))
+        if engine == 'jinja2' and django.VERSION >= (1, 8):
+            env = settings.COMPRESS_JINJA2_GET_ENVIRONMENT()
+            templates |= set([env.loader.get_source(env, template)[1] for template in
+                              env.list_templates(filter_func=lambda _path:
+                              os.path.splitext(_path)[-1] in extensions)])
         if not templates:
             raise OfflineGenerationError("No templates found. Make sure your "
                                          "TEMPLATE_LOADERS and TEMPLATE_DIRS "
@@ -170,7 +174,6 @@ class Command(NoArgsCommand):
         if verbosity > 1:
             log.write("Found templates:\n\t" + "\n\t".join(templates) + "\n")
 
-        engine = options.get("engine", "django")
         parser = self.__get_parser(engine)
 
         compressor_nodes = OrderedDict()
