@@ -23,24 +23,13 @@ from compressor.filters import CachedCompilerFilter
 from compressor.filters.css_default import CssAbsoluteFilter
 from compressor.storage import compressor_file_storage
 from compressor.signals import post_compress
+from django.template.loader import render_to_string
 from compressor.utils import get_class, get_mod_func, staticfiles
 from compressor.utils.decorators import cached_property
 
 # Some constants for nicer handling.
 SOURCE_HUNK, SOURCE_FILE = 'inline', 'file'
 METHOD_INPUT, METHOD_OUTPUT = 'input', 'output'
-
-
-if django.VERSION < (1, 8):
-    # Provide render_to_string that is similar to Django 1.8 version, for our
-    # needs, using what < 1.8 provides:
-    from django.template.loader import render_to_string as django_render_to_string
-
-    def render_to_string(template_name, context=None):
-        return django_render_to_string(template_name, dictionary=context)
-
-else:
-    from django.template.loader import render_to_string
 
 
 class Compressor(object):
