@@ -21,6 +21,7 @@ try:
 except:
     from django.utils.importlib import import_module
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
+from django.template.base import TemplateDoesNotExist as template_base_TemplateDoesNotExist 
 
 from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
@@ -144,7 +145,7 @@ class Command(NoArgsCommand):
                 if get_template_sources is None:
                     get_template_sources = loader.get_template_sources
                 paths.update(list(get_template_sources('')))
-            except (ImportError, AttributeError, TypeError):
+            except (ImportError, AttributeError, TypeError, template_base_TemplateDoesNotExist):
                 # Yeah, this didn't work out so well, let's move on
                 pass
         if not paths:
