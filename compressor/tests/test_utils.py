@@ -6,11 +6,7 @@ import django
 
 import compressor.utils.staticfiles
 
-try:
-    import imp
-    reload = imp.reload  # Python 3
-except ImportError:
-    pass
+from imp import reload
 
 
 def get_apps_without_staticfiles(apps):

@@ -3,6 +3,7 @@ import io
 import logging
 import subprocess
 
+from importlib import import_module
 from platform import system
 
 if system() != "Windows":
@@ -18,11 +19,6 @@ else:
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
-
-try:
-    from importlib import import_module
-except ImportError:
-    from django.utils.importlib import import_module
 
 from django.utils.encoding import smart_text
 from django.utils import six

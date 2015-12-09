@@ -2,8 +2,10 @@
 import os
 import sys
 
+from collections import OrderedDict
 from fnmatch import fnmatch
 from optparse import make_option
+from importlib import import_module
 
 import django
 from django.core.management.base import BaseCommand, CommandError
@@ -11,15 +13,6 @@ import django.template
 from django.template import Context
 from django.utils import six
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from django.utils.datastructures import SortedDict as OrderedDict
-
-try:
-    from importlib import import_module
-except:
-    from django.utils.importlib import import_module
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
 from django.template import engines
 
