@@ -1,4 +1,3 @@
-from django.utils import unittest
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.conf import settings
@@ -7,11 +6,7 @@ import django
 
 import compressor.utils.staticfiles
 
-try:
-    import imp
-    reload = imp.reload  # Python 3
-except ImportError:
-    pass
+from imp import reload
 
 
 def get_apps_without_staticfiles(apps):
@@ -30,8 +25,6 @@ class StaticFilesTestCase(TestCase):
         self.assertTrue(compressor.utils.staticfiles.finders is
                         django.contrib.staticfiles.finders)
 
-    @unittest.skipIf(django.VERSION < (1, 7),
-                     "No app registry in Django < 1.7")
     def test_has_finders_from_staticfiles_if_configured_per_appconfig(self):
         apps = get_apps_with_staticfiles_using_appconfig(
             settings.INSTALLED_APPS)

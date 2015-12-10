@@ -1,5 +1,6 @@
 from __future__ import with_statement
 import os
+import unittest
 
 try:
     import lxml
@@ -11,7 +12,6 @@ try:
 except ImportError:
     html5lib = None
 
-from django.utils import unittest
 from django.test.utils import override_settings
 
 from compressor.base import SOURCE_HUNK, SOURCE_FILE

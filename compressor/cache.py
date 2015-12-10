@@ -3,22 +3,12 @@ import hashlib
 import os
 import socket
 import time
+from importlib import import_module
 
-try:
-    from django.core.cache import caches
-    def get_cache(name):
-        return caches[name]
-except ImportError:
-    from django.core.cache import get_cache
-
+from django.core.cache import caches
 from django.core.files.base import ContentFile
 from django.utils.encoding import force_text, smart_bytes
 from django.utils.functional import SimpleLazyObject
-
-try:
-    from importlib import import_module
-except:
-    from django.utils.importlib import import_module
 
 from compressor.conf import settings
 from compressor.storage import default_storage
@@ -162,4 +152,4 @@ def cache_set(key, val, refreshed=False, timeout=None):
     return cache.set(key, packed_val, real_timeout)
 
 
-cache = SimpleLazyObject(lambda: get_cache(settings.COMPRESS_CACHE_BACKEND))
+cache = SimpleLazyObject(lambda: caches[settings.COMPRESS_CACHE_BACKEND])

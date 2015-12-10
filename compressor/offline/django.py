@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 from copy import copy
 
-import django
 from django import template
 from django.template import Context
 from django.template.base import Node, VariableNode, TextNode, NodeList
@@ -101,10 +100,7 @@ class DjangoParser(object):
 
     def parse(self, template_name):
         try:
-            if django.VERSION < (1, 8):
-                return get_template(template_name)
-            else:
-                return get_template(template_name).template
+            return get_template(template_name).template
         except template.TemplateSyntaxError as e:
             raise TemplateSyntaxError(str(e))
         except template.TemplateDoesNotExist as e:
@@ -120,8 +116,7 @@ class DjangoParser(object):
         pass
 
     def render_nodelist(self, template, context, node):
-        if django.VERSION >= (1, 8):
-            context.template = template
+        context.template = template
         return node.nodelist.render(context)
 
     def render_node(self, template, context, node):
@@ -146,7 +141,7 @@ class DjangoParser(object):
         return nodelist
 
     def walk_nodes(self, node, original=None):
-        if django.VERSION >= (1, 8) and original is None:
+        if original is None:
             original = node
         for node in self.get_nodelist(node, original):
             if isinstance(node, CompressorNode) and node.is_offline_compression_enabled(forced=True):

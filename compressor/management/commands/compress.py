@@ -2,25 +2,19 @@
 import os
 import sys
 
+from collections import OrderedDict
 from fnmatch import fnmatch
 from optparse import make_option
+from importlib import import_module
 
 import django
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import BaseCommand, CommandError
 import django.template
 from django.template import Context
 from django.utils import six
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from django.utils.datastructures import SortedDict as OrderedDict
-
-try:
-    from importlib import import_module
-except:
-    from django.utils.importlib import import_module
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
+from django.template import engines
 
 from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
@@ -40,9 +34,9 @@ else:
         from StringIO import StringIO
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     help = "Compress content outside of the request/response cycle"
-    option_list = NoArgsCommand.option_list + (
+    option_list = BaseCommand.option_list + (
         make_option('--extension', '-e', action='append', dest='extensions',
             help='The file extension(s) to examine (default: ".html", '
                 'separate multiple extensions with commas, or use -e '
@@ -61,30 +55,9 @@ class Command(NoArgsCommand):
     )
 
     def get_loaders(self):
-        if django.VERSION < (1, 8):
-            from django.template.loader import template_source_loaders
-            if template_source_loaders is None:
-                try:
-                    from django.template.loader import (
-                        find_template as finder_func)
-                except ImportError:
-                    from django.template.loader import (
-                        find_template_source as finder_func)  # noqa
-                try:
-                    # Force django to calculate template_source_loaders from
-                    # TEMPLATE_LOADERS settings, by asking to find a dummy template
-                    source, name = finder_func('test')
-                except django.template.TemplateDoesNotExist:
-                    pass
-                # Reload template_source_loaders now that it has been calculated ;
-                # it should contain the list of valid, instanciated template loaders
-                # to use.
-                from django.template.loader import template_source_loaders
-        else:
-            from django.template import engines
-            template_source_loaders = []
-            for e in engines.all():
-                template_source_loaders.extend(e.engine.get_template_loaders(e.engine.loaders))
+        template_source_loaders = []
+        for e in engines.all():
+            template_source_loaders.extend(e.engine.get_template_loaders(e.engine.loaders))
         loaders = []
         # If template loader is CachedTemplateLoader, return the loaders
         # that it wraps around. So if we have
@@ -143,7 +116,7 @@ class Command(NoArgsCommand):
                     'get_template_sources', None)
                 if get_template_sources is None:
                     get_template_sources = loader.get_template_sources
-                paths.update(list(get_template_sources('')))
+                paths.update(str(origin) for origin in get_template_sources(''))
             except (ImportError, AttributeError, TypeError):
                 # Yeah, this didn't work out so well, let's move on
                 pass
@@ -302,7 +275,5 @@ class Command(NoArgsCommand):
         self.compress(sys.stdout, **options)
 
 
-if django.VERSION < (1, 7):
-    Command.requires_model_validation = False
-else:
-    Command.requires_system_checks = False
+
+Command.requires_system_checks = False

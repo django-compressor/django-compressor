@@ -1,19 +1,12 @@
 from __future__ import with_statement, unicode_literals
 import os
 import codecs
+from importlib import import_module
+from six.moves.urllib.request import url2pathname
 
-import django
 from django.core.files.base import ContentFile
-try:
-    from importlib import import_module
-except:
-    from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
-
-try:
-    from urllib.request import url2pathname
-except ImportError:
-    from urllib import url2pathname
+from django.template.loader import render_to_string
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
@@ -29,18 +22,6 @@ from compressor.utils.decorators import cached_property
 # Some constants for nicer handling.
 SOURCE_HUNK, SOURCE_FILE = 'inline', 'file'
 METHOD_INPUT, METHOD_OUTPUT = 'input', 'output'
-
-
-if django.VERSION < (1, 8):
-    # Provide render_to_string that is similar to Django 1.8 version, for our
-    # needs, using what < 1.8 provides:
-    from django.template.loader import render_to_string as django_render_to_string
-
-    def render_to_string(template_name, context=None):
-        return django_render_to_string(template_name, dictionary=context)
-
-else:
-    from django.template.loader import render_to_string
 
 
 class Compressor(object):

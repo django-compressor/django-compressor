@@ -21,12 +21,13 @@ DATABASES = {
 INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'compressor',
-    'coffin',
     'sekizai',
-    'overextends',
 ]
-if django.VERSION < (1, 8):
-    INSTALLED_APPS.append('jingo')
+
+# currently, we can't use overextends and django 1.9 since that would
+# require updating the templates settings to the new format.
+if django.VERSION < (1, 9):
+    INSTALLED_APPS.append('overextends')
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -45,9 +46,6 @@ TEMPLATE_DIRS = (
     # a specific template without considering the others.
     os.path.join(TEST_DIR, 'test_templates'),
 )
-
-if django.VERSION[:2] < (1, 6):
-    TEST_RUNNER = 'discover_runner.DiscoverRunner'
 
 SECRET_KEY = "iufoj=mibkpdz*%bob952x(%49rqgv8gg45k36kjcg76&-y5=!"
 

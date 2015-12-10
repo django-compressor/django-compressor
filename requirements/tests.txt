@@ -5,10 +5,7 @@ mock==1.0.1
 Jinja2==2.7.3
 lxml==3.4.2
 beautifulsoup4==4.4.0
-unittest2==1.0.0
-coffin==0.4.0
-jingo==0.7
-django-sekizai==0.8.2
+django-sekizai==0.9.0
 django-overextends==0.4.0
 csscompressor==0.9.4
 rcssmin==1.0.6

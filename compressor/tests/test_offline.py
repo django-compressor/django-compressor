@@ -2,13 +2,14 @@ from __future__ import with_statement, unicode_literals
 import io
 import os
 import sys
+import unittest
+from importlib import import_module
 
 import django
 from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
-from django.utils import six, unittest
-from django.utils.importlib import import_module
+from django.utils import six
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.conf import settings
@@ -589,60 +590,7 @@ class OfflineCompressComplexTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual(rendered_template, ''.join(result) + '\n')
 
 
-# Coffin does not work on Python 3.2+ due to:
-# The line at coffin/template/__init__.py:15
-#     from library import *
-# causing 'ImportError: No module named library'.
-# It seems there is no evidence nor indicated support for Python 3+.
-@unittest.skipIf(sys.version_info >= (3, 2), 'Coffin does not support 3.2+')
-@unittest.skipIf(django.VERSION >= (1, 8), 'Import error on 1.8')
-class OfflineCompressCoffinTestCase(OfflineTestCaseMixin, TestCase):
-    templates_dir = 'test_coffin'
-    expected_hash = '32c8281e3346'
-    engines = ('jinja2',)
-
-    def _get_jinja2_env(self):
-        import jinja2
-        from coffin.common import env
-        from compressor.contrib.jinja2ext import CompressorExtension
-
-        # Could have used the env.add_extension method, but it's only available
-        # in Jinja2 v2.5
-        new_env = jinja2.Environment(extensions=[CompressorExtension])
-        env.extensions.update(new_env.extensions)
-
-        return env
-
-
-# Jingo does not work when using Python 3.2 due to the use of Unicode string
-# prefix (and possibly other stuff), but it actually works when using Python
-# 3.3 since it tolerates the use of the Unicode string prefix. Python 3.3
-# support is also evident in its tox.ini file.
-@unittest.skipIf(sys.version_info >= (3, 2) and sys.version_info < (3, 3),
-                 'Jingo does not support 3.2')
-@unittest.skipIf(django.VERSION >= (1, 8), 'Import error on 1.8')
-class OfflineCompressJingoTestCase(OfflineTestCaseMixin, TestCase):
-    templates_dir = 'test_jingo'
-    expected_hash = '61ec584468eb'
-    engines = ('jinja2',)
-
-    def _get_jinja2_env(self):
-        import jinja2
-        import jinja2.ext
-        from jingo import env
-        from compressor.contrib.jinja2ext import CompressorExtension
-        from compressor.offline.jinja2 import SpacelessExtension, url_for
-
-        # Could have used the env.add_extension method, but it's only available
-        # in Jinja2 v2.5
-        new_env = jinja2.Environment(extensions=[
-            CompressorExtension, SpacelessExtension, jinja2.ext.with_])
-        env.extensions.update(new_env.extensions)
-        env.globals['url_for'] = url_for
-
-        return env
-
-
+@unittest.skipIf(django.VERSION >= (1, 9), 'overextends does not yet support django 1.9')
 class OfflineGenerationOverextendsTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_overextends"
     expected_hash = "e993b2a53994"

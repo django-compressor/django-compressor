@@ -2,9 +2,10 @@
 from __future__ import with_statement, unicode_literals
 
 import sys
+import unittest
 
 from django.test import TestCase
-from django.utils import unittest, six
+from django.utils import six
 from django.test.utils import override_settings
 
 from compressor.conf import settings
