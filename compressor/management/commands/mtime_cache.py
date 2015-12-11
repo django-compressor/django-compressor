@@ -1,6 +1,5 @@
 import fnmatch
 import os
-from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -10,30 +9,30 @@ from compressor.cache import cache, get_mtime, get_mtime_cachekey
 
 class Command(BaseCommand):
     help = "Add or remove all mtime values from the cache"
-    option_list = BaseCommand.option_list + (
-        make_option(
+
+    def add_arguments(self, parser):
+        parser.add_argument(
             '-i', '--ignore', action='append', default=[],
             dest='ignore_patterns', metavar='PATTERN',
             help="Ignore files or directories matching this glob-style "
                  "pattern. Use multiple times to ignore more."),
-        make_option(
+        parser.add_argument(
             '--no-default-ignore', action='store_false',
             dest='use_default_ignore_patterns', default=True,
             help="Don't ignore the common private glob-style patterns 'CVS', "
                  "'.*' and '*~'."),
-        make_option(
+        parser.add_argument(
             '--follow-links', dest='follow_links', action='store_true',
             help="Follow symlinks when traversing the COMPRESS_ROOT "
                  "(which defaults to STATIC_ROOT). Be aware that using this "
                  "can lead to infinite recursion if a link points to a parent "
                  "directory of itself."),
-        make_option(
+        parser.add_argument(
             '-c', '--clean', dest='clean', action='store_true',
             help="Remove all items"),
-        make_option(
+        parser.add_argument(
             '-a', '--add', dest='add', action='store_true',
             help="Add all items"),
-    )
 
     def is_ignored(self, path):
         """
@@ -45,7 +44,7 @@ class Command(BaseCommand):
                 return True
         return False
 
-    def handle_noargs(self, **options):
+    def handle(self, **options):
         ignore_patterns = options['ignore_patterns']
         if options['use_default_ignore_patterns']:
             ignore_patterns += ['CVS', '.*', '*~']
@@ -82,10 +81,11 @@ class Command(BaseCommand):
 
         if keys_to_delete:
             cache.delete_many(list(keys_to_delete))
-            print("Deleted mtimes of %d files from the cache."
-                  % len(keys_to_delete))
+            self.stdout.write("Deleted mtimes of %d files from the cache."
+                              % len(keys_to_delete))
 
         if files_to_add:
             for filename in files_to_add:
                 get_mtime(filename)
-            print("Added mtimes of %d files to cache." % len(files_to_add))
+            self.stdout.write("Added mtimes of %d files to cache."
+                              % len(files_to_add))

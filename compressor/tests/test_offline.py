@@ -5,6 +5,8 @@ import sys
 import unittest
 from importlib import import_module
 
+from mock import patch
+
 import django
 from django.core.management.base import CommandError
 from django.template import Template, Context
@@ -170,6 +172,31 @@ class OfflineTestCaseMixin(object):
 class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'basic'
     expected_hash = 'f5e179b8eca4'
+
+    @patch.object(CompressCommand, 'compress')
+    def test_handle_no_args(self, compress_mock):
+        CompressCommand().handle()
+        self.assertEqual(compress_mock.call_count, 1)
+
+    @patch.object(CompressCommand, 'compress')
+    def test_handle_compress_disabled(self, compress_mock):
+        with self.settings(COMPRESS_ENABLED=False):
+            with self.assertRaises(CommandError):
+                CompressCommand().handle()
+        self.assertEqual(compress_mock.call_count, 0)
+
+    @patch.object(CompressCommand, 'compress')
+    def test_handle_compress_offline_disabled(self, compress_mock):
+        with self.settings(COMPRESS_OFFLINE=False):
+            with self.assertRaises(CommandError):
+                CompressCommand().handle()
+        self.assertEqual(compress_mock.call_count, 0)
+
+    @patch.object(CompressCommand, 'compress')
+    def test_handle_compress_offline_disabled_force(self, compress_mock):
+        with self.settings(COMPRESS_OFFLINE=False):
+            CompressCommand().handle(force=True)
+        self.assertEqual(compress_mock.call_count, 1)
 
     def test_rendering_without_manifest_raises_exception(self):
         # flush cached manifest
