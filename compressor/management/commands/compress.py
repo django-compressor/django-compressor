@@ -262,7 +262,7 @@ class Command(BaseCommand):
                 ext_list[i] = '.%s' % ext_list[i]
         return set(ext_list)
 
-    def handle_noargs(self, **options):
+    def handle(self, **options):
         if not settings.COMPRESS_ENABLED and not options.get("force"):
             raise CommandError(
                 "Compressor is disabled. Set the COMPRESS_ENABLED "
