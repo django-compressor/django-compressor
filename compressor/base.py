@@ -2,10 +2,10 @@ from __future__ import with_statement, unicode_literals
 import os
 import codecs
 from importlib import import_module
-from six.moves.urllib.request import url2pathname
 
 from django.core.files.base import ContentFile
 from django.utils.safestring import mark_safe
+from django.utils.six.moves.urllib.request import url2pathname
 from django.template.loader import render_to_string
 
 from compressor.cache import get_hexdigest, get_mtime
