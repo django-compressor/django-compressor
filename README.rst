@@ -71,7 +71,7 @@ The in-development version of Django Compressor can be installed with
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/
-.. _html5lib: http://code.google.com/p/html5lib/
+.. _html5lib: https://github.com/html5lib/html5lib-python
 .. _YUI CSS and JS: http://developer.yahoo.com/yui/compressor/
 .. _yUglify CSS and JS: https://github.com/yui/yuglify
 .. _Closure Compiler: http://code.google.com/closure/compiler/
