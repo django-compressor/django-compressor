@@ -1,4 +1,5 @@
 from __future__ import with_statement, unicode_literals
+import copy
 import io
 import os
 import sys
@@ -6,8 +7,8 @@ import unittest
 from importlib import import_module
 
 from mock import patch
+from unittest import SkipTest
 
-import django
 from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
@@ -64,13 +65,20 @@ class OfflineTestCaseMixin(object):
         # Specify both Jinja2 and Django template locations. When the wrong
         # engine is used to parse a template, the TemplateSyntaxError will
         # cause the template to be skipped over.
+        # We've hardcoded TEMPLATES[0] to be Django templates backend and
+        # TEMPLATES[1] to be Jinja2 templates backend in test_settings.
+        TEMPLATES = copy.deepcopy(settings.TEMPLATES)
+
         django_template_dir = os.path.join(
-            settings.TEST_DIR, 'test_templates', self.templates_dir)
+            TEMPLATES[0]['DIRS'][0], self.templates_dir)
         jinja2_template_dir = os.path.join(
-            settings.TEST_DIR, 'test_templates_jinja2', self.templates_dir)
+            TEMPLATES[1]['DIRS'][0], self.templates_dir)
+
+        TEMPLATES[0]['DIRS'] = [django_template_dir]
+        TEMPLATES[1]['DIRS'] = [jinja2_template_dir]
 
         override_settings = {
-            'TEMPLATE_DIRS': (django_template_dir, jinja2_template_dir,),
+            'TEMPLATES': TEMPLATES,
             'COMPRESS_ENABLED': True,
             'COMPRESS_OFFLINE': True
         }
@@ -138,9 +146,15 @@ class OfflineTestCaseMixin(object):
         rendered_template = self._render_template(engine)
         self.assertEqual(rendered_template, '\n'.join(result) + '\n')
 
-    def test_offline(self):
-        for engine in self.engines:
-            self._test_offline(engine=engine)
+    def test_offline_django(self):
+        if 'django' not in self.engines:
+            raise SkipTest('This test class does not support django engine.')
+        self._test_offline(engine='django')
+
+    def test_offline_jinja2(self):
+        if 'jinja2' not in self.engines:
+            raise SkipTest('This test class does not support jinja2 engine.')
+        self._test_offline(engine='jinja2')
 
     def _get_jinja2_env(self):
         import jinja2
@@ -165,7 +179,7 @@ class OfflineTestCaseMixin(object):
         import jinja2
 
         loader = jinja2.FileSystemLoader(
-            settings.TEMPLATE_DIRS, encoding=settings.FILE_CHARSET)
+            settings.TEMPLATES[1]['DIRS'], encoding=settings.FILE_CHARSET)
         return loader
 
 
@@ -546,7 +560,7 @@ class OfflineCompressBlockSuperBaseCompressed(OfflineTestCaseMixin, TestCase):
         self.templates = []
         for template_name in self.template_names:
             template_path = os.path.join(
-                settings.TEMPLATE_DIRS[0], template_name)
+                settings.TEMPLATES[0]['DIRS'][0], template_name)
             self.template_paths.append(template_path)
             with io.open(template_path,
                          encoding=settings.FILE_CHARSET) as file_:
@@ -617,7 +631,6 @@ class OfflineCompressComplexTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual(rendered_template, ''.join(result) + '\n')
 
 
-@unittest.skipIf(django.VERSION >= (1, 9), 'overextends does not yet support django 1.9')
 class OfflineGenerationOverextendsTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_overextends"
     expected_hash = "e993b2a53994"
