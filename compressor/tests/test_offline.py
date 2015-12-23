@@ -1,4 +1,5 @@
 from __future__ import with_statement, unicode_literals
+import copy
 import io
 import os
 import sys
@@ -63,13 +64,20 @@ class OfflineTestCaseMixin(object):
         # Specify both Jinja2 and Django template locations. When the wrong
         # engine is used to parse a template, the TemplateSyntaxError will
         # cause the template to be skipped over.
+        # We've hardcoded TEMPLATES[0] to be Django templates backend and
+        # TEMPLATES[1] to be Jinja2 templates backend in test_settings.
+        TEMPLATES = copy.deepcopy(settings.TEMPLATES)
+
         django_template_dir = os.path.join(
-            settings.TEST_DIR, 'test_templates', self.templates_dir)
+            TEMPLATES[0]['DIRS'][0], self.templates_dir)
         jinja2_template_dir = os.path.join(
-            settings.TEST_DIR, 'test_templates_jinja2', self.templates_dir)
+            TEMPLATES[1]['DIRS'][0], self.templates_dir)
+
+        TEMPLATES[0]['DIRS'] = [django_template_dir]
+        TEMPLATES[1]['DIRS'] = [jinja2_template_dir]
 
         override_settings = {
-            'TEMPLATE_DIRS': (django_template_dir, jinja2_template_dir,),
+            'TEMPLATES': TEMPLATES,
             'COMPRESS_ENABLED': True,
             'COMPRESS_OFFLINE': True
         }
@@ -164,7 +172,7 @@ class OfflineTestCaseMixin(object):
         import jinja2
 
         loader = jinja2.FileSystemLoader(
-            settings.TEMPLATE_DIRS, encoding=settings.FILE_CHARSET)
+            settings.TEMPLATES[1]['DIRS'], encoding=settings.FILE_CHARSET)
         return loader
 
 
@@ -545,7 +553,7 @@ class OfflineCompressBlockSuperBaseCompressed(OfflineTestCaseMixin, TestCase):
         self.templates = []
         for template_name in self.template_names:
             template_path = os.path.join(
-                settings.TEMPLATE_DIRS[0], template_name)
+                settings.TEMPLATES[0]['DIRS'][0], template_name)
             self.template_paths.append(template_path)
             with io.open(template_path,
                          encoding=settings.FILE_CHARSET) as file_:
