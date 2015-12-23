@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import os
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.template.utils import InvalidTemplateEngineError
 
 from appconf import AppConf
 
@@ -69,11 +70,22 @@ class CompressorConf(AppConf):
     OFFLINE_MANIFEST = 'manifest.json'
     # The Context to be used when TemplateFilter is used
     TEMPLATE_FILTER_CONTEXT = {}
-    # Function that returns the Jinja2 environment to use in offline compression.
+
+    # Returns the Jinja2 environment to use in offline compression.
     def JINJA2_GET_ENVIRONMENT():
+        alias = 'Jinja2'
         try:
-            import jinja2
-            return jinja2.Environment()
+            from django.template.loader import _engine_list
+            engines = _engine_list(alias)
+            if engines:
+                engine = engines[0]
+                return engine.env
+        except InvalidTemplateEngineError:
+            raise InvalidTemplateEngineError(
+                "Could not find config for '{}' "
+                "in settings.TEMPLATES. "
+                "COMPRESS_JINJA2_GET_ENVIRONMENT() may "
+                "need to be defined in settings".format(alias))
         except ImportError:
             return None
 
