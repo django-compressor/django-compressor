@@ -7,6 +7,7 @@ import unittest
 from importlib import import_module
 
 from mock import patch
+from unittest import SkipTest
 
 from django.core.management.base import CommandError
 from django.template import Template, Context
@@ -145,9 +146,15 @@ class OfflineTestCaseMixin(object):
         rendered_template = self._render_template(engine)
         self.assertEqual(rendered_template, '\n'.join(result) + '\n')
 
-    def test_offline(self):
-        for engine in self.engines:
-            self._test_offline(engine=engine)
+    def test_offline_django(self):
+        if 'django' not in self.engines:
+            raise SkipTest('This test class does not support django engine.')
+        self._test_offline(engine='django')
+
+    def test_offline_jinja2(self):
+        if 'jinja2' not in self.engines:
+            raise SkipTest('This test class does not support jinja2 engine.')
+        self._test_offline(engine='jinja2')
 
     def _get_jinja2_env(self):
         import jinja2
