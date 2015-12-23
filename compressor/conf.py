@@ -74,7 +74,6 @@ class CompressorConf(AppConf):
     def JINJA2_GET_ENVIRONMENT():
         alias = 'Jinja2'
         try:
-            import jinja2
             from django.template.loader import _engine_list
             engines = _engine_list(alias)
             if engines:
