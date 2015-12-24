@@ -6,7 +6,6 @@ Jinja2==2.7.3
 lxml==3.4.2
 beautifulsoup4==4.4.0
 django-sekizai==0.9.0
-django-overextends==0.4.0
 csscompressor==0.9.4
 rcssmin==1.0.6
 rjsmin==1.0.12

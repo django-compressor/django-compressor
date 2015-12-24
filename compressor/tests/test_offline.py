@@ -7,7 +7,6 @@ from importlib import import_module
 
 from mock import patch
 
-import django
 from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
@@ -615,11 +614,3 @@ class OfflineCompressComplexTestCase(OfflineTestCaseMixin, TestCase):
         rendered_template = self._render_template(engine)
         result = (result[0], result[2])
         self.assertEqual(rendered_template, ''.join(result) + '\n')
-
-
-@unittest.skipIf(django.VERSION >= (1, 9), 'overextends does not yet support django 1.9')
-class OfflineGenerationOverextendsTestCase(OfflineTestCaseMixin, TestCase):
-    templates_dir = "test_overextends"
-    expected_hash = "e993b2a53994"
-    # overextends not supported for Jinja2 yet.
-    engines = ("django",)

@@ -1,5 +1,4 @@
 import os
-import django
 
 TEST_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'tests')
 
@@ -23,11 +22,6 @@ INSTALLED_APPS = [
     'compressor',
     'sekizai',
 ]
-
-# currently, we can't use overextends and django 1.9 since that would
-# require updating the templates settings to the new format.
-if django.VERSION < (1, 9):
-    INSTALLED_APPS.append('overextends')
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
