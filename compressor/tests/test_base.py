@@ -89,12 +89,14 @@ class PrecompilerAndAbsoluteFilterTestCase(SimpleTestCase):
         self.helper(enabled=True, use_precompiler=True, use_absolute_filter=True, expected_output=self.css_absolutized)
 
 
+@override_settings(
+    COMPRESS_ENABLED=True,
+    COMPRESS_PRECOMPILERS=(),
+    COMPRESS_DEBUG_TOGGLE='nocompress',
+)
 class CompressorTestCase(SimpleTestCase):
 
     def setUp(self):
-        settings.COMPRESS_ENABLED = True
-        settings.COMPRESS_PRECOMPILERS = ()
-        settings.COMPRESS_DEBUG_TOGGLE = 'nocompress'
         self.css = """\
 <link rel="stylesheet" href="/static/css/one.css" type="text/css" />
 <style type="text/css">p { border:5px solid green;}</style>
@@ -315,11 +317,9 @@ class CssMediaTestCase(SimpleTestCase):
                          [l.get('media', None) for l in output])
 
 
+@override_settings(COMPRESS_VERBOSE=True)
 class VerboseTestCase(CompressorTestCase):
-
-    def setUp(self):
-        super(VerboseTestCase, self).setUp()
-        settings.COMPRESS_VERBOSE = True
+    pass
 
 
 class CacheBackendTestCase(CompressorTestCase):

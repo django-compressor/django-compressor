@@ -141,22 +141,23 @@ class TemplatetagTestCase(TestCase):
 
 class PrecompilerTemplatetagTestCase(TestCase):
     def setUp(self):
-        self.old_enabled = settings.COMPRESS_ENABLED
-        self.old_precompilers = settings.COMPRESS_PRECOMPILERS
-
         precompiler = os.path.join(test_dir, 'precompiler.py')
         python = sys.executable
 
-        settings.COMPRESS_ENABLED = True
-        settings.COMPRESS_PRECOMPILERS = (
-            ('text/coffeescript', '%s %s' % (python, precompiler)),
-            ('text/less', '%s %s' % (python, precompiler)),
-        )
+        override_settings = {
+            'COMPRESS_ENABLED': True,
+            'COMPRESS_PRECOMPILERS': (
+                ('text/coffeescript', '%s %s' % (python, precompiler)),
+                ('text/less', '%s %s' % (python, precompiler)),
+            )
+        }
+        self.override_settings = self.settings(**override_settings)
+        self.override_settings.__enter__()
+
         self.context = {'STATIC_URL': settings.COMPRESS_URL}
 
     def tearDown(self):
-        settings.COMPRESS_ENABLED = self.old_enabled
-        settings.COMPRESS_PRECOMPILERS = self.old_precompilers
+        self.override_settings.__exit__(None, None, None)
 
     def test_compress_coffeescript_tag(self):
         template = """{% load compress %}{% compress js %}
