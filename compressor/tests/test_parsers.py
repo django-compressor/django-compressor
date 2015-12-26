@@ -21,12 +21,12 @@ from compressor.tests.test_base import CompressorTestCase
 
 class ParserTestCase(object):
     def setUp(self):
-        self.old_parser = settings.COMPRESS_PARSER
-        settings.COMPRESS_PARSER = self.parser_cls
+        self.override_settings = self.settings(COMPRESS_PARSER=self.parser_cls)
+        self.override_settings.__enter__()
         super(ParserTestCase, self).setUp()
 
     def tearDown(self):
-        settings.COMPRESS_PARSER = self.old_parser
+        self.override_settings.__exit__(None, None, None)
 
 
 @unittest.skipIf(lxml is None, 'lxml not found')

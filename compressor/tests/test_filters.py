@@ -191,8 +191,9 @@ class CssAbsolutizingTestCase(TestCase):
                 "p { filter: Alpha(src='%(url)simg/python.png%(query)s%(hash)s%(frag)s') }")
 
     def setUp(self):
-        self.old_hashing_method = settings.COMPRESS_CSS_HASHING_METHOD
-        settings.COMPRESS_CSS_HASHING_METHOD = self.hashing_method
+        self.override_settings = self.settings(COMPRESS_CSS_HASHING_METHOD=self.hashing_method)
+        self.override_settings.__enter__()
+
         self.css = """
         <link rel="stylesheet" href="/static/css/url/url1.css" type="text/css">
         <link rel="stylesheet" href="/static/css/url/2/url2.css" type="text/css">
@@ -200,7 +201,7 @@ class CssAbsolutizingTestCase(TestCase):
         self.css_node = CssCompressor(self.css)
 
     def tearDown(self):
-        settings.COMPRESS_CSS_HASHING_METHOD = self.old_hashing_method
+        self.override_settings.__exit__(None, None, None)
 
     @override_settings(COMPRESS_CSS_HASHING_METHOD=None)
     def test_css_no_hash(self):
