@@ -1,6 +1,32 @@
 Changelog
 =========
 
+v2.0 (01/07/2015)
+-----------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/1.6...2.0>`_
+
+- Add Django 1.9 compatibility
+
+- Remove official support for Django 1.4 and 1.7
+
+- Add official support for Python 3.5
+
+- Remove official support for Python 2.6
+
+- Remove support for coffin and jingo
+
+- Fix Jinja2 compatibility for Django 1.8+
+
+- Stop bundling vendored versions of rcssmin and rjsmin, make them proper dependencies
+
+- Remove support for CSSTidy
+
+- Remove support for beautifulsoup 3.
+
+- Replace cssmin by csscompressor (cssmin is still available for backwards-compatibility but points to rcssmin)
+
+
 v1.6 (11/19/2015)
 -----------------
 
