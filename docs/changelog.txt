@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.0 (01/07/2015)
+v2.0 (01/07/2016)
 -----------------
 
 `Full Changelog <https://github.com/django-compressor/django-compressor/compare/1.6...2.0>`_
