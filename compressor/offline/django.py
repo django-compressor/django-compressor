@@ -18,8 +18,9 @@ def handle_extendsnode(extendsnode, context):
     all blocks tags with the nodes of appropriate blocks.
     Also handles {{ block.super }} tags.
     """
-    context.render_context.setdefault(BLOCK_CONTEXT_KEY, BlockContext())
-    block_context = context.render_context.get(BLOCK_CONTEXT_KEY)
+    if BLOCK_CONTEXT_KEY not in context.render_context:
+        context.render_context[BLOCK_CONTEXT_KEY] = BlockContext()
+    block_context = context.render_context[BLOCK_CONTEXT_KEY]
     blocks = dict((n.name, n) for n in
                   extendsnode.nodelist.get_nodes_by_type(BlockNode))
     block_context.add_blocks(blocks)

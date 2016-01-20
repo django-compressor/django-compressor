@@ -7,8 +7,9 @@ import unittest
 from importlib import import_module
 
 from mock import patch
-from unittest import SkipTest
+from unittest import SkipTest, skipIf
 
+from django import VERSION as DJANGO_VERSION
 from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
@@ -632,6 +633,7 @@ class OfflineCompressComplexTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual(rendered_template, ''.join(result) + '\n')
 
 
+@skipIf(DJANGO_VERSION[0] <= 1 and DJANGO_VERSION[1] < 9, "Needs Django >= 1.9, recursive templates were fixed in Django 1.9")
 class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
     """
         Test that templates extending templates with the same name
