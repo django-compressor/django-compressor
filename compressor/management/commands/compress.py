@@ -16,7 +16,7 @@ from django.template.loader import get_template  # noqa Leave this in to preload
 from django.template.utils import InvalidTemplateEngineError
 from django.template import engines
 
-from compressor.cache import get_offline_hexdigest, write_offline_manifest
+from compressor.cache import get_offline_hexdigest, write_offline_manifest, get_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import (OfflineGenerationError, TemplateSyntaxError,
                                    TemplateDoesNotExist)
@@ -50,7 +50,7 @@ class Command(BaseCommand):
                 "can lead to infinite recursion if a link points to a parent "
                 "directory of itself.", dest='follow_links'),
         make_option('--engine', default="django", action="store",
-            help="Specifies the templating engine. jinja2 or django",
+            help="Specifies the templating engine. It may be a list of comma separated values to specify multiple engines.  jinja2 and django engines are supported by default.",
             dest="engine"),
     )
 
@@ -283,8 +283,14 @@ class Command(BaseCommand):
                 raise CommandError(
                     "Offline compression is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
-        self.compress(sys.stdout, **options)
-
-
+        
+        manifest = {}
+        engines = [e.strip() for e in options["engine"].split(",")]
+        for engine in engines:
+            opts = options.copy()
+            opts["engine"] = engine
+            self.compress(sys.stdout, **options)
+            manifest.update(get_offline_manifest())
+        write_offline_manifest(manifest)
 
 Command.requires_system_checks = False
