@@ -289,7 +289,7 @@ class Command(BaseCommand):
         for engine in engines:
             opts = options.copy()
             opts["engine"] = engine
-            self.compress(sys.stdout, **options)
+            self.compress(sys.stdout, **opts)
             manifest.update(get_offline_manifest())
         write_offline_manifest(manifest)
 
