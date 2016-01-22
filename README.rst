@@ -4,7 +4,7 @@ Django Compressor
 .. image:: http://codecov.io/github/django-compressor/django-compressor/coverage.svg?branch=develop
     :target: http://codecov.io/github/django-compressor/django-compressor?branch=develop
 
-.. image:: https://pypip.in/v/django_compressor/badge.svg
+.. image:: https://img.shields.io/pypi/v/django_compressor.svg
         :target: https://pypi.python.org/pypi/django_compressor
 
 .. image:: https://pypip.in/d/django_compressor/badge.svg
