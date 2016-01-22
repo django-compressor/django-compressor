@@ -73,13 +73,10 @@ class CompressorConf(AppConf):
 
     # Returns the Jinja2 environment to use in offline compression.
     def JINJA2_GET_ENVIRONMENT():
-        alias = 'Jinja2'
+        alias = 'jinja2'
         try:
-            from django.template.loader import _engine_list
-            engines = _engine_list(alias)
-            if engines:
-                engine = engines[0]
-                return engine.env
+            from django.template import engines
+            return engines[alias].env
         except InvalidTemplateEngineError:
             raise InvalidTemplateEngineError(
                 "Could not find config for '{}' "
