@@ -1,5 +1,6 @@
 from __future__ import with_statement, unicode_literals
 import copy
+import django
 import io
 import os
 import sys
@@ -7,11 +8,12 @@ import unittest
 from importlib import import_module
 
 from mock import patch
-from unittest import SkipTest
+from unittest import SkipTest, skipIf
 
 from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.utils import six
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
@@ -629,3 +631,27 @@ class OfflineCompressComplexTestCase(OfflineTestCaseMixin, TestCase):
         rendered_template = self._render_template(engine)
         result = (result[0], result[2])
         self.assertEqual(rendered_template, ''.join(result) + '\n')
+
+
+@skipIf(django.VERSION < (1, 9), "Needs Django >= 1.9, recursive templates were fixed in Django 1.9")
+class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
+    """
+        Test that templates extending templates with the same name
+        (e.g. admin/index.html) don't cause an infinite test_extends_recursion
+    """
+    templates_dir = 'test_extends_recursion'
+    engines = ('django',)
+
+    INSTALLED_APPS = [
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.staticfiles',
+        'compressor',
+    ]
+
+    @override_settings(INSTALLED_APPS=INSTALLED_APPS)
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(
+            log=self.log, verbosity=self.verbosity, engine=engine)
+        self.assertEqual(count, 1)
