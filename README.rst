@@ -7,9 +7,6 @@ Django Compressor
 .. image:: https://img.shields.io/pypi/v/django_compressor.svg
         :target: https://pypi.python.org/pypi/django_compressor
 
-.. image:: https://pypip.in/d/django_compressor/badge.svg
-        :target: https://pypi.python.org/pypi/django_compressor
-
 .. image:: https://secure.travis-ci.org/django-compressor/django-compressor.svg?branch=develop
     :alt: Build Status
     :target: http://travis-ci.org/django-compressor/django-compressor
