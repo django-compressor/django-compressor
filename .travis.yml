@@ -1,6 +1,7 @@
 language: python
 sudo: false
 install:
+  - if [[ $TOXENV == py32-1.8.X ]]; then pip install pip\<8.0.0 virtualenv\<14.0.0; fi
   - pip install tox
 script:
   - tox
