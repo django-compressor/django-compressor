@@ -49,9 +49,9 @@ class Command(BaseCommand):
                 "(which defaults to STATIC_ROOT). Be aware that using this "
                 "can lead to infinite recursion if a link points to a parent "
                 "directory of itself.", dest='follow_links'),
-        make_option('--engine', default="django", action="store",
-            help="Specifies the templating engine. It may be a list of comma separated values to specify multiple engines.  jinja2 and django engines are supported by default.",
-            dest="engine"),
+        make_option('--engine', action="append", dest="engines", default=["django"],
+            help="Specifies the templating engine. It may be a specified more than once for multiple engines.  jinja2 and django engines are supported by default.",
+            ),
     )
 
     def get_loaders(self):
@@ -285,7 +285,7 @@ class Command(BaseCommand):
                     "COMPRESS_OFFLINE or use the --force to override.")
 
         manifest = {}
-        engines = [e.strip() for e in options["engine"].split(",")]
+        engines = [e.strip() for e in options["engines"]]
         for engine in engines:
             opts = options.copy()
             opts["engine"] = engine
