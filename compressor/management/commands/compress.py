@@ -283,7 +283,7 @@ class Command(BaseCommand):
                 raise CommandError(
                     "Offline compression is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
-        
+
         manifest = {}
         engines = [e.strip() for e in options["engine"].split(",")]
         for engine in engines:
