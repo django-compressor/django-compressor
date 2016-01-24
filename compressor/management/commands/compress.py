@@ -283,11 +283,9 @@ class Command(BaseCommand):
                 raise CommandError(
                     "Offline compression is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
-        if not "engines" in options:
-            raise CommandError("engines not specified even though default set! options: %s" % options)
 
         manifest = {}
-        engines = [e.strip() for e in options["engines"]]
+        engines = [e.strip() for e in options.get("engines", ["django"])]
         for engine in engines:
             opts = options.copy()
             opts["engine"] = engine
