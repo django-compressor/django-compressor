@@ -6,7 +6,7 @@ from .test_offline import OfflineTestCaseMixin
 
 class TestCompressCommand(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_compress_command"
-    
+
     def test_multiple_engines(self):
         call_command('compress', force=True, engines=["django"])
         manifest_django = get_offline_manifest()
