@@ -8,13 +8,13 @@ class TestCompressCommand(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_compress_command"
     
     def test_multiple_engines(self):
-        call_command('compress', force=True, engine="django")
+        call_command('compress', force=True, engines=["django"])
         manifest_django = get_offline_manifest()
 
-        call_command('compress', force=True, engine="jinja2")
+        call_command('compress', force=True, engines=["jinja2"])
         manifest_jinja2 = get_offline_manifest()
 
-        call_command('compress', force=True, engine="django, jinja2")
+        call_command('compress', force=True, engines=["django", "jinja2"])
         manifest_both = get_offline_manifest()
 
         manifest_both_expected = {}
