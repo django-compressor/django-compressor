@@ -18,6 +18,7 @@ class TestCompressCommand(TestCase):
         manifest_both_expected.update(manifest_django)
         manifest_both_expected.update(manifest_jinja2)
 
+        self.assertNotEqual(manifest_django, manifest_jinja2)
         self.assertTrue(manifest_django)
         self.assertTrue(manifest_jinja2)
         self.assertEqual(manifest_both, manifest_both_expected)
