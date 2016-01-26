@@ -660,6 +660,7 @@ class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
 
 class TestCompressCommand(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_compress_command"
+    engines = []
 
     def test_multiple_engines(self):
         call_command('compress', force=True, engines=["django"])
