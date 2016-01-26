@@ -661,7 +661,7 @@ class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
 @skipIf(not _TEST_JINJA2, "Test only run if we are testing Jinja2")
 class TestCompressCommand(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_compress_command"
-    
+
     def _test_offline(self, engine):
         raise SkipTest("Not utilized for this test case")
 
