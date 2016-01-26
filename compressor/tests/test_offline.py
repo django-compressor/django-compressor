@@ -666,13 +666,13 @@ class TestCompressCommand(OfflineTestCaseMixin, TestCase):
         raise SkipTest("Not utilized for this test case")
 
     def test_multiple_engines(self):
-        call_command('compress', force=True, engines=["django"])
+        call_command('compress', force=True, engines=["django"], verbosity=0)
         manifest_django = get_offline_manifest()
 
-        call_command('compress', force=True, engines=["jinja2"])
+        call_command('compress', force=True, engines=["jinja2"], verbosity=0)
         manifest_jinja2 = get_offline_manifest()
 
-        call_command('compress', force=True, engines=["django", "jinja2"])
+        call_command('compress', force=True, engines=["django", "jinja2"], verbosity=0)
         manifest_both = get_offline_manifest()
 
         manifest_both_expected = {}
