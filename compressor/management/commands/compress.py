@@ -284,12 +284,14 @@ class Command(BaseCommand):
                     "Offline compression is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
 
+        options.setdefault("log", sys.stdout)
+
         manifest = {}
         engines = [e.strip() for e in options.get("engines", ["django"])]
         for engine in engines:
             opts = options.copy()
             opts["engine"] = engine
-            self.compress(sys.stdout, **opts)
+            self.compress(**opts)
             manifest.update(get_offline_manifest())
         write_offline_manifest(manifest)
 
