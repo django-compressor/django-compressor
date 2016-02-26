@@ -287,7 +287,7 @@ class Command(BaseCommand):
         options.setdefault("log", sys.stdout)
 
         manifest = {}
-        engines = [e.strip() for e in options["engines"]] or ["django"]
+        engines = [e.strip() for e in options.get("engines", [])] or ["django"]
         for engine in engines:
             opts = options.copy()
             opts["engine"] = engine
