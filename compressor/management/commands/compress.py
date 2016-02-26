@@ -49,8 +49,8 @@ class Command(BaseCommand):
                 "(which defaults to STATIC_ROOT). Be aware that using this "
                 "can lead to infinite recursion if a link points to a parent "
                 "directory of itself.", dest='follow_links'),
-        make_option('--engine', action="append", dest="engines", default=["django"],
-            help="Specifies the templating engine. It may be a specified more than once for multiple engines.  jinja2 and django engines are supported by default.",
+        make_option('--engine', action="append", dest="engines", default=[],
+            help="Specifies the templating engine. It may be a specified more than once for multiple engines. If not specified, django engine is used. jinja2 and django engines are supported by default.",
             ),
     )
 
@@ -287,7 +287,7 @@ class Command(BaseCommand):
         options.setdefault("log", sys.stdout)
 
         manifest = {}
-        engines = [e.strip() for e in options.get("engines", ["django"])]
+        engines = [e.strip() for e in options["engines"]] or ["django"]
         for engine in engines:
             opts = options.copy()
             opts["engine"] = engine
