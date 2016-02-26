@@ -681,11 +681,6 @@ class TestCompressCommand(OfflineTestCaseMixin, TestCase):
         call_command('compress', engines=["django", "jinja2"], **opts)
         manifest_both = get_offline_manifest()
 
-        manifest_both_expected = {}
-        manifest_both_expected.update(manifest_django)
-        manifest_both_expected.update(manifest_jinja2)
-
-        self.assertNotEqual(manifest_django, manifest_jinja2)
-        self.assertTrue(manifest_django)
-        self.assertTrue(manifest_jinja2)
-        self.assertEqual(manifest_both, manifest_both_expected)
+        self.assertEqual(manifest_django, {'8464063aa0729700fca0452e009582af': '<script type="text/javascript" src="/static/CACHE/js/662b9ce354e4.js"></script>'})
+        self.assertEqual(manifest_jinja2, {'0ec631f01496b28bbecad129c5532db4': '<script type="text/javascript" src="/static/CACHE/js/3cd63e8c4360.js"></script>'})
+        self.assertEqual(manifest_both, {'8464063aa0729700fca0452e009582af': '<script type="text/javascript" src="/static/CACHE/js/662b9ce354e4.js"></script>', '0ec631f01496b28bbecad129c5532db4': '<script type="text/javascript" src="/static/CACHE/js/3cd63e8c4360.js"></script>'})
