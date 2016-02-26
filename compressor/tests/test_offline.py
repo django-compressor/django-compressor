@@ -665,6 +665,12 @@ class TestCompressCommand(OfflineTestCaseMixin, TestCase):
     def _test_offline(self, engine):
         raise SkipTest("Not utilized for this test case")
 
+    def _build_expected_manifest(self, expected):
+        return dict([
+            (k, ('<script type="text/javascript" src="/static/CACHE/js/'
+            '%s.js"></script>' % (v, ))) for k, v in expected.items()
+        ])
+
     def test_multiple_engines(self):
         opts = {
             "force": True,
@@ -674,13 +680,19 @@ class TestCompressCommand(OfflineTestCaseMixin, TestCase):
 
         call_command('compress', engines=["django"], **opts)
         manifest_django = get_offline_manifest()
+        manifest_django_expected = self._build_expected_manifest(
+            {'8464063aa0729700fca0452e009582af':'662b9ce354e4'})
+        self.assertEqual(manifest_django, manifest_django_expected)
 
         call_command('compress', engines=["jinja2"], **opts)
         manifest_jinja2 = get_offline_manifest()
+        manifest_jinja2_expected = self._build_expected_manifest(
+            {'0ec631f01496b28bbecad129c5532db4':'3cd63e8c4360'})
+        self.assertEqual(manifest_jinja2, manifest_jinja2_expected)
 
         call_command('compress', engines=["django", "jinja2"], **opts)
         manifest_both = get_offline_manifest()
-
-        self.assertEqual(manifest_django, {'8464063aa0729700fca0452e009582af': '<script type="text/javascript" src="/static/CACHE/js/662b9ce354e4.js"></script>'})
-        self.assertEqual(manifest_jinja2, {'0ec631f01496b28bbecad129c5532db4': '<script type="text/javascript" src="/static/CACHE/js/3cd63e8c4360.js"></script>'})
-        self.assertEqual(manifest_both, {'8464063aa0729700fca0452e009582af': '<script type="text/javascript" src="/static/CACHE/js/662b9ce354e4.js"></script>', '0ec631f01496b28bbecad129c5532db4': '<script type="text/javascript" src="/static/CACHE/js/3cd63e8c4360.js"></script>'})
+        manifest_both_expected = self._build_expected_manifest(
+            {'8464063aa0729700fca0452e009582af':'662b9ce354e4',
+             '0ec631f01496b28bbecad129c5532db4':'3cd63e8c4360'})
+        self.assertEqual(manifest_both, manifest_both_expected)
