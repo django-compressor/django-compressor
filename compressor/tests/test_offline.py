@@ -681,18 +681,18 @@ class TestCompressCommand(OfflineTestCaseMixin, TestCase):
         call_command('compress', engines=["django"], **opts)
         manifest_django = get_offline_manifest()
         manifest_django_expected = self._build_expected_manifest(
-            {'8464063aa0729700fca0452e009582af':'662b9ce354e4'})
+            {'8464063aa0729700fca0452e009582af': '662b9ce354e4'})
         self.assertEqual(manifest_django, manifest_django_expected)
 
         call_command('compress', engines=["jinja2"], **opts)
         manifest_jinja2 = get_offline_manifest()
         manifest_jinja2_expected = self._build_expected_manifest(
-            {'0ec631f01496b28bbecad129c5532db4':'3cd63e8c4360'})
+            {'0ec631f01496b28bbecad129c5532db4': '3cd63e8c4360'})
         self.assertEqual(manifest_jinja2, manifest_jinja2_expected)
 
         call_command('compress', engines=["django", "jinja2"], **opts)
         manifest_both = get_offline_manifest()
         manifest_both_expected = self._build_expected_manifest(
-            {'8464063aa0729700fca0452e009582af':'662b9ce354e4',
-             '0ec631f01496b28bbecad129c5532db4':'3cd63e8c4360'})
+            {'8464063aa0729700fca0452e009582af': '662b9ce354e4',
+             '0ec631f01496b28bbecad129c5532db4': '3cd63e8c4360'})
         self.assertEqual(manifest_both, manifest_both_expected)
