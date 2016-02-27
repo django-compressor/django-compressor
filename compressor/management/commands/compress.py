@@ -4,7 +4,6 @@ import sys
 
 from collections import OrderedDict
 from fnmatch import fnmatch
-from optparse import make_option
 from importlib import import_module
 
 import django
@@ -13,14 +12,12 @@ import django.template
 from django.template import Context
 from django.utils import six
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
-from django.template.utils import InvalidTemplateEngineError
 from django.template import engines
 
 from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import (OfflineGenerationError, TemplateSyntaxError,
                                    TemplateDoesNotExist)
-from compressor.templatetags.compress import CompressorNode
 from compressor.utils import get_mod_func
 
 if six.PY3:
@@ -36,23 +33,23 @@ else:
 
 class Command(BaseCommand):
     help = "Compress content outside of the request/response cycle"
-    option_list = BaseCommand.option_list + (
-        make_option('--extension', '-e', action='append', dest='extensions',
-            help='The file extension(s) to examine (default: ".html", '
-                'separate multiple extensions with commas, or use -e '
-                'multiple times)'),
-        make_option('-f', '--force', default=False, action='store_true',
-            help="Force the generation of compressed content even if the "
-                "COMPRESS_ENABLED setting is not True.", dest='force'),
-        make_option('--follow-links', default=False, action='store_true',
-            help="Follow symlinks when traversing the COMPRESS_ROOT "
-                "(which defaults to STATIC_ROOT). Be aware that using this "
-                "can lead to infinite recursion if a link points to a parent "
-                "directory of itself.", dest='follow_links'),
-        make_option('--engine', default="django", action="store",
-            help="Specifies the templating engine. jinja2 or django",
-            dest="engine"),
-    )
+
+    def add_arguments(self, parser):
+        parser.add_argument('--extension', '-e', action='append', dest='extensions',
+                            help='The file extension(s) to examine (default: ".html", '
+                                 'separate multiple extensions with commas, or use -e '
+                                 'multiple times)')
+        parser.add_argument('-f', '--force', default=False, action='store_true',
+                            help="Force the generation of compressed content even if the "
+                                 "COMPRESS_ENABLED setting is not True.", dest='force')
+        parser.add_argument('--follow-links', default=False, action='store_true',
+                            help="Follow symlinks when traversing the COMPRESS_ROOT "
+                                 "(which defaults to STATIC_ROOT). Be aware that using this "
+                                 "can lead to infinite recursion if a link points to a parent "
+                                 "directory of itself.", dest='follow_links')
+        parser.add_argument('--engine', default="django", action="store",
+                            help="Specifies the templating engine. jinja2 or django",
+                            dest="engine")
 
     def get_loaders(self):
         template_source_loaders = []
@@ -107,10 +104,11 @@ class Command(BaseCommand):
         verbosity = int(options.get("verbosity", 0))
         if not log:
             log = StringIO()
-        if not settings.TEMPLATE_LOADERS:
+        if not self.get_loaders():
             raise OfflineGenerationError("No template loaders defined. You "
                                          "must set TEMPLATE_LOADERS in your "
-                                         "settings.")
+                                         "settings or set 'loaders' in your "
+                                         "TEMPLATES dictionary.")
         templates = set()
         if engine == 'django':
             paths = set()
