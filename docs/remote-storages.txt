@@ -66,8 +66,8 @@ apps can be integrated.
                 "compressor.storage.CompressorFileStorage")()
 
         def save(self, name, content):
-            name = super(CachedS3BotoStorage, self).save(name, content)
             self.local_storage._save(name, content)
+            super(CachedS3BotoStorage, self).save(name, self.local_storage._open(name))
             return name
 
 #. Set your :attr:`~django.conf.settings.COMPRESS_STORAGE` and STATICFILES_STORAGE_
