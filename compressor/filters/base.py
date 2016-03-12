@@ -221,7 +221,7 @@ class CachedCompilerFilter(CompilerFilter):
             key = self.get_cache_key()
             data = cache.get(key)
             if data is not None:
-                return data
+                return smart_text(data)
             filtered = super(CachedCompilerFilter, self).input(**kwargs)
             cache.set(key, filtered, settings.COMPRESS_REBUILD_TIMEOUT)
             return filtered
