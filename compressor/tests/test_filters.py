@@ -41,6 +41,15 @@ class PrecompilerTestCase(TestCase):
         with io.open(self.filename, encoding=settings.FILE_CHARSET) as file:
             self.content = file.read()
 
+    def test_precompiler_dict_options(self):
+        command = "%s %s {option}" % (sys.executable, self.test_precompiler)
+        option = ("option", "option",)
+        CompilerFilter.options = dict([option])
+        compiler = CompilerFilter(
+            content=self.content, filename=self.filename,
+            charset=settings.FILE_CHARSET, command=command)
+        self.assertIn(option, compiler.options)
+
     def test_precompiler_infile_outfile(self):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(
