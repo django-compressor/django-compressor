@@ -126,7 +126,7 @@ class CompilerFilter(FilterBase):
         if isinstance(self.options, dict):
             # turn dict into a tuple
             new_options = ()
-            for item in kwargs.items():
+            for item in self.options.items():
                 new_options += (item,)
             self.options = new_options
 
