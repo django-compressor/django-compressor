@@ -13,3 +13,4 @@ docs/_build/
 .sass-cache
 .coverage
 .tox
+.eggs
