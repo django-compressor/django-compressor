@@ -2,7 +2,7 @@
 import os
 import sys
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from fnmatch import fnmatch
 from importlib import import_module
 
@@ -154,6 +154,18 @@ class Command(BaseCommand):
         if verbosity > 1:
             log.write("Found templates:\n\t" + "\n\t".join(templates) + "\n")
 
+        contexts = settings.COMPRESS_OFFLINE_CONTEXT
+        if isinstance(contexts, six.string_types):
+            try:
+                module, function = get_mod_func(contexts)
+                contexts = getattr(import_module(module), function)()
+            except (AttributeError, ImportError, TypeError) as e:
+                raise ImportError("Couldn't import offline context function %s: %s" %
+                                  (settings.COMPRESS_OFFLINE_CONTEXT, e))
+        elif not isinstance(contexts, (list, tuple)):
+            contexts = [contexts]
+        contexts = list(contexts) # evaluate generator
+
         parser = self.__get_parser(engine)
         compressor_nodes = OrderedDict()
         for template_name in templates:
@@ -176,16 +188,22 @@ class Command(BaseCommand):
                     log.write("UnicodeDecodeError while trying to read "
                               "template %s\n" % template_name)
                 continue
-            try:
-                nodes = list(parser.walk_nodes(template))
-            except (TemplateDoesNotExist, TemplateSyntaxError) as e:
-                # Could be an error in some base template
-                if verbosity > 0:
-                    log.write("Error parsing template %s: %s\n" % (template_name, e))
-                continue
-            if nodes:
-                template.template_name = template_name
-                compressor_nodes.setdefault(template, []).extend(nodes)
+
+            for context_dict in contexts:
+                context = parser.get_init_context(context_dict)
+                context = Context(context)
+                try:
+                    nodes = list(parser.walk_nodes(template, context=context))
+                except (TemplateDoesNotExist, TemplateSyntaxError) as e:
+                    # Could be an error in some base template
+                    if verbosity > 0:
+                        log.write("Error parsing template %s: %s\n" % (template_name, e))
+                    continue
+                if nodes:
+                    template.template_name = template_name
+                    template_nodes = compressor_nodes.setdefault(template, OrderedDict())
+                    for node in nodes:
+                        template_nodes.setdefault(node, []).append(context)
 
         if not compressor_nodes:
             raise OfflineGenerationError(
@@ -198,36 +216,23 @@ class Command(BaseCommand):
                       "\n\t".join((t.template_name
                                    for t in compressor_nodes.keys())) + "\n")
 
-        contexts = settings.COMPRESS_OFFLINE_CONTEXT
-        if isinstance(contexts, six.string_types):
-            try:
-                module, function = get_mod_func(contexts)
-                contexts = getattr(import_module(module), function)()
-            except (AttributeError, ImportError, TypeError) as e:
-                raise ImportError("Couldn't import offline context function %s: %s" %
-                                  (settings.COMPRESS_OFFLINE_CONTEXT, e))
-        elif not isinstance(contexts, (list, tuple)):
-            contexts = [contexts]
-
         log.write("Compressing... ")
-        block_count = context_count = 0
+        block_count = 0
+        compressed_contexts = []
         results = []
         offline_manifest = OrderedDict()
+        for template, nodes in compressor_nodes.items():
+            template._log = log
+            template._log_verbosity = verbosity
 
-        for context_dict in contexts:
-            context_count += 1
-            init_context = parser.get_init_context(context_dict)
-
-            for template, nodes in compressor_nodes.items():
-                context = Context(init_context)
-                template._log = log
-                template._log_verbosity = verbosity
-
-                if not parser.process_template(template, context):
-                    continue
-
-                for node in nodes:
+            for node, contexts in nodes.items():
+                for context in contexts:
+                    if context not in compressed_contexts:
+                        compressed_contexts.append(context)
                     context.push()
+                    if not parser.process_template(template, context):
+                        continue
+
                     parser.process_node(template, context, node)
                     rendered = parser.render_nodelist(template, context, node)
                     key = get_offline_hexdigest(rendered)
@@ -247,6 +252,7 @@ class Command(BaseCommand):
 
         write_offline_manifest(offline_manifest)
 
+        context_count = len(compressed_contexts)
         log.write("done\nCompressed %d block(s) from %d template(s) for %d context(s).\n" %
                   (block_count, len(compressor_nodes), context_count))
         return block_count, results

@@ -120,10 +120,14 @@ class OfflineTestCaseMixin(object):
             default_storage.delete(manifest_path)
 
     def _prepare_contexts(self, engine):
+        contexts = settings.COMPRESS_OFFLINE_CONTEXT
+        if not isinstance(contexts, (list, tuple)):
+            contexts = [contexts]
+
         if engine == 'django':
-            return [Context(settings.COMPRESS_OFFLINE_CONTEXT)]
+            return [Context(c) for c in contexts]
         if engine == 'jinja2':
-            return [settings.COMPRESS_OFFLINE_CONTEXT]
+            return contexts
         return None
 
     def _render_template(self, engine):
@@ -429,6 +433,40 @@ class OfflineCompressTestCaseWithContextGeneratorSuper(
         'COMPRESS_OFFLINE_CONTEXT': 'compressor.tests.test_offline.'
                                     'offline_context_generator'
     }
+    # Block.super not supported for Jinja2 yet.
+    engines = ('django',)
+
+
+class OfflineCompressTestCaseWithContextVariableInheritance(
+        OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_with_context_variable_inheritance'
+    additional_test_settings = {
+        'COMPRESS_OFFLINE_CONTEXT': {
+            'parent_template': 'base.html',
+        }
+    }
+
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(
+            log=self.log, verbosity=self.verbosity, engine=engine)
+        self.assertEqual(1, count)
+        self.assertEqual(['<script type="text/javascript" src="/static/CACHE/js/'
+                          'ea3267f3e9dd.js"></script>'], result)
+        rendered_template = self._render_template(engine)
+        self.assertEqual(rendered_template, '\n' + result[0] + '\n')
+
+
+class OfflineCompressTestCaseWithContextVariableInheritanceSuper(
+        OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_with_context_variable_inheritance_super'
+    additional_test_settings = {
+        'COMPRESS_OFFLINE_CONTEXT': [{
+            'parent_template': 'base1.html',
+        }, {
+            'parent_template': 'base2.html',
+        }]
+    }
+    expected_hash = ['7d1416cab12e', 'a31eb23d0157']
     # Block.super not supported for Jinja2 yet.
     engines = ('django',)
 

@@ -112,7 +112,7 @@ class Jinja2Parser(object):
 
         return body
 
-    def walk_nodes(self, node, block_name=None):
+    def walk_nodes(self, node, block_name=None, context=None):
         for node in self.get_nodelist(node):
             if (isinstance(node, CallBlock) and
               isinstance(node.call, Call) and
