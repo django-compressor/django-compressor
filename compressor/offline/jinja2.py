@@ -74,9 +74,6 @@ class Jinja2Parser(object):
 
         return template
 
-    def process_template(self, template, context):
-        return True
-
     def get_init_context(self, offline_context):
         # Don't need to add filters and tests to the context, as Jinja2 will
         # automatically look for them in self.env.filters and self.env.tests.
@@ -87,9 +84,6 @@ class Jinja2Parser(object):
         context.update(offline_context)
 
         return context
-
-    def process_node(self, template, context, node):
-        pass
 
     def _render_nodes(self, template, context, nodes):
         compiled_node = self.env.compile(jinja2.nodes.Template(nodes))

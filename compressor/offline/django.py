@@ -100,14 +100,8 @@ class DjangoParser(object):
         except template.TemplateDoesNotExist as e:
             raise TemplateDoesNotExist(str(e))
 
-    def process_template(self, template, context):
-        return True
-
     def get_init_context(self, offline_context):
         return offline_context
-
-    def process_node(self, template, context, node):
-        pass
 
     def render_nodelist(self, template, context, node):
         context.template = template

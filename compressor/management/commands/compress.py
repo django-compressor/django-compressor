@@ -5,6 +5,8 @@ import sys
 from collections import OrderedDict
 from fnmatch import fnmatch
 from importlib import import_module
+import multiprocessing
+import traceback
 
 import django
 from django.core.management.base import BaseCommand, CommandError
@@ -47,6 +49,10 @@ class Command(BaseCommand):
                                  "(which defaults to STATIC_ROOT). Be aware that using this "
                                  "can lead to infinite recursion if a link points to a parent "
                                  "directory of itself.", dest='follow_links')
+        parser.add_argument('--processes', '-p', default=1, type='int',
+                            dest='processes',
+                            help='Number of parallel processes to use to compress blocks '
+                            '(default 1).'),
         parser.add_argument('--engine', default="django", action="store",
                             help="Specifies the templating engine. jinja2 or django",
                             dest="engine")
@@ -208,47 +214,48 @@ class Command(BaseCommand):
         elif not isinstance(contexts, (list, tuple)):
             contexts = [contexts]
 
-        log.write("Compressing... ")
-        block_count = context_count = 0
-        results = []
-        offline_manifest = OrderedDict()
 
+        processes = options.get('processes', 1)
+        if processes > 1:
+            manager = multiprocessing.Manager()
+            offline_manifest_lock = manager.Lock()
+            offline_manifest = manager.dict()
+        else:
+            offline_manifest_lock = _DummyLock()
+            offline_manifest = {}
+        context_count = 0
+
+        global tasks
+        tasks = []
+        results = []
+        log.write("Compressing... ")
         for context_dict in contexts:
             context_count += 1
-            init_context = parser.get_init_context(context_dict)
-
             for template, nodes in compressor_nodes.items():
-                context = Context(init_context)
                 template._log = log
                 template._log_verbosity = verbosity
+                template_tasks = ((template, parser, node, context_dict,
+                        offline_manifest, offline_manifest_lock)
+                            for node in nodes)
+                if processes > 1:
+                    tasks += template_tasks
+                else:
+                    results += (_do_render(*task) for task in template_tasks)
 
-                if not parser.process_template(template, context):
-                    continue
+        if tasks:
+            pool = multiprocessing.Pool(processes=processes)
+            try:
+                results = pool.map(_do_render_task, range(len(tasks)))
+            finally:
+                pool.close()
+                pool.join()
+        results = [r for r in results if r]
 
-                for node in nodes:
-                    context.push()
-                    parser.process_node(template, context, node)
-                    rendered = parser.render_nodelist(template, context, node)
-                    key = get_offline_hexdigest(rendered)
-
-                    if key in offline_manifest:
-                        continue
-
-                    try:
-                        result = parser.render_node(template, context, node)
-                    except Exception as e:
-                        raise CommandError("An error occurred during rendering %s: "
-                                           "%s" % (template.template_name, e))
-                    offline_manifest[key] = result
-                    context.pop()
-                    results.append(result)
-                    block_count += 1
-
-        write_offline_manifest(offline_manifest)
+        write_offline_manifest(offline_manifest.copy())
 
         log.write("done\nCompressed %d block(s) from %d template(s) for %d context(s).\n" %
-                  (block_count, len(compressor_nodes), context_count))
-        return block_count, results
+                  (len(results), len(compressor_nodes), context_count))
+        return len(results), results
 
     def handle_extensions(self, extensions=('html',)):
         """
@@ -283,6 +290,46 @@ class Command(BaseCommand):
                     "COMPRESS_OFFLINE or use the --force to override.")
         self.compress(sys.stdout, **options)
 
+
+def _do_render_task(index):
+    global tasks
+    task = tasks[index]
+    try:
+        return _do_render(*task)
+    except Exception as e:
+        log = task[0]._log
+        log.write(traceback.format_exc())
+        raise
+
+
+def _do_render(template, parser, node, context_dict, manifest, manifest_lock):
+    init_context = parser.get_init_context(context_dict)
+    context = Context(dict_=init_context)
+
+    rendered = parser.render_nodelist(template, context, node)
+    key = get_offline_hexdigest(rendered)
+
+    if key in manifest:
+        return None
+
+    try:
+        result = parser.render_node(template, context, node)
+    except Exception as e:
+        raise CommandError("An error occurred during rendering %s: "
+                        "%s" % (template.template_name, e))
+    with manifest_lock:
+        if key in manifest:
+            return None
+        manifest[key] = result
+    return result
+
+
+class _DummyLock(object):
+    def __enter__(_ignored):
+        return None
+
+    def __exit__(*_ignored):
+        return False
 
 
 Command.requires_system_checks = False
