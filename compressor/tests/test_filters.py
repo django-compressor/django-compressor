@@ -3,8 +3,10 @@ from collections import defaultdict
 import io
 import os
 import sys
+import mock
 
 from django.utils import six
+from django.utils.encoding import smart_text
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -102,6 +104,15 @@ class PrecompilerTestCase(TestCase):
         compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
         self.assertEqual("body { color:#990; }", compiler.input())
         self.assertIsNotNone(compiler.infile)  # Not cached
+
+    @mock.patch('django.core.cache.backends.locmem.LocMemCache.get')
+    def test_precompiler_cache_issue750(self, mock_cache):
+        # emulate memcached and return string
+        mock_cache.side_effect = (lambda key: str("body { color:#990; }"))
+        command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
+        compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
+        self.assertEqual("body { color:#990; }", compiler.input())
+        self.assertEqual(type(compiler.input()), type(smart_text("body { color:#990; }")))
 
     def test_precompiler_not_cacheable(self):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
