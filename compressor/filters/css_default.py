@@ -84,19 +84,23 @@ class CssAbsoluteFilter(FilterBase):
 
     def _converter(self, matchobj, group, template):
         url = matchobj.group(group)
-        url = url.strip(' \'"')
+
+        url = url.strip()
+        wrap = '"' if url[0] == '"' else "'"
+        url = url.strip('\'"')
+
         if url.startswith('#'):
-            return "url('%s')" % url
+            return template % (wrap, url, wrap)
         elif url.startswith(SCHEMES):
-            return "url('%s')" % self.add_suffix(url)
+            return template % (wrap, self.add_suffix(url), wrap)
         full_url = posixpath.normpath('/'.join([str(self.directory_name),
                                                 url]))
         if self.has_scheme:
             full_url = "%s%s" % (self.protocol, full_url)
-        return template % self.add_suffix(full_url)
+        return template % (wrap, self.add_suffix(full_url), wrap)
 
     def url_converter(self, matchobj):
-        return self._converter(matchobj, 1, "url('%s')")
+        return self._converter(matchobj, 1, "url(%s%s%s)")
 
     def src_converter(self, matchobj):
-        return self._converter(matchobj, 2, "src='%s'")
+        return self._converter(matchobj, 2, "src=%s%s%s")
