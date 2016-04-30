@@ -249,7 +249,7 @@ class Command(BaseCommand):
             finally:
                 pool.close()
                 pool.join()
-        results = [r for r in results if r]
+        results = [r for r in results if r is not None]
 
         write_offline_manifest(offline_manifest.copy())
 
