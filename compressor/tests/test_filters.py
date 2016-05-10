@@ -287,6 +287,16 @@ class CssAbsolutizingTestCase(TestCase):
             filter = CssAbsoluteFilter(content)
             self.assertEqual(content, filter.input(filename=filename, basename='css/url/test.css'))
 
+    def test_css_absolute_filter_only_url_fragment_wrap_double_quotes(self):
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        content = 'p { background: url("#foo") }'
+        filter = CssAbsoluteFilter(content)
+        self.assertEqual(content, filter.input(filename=filename, basename='css/url/test.css'))
+
+        with self.settings(COMPRESS_URL='http://media.example.com/'):
+            filter = CssAbsoluteFilter(content)
+            self.assertEqual(content, filter.input(filename=filename, basename='css/url/test.css'))
+
     def test_css_absolute_filter_querystring(self):
         filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
         imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/python.png')
