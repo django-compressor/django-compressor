@@ -116,16 +116,12 @@ class DjangoParser(object):
     def render_node(self, template, context, node):
         return node.render(context, forced=True)
 
-    def get_nodelist(self, node, original):
+    def get_nodelist(self, node, original, context):
         if isinstance(node, ExtendsNode):
             try:
-                context = Context()
+                if context is None:
+                    context = Context()
                 context.template = original
-                # TODO: We are passing an empty context when finding base
-                # templates. This does not work when extending using
-                # variables ({% extends template_var %}).
-                # A refactor might be needed to support that use-case with
-                # multiple offline contexts.
                 return handle_extendsnode(node, context)
             except template.TemplateSyntaxError as e:
                 raise TemplateSyntaxError(str(e))
@@ -141,13 +137,13 @@ class DjangoParser(object):
             nodelist = getattr(node, 'nodelist', [])
         return nodelist
 
-    def walk_nodes(self, node, original=None):
+    def walk_nodes(self, node, original=None, context=None):
         if original is None:
             original = node
-        for node in self.get_nodelist(node, original):
+        for node in self.get_nodelist(node, original, context):
             if isinstance(node, CompressorNode) \
                     and node.is_offline_compression_enabled(forced=True):
                 yield node
             else:
-                for node in self.walk_nodes(node, original):
+                for node in self.walk_nodes(node, original, context):
                     yield node

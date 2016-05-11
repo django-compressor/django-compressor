@@ -1,0 +1,8 @@
+{% load compress %}
+{% spaceless %}
+    {% compress js %}
+    <script type="text/javascript">
+        alert("test using template extension passed in variable parent=base.html");
+    </script>
+    {% endcompress %}
+{% endspaceless %}
