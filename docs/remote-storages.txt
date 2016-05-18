@@ -17,7 +17,7 @@ django-storages
 ^^^^^^^^^^^^^^^
 
 So assuming your CDN is `Amazon S3`_, you can use the boto_ storage backend
-from the 3rd party app `django-storages-redux`_. Some required settings are::
+from the 3rd party app `django-storages`_. Some required settings are::
 
     AWS_ACCESS_KEY_ID = 'XXXXXXXXXXXXXXXXXXXXX'
     AWS_SECRET_ACCESS_KEY = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
@@ -51,7 +51,7 @@ apps can be integrated.
 
 #. You need to create a subclass of the remote storage backend you want
    to use; below is an example of the boto S3 storage backend from
-   django-storages-redux_::
+   django-storages_::
 
     from django.core.files.storage import get_storage_class
     from storages.backends.s3boto import S3BotoStorage
@@ -82,7 +82,7 @@ apps can be integrated.
 .. _CDN: http://en.wikipedia.org/wiki/Content_delivery_network
 .. _Amazon S3: https://s3.amazonaws.com/
 .. _boto: http://boto.cloudhackers.com/
-.. _django-storages-redux: http://github.com/jschneier/django-storages
+.. _django-storages: http://github.com/jschneier/django-storages
 .. _staticfiles: http://docs.djangoproject.com/en/dev/howto/static-files/
 .. _STATIC_ROOT: http://docs.djangoproject.com/en/dev/ref/settings/#static-root
 .. _STATIC_URL: http://docs.djangoproject.com/en/dev/ref/settings/#static-url
