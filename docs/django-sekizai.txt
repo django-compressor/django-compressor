@@ -21,4 +21,4 @@ Usage
 
 
 .. _django-sekizai: https://github.com/ojii/django-sekizai
-.. _django-sekizai docs: http://django-sekizai.readthedocs.org/en/latest/
+.. _django-sekizai docs: https://django-sekizai.readthedocs.io/en/latest/
