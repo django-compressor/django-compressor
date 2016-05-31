@@ -326,7 +326,7 @@ v1.0
 - Added :func:`post_compress<compressor.signals.post_compress>` signal.
 
 .. _`Slim It`: http://slimit.org/
-.. _`django-appconf`: http://django-appconf.rtfd.org/
+.. _`django-appconf`: https://django-appconf.readthedocs.io/
 .. _`versiontools`: http://pypi.python.org/pypi/versiontools
 
 v0.9.2
@@ -465,7 +465,7 @@ Major improvements and a lot of bugfixes, some of which are:
 - Added ``mtime_cache`` management command to add and/or remove all mtimes
   from the cache.
 
-- Moved docs to Read The Docs: http://django-compressor.readthedocs.org/en/latest/
+- Moved docs to Read The Docs: https://django-compressor.readthedocs.io/en/latest/
 
 - Added optional ``compressor.storage.GzipCompressorFileStorage`` storage
   backend that gzips of the saved files automatically for easier deployment.

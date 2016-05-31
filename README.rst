@@ -80,5 +80,5 @@ The in-development version of Django Compressor can be installed with
 .. _JSMin: http://www.crockford.com/javascript/jsmin.html
 .. _csscompressor: https://github.com/sprymix/csscompressor
 .. _data URIs: http://en.wikipedia.org/wiki/Data_URI_scheme
-.. _django-compressor.readthedocs.org: http://django-compressor.readthedocs.org/en/latest/
+.. _django-compressor.readthedocs.org: https://django-compressor.readthedocs.io/en/latest/
 .. _github.com/django-compressor/django-compressor: https://github.com/django-compressor/django-compressor
