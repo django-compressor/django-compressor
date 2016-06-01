@@ -1,6 +1,6 @@
 .. _behind_the_scenes:
 
-Behind the scenes
+Behind the Scenes
 =================
 
 This document assumes you already have an up and running instance of
@@ -8,25 +8,25 @@ Django Compressor, and that you understand how to use it in your templates.
 The goal is to explain what the main template tag, {% compress %}, does
 behind the scenes, to help you debug performance problems for instance.
 
-Offline cache
+Offline compression
 -------------
 
-If offline cache is activated, the first thing {% compress %} tries to do is
+If offline compression is activated, the {% compress %} tag will try to
 retrieve the compressed version for its nodelist from the offline manifest
 cache. It doesn't parse, doesn't check the modified times of the files, doesn't
 even know which files are concerned actually, since it doesn't look inside the
 nodelist of the template block enclosed by the ``compress`` template tag.
 The offline cache manifest is just a json file, stored on disk inside the
 directory that holds the compressed files. The format of the manifest is simply
-a key <=> value dictionary, with the hash of the nodelist being the key,
+a key-value dictionary, with the hash of the nodelist being the key,
 and the HTML containing the element code for the combined file or piece of code
-being the value. Generating the offline manifest, using the ``compress``
-management command, also generates the combined files referenced in the manifest.
+being the value. The ``compress`` management command generates the
+offline manifest as well as the combined files referenced in the manifest.
 
-If offline cache is activated and the nodelist hash can not be found inside the
+If offline compression is enabled and the nodelist hash can not be found inside the
 manifest, {% compress %} will raise an ``OfflineGenerationError``.
 
-If offline cache is de-activated, the following happens:
+If offline compression is disabled, the following happens:
 
 First step: parsing and file list
 ---------------------------------

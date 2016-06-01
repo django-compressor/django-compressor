@@ -1,6 +1,6 @@
 .. _remote_storages:
 
-Remote storages
+Remote Storages
 ---------------
 
 In some cases it's useful to use a CDN_ for serving static files such as

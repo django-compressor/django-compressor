@@ -459,9 +459,7 @@ Offline settings
     :Default: ``False``
 
     Boolean that decides if compression should be done outside of the
-    request/response loop. (See :ref:`behind_the_Scenes` for more.) This allows
-    to pre-compress CSS and JavaScript files and works just like the automatic
-    compression with the ``{% compress %}`` tag.
+    request/response loop. See :ref:`offline_compression` for details.
 
 .. attribute:: COMPRESS_OFFLINE_TIMEOUT
 

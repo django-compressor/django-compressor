@@ -45,7 +45,9 @@ You will find offline compression beneficial if:
   :attr:`~django.conf.settings.COMPRESS_PRECOMPILERS` binaries in one
   location.
 
-* You store compressed files on a CDN. 
+* You store compressed files on a CDN.
+
+* You want the best possible performance.
 
 Caveats
 -------
