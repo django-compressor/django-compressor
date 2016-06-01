@@ -107,22 +107,22 @@ access it in the `post_compress signal <signals>`.
 .. _memcached: http://memcached.org/
 .. _caching documentation: https://docs.djangoproject.com/en/1.8/topics/cache/#memcached
 
-.. _pre-compression:
 
-Pre-compression
+.. _offline_compression:
+
+Offline Compression
 ---------------
 
-Django Compressor comes with an optional ``compress`` management command to
-run the compression outside of the request/response loop -- independent
-from user requests. This allows to pre-compress CSS and JavaScript files and
-works just like the automatic compression with the ``{% compress %}`` tag.
+Django Compressor has the ability to run the compression "offline",
+i.e. outside of the request/response loop -- independent from user requests.
+If offline compression is enabled, no new files are generated during a request
+and the ``{% compress %}`` tag simply inserts links to the files in the
+offline cache (see :ref:`behind_the_scenes` for details). This results in better
+performance and enables certain deployment scenarios (see :ref:`scenarios`).
 
-To compress the files "offline" and update the offline cache you have
-to use the ``compress`` management command, ideally during deployment.
-Also make sure to enable the :attr:`django.conf.settings.COMPRESS_OFFLINE`
-setting. In case you don't use the ``compress`` management command, Django
-Compressor will automatically fallback to the automatic compression using
-the template tag.
+To use offline compression, enable the :attr:`django.conf.settings.COMPRESS_OFFLINE`
+setting and then run the ``compress`` management command to compress your assets
+and update the offline cache.
 
 The command parses all templates that can be found with the template
 loader (as specified in the TEMPLATE_LOADERS_ setting) and looks for
@@ -137,19 +137,17 @@ in the blocks, e.g.:
 
     {% load compress %}
     {% compress js %}
-    <script src="{{ path_to_files }}js/one.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        alert("{{ greeting }}");
+    </script>
     {% endcompress %}
 
-Since this template requires a variable (``path_to_files``) you need to
-specify this in your settings before using the ``compress`` management
-command::
+Since this template requires a variable (``greeting``) you need to specify
+this in your settings before using the ``compress`` management command::
 
     COMPRESS_OFFLINE_CONTEXT = {
-        'path_to_files': '/static/js/',
+        'greeting': 'Hello there!',
     }
-
-If not specified, the ``COMPRESS_OFFLINE_CONTEXT`` will by default contain
-the commonly used setting to refer to saved files ``STATIC_URL``.
 
 The result of running the ``compress`` management command will be cached
 in a file called ``manifest.json`` using the :attr:`configured storage
