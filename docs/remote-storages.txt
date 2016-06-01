@@ -47,7 +47,7 @@ apps can be integrated.
 
 #. Make sure the :attr:`~django.conf.settings.COMPRESS_ROOT` and STATIC_ROOT_
    settings are equal since both apps need to look at the same directories
-   when to do their job.
+   when doing their job.
 
 #. You need to create a subclass of the remote storage backend you want
    to use; below is an example of the boto S3 storage backend from
@@ -79,13 +79,14 @@ apps can be integrated.
    :attr:`~django.conf.settings.COMPRESS_URL` (e.g.
    ``"http://compressor-test.s3.amazonaws.com/"``).
 
-At the end it should look like this::
+In the end it might look like this::
 
-    STATICFILES_STORAGE = 'path.to.CachedS3BotoStorage'
+    STATIC_ROOT = '/path/to/staticfiles'
+    COMPRESS_ROOT = STATIC_ROOT
+    STATICFILES_STORAGE = 'mysite.storage.CachedS3BotoStorage'
     COMPRESS_STORAGE = STATICFILES_STORAGE
-    COMPRESS_URL = 'https://{0}.s3.amazonaws.com/'.format(AWS_STORAGE_BUCKET_NAME)
-    STATIC_URL = COMPRESS_URL
-
+    STATIC_URL = 'https://compressor-test.s3.amazonaws.com/'
+    COMPRESS_URL = STATIC_URL
 
 .. _CDN: http://en.wikipedia.org/wiki/Content_delivery_network
 .. _Amazon S3: https://s3.amazonaws.com/
