@@ -1,10 +1,11 @@
-Jinja2 In-Request Support
-=========================
+Jinja2 Support
+==============
 
 Django Compressor comes with support for Jinja2_ via an extension.
 
-Plain Jinja2
-------------
+
+In-Request Compression
+----------------------
 
 In order to use Django Compressor's Jinja2 extension we would need to pass
 ``compressor.contrib.jinja2ext.CompressorExtension`` into environment::
@@ -25,20 +26,21 @@ From now on, you can use same code you'd normally use within Django templates::
     template.render({'STATIC_URL': settings.STATIC_URL})
 
 
-Jinja2 Offline Compression Support
-==================================
-You'd need to configure ``COMPRESS_JINJA2_GET_ENVIRONMENT`` so that
+Offline Compression
+-------------------
+
+Usage
+^^^^^
+First, you will need to configure ``COMPRESS_JINJA2_GET_ENVIRONMENT`` so that
 Compressor can retrieve the Jinja2 environment for rendering.
 This can be a lambda or function that returns a Jinja2 environment.
 
-Usage
------
-Run the following compress command along with an ``--engine`` parameter. The
-parameter can be either jinja2 or django (default). For example,
+Then, run the following compress command along with an ``--engine`` parameter.
+The parameter can be either jinja2 or django (default). For example,
 ``./manage.py compress --engine jinja2``.
 
 Using both Django and Jinja2 templates
---------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 There may be a chance that the Jinja2 parser is used to parse Django templates
 if you have a mixture of Django and Jinja2 templates in the same location(s).
 This should not be a problem since the Jinja2 parser will likely raise a
@@ -56,7 +58,7 @@ However, it is still recommended that you do not mix Django and Jinja2
 templates in the same project.
 
 Limitations
------------
+^^^^^^^^^^^
 - Does not support ``{% import %}`` and similar blocks within
   ``{% compress %}``  blocks.
 - Does not support ``{{super()}}``.
@@ -65,7 +67,7 @@ Limitations
   should run fine.
 
 Jinja2 templates location
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 IMPORTANT: For Compressor to discover the templates for offline compression,
 there must be a template loader that implements the ``get_template_sources``
 method, and is in the ``TEMPLATE_LOADERS`` setting.
@@ -86,7 +88,7 @@ the filesystem loader (``django.template.loaders.filesystem.Loader``) in the
 ``TEMPLATE_DIRS`` setting.
 
 Using your custom loader
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 You should configure ``TEMPLATE_LOADERS`` as such::
 
     TEMPLATE_LOADERS = (
