@@ -79,6 +79,14 @@ apps can be integrated.
    :attr:`~django.conf.settings.COMPRESS_URL` (e.g.
    ``"http://compressor-test.s3.amazonaws.com/"``).
 
+At the end it should look like this::
+
+    STATICFILES_STORAGE = 'path.to.CachedS3BotoStorage'
+    COMPRESS_STORAGE = STATICFILES_STORAGE
+    COMPRESS_URL = 'https://{0}.s3.amazonaws.com/'.format(AWS_STORAGE_BUCKET_NAME)
+    STATIC_URL = COMPRESS_URL
+
+
 .. _CDN: http://en.wikipedia.org/wiki/Content_delivery_network
 .. _Amazon S3: https://s3.amazonaws.com/
 .. _boto: http://boto.cloudhackers.com/
