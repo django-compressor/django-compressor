@@ -138,7 +138,7 @@ def get_precompiler_cachekey(command, contents):
 def cache_get(key):
     try:
         packed_val = cache.get(key)
-    except Exception
+    except Exception:
         packed_val = None
     if packed_val is None:
         return None
