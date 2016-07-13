@@ -97,10 +97,16 @@ def get_templatetag_cachekey(compressor, mode, kind):
 def get_mtime(filename):
     if settings.COMPRESS_MTIME_DELAY:
         key = get_mtime_cachekey(filename)
-        mtime = cache.get(key)
+        try:
+            mtime = cache.get(key)
+        except Exception:
+            mtime = None
         if mtime is None:
             mtime = os.path.getmtime(filename)
-            cache.set(key, mtime, settings.COMPRESS_MTIME_DELAY)
+            try:
+                cache.set(key, mtime, settings.COMPRESS_MTIME_DELAY)
+            except Exception:
+                pass
         return mtime
     return os.path.getmtime(filename)
 
@@ -130,7 +136,10 @@ def get_precompiler_cachekey(command, contents):
 
 
 def cache_get(key):
-    packed_val = cache.get(key)
+    try:
+        packed_val = cache.get(key)
+    except Exception
+        packed_val = None
     if packed_val is None:
         return None
     val, refresh_time, refreshed = packed_val
@@ -149,7 +158,11 @@ def cache_set(key, val, refreshed=False, timeout=None):
     refresh_time = timeout + time.time()
     real_timeout = timeout + settings.COMPRESS_MINT_DELAY
     packed_val = (val, refresh_time, refreshed)
-    return cache.set(key, packed_val, real_timeout)
+    try:
+        value = cache.set(key, packed_val, real_timeout)
+    except Exception:
+        value = None
+    return value
 
 
 cache = SimpleLazyObject(lambda: caches[settings.COMPRESS_CACHE_BACKEND])
