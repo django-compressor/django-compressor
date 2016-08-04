@@ -16,11 +16,9 @@ env:
 matrix:
   include:
     - python: 3.5
-      env:
-        - TOXENV=py35-1.8.X
+      env: TOXENV=py35-1.8.X
     - python: 3.5
-      env:
-        - TOXENV=py35-1.9.X
+      env: TOXENV=py35-1.9.X
 notifications:
   irc: "irc.freenode.org#django-compressor"
 after_success:
