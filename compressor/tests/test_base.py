@@ -405,7 +405,8 @@ class CompressorInDebugModeTestCase(SimpleTestCase):
         # files can be outdated
         css_filename = os.path.join(settings.COMPRESS_ROOT, "css", "one.css")
         # Store the hash of the original file's content
-        css_content = open(css_filename).read()
+        with open(css_filename) as f:
+            css_content = f.read()
         hashed = get_hexdigest(css_content, 12)
         # Now modify the file in the STATIC_ROOT
         test_css_content = "p { font-family: 'test' }"
@@ -419,6 +420,7 @@ class CompressorInDebugModeTestCase(SimpleTestCase):
         compressor.storage = DefaultStorage()
         output = compressor.output()
         self.assertEqual(expected, output)
-        result = open(os.path.join(settings.COMPRESS_ROOT, "CACHE", "css",
-                                   "%s.css" % hashed), "r").read()
+        with open(os.path.join(settings.COMPRESS_ROOT, "CACHE", "css",
+                               "%s.css" % hashed), "r") as f:
+            result = f.read()
         self.assertTrue(test_css_content not in result)
