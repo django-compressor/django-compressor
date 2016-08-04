@@ -16,9 +16,8 @@ def main():
     options, arguments = p.parse_args()
 
     if options.filename:
-        f = open(options.filename)
-        content = f.read()
-        f.close()
+        with open(options.filename) as f:
+            content = f.read()
     else:
         content = sys.stdin.read()
 

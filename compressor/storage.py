@@ -70,21 +70,17 @@ class GzipCompressorFileStorage(CompressorFileStorage):
         orig_path = self.path(filename)
         compressed_path = '%s.gz' % orig_path
 
-        f_in = open(orig_path, 'rb')
-        f_out = open(compressed_path, 'wb')
-        try:
-            f_out = gzip.GzipFile(fileobj=f_out)
-            f_out.write(f_in.read())
-        finally:
-            f_out.close()
-            f_in.close()
-            # Ensure the file timestamps match.
-            # os.stat() returns nanosecond resolution on Linux, but os.utime()
-            # only sets microsecond resolution.  Set times on both files to
-            # ensure they are equal.
-            stamp = time.time()
-            os.utime(orig_path, (stamp, stamp))
-            os.utime(compressed_path, (stamp, stamp))
+        with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
+            with gzip.GzipFile(fileobj=f_out) as gz_out:
+                gz_out.write(f_in.read())
+
+        # Ensure the file timestamps match.
+        # os.stat() returns nanosecond resolution on Linux, but os.utime()
+        # only sets microsecond resolution.  Set times on both files to
+        # ensure they are equal.
+        stamp = time.time()
+        os.utime(orig_path, (stamp, stamp))
+        os.utime(compressed_path, (stamp, stamp))
 
         return filename
 
