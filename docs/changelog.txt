@@ -1,7 +1,23 @@
 Changelog
 =========
 
-v2.0 (01/07/2016)
+v2.1 (2016-08-09)
+-----------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.0...2.1>`_
+
+- Add Django 1.10 compatibility
+
+- Add support for inheritance using a variable in offline compression
+
+- Fix recursion error with offline compression when extending templates with the same name
+
+- Fix UnicodeDecodeError when using CompilerFilter and caching
+
+- Fix CssAbsoluteFilter changing double quotes to single quotes, breaking SVG
+
+
+v2.0 (2016-01-07)
 -----------------
 
 `Full Changelog <https://github.com/django-compressor/django-compressor/compare/1.6...2.0>`_
@@ -27,7 +43,7 @@ v2.0 (01/07/2016)
 - Replace cssmin by csscompressor (cssmin is still available for backwards-compatibility but points to rcssmin)
 
 
-v1.6 (11/19/2015)
+v1.6 (2015-11-19)
 -----------------
 
 `Full Changelog <https://github.com/django-compressor/django-compressor/compare/1.5...1.6>`_
@@ -49,7 +65,7 @@ v1.6 (11/19/2015)
 - Removed some silent exception catching in compress command
 
 
-v1.5 (03/27/2015)
+v1.5 (2015-03-27)
 -----------------
 
 `Full Changelog <https://github.com/django-compressor/django-compressor/compare/1.4...1.5>`_
@@ -83,7 +99,7 @@ v1.5 (03/27/2015)
 - Remove unnecessary filename and existence checks in CssAbsoluteFilter
 
 
-v1.4 (06/20/2014)
+v1.4 (2014-06-20)
 -----------------
 
 - Added Python 3 compatibility.
@@ -120,7 +136,7 @@ v1.4 (06/20/2014)
 
 - Fixed windows line endings in offline compression.
 
-v1.3 (03/18/2013)
+v1.3 (2013-03-18)
 -----------------
 
 - *Backward incompatible changes*
