@@ -339,6 +339,21 @@ p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='%(compress_u
         filter = CssAbsoluteFilter(content)
         self.assertEqual(path, filter.guess_filename(url))
 
+    def test_filenames_with_space(self):
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        imagefilename = os.path.join(settings.COMPRESS_ROOT, 'img/add with spaces.png')
+
+        template = "p { background: url('%(url)simg/add with spaces.png%(query)s%(hash)s%(frag)s') }"
+
+        content = template % blankdict(url='../../')
+        params = blankdict({
+            'url': settings.COMPRESS_URL,
+            'hash': '?' + self.hashing_func(imagefilename),
+        })
+        output = template % params
+        filter = CssAbsoluteFilter(content)
+        self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+
 
 @override_settings(COMPRESS_URL='http://static.example.com/')
 class CssAbsolutizingTestCaseWithDifferentURL(CssAbsolutizingTestCase):
