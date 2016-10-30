@@ -369,24 +369,26 @@ class CssAbsolutizingTestCase(TestCase):
             self.assertEqual(output, filter.input(filename=filename, basename='bar/baz/test.css'))
 
     def test_css_hunks(self):
-        hash_dict = {
-            'hash1': self.hashing_func(os.path.join(settings.COMPRESS_ROOT, 'img/python.png')),
-            'hash2': self.hashing_func(os.path.join(settings.COMPRESS_ROOT, 'img/add.png')),
-        }
-        self.assertEqual(["""\
-p { background: url('/static/img/python.png?%(hash1)s'); }
-p { background: url('/static/img/python.png?%(hash1)s'); }
-p { background: url('/static/img/python.png?%(hash1)s'); }
-p { background: url('/static/img/python.png?%(hash1)s'); }
-p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/static/img/python.png?%(hash1)s'); }
-""" % hash_dict,
-               """\
-p { background: url('/static/img/add.png?%(hash2)s'); }
-p { background: url('/static/img/add.png?%(hash2)s'); }
-p { background: url('/static/img/add.png?%(hash2)s'); }
-p { background: url('/static/img/add.png?%(hash2)s'); }
-p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/static/img/add.png?%(hash2)s'); }
-""" % hash_dict], list(self.css_node.hunks()))
+        hash_python_png = self.hashing_func(os.path.join(settings.COMPRESS_ROOT, 'img/python.png'))
+        hash_add_png = self.hashing_func(os.path.join(settings.COMPRESS_ROOT, 'img/add.png'))
+
+        css1 = """\
+p { background: url('/static/img/python.png?%(hash)s'); }
+p { background: url('/static/img/python.png?%(hash)s'); }
+p { background: url('/static/img/python.png?%(hash)s'); }
+p { background: url('/static/img/python.png?%(hash)s'); }
+p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/static/img/python.png?%(hash)s'); }
+""" % dict(hash=hash_python_png)
+
+        css2 = """\
+p { background: url('/static/img/add.png?%(hash)s'); }
+p { background: url('/static/img/add.png?%(hash)s'); }
+p { background: url('/static/img/add.png?%(hash)s'); }
+p { background: url('/static/img/add.png?%(hash)s'); }
+p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/static/img/add.png?%(hash)s'); }
+""" % dict(hash=hash_add_png})
+
+        self.assertEqual([css1, css2], list(self.css_node.hunks()))
 
     def test_guess_filename(self):
         for base_url in ('/static/', 'http://static.example.com/'):
