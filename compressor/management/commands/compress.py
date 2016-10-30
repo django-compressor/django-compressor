@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 # flake8: noqa
 import os
 import sys
@@ -11,6 +12,7 @@ from django.core.management.base import BaseCommand, CommandError
 import django.template
 from django.template import Context
 from django.utils import six
+from django.utils.encoding import smart_text
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
 from django.template import engines
 
@@ -119,7 +121,7 @@ class Command(BaseCommand):
                         'get_template_sources', None)
                     if get_template_sources is None:
                         get_template_sources = loader.get_template_sources
-                    paths.update(str(origin) for origin in get_template_sources(''))
+                    paths.update(smart_text(origin) for origin in get_template_sources(''))
                 except (ImportError, AttributeError, TypeError):
                     # Yeah, this didn't work out so well, let's move on
                     pass
@@ -177,7 +179,7 @@ class Command(BaseCommand):
                 continue
             except TemplateSyntaxError as e:  # broken template -> ignore
                 if verbosity > 0:
-                    log.write("Invalid template %s: %s\n" % (template_name, e))
+                    log.write("Invalid template %s: %s\n" % (template_name, smart_text(e)))
                 continue
             except TemplateDoesNotExist:  # non existent template -> ignore
                 if verbosity > 0:
@@ -197,7 +199,8 @@ class Command(BaseCommand):
                 except (TemplateDoesNotExist, TemplateSyntaxError) as e:
                     # Could be an error in some base template
                     if verbosity > 0:
-                        log.write("Error parsing template %s: %s\n" % (template_name, e))
+                        log.write("Error parsing template %s: %s\n" %
+                                  (template_name, smart_text(e)))
                     continue
                 if nodes:
                     template.template_name = template_name
@@ -244,7 +247,7 @@ class Command(BaseCommand):
                         result = parser.render_node(template, context, node)
                     except Exception as e:
                         raise CommandError("An error occurred during rendering %s: "
-                                           "%s" % (template.template_name, e))
+                                           "%s" % (template.template_name, smart_text(e)))
                     offline_manifest[key] = result
                     context.pop()
                     results.append(result)
