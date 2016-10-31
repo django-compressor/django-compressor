@@ -47,12 +47,9 @@ This should not be a problem since the Jinja2 parser will likely raise a
 template syntax error, causing Compressor to skip the errorneous
 template safely. (Vice versa for Django parser).
 
-A typical usage could be :
+Templates of both engines can be compressed like this:
 
-- ``./manage.py compress`` for processing Django templates first, skipping
-  Jinja2 templates.
-- ``./manage.py compress --engine jinja2`` for processing Jinja2 templates,
-  skipping Django templates.
+- ``./manage.py compress --engine django --engine jinja2``
 
 However, it is still recommended that you do not mix Django and Jinja2
 templates in the same project.

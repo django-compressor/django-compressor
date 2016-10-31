@@ -10,6 +10,7 @@ from importlib import import_module
 from mock import patch
 from unittest import SkipTest, skipIf
 
+from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
@@ -699,3 +700,43 @@ class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
         count, result = CompressCommand().compress(
             log=self.log, verbosity=self.verbosity, engine=engine)
         self.assertEqual(count, 1)
+
+
+@skipIf(not _TEST_JINJA2, "Test only run if we are testing Jinja2")
+class TestCompressCommand(OfflineTestCaseMixin, TestCase):
+    templates_dir = "test_compress_command"
+
+    def _test_offline(self, engine):
+        raise SkipTest("Not utilized for this test case")
+
+    def _build_expected_manifest(self, expected):
+        return dict([
+            (k, ('<script type="text/javascript" src="/static/CACHE/js/'
+            '%s.js"></script>' % (v, ))) for k, v in expected.items()
+        ])
+
+    def test_multiple_engines(self):
+        opts = {
+            "force": True,
+            "verbosity": 0,
+            "log": StringIO(),
+        }
+
+        call_command('compress', engines=["django"], **opts)
+        manifest_django = get_offline_manifest()
+        manifest_django_expected = self._build_expected_manifest(
+            {'8464063aa0729700fca0452e009582af': '662b9ce354e4'})
+        self.assertEqual(manifest_django, manifest_django_expected)
+
+        call_command('compress', engines=["jinja2"], **opts)
+        manifest_jinja2 = get_offline_manifest()
+        manifest_jinja2_expected = self._build_expected_manifest(
+            {'0ec631f01496b28bbecad129c5532db4': '3cd63e8c4360'})
+        self.assertEqual(manifest_jinja2, manifest_jinja2_expected)
+
+        call_command('compress', engines=["django", "jinja2"], **opts)
+        manifest_both = get_offline_manifest()
+        manifest_both_expected = self._build_expected_manifest(
+            {'8464063aa0729700fca0452e009582af': '662b9ce354e4',
+             '0ec631f01496b28bbecad129c5532db4': '3cd63e8c4360'})
+        self.assertEqual(manifest_both, manifest_both_expected)
