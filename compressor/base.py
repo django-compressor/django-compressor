@@ -7,6 +7,7 @@ from django.core.files.base import ContentFile
 from django.utils.safestring import mark_safe
 from django.utils.six.moves.urllib.request import url2pathname
 from django.template.loader import render_to_string
+from django.utils.functional import cached_property
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
@@ -17,7 +18,6 @@ from compressor.filters.css_default import CssAbsoluteFilter
 from compressor.storage import compressor_file_storage
 from compressor.signals import post_compress
 from compressor.utils import get_class, get_mod_func, staticfiles
-from compressor.utils.decorators import cached_property
 
 # Some constants for nicer handling.
 SOURCE_HUNK, SOURCE_FILE = 'inline', 'file'
