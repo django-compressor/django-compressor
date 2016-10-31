@@ -265,6 +265,12 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
             self.assertTrue(isinstance(loaders[0], FileSystemLoader))
             self.assertTrue(isinstance(loaders[1], AppDirectoriesLoader))
 
+    @patch("compressor.offline.django.DjangoParser.render_node",
+           side_effect=Exception(b"non-ascii character here:\xc3\xa4"))
+    def test_non_ascii_exception_messages(self, mock):
+        with self.assertRaises(CommandError):
+            CompressCommand().handle()
+
 
 class OfflineCompressSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_duplicate'
