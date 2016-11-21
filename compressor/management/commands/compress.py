@@ -20,7 +20,7 @@ from compressor.cache import get_offline_hexdigest, write_offline_manifest, get_
 from compressor.conf import settings
 from compressor.exceptions import (OfflineGenerationError, TemplateSyntaxError,
                                    TemplateDoesNotExist)
-from compressor.utils import get_mod_func
+from compressor.utils import get_mod_func, url_placeholders
 
 if six.PY3:
     # there is an 'io' module in python 2.6+, but io.StringIO does not
@@ -49,7 +49,7 @@ class Command(BaseCommand):
                                  "(which defaults to STATIC_ROOT). Be aware that using this "
                                  "can lead to infinite recursion if a link points to a parent "
                                  "directory of itself.", dest='follow_links')
-        parser.add_argument('--engine', default="[]", action="append",
+        parser.add_argument('--engine', default=[], action="append",
                             help="Specifies the templating engine. jinja2 and django are "
                                  "supported. It may be a specified more than once for "
                                  "multiple engines. If not specified, django engine is used.",
@@ -239,7 +239,10 @@ class Command(BaseCommand):
                         continue
 
                     parser.process_node(template, context, node)
-                    rendered = parser.render_nodelist(template, context, node)
+
+                    with url_placeholders():
+                        rendered = parser.render_nodelist(template, context, node)
+
                     key = get_offline_hexdigest(rendered)
 
                     if key in offline_manifest:
@@ -250,7 +253,15 @@ class Command(BaseCommand):
                     except Exception as e:
                         raise CommandError("An error occurred during rendering %s: "
                                            "%s" % (template.template_name, smart_text(e)))
-                    offline_manifest[key] = result
+
+                    if settings.COMPRESS_OFFLINE_URL_PLACEHOLDERS:
+                        # Replace settings.COMPRESS_URL with a placeholder
+                        offline_manifest[key] = result.replace(
+                            settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
+                        )
+                    else:
+                        offline_manifest[key] = result
+
                     context.pop()
                     results.append(result)
                     block_count += 1

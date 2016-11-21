@@ -1,3 +1,4 @@
+from compressor.utils import url_placeholders
 from jinja2 import nodes
 from jinja2.ext import Extension
 from jinja2.exceptions import TemplateSyntaxError
@@ -45,11 +46,10 @@ class CompressorExtension(CompressorMixin, Extension):
 
     def _compress(self, kind, mode, caller, forced):
         mode = mode or OUTPUT_FILE
-        original_content = caller()
         context = {
-            'original_content': original_content
+            'original_content_generator': caller,
         }
         return self.render_compressed(context, kind, mode, forced=forced)
 
     def get_original_content(self, context):
-        return context['original_content']
+        return context['original_content_generator']()

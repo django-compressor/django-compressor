@@ -70,6 +70,13 @@ class CompressorConf(AppConf):
     OFFLINE_MANIFEST = 'manifest.json'
     # The Context to be used when TemplateFilter is used
     TEMPLATE_FILTER_CONTEXT = {}
+    # Whether to use placeholders instead of original URLs with offline compression
+    # (affects only manifest file contents and manifest keys determination)
+    OFFLINE_URL_PLACEHOLDERS = False
+    # Placeholder to be used instead of settings.STATIC_URL while compression
+    STATIC_URL_PLACEHOLDER = '/__compressor_url_placeholder__/'
+    # Placeholder to be used instead of settings.STATIC_URL while compression
+    URL_PLACEHOLDER = '/__compressor_url_placeholder__/'
 
     # Returns the Jinja2 environment to use in offline compression.
     def JINJA2_GET_ENVIRONMENT():

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from contextlib import contextmanager
 import os
 
+from django.apps import apps
+
+from compressor.conf import settings
 from compressor.exceptions import FilterError
 
 
@@ -40,3 +44,34 @@ def get_pathext(default_pathext=None):
     if default_pathext is None:
         default_pathext = os.pathsep.join(['.COM', '.EXE', '.BAT', '.CMD'])
     return os.environ.get('PATHEXT', default_pathext)
+
+
+@contextmanager
+def url_placeholders():
+    if settings.COMPRESS_OFFLINE_URL_PLACEHOLDERS:
+        # Backup settings.STATIC_URL and settings.COMPRESS_URL
+        settings.STATIC_URL_ORIGIN = settings.STATIC_URL
+        settings.COMPRESS_URL_ORIGIN = settings.COMPRESS_URL
+
+        # Replace settings.STATIC_URL and settings.COMPRESS_URL with placeholders
+        settings.STATIC_URL = settings.COMPRESS_STATIC_URL_PLACEHOLDER
+        settings.COMPRESS_URL = settings.COMPRESS_URL_PLACEHOLDER
+
+        # Needed to reset ``storage.base_url`` in {% static %} tag
+        if apps.is_installed('django.contrib.staticfiles'):
+            from django.contrib.staticfiles.storage import staticfiles_storage
+            staticfiles_storage.base_url = settings.STATIC_URL
+        else:
+            staticfiles_storage = None
+
+        yield
+
+        # Restore original settings.STATIC_URL and settings.COMPRESS_URL
+        settings.STATIC_URL = settings.STATIC_URL_ORIGIN
+        settings.COMPRESS_URL = settings.COMPRESS_URL_ORIGIN
+
+        # Needed to reset ``storage.base_url`` in {% static %} tag
+        if staticfiles_storage:
+            staticfiles_storage.base_url = settings.STATIC_URL
+    else:
+        yield
