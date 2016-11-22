@@ -18,10 +18,10 @@ for key in dir(compressor.tests.test_offline):
         isinstance(value, type) and issubclass(value, TestCase) and value is not TestCase
     ):
         new_class = type(key, (value,), {})
-        module_dict[key] = override_settings(COMPRESS_OFFLINE_URL_PLACEHOLDERS=True)(new_class)
+        module_dict[key] = override_settings(COMPRESS_OFFLINE_USE_URL_PLACEHOLDER=True)(new_class)
 
 
-@override_settings(COMPRESS_OFFLINE_URL_PLACEHOLDERS=True)
+@override_settings(COMPRESS_OFFLINE_USE_URL_PLACEHOLDER=True)
 class OfflineCompressStaticTemplateTagTestCase(
     compressor.tests.test_offline.OfflineCompressStaticTemplateTagTestCase
 ):
@@ -41,13 +41,15 @@ class OfflineCompressStaticTemplateTagTestCase(
         with self.settings(STATIC_URL='/another/static/'):
             self.assertEqual(self._render_template(engine), result[0] + '\n')
 
-        # But without settings.COMPRESS_OFFLINE_URL_PLACEHOLDERS it fails
-        with self.settings(STATIC_URL='/another/static/', COMPRESS_OFFLINE_URL_PLACEHOLDERS=False):
+        # But without settings.COMPRESS_OFFLINE_USE_URL_PLACEHOLDER it fails
+        with self.settings(
+            STATIC_URL='/another/static/', COMPRESS_OFFLINE_USE_URL_PLACEHOLDER=False
+        ):
             with self.assertRaises(OfflineGenerationError):
                 self._render_template(engine)
 
 
-@override_settings(COMPRESS_OFFLINE_URL_PLACEHOLDERS=True)
+@override_settings(COMPRESS_OFFLINE_USE_URL_PLACEHOLDER=True)
 class TestCompressCommand(compressor.tests.test_offline.TestCompressCommand):
     def _build_expected_manifest(self, expected):
         return {
