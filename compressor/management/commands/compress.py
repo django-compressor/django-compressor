@@ -20,7 +20,7 @@ from compressor.cache import get_offline_hexdigest, write_offline_manifest, get_
 from compressor.conf import settings
 from compressor.exceptions import (OfflineGenerationError, TemplateSyntaxError,
                                    TemplateDoesNotExist)
-from compressor.utils import get_mod_func, url_placeholders
+from compressor.utils import get_mod_func
 
 if six.PY3:
     # there is an 'io' module in python 2.6+, but io.StringIO does not
@@ -239,10 +239,7 @@ class Command(BaseCommand):
                         continue
 
                     parser.process_node(template, context, node)
-
-                    with url_placeholders():
-                        rendered = parser.render_nodelist(template, context, node)
-
+                    rendered = parser.render_nodelist(template, context, node)
                     key = get_offline_hexdigest(rendered)
 
                     if key in offline_manifest:

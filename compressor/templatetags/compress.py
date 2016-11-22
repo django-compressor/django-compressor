@@ -6,7 +6,7 @@ from compressor.cache import (cache_get, cache_set, get_offline_hexdigest,
                               get_offline_manifest, get_templatetag_cachekey)
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
-from compressor.utils import get_class, url_placeholders
+from compressor.utils import get_class
 
 register = template.Library()
 
@@ -61,10 +61,7 @@ class CompressorMixin(object):
         If enabled and in offline mode, and not forced check the offline cache
         and return the result if given
         """
-        with url_placeholders():
-            rendered = self.get_original_content(context)
-
-        key = get_offline_hexdigest(rendered)
+        key = get_offline_hexdigest(self.get_original_content(context))
         offline_manifest = get_offline_manifest()
         if key in offline_manifest:
             result = offline_manifest[key]
