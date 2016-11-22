@@ -50,7 +50,7 @@ def get_mtime_cachekey(filename):
 
 
 def get_offline_hexdigest(render_template_string):
-    if settings.COMPRESS_OFFLINE_USE_URL_PLACEHOLDER:
+    if settings.COMPRESS_OFFLINE_URLLESS:
         # Make hexdigest calculation independent of settings.STATIC_URL
         render_template_string = render_template_string.replace(settings.STATIC_URL, '')
     return get_hexdigest(render_template_string)

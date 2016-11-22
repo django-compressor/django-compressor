@@ -251,7 +251,7 @@ class Command(BaseCommand):
                         raise CommandError("An error occurred during rendering %s: "
                                            "%s" % (template.template_name, smart_text(e)))
 
-                    if settings.COMPRESS_OFFLINE_USE_URL_PLACEHOLDER:
+                    if settings.COMPRESS_OFFLINE_URLLESS:
                         # Replace settings.COMPRESS_URL with a placeholder
                         offline_manifest[key] = result.replace(
                             settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER

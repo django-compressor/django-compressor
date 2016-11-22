@@ -70,9 +70,10 @@ class CompressorConf(AppConf):
     OFFLINE_MANIFEST = 'manifest.json'
     # The Context to be used when TemplateFilter is used
     TEMPLATE_FILTER_CONTEXT = {}
-    # Whether to use a placeholder instead of settings.COMPRESS_URL while offline compression
-    # (affects only manifest file contents and manifest key determination)
-    OFFLINE_USE_URL_PLACEHOLDER = False
+    # URL-less mode: you do offline compression & decompression regardless of settings.STATIC_URL
+    # and settings.COMPRESS_URL so your assets become re-locatable for any URLs.
+    # Affects manifest file contents and manifest key determination, but not the assets contents.
+    OFFLINE_URLLESS = False
     # Placeholder to be used instead of settings.COMPRESS_URL while offline compression
     URL_PLACEHOLDER = '/__compressor_url_placeholder__/'
 
