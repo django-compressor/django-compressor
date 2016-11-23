@@ -74,7 +74,8 @@ class CompressorConf(AppConf):
     # and settings.COMPRESS_URL so your assets become re-locatable for any URLs.
     # Affects manifest file contents and manifest key determination, but not the assets contents.
     OFFLINE_URLLESS = False
-    # Placeholder to be used instead of settings.COMPRESS_URL while offline compression
+    # Placeholder to be used instead of settings.COMPRESS_URL during offline compression
+    # if OFFLINE_URLLESS is enabled.
     URL_PLACEHOLDER = '/__compressor_url_placeholder__/'
 
     # Returns the Jinja2 environment to use in offline compression.

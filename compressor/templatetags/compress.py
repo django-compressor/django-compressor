@@ -67,7 +67,6 @@ class CompressorMixin(object):
             result = offline_manifest[key]
 
             if settings.COMPRESS_OFFLINE_URLLESS:
-                # Replace placeholder with original settings.COMPRESS_URL
                 result = result.replace(
                     settings.COMPRESS_URL_PLACEHOLDER, settings.COMPRESS_URL
                 )
