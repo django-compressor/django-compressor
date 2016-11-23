@@ -516,3 +516,21 @@ Offline settings
 
     The name of the file to be used for saving the names of the files
     compressed offline.
+
+.. attribute:: COMPRESS_OFFLINE_URLLESS
+
+    :Default: ``False``
+
+    Enable URL-less mode when you do offline compression & decompression regardless of
+    ``settings.STATIC_URL`` and ``settings.COMPRESS_URL`` so your assets become re-locatable
+    for any URLs.
+
+    Affects manifest file contents and manifest key determination, but not the assets contents.
+
+.. attribute:: COMPRESS_URL_PLACEHOLDER
+
+    :Default: ``'/__compressor_url_placeholder__/'``
+
+    If :attr:`~django.conf.settings.COMPRESS_OFFLINE_URLLESS` is ``True`` -
+    replace :attr:`~django.conf.settings.COMPRESS_URL` with this placeholder in the
+    offline manifest file.
