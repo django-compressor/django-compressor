@@ -246,12 +246,13 @@ class Command(BaseCommand):
                         continue
 
                     try:
-                        result = parser.render_node(template, context, node).replace(
-                            settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
-                        )
+                        result = parser.render_node(template, context, node)
                     except Exception as e:
                         raise CommandError("An error occurred during rendering %s: "
                                            "%s" % (template.template_name, smart_text(e)))
+                    result = result.replace(
+                        settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
+                    )
                     offline_manifest[key] = result
                     context.pop()
                     results.append(result)
