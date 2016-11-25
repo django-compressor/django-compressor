@@ -58,7 +58,6 @@ class OfflineTestCaseMixin(object):
     else:
         engines = ('django',)
     additional_test_settings = None
-    compress_url = '/static/'
 
     def setUp(self):
         self.log = StringIO()
@@ -134,16 +133,18 @@ class OfflineTestCaseMixin(object):
 
     def _render_script(self, hash):
         return '<script type="text/javascript" src="{}CACHE/js/{}.js"></script>'.format(
-            self.compress_url, hash
+            settings.COMPRESS_URL_PLACEHOLDER, hash
         )
 
     def _render_link(self, hash):
         return '<link rel="stylesheet" href="{}CACHE/css/{}.css" type="text/css" />'.format(
-            self.compress_url, hash
+            settings.COMPRESS_URL_PLACEHOLDER, hash
         )
 
     def _render_result(self, result, separator='\n'):
-        return separator.join(result) + '\n'
+        return (separator.join(result) + '\n').replace(
+            settings.COMPRESS_URL_PLACEHOLDER, settings.COMPRESS_URL
+        )
 
     def _test_offline(self, engine):
         hashes = self.expected_hash
@@ -355,6 +356,18 @@ class OfflineCompressTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
 class OfflineCompressStaticTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_static_templatetag'
     expected_hash = 'dfa2bb387fa8'
+
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(
+            log=self.log, verbosity=self.verbosity, engine=engine
+        )
+        self.assertEqual(1, count)
+        self.assertEqual([self._render_script(self.expected_hash)], result)
+        self.assertEqual(self._render_template(engine), self._render_result(result))
+
+        # Changing settings.STATIC_URL doesn't affect the next "offline" decompression
+        with self.settings(STATIC_URL='/another/static/url/'):
+            self.assertEqual(self._render_template(engine), self._render_result(result))
 
 
 class OfflineCompressTestCaseWithContext(OfflineTestCaseMixin, TestCase):

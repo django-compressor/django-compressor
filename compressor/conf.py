@@ -70,12 +70,8 @@ class CompressorConf(AppConf):
     OFFLINE_MANIFEST = 'manifest.json'
     # The Context to be used when TemplateFilter is used
     TEMPLATE_FILTER_CONTEXT = {}
-    # URL-less mode: you do offline compression & decompression regardless of settings.STATIC_URL
-    # and settings.COMPRESS_URL so your assets become re-locatable for any URLs.
-    # Affects manifest file contents and manifest key determination, but not the assets contents.
-    OFFLINE_URLLESS = False
-    # Placeholder to be used instead of settings.COMPRESS_URL during offline compression
-    # if OFFLINE_URLLESS is enabled.
+    # Placeholder to be used instead of settings.COMPRESS_URL during offline compression.
+    # Affects manifest file contents only.
     URL_PLACEHOLDER = '/__compressor_url_placeholder__/'
 
     # Returns the Jinja2 environment to use in offline compression.
