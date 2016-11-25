@@ -64,7 +64,9 @@ class CompressorMixin(object):
         key = get_offline_hexdigest(self.get_original_content(context))
         offline_manifest = get_offline_manifest()
         if key in offline_manifest:
-            return offline_manifest[key]
+            return offline_manifest[key].replace(
+                settings.COMPRESS_URL_PLACEHOLDER, settings.COMPRESS_URL
+            )
         else:
             raise OfflineGenerationError('You have offline compression '
                 'enabled but key "%s" is missing from offline manifest. '
