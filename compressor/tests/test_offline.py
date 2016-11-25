@@ -46,6 +46,10 @@ def offline_context_generator():
         yield {'content': 'OK %d!' % i}
 
 
+def static_url_context_generator():
+    yield {'STATIC_URL': settings.STATIC_URL}
+
+
 class OfflineTestCaseMixin(object):
     template_name = 'test_compressor_offline.html'
     verbosity = 0
@@ -376,21 +380,6 @@ class OfflineCompressStaticTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_static_templatetag'
     expected_hash = 'dfa2bb387fa8'
 
-    def _test_offline(self, engine):
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine
-        )
-        self.assertEqual(1, count)
-        self.assertEqual([self._render_script(self.expected_hash)], result)
-        self.assertEqual(
-            self._render_template(engine), self._render_result(result))
-
-        # Changing settings.STATIC_URL doesn't affect the next
-        # offline "decompression"
-        with self.settings(STATIC_URL='/another/static/url/'):
-            self.assertEqual(
-                self._render_template(engine), self._render_result(result))
-
 
 class OfflineCompressTestCaseWithContext(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_with_context'
@@ -469,6 +458,40 @@ class OfflineCompressTestCaseWithContextGeneratorSuper(
     }
     # Block.super not supported for Jinja2 yet.
     engines = ('django',)
+
+
+class OfflineCompressStaticUrlIndependenceTestCase(
+        OfflineCompressTestCaseWithContextGenerator):
+    """
+    Test that the offline manifest is independent of STATIC_URL.
+    I.e. users can use the manifest with any other STATIC_URL in the future.
+
+    We use COMPRESS_OFFLINE_CONTEXT generator to make sure that
+    STATIC_URL is not cached when rendering the template.
+    """
+    templates_dir = 'test_static_url_independence'
+    expected_hash = '44ed960a3d1d'
+    additional_test_settings = {
+        'STATIC_URL': '/custom/static/url/',
+        'COMPRESS_OFFLINE_CONTEXT': (
+            'compressor.tests.test_offline.static_url_context_generator'
+        )
+    }
+
+    def _test_offline(self, engine):
+        count, result = CompressCommand().compress(
+            log=self.log, verbosity=self.verbosity, engine=engine
+        )
+        self.assertEqual(1, count)
+        self.assertEqual([self._render_script(self.expected_hash)], result)
+        self.assertEqual(
+            self._render_template(engine), self._render_result(result))
+
+        # Changing STATIC_URL setting doesn't break things despite that
+        # offline compression was made with different STATIC_URL.
+        with self.settings(STATIC_URL='/another/static/url/'):
+            self.assertEqual(
+                self._render_template(engine), self._render_result(result))
 
 
 class OfflineCompressTestCaseWithContextVariableInheritance(
