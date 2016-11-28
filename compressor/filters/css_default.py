@@ -104,3 +104,17 @@ class CssAbsoluteFilter(FilterBase):
 
     def src_converter(self, matchobj):
         return self._converter(matchobj, 2, "src=%s%s%s")
+
+
+class CssRelativeFilter(CssAbsoluteFilter):
+    """
+    Do similar to ``CssAbsoluteFilter`` URL processing
+    but replace ``settings.COMPRESS_URL`` prefix with '../../'.
+    """
+
+    def add_suffix(self, url):
+        url = super(CssRelativeFilter, self).add_suffix(url)
+        prefix = self.url
+        if self.has_scheme:
+            prefix = '{}{}'.format(self.protocol, prefix)
+        return re.sub('^' + prefix, '../..', url)
