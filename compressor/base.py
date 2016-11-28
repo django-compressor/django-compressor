@@ -14,7 +14,7 @@ from compressor.conf import settings
 from compressor.exceptions import (CompressorError, UncompressableFileError,
         FilterDoesNotExist)
 from compressor.filters import CachedCompilerFilter
-from compressor.filters.css_default import CssAbsoluteFilter
+from compressor.filters.css_default import CssAbsoluteFilter, CssRelativeFilter
 from compressor.storage import compressor_file_storage
 from compressor.signals import post_compress
 from compressor.utils import get_class, get_mod_func, staticfiles
@@ -211,6 +211,8 @@ class Compressor(object):
                 # on precompiled css files even if compression is disabled.
                 if CssAbsoluteFilter in self.cached_filters:
                     value = self.filter(value, [CssAbsoluteFilter], **options)
+                elif CssRelativeFilter in self.cached_filters:
+                    value = self.filter(value, [CssRelativeFilter], **options)
                 yield self.handle_output(kind, value, forced=True,
                                          basename=basename)
             else:
