@@ -49,7 +49,7 @@ class Command(BaseCommand):
                                  "(which defaults to STATIC_ROOT). Be aware that using this "
                                  "can lead to infinite recursion if a link points to a parent "
                                  "directory of itself.", dest='follow_links')
-        parser.add_argument('--engine', default="[]", action="append",
+        parser.add_argument('--engine', default=[], action="append",
                             help="Specifies the templating engine. jinja2 and django are "
                                  "supported. It may be a specified more than once for "
                                  "multiple engines. If not specified, django engine is used.",
@@ -250,6 +250,9 @@ class Command(BaseCommand):
                     except Exception as e:
                         raise CommandError("An error occurred during rendering %s: "
                                            "%s" % (template.template_name, smart_text(e)))
+                    result = result.replace(
+                        settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
+                    )
                     offline_manifest[key] = result
                     context.pop()
                     results.append(result)
