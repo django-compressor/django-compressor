@@ -117,4 +117,4 @@ class CssRelativeFilter(CssAbsoluteFilter):
         prefix = self.url
         if self.has_scheme:
             prefix = '{}{}'.format(self.protocol, prefix)
-        return re.sub('^' + prefix, '../..', url)
+        return re.sub('^{}'.format(prefix), '../..', url)
