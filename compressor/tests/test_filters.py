@@ -379,6 +379,21 @@ class CssRelativizingTestCase(CssAbsolutizingTestCase):
     filter_class = CssRelativeFilter
     expected_url_prefix = '../../'
 
+    @override_settings(
+        COMPRESS_CSS_HASHING_METHOD=None,
+        COMPRESS_OUTPUT_DIR='CACHE/in/depth'
+    )
+    def test_nested_cache_dir(self):
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        content = self.template % blankdict(url='../../')
+        params = blankdict({
+            'url': '../../../../',
+        })
+        output = self.template % params
+        filter = self.filter_class(content)
+        self.assertEqual(output, filter.input(filename=filename,
+                                              basename='css/url/test.css'))
+
 
 @override_settings(
     COMPRESS_ENABLED=True,
