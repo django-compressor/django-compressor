@@ -114,7 +114,18 @@ class CssRelativeFilter(CssAbsoluteFilter):
 
     def add_suffix(self, url):
         url = super(CssRelativeFilter, self).add_suffix(url)
-        prefix = self.url
+        old_prefix = self.url
         if self.has_scheme:
-            prefix = '{}{}'.format(self.protocol, prefix)
-        return re.sub('^{}'.format(prefix), '../..', url)
+            old_prefix = '{}{}'.format(self.protocol, old_prefix)
+        # One level up from 'css' / 'js' folder
+        new_prefix = ['..']
+        # N levels up from settings.COMPRESS_OUTPUT_DIR:
+        # - if it's 'CACHE' (default) then it'd be ['..'];
+        # - if it's 'CACHE/in/depth' then it'd be ['..', '..', '..'].
+        new_prefix += [
+            '..' for part in os.path.normpath(
+                settings.COMPRESS_OUTPUT_DIR
+            ).split(os.sep) if part
+        ]
+        new_prefix = '/'.join(new_prefix)
+        return re.sub('^{}'.format(old_prefix), new_prefix, url)
