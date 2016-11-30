@@ -87,6 +87,12 @@ Backend settings
          feature, and the ``'content'`` in case you're using multiple servers
          to serve your content.
 
+    - ``compressor.filters.css_default.CssRelativeFilter``
+
+      Alternative to ``CssAbsoluteFilter`` which uses ``'../../'``
+      URL prefix instead of absolute path to file (if you don't want to
+      hard-code :attr:`~django.conf.settings.COMPRESS_URL` into CSS code).
+
     - ``compressor.filters.datauri.CssDataUriFilter``
 
       A filter for embedding media as `data: URIs`_ in the CSS.
