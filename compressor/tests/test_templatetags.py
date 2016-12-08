@@ -48,6 +48,23 @@ class TemplatetagTestCase(TestCase):
         out = css_tag("/static/CACHE/css/e41ba2cc6982.css")
         self.assertEqual(out, render(template, self.context))
 
+    def test_missing_rel_leaves_empty_result(self):
+        template = """{% load compress %}{% compress css %}
+<link href="{{ STATIC_URL }}css/one.css" type="text/css">
+{% endcompress %}"""
+        out = ""
+        self.assertEqual(out, render(template, self.context))
+
+    def test_missing_rel_only_on_one_resource(self):
+        template = """{% load compress %}{% compress css %}
+<link href="{{ STATIC_URL }}css/wontmatter.css" type="text/css">
+<link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
+<style type="text/css">p { border:5px solid green;}</style>
+<link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
+{% endcompress %}"""
+        out = css_tag("/static/CACHE/css/e41ba2cc6982.css")
+        self.assertEqual(out, render(template, self.context))
+
     def test_uppercase_rel(self):
         template = """{% load compress %}{% compress css %}
 <link rel="StyleSheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
