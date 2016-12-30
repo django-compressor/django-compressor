@@ -101,7 +101,7 @@ class TestJinja2CompressorExtension(TestCase):
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = '<script type="text/javascript" src="/static/CACHE/js/066cd253eada.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/d728fc7f9301.js"></script>'
         self.assertEqual(out, template.render(context))
 
     def test_nonascii_js_tag(self):
@@ -110,7 +110,7 @@ class TestJinja2CompressorExtension(TestCase):
         <script type="text/javascript" charset="utf-8">var test_value = "\u2014";</script>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = '<script type="text/javascript" src="/static/CACHE/js/e214fe629b28.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/d34f30e02e70.js"></script>'
         self.assertEqual(out, template.render(context))
 
     def test_nonascii_latin1_js_tag(self):
@@ -119,7 +119,7 @@ class TestJinja2CompressorExtension(TestCase):
         <script type="text/javascript">var test_value = "\u2014";</script>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = '<script type="text/javascript" src="/static/CACHE/js/be9e078b5ca7.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/a830bddd3636.js"></script>'
         self.assertEqual(out, template.render(context))
 
     def test_css_inline(self):
@@ -140,7 +140,7 @@ class TestJinja2CompressorExtension(TestCase):
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = '<script type="text/javascript">obj={};obj.value="value";</script>'
+        out = '<script type="text/javascript">;obj={};;obj.value="value";</script>'
         self.assertEqual(out, template.render(context))
 
     def test_nonascii_inline_css(self):
