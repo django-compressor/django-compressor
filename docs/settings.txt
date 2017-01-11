@@ -528,3 +528,9 @@ Offline settings
     :Default: ``True``
 
     If false the files are not grouped in a single file.
+
+.. attribute:: COMPRESS_OFFLINE_SOURCEMAPS_ON_FILES
+
+    :Default: ``False``
+
+    If True, write the Base64 source maps on a separated file
