@@ -44,6 +44,20 @@ class StorageTestCase(TestCase):
         out = css_tag("/static/CACHE/css/1d4424458f88.css")
         self.assertEqual(out, render(template, context))
 
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_css_tag_with_storage_no_group(self):
+        template = """{% load compress %}{% compress css %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
+        <style type="text/css">p { border:5px solid white;}</style>
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
+        {% endcompress %}
+        """
+        context = {'STATIC_URL': settings.COMPRESS_URL}
+        out = '\n'.join([css_tag('/static/CACHE/css/cdd1a7452e1d.css'),
+                         css_tag('/static/CACHE/css/bec939b6c3b6.css'),
+                         css_tag('/static/CACHE/css/652d0fbfecf5.css')])
+        self.assertEqual(out, render(template, context))
+
     def test_race_condition_handling(self):
         # Hold on to original os.remove
         original_remove = os.remove

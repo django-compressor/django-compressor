@@ -133,6 +133,8 @@ def get_precompiler_cachekey(command, contents):
 
 
 def cache_get(key):
+    if settings.COMPRESS_OFFLINE_GROUP_FILES:
+        key = 'G|%s' % key
     packed_val = cache.get(key)
     if packed_val is None:
         return None
@@ -147,6 +149,8 @@ def cache_get(key):
 
 
 def cache_set(key, val, refreshed=False, timeout=None):
+    if settings.COMPRESS_OFFLINE_GROUP_FILES:
+        key = 'G|%s' % key
     if timeout is None:
         timeout = settings.COMPRESS_REBUILD_TIMEOUT
     refresh_time = timeout + time.time()

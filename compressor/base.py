@@ -289,16 +289,21 @@ class Compressor(object):
         any custom modification. Calls other mode specific methods or simply
         returns the content directly.
         """
-        output = '\n'.join(self.filter_input(forced))
 
-        if not output:
+        outputs = self.filter_input(forced)
+        if settings.COMPRESS_OFFLINE_GROUP_FILES:
+            outputs = ['\n'.join(outputs)]
+
+        if not outputs:
             return ''
 
         if settings.COMPRESS_ENABLED or forced:
-            filtered_output = self.filter_output(output)
-            return self.handle_output(mode, filtered_output, forced)
-
-        return output
+            filtered_outputs = []
+            for output in outputs:
+                filtered_output = self.filter_output(output)
+                filtered_outputs.append(self.handle_output(mode, filtered_output, forced))
+            outputs = filtered_outputs
+        return '\n'.join(outputs)
 
     def handle_output(self, mode, content, forced, basename=None):
         # Then check for the appropriate output method and call it

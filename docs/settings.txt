@@ -516,3 +516,9 @@ Offline settings
 
     The name of the file to be used for saving the names of the files
     compressed offline.
+
+.. attribute:: COMPRESS_OFFLINE_GROUP_FILES
+
+    :Default: ``True``
+
+    If false the files are not grouped in a single file.
