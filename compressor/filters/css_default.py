@@ -109,23 +109,31 @@ class CssAbsoluteFilter(FilterBase):
 class CssRelativeFilter(CssAbsoluteFilter):
     """
     Do similar to ``CssAbsoluteFilter`` URL processing
-    but replace ``settings.COMPRESS_URL`` prefix with '../../'.
-    """
+    but replace ``settings.COMPRESS_URL`` prefix with '../' * (N + 1),
+    where N is the *depth* of ``settings.COMPRESS_OUTPUT_DIR`` folder.
 
+    E.g. by default ``settings.COMPRESS_OUTPUT_DIR == 'CACHE'``,
+    its depth N == 1, prefix == '../' * (1 + 1) == '../../'.
+
+    If ``settings.COMPRESS_OUTPUT_DIR == 'my/compiled/data'``,
+    its depth N == 3, prefix == '../' * (3 + 1) == '../../../../'.
+
+    How does it work:
+
+    - original file URL: '/static/my-app/style.css'
+    - it has an image link: ``url(images/logo.svg)``
+    - compiled file URL: '/static/CACHE/css/abcdef123456.css'
+    - replaced image link URL: ``url(../../my-app/images/logo.svg)``
+    """
     def add_suffix(self, url):
         url = super(CssRelativeFilter, self).add_suffix(url)
         old_prefix = self.url
         if self.has_scheme:
             old_prefix = '{}{}'.format(self.protocol, old_prefix)
         # One level up from 'css' / 'js' folder
-        new_prefix = ['..']
-        # N levels up from settings.COMPRESS_OUTPUT_DIR:
-        # - if it's 'CACHE' (default) then it'd be ['..'];
-        # - if it's 'CACHE/in/depth' then it'd be ['..', '..', '..'].
-        new_prefix += [
-            '..' for part in os.path.normpath(
-                settings.COMPRESS_OUTPUT_DIR
-            ).split(os.sep) if part
-        ]
-        new_prefix = '/'.join(new_prefix)
+        new_prefix = '..'
+        # N levels up from ``settings.COMPRESS_OUTPUT_DIR``
+        new_prefix += '/..' * len(list(filter(
+            None, os.path.normpath(settings.COMPRESS_OUTPUT_DIR).split(os.sep)
+        )))
         return re.sub('^{}'.format(old_prefix), new_prefix, url)

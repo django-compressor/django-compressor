@@ -89,9 +89,11 @@ Backend settings
 
     - ``compressor.filters.css_default.CssRelativeFilter``
 
-      Alternative to ``CssAbsoluteFilter`` which uses ``'../../'``
+      Alternative to ``CssAbsoluteFilter`` which uses ``'../' * (N + 1)``
       URL prefix instead of absolute path to file (if you don't want to
-      hard-code :attr:`~django.conf.settings.COMPRESS_URL` into CSS code).
+      hard-code :attr:`~django.conf.settings.COMPRESS_URL` into CSS code),
+      where ``N`` is the *depth* of ``settings.COMPRESS_OUTPUT_DIR`` folder
+      (i.e. for ``'CACHE'`` it's ``1``, for ``CACHE/data`` it's ``2``, etc).
 
     - ``compressor.filters.datauri.CssDataUriFilter``
 
