@@ -2,8 +2,8 @@ from compressor.conf import settings
 from compressor.filters import CompilerFilter
 
 
-COMPRESS_POSTCSS_BINARY  = "postcss"
-COMPRESS_POSTCSS_ARGS    = " "
+COMPRESS_POSTCSS_BINARY = "postcss"
+COMPRESS_POSTCSS_ARGS = " "
 COMPRESS_POSTCSS_PLUGINS = ()
 
 
