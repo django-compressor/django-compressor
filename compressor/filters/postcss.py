@@ -2,9 +2,9 @@ from compressor.conf import settings
 from compressor.filters import CompilerFilter
 
 
-COMPRESS_POSTCSS_BINARY = "postcss"
-COMPRESS_POSTCSS_ARGS = " "
-COMPRESS_POSTCSS_PLUGINS = ()
+DEFAULT_BINARY = "postcss"
+DEFAULT_ARGS = " "
+DEFAULT_PLUGINS = ()
 
 
 class PostCSSFilter(CompilerFilter):
@@ -14,7 +14,7 @@ class PostCSSFilter(CompilerFilter):
 
     command = "{binary} {args} {plugins} -o {outfile} {infile}"
     options = (
-        ("binary", getattr(settings, "COMPRESS_POSTCSS_BINARY", COMPRESS_POSTCSS_BINARY)),
-        ("args", getattr(settings, "COMPRESS_POSTCSS_ARGS", COMPRESS_POSTCSS_ARGS)),
-        ("plugins", plugins_as_args(getattr(settings, "COMPRESS_POSTCSS_PLUGINS", COMPRESS_POSTCSS_PLUGINS))),
+        ("binary", getattr(settings, "COMPRESS_POSTCSS_BINARY", DEFAULT_BINARY)),
+        ("args", getattr(settings, "COMPRESS_POSTCSS_ARGS", DEFAULT_ARGS)),
+        ("plugins", plugins_as_args(getattr(settings, "COMPRESS_POSTCSS_PLUGINS", DEFAULT_PLUGINS))),
     )
