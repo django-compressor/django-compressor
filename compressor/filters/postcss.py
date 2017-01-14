@@ -23,6 +23,11 @@ class PostCSSFilter(CompilerFilter):
 
 
 class PostCSSFilterTestable(PostCSSFilter):
+    """
+    This class should inherit from PostCSSFilter. Its sole purpose is to
+    make testing of the superclass easier but can be treated as the superclass
+    itself when testing.
+    """
     def __init__(self, *args, **kwargs):
         super(PostCSSFilter, self).__init__(*args, **kwargs)
         self.options = fetch_options()
