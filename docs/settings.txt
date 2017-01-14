@@ -144,11 +144,45 @@ Backend settings
 
          The arguments passed to clean-css.
 
+    - ``compressor.filters.PostCSSFilter``
+
+      A filter that passes the CSS content to the `postcss`_ tool. You can
+      specify the plugins you wish to use with :attr:`COMPRESS_POSTCSS_PLUGINS`
+      in your settings (assuming you have postcss and the desired plugins installed).
+
+      Example::
+
+          COMPRESS_POSTCSS_PLUGINS = (
+              'autoprefixer',
+              'postcss-font-magician',
+          )
+
+      .. attribute:: COMPRESS_POSTCSS_PLUGINS
+
+         A tuple with postcss plugins that you want to use. Any plugin you
+         specify here must be installed manually. If no plugins are specified
+         then the CSS will still go through postcss but without any plugins
+         applied and thus no changes to the file will occur.
+
+      .. attribute:: COMPRESS_POSTCSS_BINARY
+
+         Path to the postcss binary in the filesystem. By default ``postcss`` will
+         be used. If postcss is not installed globally or for some other reason
+         you wish to use a different binary you can explicitly state the path to that binary.
+
+      .. attribute:: COMPRESS_POSTCSS_ARGUMENTS
+
+         Extra arguments passed to postcss if desired. By default no extra
+         arguments are required.
+
+
+
 
     .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
     .. _csscompressor: http://pypi.python.org/pypi/csscompressor/
     .. _rCSSmin: http://opensource.perlig.de/rcssmin/
     .. _`clean-css`: https://github.com/GoalSmashers/clean-css/
+    .. _postcss: https://github.com/postcss/postcss
 
 
     - ``compressor.filters.template.TemplateFilter``

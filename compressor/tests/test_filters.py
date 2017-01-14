@@ -22,6 +22,7 @@ from compressor.filters.closure import ClosureCompilerFilter
 from compressor.filters.yuglify import YUglifyCSSFilter, YUglifyJSFilter
 from compressor.filters.yui import YUICSSFilter, YUIJSFilter
 from compressor.filters.cleancss import CleanCSSFilter
+from compressor.filters.postcss import PostCSSFilterTestable as PostCSSFilter
 from compressor.tests.test_base import test_dir
 
 
@@ -389,6 +390,24 @@ class CssDataUriTestCase(TestCase):
 .datauri { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9YGARc5KB0XV+IAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAF1JREFUGNO9zL0NglAAxPEfdLTs4BZM4DIO4C7OwQg2JoQ9LE1exdlYvBBeZ7jqch9//q1uH4TLzw4d6+ErXMMcXuHWxId3KOETnnXXV6MJpcq2MLaI97CER3N0 vr4MkhoXe0rZigAAAABJRU5ErkJggg=="); }
 ''' % datauri_hash]
         self.assertEqual(out, list(self.css_node.hunks()))
+
+
+class PostCSSFilterTestCase(TestCase):
+    """
+    Tests for PostCSS. Ideally we would want to install a few plugins and try
+    with those.
+    """
+
+    @override_settings(COMPRESS_POSTCSS_PLUGINS=('plugin1', 'plugin2'))
+    def test_multiple_plugins(self):
+        filter = PostCSSFilter('test')
+        options = dict(filter.options)
+        self.assertIn('--use plugin1 --use plugin2', options['plugins'])
+
+    def test_no_plugins(self):
+        filter = PostCSSFilter('test')
+        options = dict(filter.options)
+        self.assertNotIn('--use', options['plugins'])
 
 
 class TemplateTestCase(TestCase):
