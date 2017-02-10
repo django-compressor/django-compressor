@@ -2,7 +2,7 @@ Contributing
 ============
 
 Like every open-source project, Django Compressor is always looking for
-motivated individuals to contribute to it's source code.
+motivated individuals to contribute to its source code.
 However, to ensure the highest code quality and keep the repository nice and
 tidy, everybody has to follow a few rules (nothing major, I promise :) )
 
