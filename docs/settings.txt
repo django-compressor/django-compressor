@@ -19,8 +19,11 @@ Base settings
     when ``DEBUG`` is ``True`` ``COMPRESS_ENABLED`` must also be set to
     ``True``.
 
-    When ``COMPRESS_ENABLED`` is ``False`` the input will be rendered without
-    any compression except for code with a mimetype matching one listed in the
+    When ``COMPRESS_ENABLED`` is ``False`` and there is an ``else`` block, the
+    ``else`` block will be rendered unaltered. When ``COMPRESS_ENABLED`` is
+    ``False`` and there is no ``else`` block, the input will be rendered
+    without any compression except for code with a mimetype matching one
+    listed in the
     :attr:`~django.conf.settings.COMPRESS_PRECOMPILERS` setting. These
     matching files are still passed to the precompiler before rendering.
 

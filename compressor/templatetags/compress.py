@@ -109,13 +109,16 @@ class CompressorMixin(object):
 
 class CompressorNode(CompressorMixin, template.Node):
 
-    def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE, name=None):
+    def __init__(self, nodelist, nodelist_else=None, kind=None, mode=OUTPUT_FILE, name=None):
         self.nodelist = nodelist
+        self.nodelist_else = nodelist_else
         self.kind = kind
         self.mode = mode
         self.name = name
 
     def get_original_content(self, context):
+        if not settings.COMPRESS_ENABLED and self.nodelist_else:
+            return self.nodelist_else.render(context)
         return self.nodelist.render(context)
 
     def render(self, context, forced=False):
@@ -136,7 +139,11 @@ def compress(parser, token):
 
         {% compress <js/css> %}
         <html of inline or linked JS/CSS>
+        {% else %}
+        <html of inline or linked JS/CSS if compression is disabled>
         {% endcompress %}
+
+    The else part is optional.
 
     Examples::
 
@@ -166,9 +173,6 @@ def compress(parser, token):
     they will be silently stripped.
     """
 
-    nodelist = parser.parse(('endcompress',))
-    parser.delete_first_token()
-
     args = token.split_contents()
 
     if not len(args) in (2, 3, 4):
@@ -189,4 +193,14 @@ def compress(parser, token):
         name = args[3]
     else:
         name = None
-    return CompressorNode(nodelist, kind, mode, name)
+
+    nodelist = parser.parse(('endcompress', 'else'))
+    token = parser.next_token()
+
+    nodelist_else = None
+    if token.contents.startswith('else'):
+        nodelist_else = parser.parse(('endcompress',))
+        token = parser.next_token()
+        assert token.contents == 'endcompress'
+
+    return CompressorNode(nodelist, nodelist_else, kind, mode, name)
