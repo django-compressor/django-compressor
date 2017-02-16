@@ -6,7 +6,7 @@ from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
 
-URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
+URL_PATTERN = re.compile(r'url\( *(([\'"]?).+?\2) *\)')
 SRC_PATTERN = re.compile(r'src=([\'"])(.+?)\1')
 SCHEMES = ('http://', 'https://', '/', 'data:')
 

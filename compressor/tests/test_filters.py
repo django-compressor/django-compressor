@@ -214,12 +214,6 @@ class CssAbsolutizingTestCase(TestCase):
         self.override_settings = self.settings(COMPRESS_CSS_HASHING_METHOD=self.hashing_method)
         self.override_settings.__enter__()
 
-        self.css = """
-        <link rel="stylesheet" href="/static/css/url/url1.css" type="text/css">
-        <link rel="stylesheet" href="/static/css/url/2/url2.css" type="text/css">
-        """
-        self.css_node = CssCompressor(self.css)
-
     def tearDown(self):
         self.override_settings.__exit__(None, None, None)
 
@@ -330,7 +324,13 @@ p { background: url('%(compress_url)simg/add.png?%(hash)s'); }
 p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='%(compress_url)simg/add.png?%(hash)s'); }
 """ % dict(compress_url=settings.COMPRESS_URL, hash=hash_add_png)
 
-        self.assertEqual([css1, css2], list(self.css_node.hunks()))
+        css = """
+        <link rel="stylesheet" href="/static/css/url/url1.css" type="text/css">
+        <link rel="stylesheet" href="/static/css/url/2/url2.css" type="text/css">
+        """
+        css_node = CssCompressor(css)
+
+        self.assertEqual([css1, css2], list(css_node.hunks()))
 
     def test_guess_filename(self):
         url = '%s/img/python.png' % settings.COMPRESS_URL.rstrip('/')
@@ -353,6 +353,11 @@ p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='%(compress_u
         output = template % params
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename, basename='css/url/test.css'))
+
+    def test_does_not_change_nested_urls(self):
+        css = """body { background-image: url("data:image/svg+xml;utf8,<svg><rect fill='url(%23gradient)'/></svg>");}"""
+        filter = CssAbsoluteFilter(css, filename="doesntmatter")
+        self.assertEqual(css, filter.input(filename="doesntmatter", basename="doesntmatter"))
 
 
 @override_settings(COMPRESS_URL='http://static.example.com/')
