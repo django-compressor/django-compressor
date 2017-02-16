@@ -6,9 +6,15 @@ from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
 
-URL_PATTERN = re.compile(r'url\( *([\'"]?)(.+?)\1 *\)')
-# URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
-SRC_PATTERN = re.compile(r'src=([\'"])(.+?)\1')
+URL_PATTERN = re.compile(r"""
+    url\(
+    \s*      # any amount of whitespace
+    ([\'"]?) # optional quote
+    (.*?)    # any amount of anything, non-greedily (this is the actual url)
+    \1       # matching quote (or nothing if there was none)
+    \s*      # any amount of whitespace
+    \)""", re.VERBOSE)
+SRC_PATTERN = re.compile(r'src=([\'"])(.*?)\1')
 SCHEMES = ('http://', 'https://', '/')
 
 
