@@ -310,16 +310,16 @@ class CssAbsolutizingTestCase(TestCase):
 
         css1 = """\
 p { background: url('%(compress_url)simg/python.png?%(hash)s'); }
-p { background: url('%(compress_url)simg/python.png?%(hash)s'); }
-p { background: url('%(compress_url)simg/python.png?%(hash)s'); }
+p { background: url(%(compress_url)simg/python.png?%(hash)s); }
+p { background: url(%(compress_url)simg/python.png?%(hash)s); }
 p { background: url('%(compress_url)simg/python.png?%(hash)s'); }
 p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='%(compress_url)simg/python.png?%(hash)s'); }
 """ % dict(compress_url=settings.COMPRESS_URL, hash=hash_python_png)
 
         css2 = """\
 p { background: url('%(compress_url)simg/add.png?%(hash)s'); }
-p { background: url('%(compress_url)simg/add.png?%(hash)s'); }
-p { background: url('%(compress_url)simg/add.png?%(hash)s'); }
+p { background: url(%(compress_url)simg/add.png?%(hash)s); }
+p { background: url(%(compress_url)simg/add.png?%(hash)s); }
 p { background: url('%(compress_url)simg/add.png?%(hash)s'); }
 p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='%(compress_url)simg/add.png?%(hash)s'); }
 """ % dict(compress_url=settings.COMPRESS_URL, hash=hash_add_png)
@@ -358,6 +358,14 @@ p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='%(compress_u
         css = """body { background-image: url("data:image/svg+xml;utf8,<svg><rect fill='url(%23gradient)'/></svg>");}"""
         filter = CssAbsoluteFilter(css, filename="doesntmatter")
         self.assertEqual(css, filter.input(filename="doesntmatter", basename="doesntmatter"))
+
+    def test_does_not_change_quotes_in_src(self):
+        filename = os.path.join(settings.COMPRESS_ROOT, 'css/url/test.css')
+        hash_add_png = self.hashing_func(os.path.join(settings.COMPRESS_ROOT, 'img/add.png'))
+        css = """p { filter: Alpha(src="/img/add.png%(hash)s") }"""
+        filter = CssAbsoluteFilter(css % dict(hash=""))
+        expected = css % dict(hash='?' + hash_add_png)
+        self.assertEqual(expected, filter.input(filename=filename, basename='css/url/test.css'))
 
 
 @override_settings(COMPRESS_URL='http://static.example.com/')

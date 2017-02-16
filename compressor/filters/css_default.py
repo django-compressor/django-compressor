@@ -6,7 +6,8 @@ from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
 
-URL_PATTERN = re.compile(r'url\( *(([\'"]?).+?\2) *\)')
+URL_PATTERN = re.compile(r'url\( *([\'"]?)(.+?)\1 *\)')
+# URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 SRC_PATTERN = re.compile(r'src=([\'"])(.+?)\1')
 SCHEMES = ('http://', 'https://', '/')
 
@@ -86,7 +87,7 @@ class CssAbsoluteFilter(FilterBase):
         url = matchobj.group(group)
 
         url = url.strip()
-        wrap = '"' if url[0] == '"' else "'"
+        wrap = matchobj.group(1)
         url = url.strip('\'"')
 
         if url.startswith(('#', 'data:')):
@@ -100,7 +101,7 @@ class CssAbsoluteFilter(FilterBase):
         return template % (wrap, self.add_suffix(full_url), wrap)
 
     def url_converter(self, matchobj):
-        return self._converter(matchobj, 1, "url(%s%s%s)")
+        return self._converter(matchobj, 2, "url(%s%s%s)")
 
     def src_converter(self, matchobj):
         return self._converter(matchobj, 2, "src=%s%s%s")
