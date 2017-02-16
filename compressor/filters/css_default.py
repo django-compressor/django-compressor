@@ -8,7 +8,7 @@ from compressor.filters import FilterBase, FilterError
 
 URL_PATTERN = re.compile(r'url\( *(([\'"]?).+?\2) *\)')
 SRC_PATTERN = re.compile(r'src=([\'"])(.+?)\1')
-SCHEMES = ('http://', 'https://', '/', 'data:')
+SCHEMES = ('http://', 'https://', '/')
 
 
 class CssAbsoluteFilter(FilterBase):
@@ -89,7 +89,7 @@ class CssAbsoluteFilter(FilterBase):
         wrap = '"' if url[0] == '"' else "'"
         url = url.strip('\'"')
 
-        if url.startswith('#'):
+        if url.startswith(('#', 'data:')):
             return template % (wrap, url, wrap)
         elif url.startswith(SCHEMES):
             return template % (wrap, self.add_suffix(url), wrap)
