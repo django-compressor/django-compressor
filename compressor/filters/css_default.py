@@ -6,9 +6,16 @@ from compressor.cache import get_hashed_mtime, get_hashed_content
 from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
 
-URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
-SRC_PATTERN = re.compile(r'src=([\'"])(.+?)\1')
-SCHEMES = ('http://', 'https://', '/', 'data:')
+URL_PATTERN = re.compile(r"""
+    url\(
+    \s*      # any amount of whitespace
+    ([\'"]?) # optional quote
+    (.*?)    # any amount of anything, non-greedily (this is the actual url)
+    \1       # matching quote (or nothing if there was none)
+    \s*      # any amount of whitespace
+    \)""", re.VERBOSE)
+SRC_PATTERN = re.compile(r'src=([\'"])(.*?)\1')
+SCHEMES = ('http://', 'https://', '/')
 
 
 class CssAbsoluteFilter(FilterBase):
@@ -56,51 +63,50 @@ class CssAbsoluteFilter(FilterBase):
 
     def add_suffix(self, url):
         filename = self.guess_filename(url)
+        if not filename:
+            return url
+        if settings.COMPRESS_CSS_HASHING_METHOD is None:
+            return url
+        if not url.startswith(SCHEMES):
+            return url
+
         suffix = None
-        if filename:
-            if settings.COMPRESS_CSS_HASHING_METHOD == "mtime":
-                suffix = get_hashed_mtime(filename)
-            elif settings.COMPRESS_CSS_HASHING_METHOD in ("hash", "content"):
-                suffix = get_hashed_content(filename)
-            elif settings.COMPRESS_CSS_HASHING_METHOD is None:
-                suffix = None
-            else:
-                raise FilterError('COMPRESS_CSS_HASHING_METHOD is configured '
+        if settings.COMPRESS_CSS_HASHING_METHOD == "mtime":
+            suffix = get_hashed_mtime(filename)
+        elif settings.COMPRESS_CSS_HASHING_METHOD in ("hash", "content"):
+            suffix = get_hashed_content(filename)
+        else:
+            raise FilterError('COMPRESS_CSS_HASHING_METHOD is configured '
                                   'with an unknown method (%s).' %
                                   settings.COMPRESS_CSS_HASHING_METHOD)
-        if suffix is None:
-            return url
-        if url.startswith(SCHEMES):
-            fragment = None
-            if "#" in url:
-                url, fragment = url.rsplit("#", 1)
-            if "?" in url:
-                url = "%s&%s" % (url, suffix)
-            else:
-                url = "%s?%s" % (url, suffix)
-            if fragment is not None:
-                url = "%s#%s" % (url, fragment)
+        fragment = None
+        if "#" in url:
+            url, fragment = url.rsplit("#", 1)
+        if "?" in url:
+            url = "%s&%s" % (url, suffix)
+        else:
+            url = "%s?%s" % (url, suffix)
+        if fragment is not None:
+            url = "%s#%s" % (url, fragment)
         return url
 
-    def _converter(self, matchobj, group, template):
-        url = matchobj.group(group)
-
-        url = url.strip()
-        wrap = '"' if url[0] == '"' else "'"
-        url = url.strip('\'"')
-
-        if url.startswith('#'):
-            return template % (wrap, url, wrap)
+    def _converter(self, url):
+        if url.startswith(('#', 'data:')):
+            return url
         elif url.startswith(SCHEMES):
-            return template % (wrap, self.add_suffix(url), wrap)
+            return self.add_suffix(url)
         full_url = posixpath.normpath('/'.join([str(self.directory_name),
                                                 url]))
         if self.has_scheme:
             full_url = "%s%s" % (self.protocol, full_url)
-        return template % (wrap, self.add_suffix(full_url), wrap)
+        return self.add_suffix(full_url)
 
     def url_converter(self, matchobj):
-        return self._converter(matchobj, 1, "url(%s%s%s)")
+        quote = matchobj.group(1)
+        converted_url = self._converter(matchobj.group(2))
+        return "url(%s%s%s)" % (quote, converted_url, quote)
 
     def src_converter(self, matchobj):
-        return self._converter(matchobj, 2, "src=%s%s%s")
+        quote = matchobj.group(1)
+        converted_url = self._converter(matchobj.group(2))
+        return "src=%s%s%s" % (quote, converted_url, quote)
