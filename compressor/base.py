@@ -339,7 +339,7 @@ class Compressor(object):
 
         self.context['compressed'].update(context or {})
         self.context['compressed'].update(self.extra_context)
-        if hasattr(self.context, 'flatten'):
+        if VERSION < (1, 8) or VERSION > (1, 9):
             # Django 1.8 complains about Context being passed to its
             # Template.render function.
             final_context = self.context.flatten()
