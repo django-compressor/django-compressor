@@ -132,6 +132,22 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">obj.value = "value";</script>"""
         self.assertEqual(out, render(template, context))
 
+    def test_inline(self):
+        template = """{% load compress %}{% compress js inline %}
+        <script src="{{ STATIC_URL }}js/one.js" type="text/javascript"></script>
+        <script type="text/javascript">obj.value = "value";</script>
+        {% endcompress %}{% compress css inline %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
+        <style type="text/css">p { border:5px solid green;}</style>
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
+        {% endcompress %}"""
+
+        out_js = '<script type="text/javascript">;obj={};;obj.value="value";</script>'
+        out_css = '\n'.join(('<style type="text/css">body { background:#990; }',
+                             'p { border:5px solid green;}',
+                             'body { color:#fff; }</style>'))
+        self.assertEqual(out_js + out_css, render(template, self.context))
+
     def test_named_compress_tag(self):
         template = """{% load compress %}{% compress js inline foo %}
         <script type="text/javascript">obj.value = "value";</script>
