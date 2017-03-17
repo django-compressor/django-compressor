@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 import io
 import logging
 import subprocess
+import pipes
 
 from importlib import import_module
 from platform import system
@@ -46,7 +47,7 @@ class FilterBase(object):
         self.content = content
         self.verbose = verbose or settings.COMPRESS_VERBOSE
         self.logger = logger
-        self.filename = filename
+        self.filename = pipes.quote(filename)
         self.charset = charset
 
     def input(self, **kwargs):
