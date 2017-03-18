@@ -145,4 +145,7 @@ setup(
         'rcssmin == 1.0.6',
         'rjsmin == 1.0.12',
     ],
+    extras_require = {
+        'cssmin':  ["cssmin"],
+    },
 )
