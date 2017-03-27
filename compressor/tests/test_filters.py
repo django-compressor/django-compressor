@@ -319,7 +319,7 @@ p { background: url(%(compress_url)simg/python.png?%(hash)s); }
 p { background: url(%(compress_url)simg/python.png?%(hash)s); }
 p { background: url('%(compress_url)simg/python.png?%(hash)s'); }
 p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='%(compress_url)simg/python.png?%(hash)s'); }
-""" % dict(compress_url=settings.COMPRESS_URL, hash=hash_python_png)
+""" % dict(compress_url=self.expected_url_prefix, hash=hash_python_png)
 
         css2 = """\
 p { background: url('%(compress_url)simg/add.png?%(hash)s'); }
@@ -327,7 +327,7 @@ p { background: url(%(compress_url)simg/add.png?%(hash)s); }
 p { background: url(%(compress_url)simg/add.png?%(hash)s); }
 p { background: url('%(compress_url)simg/add.png?%(hash)s'); }
 p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='%(compress_url)simg/add.png?%(hash)s'); }
-""" % dict(compress_url=settings.COMPRESS_URL, hash=hash_add_png)
+""" % dict(compress_url=self.expected_url_prefix, hash=hash_add_png)
 
         css = """
         <link rel="stylesheet" href="/static/css/url/url1.css" type="text/css">
