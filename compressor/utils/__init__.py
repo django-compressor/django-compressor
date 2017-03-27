@@ -15,8 +15,10 @@ def get_class(class_string, exception=FilterError):
             mod_name, class_name = get_mod_func(class_string)
             if class_name:
                 return getattr(__import__(mod_name, {}, {}, [str('')]), class_name)
-        except (ImportError, AttributeError):
-            raise exception('Failed to import %s' % class_string)
+        except AttributeError as e:
+            raise exception('Failed to import %s. AttributeError is: %s' % (class_string, e))
+        except ImportError as e:
+            raise exception('Failed to import %s. ImportError is: %s' % (class_string, e))
 
         raise exception("Invalid class path '%s'" % class_string)
 

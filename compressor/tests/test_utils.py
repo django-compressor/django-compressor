@@ -5,6 +5,8 @@ import django.contrib.staticfiles.finders
 import django
 
 import compressor.utils.staticfiles
+from compressor.exceptions import FilterError
+from compressor.utils import get_class
 
 from imp import reload
 
@@ -44,3 +46,13 @@ class StaticFilesTestCase(TestCase):
                 self.assertTrue(compressor.utils.staticfiles.finders is None)
         finally:
             reload(compressor.utils.staticfiles)
+
+
+class TestGetClass(TestCase):
+
+    def test_get_class_import_exception(self):
+        with self.assertRaises(FilterError) as context:
+            get_class('common.uglify.JsUglifySourcemapCompressor')
+
+        self.assertTrue(('Failed to import common.uglify.JsUglifySourcemapCompressor. '
+                         'ImportError is: No module named' in str(context.exception)))
