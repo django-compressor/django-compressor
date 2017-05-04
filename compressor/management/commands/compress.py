@@ -248,8 +248,8 @@ class Command(BaseCommand):
                     try:
                         result = parser.render_node(template, context, node)
                     except Exception as e:
-                        raise CommandError("An error occurred during rendering %s: "
-                                           "%s" % (template.template_name, smart_text(e)))
+                        raise CommandError(u"An error occurred during rendering %s: "
+                                           u"%s" % (template.template_name, smart_text(e)))
                     result = result.replace(
                         settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
                     )
