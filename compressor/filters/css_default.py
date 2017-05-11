@@ -104,9 +104,7 @@ class CssAbsoluteFilter(FilterBase):
 
     def post_process_url(self, url):
         """
-        Extra URL processing.
-
-        Abstract method to be overridden in derived classes.
+        Extra URL processing, to be overridden in subclasses.
         """
         return url
 
@@ -132,12 +130,12 @@ class CssRelativeFilter(CssAbsoluteFilter):
         where N is the *depth* of ``settings.COMPRESS_OUTPUT_DIR`` folder.
 
         E.g. by default ``settings.COMPRESS_OUTPUT_DIR == 'CACHE'``,
-        its depth N == 1, prefix == '../' * (1 + 1) == '../../'.
+        the depth is 1, and the prefix will be '../../'.
 
         If ``settings.COMPRESS_OUTPUT_DIR == 'my/compiled/data'``,
-        its depth N == 3, prefix == '../' * (3 + 1) == '../../../../'.
+        the depth is 3, and the prefix will be '../../../../'.
 
-        How does it work:
+        Example:
 
         - original file URL: '/static/my-app/style.css'
         - it has an image link: ``url(images/logo.svg)``
