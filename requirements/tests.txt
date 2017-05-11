@@ -1,5 +1,5 @@
 flake8==2.4.0
-coverage==3.7.1
+coverage==4.4
 html5lib==0.9999999
 mock==1.0.1
 Jinja2==2.7.3
