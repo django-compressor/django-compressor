@@ -3,8 +3,6 @@ import copy
 import django
 import io
 import os
-import sys
-import unittest
 from importlib import import_module
 
 from mock import patch
@@ -34,12 +32,6 @@ else:
     except ImportError:
         from StringIO import StringIO
 
-# The Jinja2 tests fail on Python 3.2 due to the following:
-# The line in compressor/management/commands/compress.py:
-#     compressor_nodes.setdefault(template, []).extend(nodes)
-# causes the error 'unhashable type: 'Template''
-_TEST_JINJA2 = not(sys.version_info[0] == 3 and sys.version_info[1] == 2)
-
 
 def offline_context_generator():
     for i in range(1, 4):
@@ -57,10 +49,7 @@ class OfflineTestCaseMixin(object):
     templates_dir = ''
     expected_hash = ''
     # Engines to test
-    if _TEST_JINJA2:
-        engines = ('django', 'jinja2')
-    else:
-        engines = ('django',)
+    engines = ('django', 'jinja2')
     additional_test_settings = None
 
     def setUp(self):
@@ -247,7 +236,6 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
         self.assertRaises(OfflineGenerationError,
                           self.template.render, Context({}))
 
-    @unittest.skipIf(not _TEST_JINJA2, 'No Jinja2 testing')
     def test_rendering_without_manifest_raises_exception_jinja2(self):
         # flush cached manifest
         flush_offline_manifest()
@@ -742,7 +730,6 @@ class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual(count, 1)
 
 
-@skipIf(not _TEST_JINJA2, "Test only run if we are testing Jinja2")
 class TestCompressCommand(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_compress_command"
 
