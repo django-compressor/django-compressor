@@ -77,8 +77,8 @@ class CssAbsoluteFilter(FilterBase):
             suffix = get_hashed_content(filename)
         else:
             raise FilterError('COMPRESS_CSS_HASHING_METHOD is configured '
-                                  'with an unknown method (%s).' %
-                                  settings.COMPRESS_CSS_HASHING_METHOD)
+                              'with an unknown method (%s).' %
+                              settings.COMPRESS_CSS_HASHING_METHOD)
         fragment = None
         if "#" in url:
             url, fragment = url.rsplit("#", 1)
@@ -99,7 +99,14 @@ class CssAbsoluteFilter(FilterBase):
                                                 url]))
         if self.has_scheme:
             full_url = "%s%s" % (self.protocol, full_url)
-        return self.add_suffix(full_url)
+        full_url = self.add_suffix(full_url)
+        return self.post_process_url(full_url)
+
+    def post_process_url(self, url):
+        """
+        Extra URL processing, to be overridden in subclasses.
+        """
+        return url
 
     def url_converter(self, matchobj):
         quote = matchobj.group(1)
@@ -110,3 +117,38 @@ class CssAbsoluteFilter(FilterBase):
         quote = matchobj.group(1)
         converted_url = self._converter(matchobj.group(2))
         return "src=%s%s%s" % (quote, converted_url, quote)
+
+
+class CssRelativeFilter(CssAbsoluteFilter):
+    """
+    Do similar to ``CssAbsoluteFilter`` URL processing
+    but add a *relative URL prefix* instead of ``settings.COMPRESS_URL``.
+    """
+    def post_process_url(self, url):
+        """
+        Replace ``settings.COMPRESS_URL`` URL prefix with  '../' * (N + 1)
+        where N is the *depth* of ``settings.COMPRESS_OUTPUT_DIR`` folder.
+
+        E.g. by default ``settings.COMPRESS_OUTPUT_DIR == 'CACHE'``,
+        the depth is 1, and the prefix will be '../../'.
+
+        If ``settings.COMPRESS_OUTPUT_DIR == 'my/compiled/data'``,
+        the depth is 3, and the prefix will be '../../../../'.
+
+        Example:
+
+        - original file URL: '/static/my-app/style.css'
+        - it has an image link: ``url(images/logo.svg)``
+        - compiled file URL: '/static/CACHE/css/abcdef123456.css'
+        - replaced image link URL: ``url(../../my-app/images/logo.svg)``
+        """
+        old_prefix = self.url
+        if self.has_scheme:
+            old_prefix = '{}{}'.format(self.protocol, old_prefix)
+        # One level up from 'css' / 'js' folder
+        new_prefix = '..'
+        # N levels up from ``settings.COMPRESS_OUTPUT_DIR``
+        new_prefix += '/..' * len(list(filter(
+            None, os.path.normpath(settings.COMPRESS_OUTPUT_DIR).split(os.sep)
+        )))
+        return re.sub('^{}'.format(old_prefix), new_prefix, url)
