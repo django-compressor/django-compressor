@@ -379,18 +379,10 @@ Caching settings
 
 .. attribute:: COMPRESS_CACHE_BACKEND
 
-    :Default: ``CACHES["default"]`` or ``CACHE_BACKEND``
+    :Default: ``"default"``
 
-    The backend to use for caching, in case you want to use a different cache
-    backend for Django Compressor.
-
-    If you have set the ``CACHES`` setting (new in Django 1.3),
-    ``COMPRESS_CACHE_BACKEND`` defaults to ``"default"``, which is the alias for
-    the default cache backend. You can set it to a different alias that you have
-    configured in your ``CACHES`` setting.
-
-    If you have not set ``CACHES`` and are using the old ``CACHE_BACKEND``
-    setting, ``COMPRESS_CACHE_BACKEND`` defaults to the ``CACHE_BACKEND`` setting.
+    The cache to use by Django Compressor. Must be a cache alias specified in
+    your ``CACHES`` setting.
 
 .. attribute:: COMPRESS_REBUILD_TIMEOUT
 
