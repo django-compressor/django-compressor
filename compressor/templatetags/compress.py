@@ -61,7 +61,8 @@ class CompressorMixin(object):
         If enabled and in offline mode, and not forced check the offline cache
         and return the result if given
         """
-        key = get_offline_hexdigest(self.get_original_content(context))
+        original_content = self.get_original_content(context)
+        key = get_offline_hexdigest(original_content)
         offline_manifest = get_offline_manifest()
         if key in offline_manifest:
             return offline_manifest[key].replace(
@@ -70,7 +71,8 @@ class CompressorMixin(object):
         else:
             raise OfflineGenerationError('You have offline compression '
                 'enabled but key "%s" is missing from offline manifest. '
-                'You may need to run "python manage.py compress".' % key)
+                'You may need to run "python manage.py compress". Here '
+                'is the original content:\n\n%s' % (key, original_content))
 
     def render_cached(self, compressor, kind, mode):
         """
