@@ -27,7 +27,7 @@ Long version:
   Statics are never stale and browsers can be told to cache the output forever.
 
 **Full test suite**
-  I has one.
+  It has one.
 
 Contents
 ========
