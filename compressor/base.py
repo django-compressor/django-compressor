@@ -3,6 +3,7 @@ import os
 import codecs
 from importlib import import_module
 
+from django import VERSION
 from django.core.files.base import ContentFile
 from django.utils.safestring import mark_safe
 from django.utils.six.moves.urllib.request import url2pathname
@@ -341,12 +342,12 @@ class Compressor(object):
 
         self.context['compressed'].update(context or {})
         self.context['compressed'].update(self.extra_context)
-        if hasattr(self.context, 'flatten'):
+        if VERSION < (1, 8) or VERSION > (1, 9):
             # Django 1.8 complains about Context being passed to its
             # Template.render function.
-            final_context = self.context.flatten()
-        else:
             final_context = self.context
+        else:
+            final_context = self.context.flatten()
 
         post_compress.send(sender=self.__class__, type=self.type,
                            mode=mode, context=final_context)
