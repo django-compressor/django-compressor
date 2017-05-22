@@ -144,7 +144,7 @@ class Command(BaseCommand):
                     templates.update(os.path.join(root, name)
                         for name in files if not name.startswith('.') and
                             any(fnmatch(name, "*%s" % glob) for glob in extensions))
-        elif engine == 'jinja2' and django.VERSION >= (1, 8):
+        elif engine == 'jinja2':
             env = settings.COMPRESS_JINJA2_GET_ENVIRONMENT()
             if env and hasattr(env, 'list_templates'):
                 templates |= set([env.loader.get_source(env, template)[1] for template in
