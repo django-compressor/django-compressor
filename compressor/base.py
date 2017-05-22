@@ -236,13 +236,14 @@ class Compressor(object):
             content.append(hunk)
         return content
 
-    def precompile(self, content, kind=None, elem=None, filename=None,
-                   charset=None, **kwargs):
+    def precompile(self, content, kind=None, elem=None, filename=None, **kwargs):
         """
         Processes file using a pre compiler.
 
         This is the place where files like coffee script are processed.
         """
+        charset = kwargs.get('charset', None)
+
         if not kind:
             return False, content
         attrs = self.parser.elem_attribs(elem)
