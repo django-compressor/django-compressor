@@ -178,7 +178,7 @@ class CompressorTestCase(SimpleTestCase):
     def test_cachekey(self):
         is_cachekey = re.compile(r'\w{12}')
         self.assertTrue(is_cachekey.match(self.css_node.cachekey),
-            "cachekey is returning something that doesn't look like r'\w{12}'")
+            r"cachekey is returning something that doesn't look like r'\w{12}'")
 
     def test_css_return_if_on(self):
         output = css_tag('/static/CACHE/css/e41ba2cc6982.css')
