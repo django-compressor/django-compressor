@@ -21,6 +21,7 @@ class CompressorConf(AppConf):
 
     CSS_COMPRESSOR = 'compressor.css.CssCompressor'
     JS_COMPRESSOR = 'compressor.js.JsCompressor'
+    LDJSON_COMPRESSOR = 'compressor.ldjson.LdjsonCompressor'
 
     URL = None
     ROOT = None

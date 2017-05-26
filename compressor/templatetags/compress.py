@@ -24,13 +24,14 @@ class CompressorMixin(object):
     def compressors(self):
         return {
             'js': settings.COMPRESS_JS_COMPRESSOR,
+            'ldjson': settings.COMPRESS_LDJSON_COMPRESSOR,
             'css': settings.COMPRESS_CSS_COMPRESSOR,
         }
 
     def compressor_cls(self, kind, *args, **kwargs):
         if kind not in self.compressors.keys():
             raise template.TemplateSyntaxError(
-                "The compress tag's argument must be 'js' or 'css'.")
+                "The compress tag's argument must be 'js' or 'css' pr 'ldjson'.")
         return get_class(self.compressors.get(kind),
                          exception=ImproperlyConfigured)(*args, **kwargs)
 
