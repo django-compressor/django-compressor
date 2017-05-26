@@ -22,10 +22,11 @@ class CompressorMixin(object):
 
     @property
     def compressors(self):
-        return {
+        defaults = {
             'js': settings.COMPRESS_JS_COMPRESSOR,
             'css': settings.COMPRESS_CSS_COMPRESSOR,
         }
+        return getattr(settings, 'COMPRESS_COMPROCESSORS', defaults)
 
     def compressor_cls(self, kind, *args, **kwargs):
         if kind not in self.compressors.keys():
