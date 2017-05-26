@@ -105,7 +105,7 @@ class CompressorConf(AppConf):
         # Uses Django's STATIC_URL by default
         if value is None:
             value = settings.STATIC_URL
-        if not value.endswith('/'):
+        if not value.endswith(os.sep):
             raise ImproperlyConfigured("URL settings (e.g. COMPRESS_URL) "
                                        "must have a trailing slash")
         return value
