@@ -132,7 +132,9 @@ class DjangoParser(object):
         nodelist = []
         if isinstance(node, Node):
             for attr in node.child_nodelists:
-                nodelist += getattr(node, attr, [])
+                attrs = getattr(node, attr, [])
+                if attrs != None:
+                    nodelist += attrs
         else:
             nodelist = getattr(node, 'nodelist', [])
         return nodelist
