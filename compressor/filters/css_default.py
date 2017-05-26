@@ -59,7 +59,7 @@ class CssAbsoluteFilter(FilterBase):
             local_path = local_path.replace(self.url_path, "", 1)
         # Re-build the local full path by adding root
         filename = os.path.join(self.root, local_path.lstrip('/'))
-        return os.path.exists(filename) and filename
+        return os.path.exists(filename.encode('UTF-8')) and filename
 
     def add_suffix(self, url):
         filename = self.guess_filename(url)
