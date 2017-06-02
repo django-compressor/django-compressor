@@ -12,6 +12,20 @@ from django.template.loader_tags import BLOCK_CONTEXT_KEY, ExtendsNode, BlockNod
 from compressor.exceptions import TemplateSyntaxError, TemplateDoesNotExist
 from compressor.templatetags.compress import CompressorNode
 
+from django.template import defaulttags
+
+NOT_ALLOWED_TEMPLATE_TAGS = (
+    defaulttags.CsrfTokenNode,
+    defaulttags.CycleNode,
+    defaulttags.ForNode,
+    defaulttags.IfNode,
+    defaulttags.LoremNode,
+    defaulttags.NowNode,
+    defaulttags.ResetCycleNode,
+    defaulttags.VerbatimNode,
+    defaulttags.WithNode,
+)
+
 
 def handle_extendsnode(extendsnode, context):
     """Create a copy of Node tree of a derived template replacing
@@ -110,6 +124,13 @@ class DjangoParser(object):
         pass
 
     def render_nodelist(self, template, context, node):
+        for section_node in node.nodelist:
+            for node_type in NOT_ALLOWED_TEMPLATE_TAGS:
+                if isinstance(section_node, node_type):
+                    msg = "Invalid template tag(%s) used in template(%s)" % (node_type, template.name)
+                    print(msg)
+                    raise Exception(msg)
+
         context.template = template
         return node.nodelist.render(context)
 
