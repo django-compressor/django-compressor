@@ -69,6 +69,7 @@ class CompressorMixin(object):
                 settings.COMPRESS_URL_PLACEHOLDER, settings.COMPRESS_URL
             )
         else:
+            print("Error occurred while rendering (%s)" % self.get_original_content(context))
             raise OfflineGenerationError('You have offline compression '
                 'enabled but key "%s" is missing from offline manifest. '
                 'You may need to run "python manage.py compress". Here '

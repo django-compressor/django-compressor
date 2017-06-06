@@ -113,14 +113,14 @@ def find_package_data(where='.', package='',
     return out
 
 setup(
-    name="django_compressor",
+    name="coverfox_django_compressor",
     version=find_version("compressor", "__init__.py"),
     url='https://django-compressor.readthedocs.io/en/latest/',
     license='MIT',
     description="Compresses linked and inline JavaScript or CSS into single cached files.",
     long_description=read('README.rst'),
-    author='Jannis Leidel',
-    author_email='jannis@leidel.info',
+    author='Hitul Mistry',
+    author_email='hitul.mistry@coverfoxmail.com',
     packages=find_packages(),
     package_data=find_package_data(),
     classifiers=[

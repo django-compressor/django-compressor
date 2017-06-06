@@ -229,7 +229,7 @@ class Command(BaseCommand):
         for template, nodes in compressor_nodes.items():
             template._log = log
             template._log_verbosity = verbosity
-
+            print("Compressing (%s)" % template.name)
             for node, contexts in nodes.items():
                 for context in contexts:
                     if context not in compressed_contexts:
