@@ -104,7 +104,11 @@ class CompressorMixin(object):
             if cache_content is not None:
                 return cache_content
 
-        rendered_output = compressor.output(mode, forced=forced)
+        file_basename = getattr(self, 'name', None) or getattr(self, 'basename', None)
+        if file_basename is None:
+            file_basename = 'output'
+
+        rendered_output = compressor.output(mode, forced=forced, basename=file_basename)
         assert isinstance(rendered_output, six.string_types)
         if cache_key:
             cache_set(cache_key, rendered_output)

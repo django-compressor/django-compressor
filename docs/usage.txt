@@ -27,7 +27,7 @@ Which would be rendered something like:
 
 .. code-block:: django
 
-    <link rel="stylesheet" href="/static/CACHE/css/f7c661b7a124.css" type="text/css" charset="utf-8">
+    <link rel="stylesheet" href="/static/CACHE/css/one.f7c661b7a124.css" type="text/css" charset="utf-8">
 
 or:
 
@@ -35,7 +35,7 @@ or:
 
     {% load compress %}
 
-    {% compress js %}
+    {% compress js file base %}
     <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
     {% endcompress %}
@@ -44,7 +44,7 @@ Which would be rendered something like:
 
 .. code-block:: django
 
-    <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/static/CACHE/js/base.3f33b9146e12.js" charset="utf-8"></script>
 
 .. note::
 
