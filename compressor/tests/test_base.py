@@ -211,6 +211,12 @@ class CompressorTestCase(SimpleTestCase):
         out = '<script type="text/javascript" src="/static/CACHE/js/d728fc7f9301.js"></script>'
         self.assertEqual(out, self.js_node.output())
 
+    @override_settings(COMPRESS_CACHE_HASH='sha256')
+    def test_js_output_sha256(self):
+        """ Modify the CACHE_HASH to use sha256 instead of md5 """
+        out = '<script type="text/javascript" src="/static/CACHE/js/74e158ccb432.js"></script>'
+        self.assertEqual(out, self.js_node.output())
+
     def test_js_override_url(self):
         self.js_node.context.update({'url': 'This is not a url, just a text'})
         out = '<script type="text/javascript" src="/static/CACHE/js/d728fc7f9301.js"></script>'
