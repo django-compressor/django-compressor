@@ -18,7 +18,8 @@ _cachekey_func = None
 
 
 def get_hexdigest(plaintext, length=None):
-    digest = hashlib.md5(smart_bytes(plaintext)).hexdigest()
+    hash_name = getattr(settings, 'COMPRESS_CACHE_HASH', 'md5')
+    digest = getattr(hashlib, hash_name)(smart_bytes(plaintext)).hexdigest()
     if length:
         return digest[:length]
     return digest
