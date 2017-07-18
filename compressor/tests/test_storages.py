@@ -41,7 +41,7 @@ class StorageTestCase(TestCase):
         {% endcompress %}
         """
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = css_tag("/static/CACHE/css/1d4424458f88.css")
+        out = css_tag("/static/CACHE/css/aca9bcd16bee.css")
         self.assertEqual(out, render(template, context))
 
     def test_race_condition_handling(self):

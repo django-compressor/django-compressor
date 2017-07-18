@@ -8,7 +8,7 @@ class TestMtimeCacheCommand(TestCase):
     # FIXME: add actual tests, improve the existing ones.
 
     exclusion_patterns = [
-        '*CACHE*', '*custom*', '*066cd253eada.js', '*d728fc7f9301.js', 'test.txt*'
+        '*CACHE*', '*custom*', '*066cd253eada.js', '*d728fc7f9301.js', '*74e158ccb432.js', 'test.txt*'
     ]
 
     def default_ignore(self):
