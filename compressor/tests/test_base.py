@@ -57,10 +57,10 @@ class PrecompilerAndAbsoluteFilterTestCase(SimpleTestCase):
 
     def setUp(self):
         self.html_orig = '<link rel="stylesheet" href="/static/css/relative_url.css" type="text/css" />'
-        self.html_link_to_precompiled_css = '<link rel="stylesheet" href="/static/CACHE/css/relative_url.41a74f6d5864.css" type="text/css" />'
-        self.html_link_to_absolutized_css = '<link rel="stylesheet" href="/static/CACHE/css/relative_url.9b8fd415e521.css" type="text/css" />'
+        self.html_link_to_precompiled_css = '<link rel="stylesheet" href="/static/CACHE/css/relative_url.e8602322bfa6.css" type="text/css" />'
+        self.html_link_to_absolutized_css = '<link rel="stylesheet" href="/static/CACHE/css/relative_url.376db5682982.css" type="text/css" />'
         self.css_orig = "p { background: url('../img/python.png'); }" # content of relative_url.css
-        self.css_absolutized = "p { background: url('/static/img/python.png?c2281c83670e'); }"
+        self.css_absolutized = "p { background: url('/static/img/python.png?ccb38978f900'); }"
 
     def helper(self, enabled, use_precompiler, use_absolute_filter, expected_output):
         precompiler = (('text/css', 'compressor.tests.test_base.PassthroughPrecompiler'),) if use_precompiler else ()
@@ -181,7 +181,7 @@ class CompressorTestCase(SimpleTestCase):
             r"cachekey is returning something that doesn't look like r'\w{12}'")
 
     def test_css_return_if_on(self):
-        output = css_tag('/static/CACHE/css/e41ba2cc6982.css')
+        output = css_tag('/static/CACHE/css/58a8c0714e59.css')
         self.assertEqual(output, self.css_node.output().strip())
 
     def test_js_split(self):
@@ -208,17 +208,17 @@ class CompressorTestCase(SimpleTestCase):
         self.assertEqual(out, list(self.js_node.hunks()))
 
     def test_js_output(self):
-        out = '<script type="text/javascript" src="/static/CACHE/js/d728fc7f9301.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/74e158ccb432.js"></script>'
         self.assertEqual(out, self.js_node.output())
 
     def test_js_override_url(self):
         self.js_node.context.update({'url': 'This is not a url, just a text'})
-        out = '<script type="text/javascript" src="/static/CACHE/js/d728fc7f9301.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/74e158ccb432.js"></script>'
         self.assertEqual(out, self.js_node.output())
 
     def test_css_override_url(self):
         self.css_node.context.update({'url': 'This is not a url, just a text'})
-        output = css_tag('/static/CACHE/css/e41ba2cc6982.css')
+        output = css_tag('/static/CACHE/css/58a8c0714e59.css')
         self.assertEqual(output, self.css_node.output().strip())
 
     @override_settings(COMPRESS_PRECOMPILERS=(), COMPRESS_ENABLED=False)
@@ -226,22 +226,22 @@ class CompressorTestCase(SimpleTestCase):
         self.assertEqualCollapsed(self.js, self.js_node.output())
 
     def test_js_return_if_on(self):
-        output = '<script type="text/javascript" src="/static/CACHE/js/d728fc7f9301.js"></script>'
+        output = '<script type="text/javascript" src="/static/CACHE/js/74e158ccb432.js"></script>'
         self.assertEqual(output, self.js_node.output())
 
     @override_settings(COMPRESS_OUTPUT_DIR='custom')
     def test_custom_output_dir1(self):
-        output = '<script type="text/javascript" src="/static/custom/js/d728fc7f9301.js"></script>'
+        output = '<script type="text/javascript" src="/static/custom/js/74e158ccb432.js"></script>'
         self.assertEqual(output, JsCompressor(self.js).output())
 
     @override_settings(COMPRESS_OUTPUT_DIR='')
     def test_custom_output_dir2(self):
-        output = '<script type="text/javascript" src="/static/js/d728fc7f9301.js"></script>'
+        output = '<script type="text/javascript" src="/static/js/74e158ccb432.js"></script>'
         self.assertEqual(output, JsCompressor(self.js).output())
 
     @override_settings(COMPRESS_OUTPUT_DIR='/custom/nested/')
     def test_custom_output_dir3(self):
-        output = '<script type="text/javascript" src="/static/custom/nested/js/d728fc7f9301.js"></script>'
+        output = '<script type="text/javascript" src="/static/custom/nested/js/74e158ccb432.js"></script>'
         self.assertEqual(output, JsCompressor(self.js).output())
 
     @override_settings(COMPRESS_PRECOMPILERS=(

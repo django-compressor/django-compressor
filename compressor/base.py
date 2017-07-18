@@ -92,12 +92,12 @@ class Compressor(object):
         Returns file path for an output file based on contents.
 
         Returned path is relative to compressor storage's base url, for
-        example "CACHE/css/e41ba2cc6982.css".
+        example "CACHE/css/58a8c0714e59.css".
 
         When `basename` argument is provided then file name (without extension)
         will be used as a part of returned file name, for example:
 
-        get_filepath(content, "my_file.css") -> 'CACHE/css/my_file.e41ba2cc6982.css'
+        get_filepath(content, "my_file.css") -> 'CACHE/css/my_file.58a8c0714e59.css'
         """
         parts = []
         if basename:
