@@ -168,13 +168,18 @@ class Command(BaseCommand):
                                   (settings.COMPRESS_OFFLINE_CONTEXT, e))
         elif not isinstance(contexts, (list, tuple)):
             contexts = [contexts]
-        contexts = list(contexts) # evaluate generator
 
         parser = self.__get_parser(engine)
-        compressor_nodes = OrderedDict()
+        fine_templates = []
+
+        log.write("Compressing... ")
+        verbosity = 1
+
         for template_name in templates:
             try:
                 template = parser.parse(template_name)
+                template.template_name = template_name
+                fine_templates.append(template)
             except IOError:  # unreadable file -> ignore
                 if verbosity > 0:
                     log.write("Unreadable template at: %s\n" % template_name)
@@ -193,77 +198,70 @@ class Command(BaseCommand):
                               "template %s\n" % template_name)
                 continue
 
-            for context_dict in contexts:
-                context = parser.get_init_context(context_dict)
-                context = Context(context)
+        contexts_count = 0
+        nodes_count = 0
+        block_count = 0
+        offline_manifest = OrderedDict()
+        results = []
+        for context_dict in contexts:
+            compressor_nodes = OrderedDict()
+            for template in fine_templates:
+                context = Context(parser.get_init_context(context_dict))
+
                 try:
                     nodes = list(parser.walk_nodes(template, context=context))
                 except (TemplateDoesNotExist, TemplateSyntaxError) as e:
                     # Could be an error in some base template
                     if verbosity > 0:
                         log.write("Error parsing template %s: %s\n" %
-                                  (template_name, smart_text(e)))
+                                  (template.template_name, smart_text(e)))
                     continue
+
                 if nodes:
-                    template.template_name = template_name
                     template_nodes = compressor_nodes.setdefault(template, OrderedDict())
                     for node in nodes:
+                        nodes_count += 1
                         template_nodes.setdefault(node, []).append(context)
 
-        if not compressor_nodes:
+            for template, nodes in compressor_nodes.items():
+                template._log = log
+                template._log_verbosity = verbosity
+
+                for node, node_contexts in nodes.items():
+                    for context in node_contexts:
+                        context.push()
+                        if not parser.process_template(template, context):
+                            continue
+
+                        parser.process_node(template, context, node)
+                        rendered = parser.render_nodelist(template, context, node)
+                        key = get_offline_hexdigest(rendered)
+
+                        if key in offline_manifest:
+                            continue
+
+                        try:
+                            result = parser.render_node(template, context, node)
+                        except Exception as e:
+                            raise CommandError("An error occurred during rendering %s: "
+                                               "%s" % (template.template_name, smart_text(e)))
+                        result = result.replace(
+                            settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
+                        )
+                        offline_manifest[key] = result
+                        context.pop()
+                        results.append(result)
+                        block_count += 1
+
+        if not nodes_count:
             raise OfflineGenerationError(
                 "No 'compress' template tags found in templates."
                 "Try running compress command with --follow-links and/or"
                 "--extension=EXTENSIONS")
 
-        if verbosity > 0:
-            log.write("Found 'compress' tags in:\n\t" +
-                      "\n\t".join((t.template_name
-                                   for t in compressor_nodes.keys())) + "\n")
-
-        log.write("Compressing... ")
-        block_count = 0
-        compressed_contexts = []
-        results = []
-        offline_manifest = OrderedDict()
-        for template, nodes in compressor_nodes.items():
-            template._log = log
-            template._log_verbosity = verbosity
-
-            for node, contexts in nodes.items():
-                for context in contexts:
-                    if context not in compressed_contexts:
-                        compressed_contexts.append(context)
-                    context.push()
-                    if not parser.process_template(template, context):
-                        continue
-
-                    parser.process_node(template, context, node)
-                    rendered = parser.render_nodelist(template, context, node)
-                    key = get_offline_hexdigest(rendered)
-
-                    if key in offline_manifest:
-                        continue
-
-                    try:
-                        result = parser.render_node(template, context, node)
-                    except Exception as e:
-                        raise CommandError("An error occurred during rendering %s: "
-                                           "%s" % (template.template_name, smart_text(e)))
-                    result = result.replace(
-                        settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
-                    )
-                    offline_manifest[key] = result
-                    context.pop()
-                    results.append(result)
-                    block_count += 1
-
-        write_offline_manifest(offline_manifest)
-
-        context_count = len(compressed_contexts)
         log.write("done\nCompressed %d block(s) from %d template(s) for %d context(s).\n" %
-                  (block_count, len(compressor_nodes), context_count))
-        return block_count, results
+                  (block_count, nodes_count, contexts_count))
+        return offline_manifest, block_count, results
 
     def handle_extensions(self, extensions=('html',)):
         """
@@ -287,6 +285,9 @@ class Command(BaseCommand):
         return set(ext_list)
 
     def handle(self, **options):
+        self.handle_inner(**options)
+
+    def handle_inner(self, **options):
         if not settings.COMPRESS_ENABLED and not options.get("force"):
             raise CommandError(
                 "Compressor is disabled. Set the COMPRESS_ENABLED "
@@ -299,13 +300,18 @@ class Command(BaseCommand):
 
         options.setdefault("log", sys.stdout)
 
-        manifest = {}
+        final_offline_manifest = {}
+        final_block_count = 0
+        final_results = []
         engines = [e.strip() for e in options.get("engines", [])] or ["django"]
         for engine in engines:
             opts = options.copy()
             opts["engine"] = engine
-            self.compress(**opts)
-            manifest.update(get_offline_manifest())
-        write_offline_manifest(manifest)
+            offline_manifest, block_count, results = self.compress(**opts)
+            final_results.extend(results)
+            final_block_count += block_count
+            final_offline_manifest.update(offline_manifest)
+        write_offline_manifest(final_offline_manifest)
+        return final_block_count, final_results
 
 Command.requires_system_checks = False
