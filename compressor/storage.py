@@ -99,10 +99,9 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
         compressed_path = '%s.br' % orig_path
 
         with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
-            compressor = brotli.Compressor()
             while True:
                 f_in_data = f_in.read(self.chunk_size)
-                compressed_data = compressor.compress(f_in_data)
+                compressed_data =brotli.compress(f_in_data)
                 f_out.write(compressed_data)
 
         # Ensure the file timestamps match.
