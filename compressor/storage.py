@@ -98,12 +98,17 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
         orig_path = self.path(filename)
         compressed_path = '%s.br' % orig_path
 
+        br_compressor = brotli.Compressor()
         with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
             while True:
                 f_in_data = f_in.read(self.chunk_size)
-                compressed_data =brotli.compress(f_in_data)
+                if not f_in_data:
+                    break
+                compressed_data = br_compressor.compress(f_in_data)
+                if not compressed_data:
+                    compressed_data = br_compressor.flush()
                 f_out.write(compressed_data)
-
+            f_out.write(br_compressor.finish())
         # Ensure the file timestamps match.
         # os.stat() returns nanosecond resolution on Linux, but os.utime()
         # only sets microsecond resolution.  Set times on both files to
@@ -113,6 +118,7 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
         os.utime(compressed_path, (stamp, stamp))
 
         return filename
+
 
 class DefaultStorage(LazyObject):
     def _setup(self):
