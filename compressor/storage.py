@@ -100,10 +100,7 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
 
         br_compressor = brotli.Compressor()
         with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
-            while True:
-                f_in_data = f_in.read(self.chunk_size)
-                if not f_in_data:
-                    break
+            for f_in_data in iter(lambda: f_in.read(self.chunk_size), b''):
                 compressed_data = br_compressor.compress(f_in_data)
                 if not compressed_data:
                     compressed_data = br_compressor.flush()

@@ -49,10 +49,7 @@ class StorageTestCase(TestCase):
         decompressed_data = b''
         br_decompressor = brotli.Decompressor()
         with open(os.path.join(settings.COMPRESS_ROOT, 'test.txt.br'), 'rb') as f:
-            while True:
-                data = f.read(chunk_size)
-                if not data:
-                    break
+            for data in iter(lambda: f.read(chunk_size), b''):
                 decompressed_data += br_decompressor.decompress(data)
             decompressed_data += br_decompressor.finish()
         self.assertEqual(payload, decompressed_data)
