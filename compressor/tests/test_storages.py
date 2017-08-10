@@ -54,7 +54,7 @@ class StorageTestCase(TestCase):
                 if not data:
                     break
                 decompressed_data += br_decompressor.decompress(data)
-            decompressed_data += br_decompressor.flush()
+            decompressed_data += br_decompressor.finish()
         self.assertEqual(payload, decompressed_data)
 
     def test_css_tag_with_storage(self):
