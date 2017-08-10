@@ -41,12 +41,12 @@ class StorageTestCase(TestCase):
         self.assertTrue(os.path.exists(os.path.join(settings.COMPRESS_ROOT, 'test.txt.gz')))
 
     def test_brotli_storage(self):
-        payload = ','.join([str(i) for i in range(1000)])
+        payload = b','.join([str(i) for i in range(1000)])
         chunk_size = 1024
         storage.brotli_storage.save('test.txt', ContentFile(payload))
         self.assertTrue(os.path.exists(os.path.join(settings.COMPRESS_ROOT, 'test.txt')))
         self.assertTrue(os.path.exists(os.path.join(settings.COMPRESS_ROOT, 'test.txt.br')))
-        decompressed_data = ''
+        decompressed_data = b''
         br_decompressor = brotli.Decompressor()
         with open(os.path.join(settings.COMPRESS_ROOT, 'test.txt.br'), 'rb') as f:
             while True:
