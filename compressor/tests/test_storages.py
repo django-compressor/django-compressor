@@ -41,7 +41,7 @@ class StorageTestCase(TestCase):
         self.assertTrue(os.path.exists(os.path.join(settings.COMPRESS_ROOT, 'test.txt.gz')))
 
     def test_brotli_storage(self):
-        payload = b','.join([str(i) for i in range(1000)])
+        payload = ','.join([str(i) for i in range(1000)]).encode()
         chunk_size = 1024
         storage.brotli_storage.save('test.txt', ContentFile(payload))
         self.assertTrue(os.path.exists(os.path.join(settings.COMPRESS_ROOT, 'test.txt')))
