@@ -1,6 +1,25 @@
 Changelog
 =========
 
+v2.2 (2017-08-16)
+-------------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.1.1...2.2>`_
+
+- Switch from MD5 to SHA256 for hashes generation.
+
+- Add Django 1.11 compatibility
+
+- Various compatibility fixes for Python 3.6 and Django 1.8
+
+- Made OfflineGenerationError easier to debug
+
+- Drop support for Python 3.2
+
+- Add new CssRelativeFilter which works like CssAbsoluteFilter but outputs relative URLs.
+
+- Fix URL CssAbsoluteFilter URL detection
+
 v2.1.1 (2017-02-02)
 -------------------
 
