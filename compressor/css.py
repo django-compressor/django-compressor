@@ -47,5 +47,5 @@ class CssCompressor(Compressor):
                 for media, subnode in self.media_nodes:
                     subnode.extra_context.update({'media': media})
                     ret.append(subnode.output(*args, **kwargs))
-                return ''.join(ret)
+                return '\n'.join(ret)
         return super(CssCompressor, self).output(*args, **kwargs)

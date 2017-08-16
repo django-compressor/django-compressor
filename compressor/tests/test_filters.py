@@ -451,14 +451,26 @@ class TemplateTestCase(TestCase):
         self.assertEqual(input, TemplateFilter(content).input())
 
 
-class SpecializedFiltersTest(TestCase):
+class ClosureFiltersTest(TestCase):
     """
-    Test to check the Specializations of filters.
+    Test to check the Closure filter.
     """
     def test_closure_filter(self):
         filter = ClosureCompilerFilter('')
+        self.assertEqual(filter.command, '{binary} {args}')
         self.assertEqual(filter.options, (('binary', six.text_type('java -jar compiler.jar')), ('args', six.text_type(''))))
 
+    @override_settings(COMPRESS_CLOSURE_COMPILER_SOURCEMAPS=True, COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_source_map(self):
+        filter = ClosureCompilerFilter('')
+        self.assertEqual(filter.command, '{binary} --create_source_map {mapfile} {args}')
+        self.assertEqual(filter.options, (('binary', six.text_type('java -jar compiler.jar')), ('args', six.text_type(''))))
+
+
+class YuglifyFiltersTest(TestCase):
+    """
+    Test to check the Yuglify filter.
+    """
     def test_yuglify_filters(self):
         filter = YUglifyCSSFilter('')
         self.assertEqual(filter.command, '{binary} {args} --type=css')
@@ -468,6 +480,11 @@ class SpecializedFiltersTest(TestCase):
         self.assertEqual(filter.command, '{binary} {args} --type=js')
         self.assertEqual(filter.options, (('binary', six.text_type('yuglify')), ('args', six.text_type('--terminal'))))
 
+
+class YuiFiltersTest(TestCase):
+    """
+    Test to check the Yui filter.
+    """
     def test_yui_filters(self):
         filter = YUICSSFilter('')
         self.assertEqual(filter.command, '{binary} {args} --type=css')
@@ -477,6 +494,11 @@ class SpecializedFiltersTest(TestCase):
         self.assertEqual(filter.command, '{binary} {args} --type=js --verbose')
         self.assertEqual(filter.options, (('binary', six.text_type('java -jar yuicompressor.jar')), ('args', six.text_type('')), ('verbose', 1)))
 
+
+class CleanCssFiltersTest(TestCase):
+    """
+    Test to check the CleanCss filter.
+    """
     def test_clean_css_filter(self):
         filter = CleanCSSFilter('')
         self.assertEqual(filter.options, (('binary', six.text_type('cleancss')), ('args', six.text_type(''))))

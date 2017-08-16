@@ -39,6 +39,7 @@ class CompressorConf(AppConf):
     CACHEABLE_PRECOMPILERS = ()
     CLOSURE_COMPILER_BINARY = 'java -jar compiler.jar'
     CLOSURE_COMPILER_ARGUMENTS = ''
+    CLOSURE_COMPILER_SOURCEMAPS = False
     YUI_BINARY = 'java -jar yuicompressor.jar'
     YUI_CSS_ARGUMENTS = ''
     YUI_JS_ARGUMENTS = ''
@@ -68,6 +69,10 @@ class CompressorConf(AppConf):
     OFFLINE_CONTEXT = {}
     # The name of the manifest file (e.g. filename.ext)
     OFFLINE_MANIFEST = 'manifest.json'
+    # If false the files are not grouped in a single file
+    OFFLINE_GROUP_FILES = True
+    # If True, write the Base64 source maps on a separated file
+    OFFLINE_SOURCEMAPS_ON_FILES = False
     # The Context to be used when TemplateFilter is used
     TEMPLATE_FILTER_CONTEXT = {}
     # Placeholder to be used instead of settings.COMPRESS_URL during offline compression.

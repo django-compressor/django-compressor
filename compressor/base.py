@@ -1,7 +1,9 @@
 from __future__ import with_statement, unicode_literals
+import base64
 import os
 import codecs
 from importlib import import_module
+import re
 
 from django import VERSION
 from django.core.files.base import ContentFile
@@ -292,16 +294,21 @@ class Compressor(object):
         any custom modification. Calls other mode specific methods or simply
         returns the content directly.
         """
-        output = '\n'.join(self.filter_input(forced))
 
-        if not output:
+        outputs = self.filter_input(forced)
+        if settings.COMPRESS_OFFLINE_GROUP_FILES:
+            outputs = ['\n'.join(outputs)]
+
+        if not outputs:
             return ''
 
         if settings.COMPRESS_ENABLED or forced:
-            filtered_output = self.filter_output(output)
-            return self.handle_output(mode, filtered_output, forced)
-
-        return output
+            filtered_outputs = []
+            for output in outputs:
+                filtered_output = self.filter_output(output)
+                filtered_outputs.append(self.handle_output(mode, filtered_output, forced))
+            outputs = filtered_outputs
+        return '\n'.join(outputs)
 
     def handle_output(self, mode, content, forced, basename=None):
         # Then check for the appropriate output method and call it
@@ -318,6 +325,23 @@ class Compressor(object):
         the appropriate template with the file's URL.
         """
         new_filepath = self.get_filepath(content, basename=basename)
+        if settings.COMPRESS_OFFLINE_SOURCEMAPS_ON_FILES:
+            new_map_filepath = '%s.map' % new_filepath
+
+            source_mapping_url_re = '(//[#|@] *sourceMappingURL=data:application/json;base64,' \
+                                    '(([A-Za-z0-9-]{4})*([A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?))|' \
+                                    '(/\*[#|@] *sourceMappingURL=data:application/json;base64,' \
+                                    '(([A-Za-z0-9-]{4})*([A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?)) *\*/'
+            m = re.search(source_mapping_url_re, content)
+            if m:
+                b = m.group(2) if m.group(2) else m.group(6)
+                map = base64.standard_b64decode(b)
+                if not self.storage.exists(new_map_filepath) or forced:
+                    self.storage.save(new_map_filepath, ContentFile(map.encode(self.charset)))
+                content = re.sub(
+                    source_mapping_url_re,
+                    '//# sourceMappingURL=%s' % os.path.basename(new_map_filepath),
+                    content)
         if not self.storage.exists(new_filepath) or forced:
             self.storage.save(new_filepath, ContentFile(content.encode(self.charset)))
         url = mark_safe(self.storage.url(new_filepath))

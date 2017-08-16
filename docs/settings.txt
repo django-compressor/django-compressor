@@ -204,6 +204,12 @@ Backend settings
 
          The arguments passed to the compiler.
 
+      .. attribute:: COMPRESS_CLOSURE_COMPILER_SOURCEMAPS
+
+        :Default: ``False``
+
+        If True add the source map in base64 at the end of file.
+
     - ``compressor.filters.yui.YUIJSFilter``
 
       A filter that passes the JavaScript code to the `YUI compressor`_.
@@ -517,3 +523,15 @@ Offline settings
 
     The name of the file to be used for saving the names of the files
     compressed offline.
+
+.. attribute:: COMPRESS_OFFLINE_GROUP_FILES
+
+    :Default: ``True``
+
+    If false the files are not grouped in a single file.
+
+.. attribute:: COMPRESS_OFFLINE_SOURCEMAPS_ON_FILES
+
+    :Default: ``False``
+
+    If True, write the Base64 source maps on a separated file

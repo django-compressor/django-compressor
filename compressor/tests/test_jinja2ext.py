@@ -80,6 +80,19 @@ class TestJinja2CompressorExtension(TestCase):
         out = css_tag("/static/CACHE/css/58a8c0714e59.css")
         self.assertEqual(out, template.render(context))
 
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_css_tag_no_group(self):
+        template = self.env.from_string("""{% compress css -%}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css" charset="utf-8">
+        <style type="text/css">p { border:5px solid green;}</style>
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css" charset="utf-8">
+        {% endcompress %}""")
+        context = {'STATIC_URL': settings.COMPRESS_URL}
+        out = '\n'.join([css_tag('/static/CACHE/css/cdd1a7452e1d.css'),
+                         css_tag('/static/CACHE/css/13c6e6521347.css'),
+                         css_tag('/static/CACHE/css/652d0fbfecf5.css')])
+        self.assertEqual(out, template.render(context))
+
     def test_nonascii_css_tag(self):
         template = self.env.from_string("""{% compress css -%}
         <link rel="stylesheet" href="{{ STATIC_URL }}css/nonasc.css" type="text/css" charset="utf-8">
@@ -87,6 +100,17 @@ class TestJinja2CompressorExtension(TestCase):
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
         out = css_tag("/static/CACHE/css/4263023f49d6.css")
+        self.assertEqual(out, template.render(context))
+
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_nonascii_css_tag_no_group(self):
+        template = self.env.from_string("""{% compress css -%}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/nonasc.css" type="text/css" charset="utf-8">
+        <style type="text/css">p { border:5px solid green;}</style>
+        {% endcompress %}""")
+        context = {'STATIC_URL': settings.COMPRESS_URL}
+        out = '\n'.join([css_tag('/static/CACHE/css/e64bd1e74133.css'),
+                         css_tag('/static/CACHE/css/13c6e6521347.css')])
         self.assertEqual(out, template.render(context))
 
     def test_js_tag(self):
@@ -98,6 +122,17 @@ class TestJinja2CompressorExtension(TestCase):
         out = '<script type="text/javascript" src="/static/CACHE/js/74e158ccb432.js"></script>'
         self.assertEqual(out, template.render(context))
 
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_js_tag_no_group(self):
+        template = self.env.from_string("""{% compress js -%}
+        <script src="{{ STATIC_URL }}js/one.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+        {% endcompress %}""")
+        context = {'STATIC_URL': settings.COMPRESS_URL}
+        out = '\n'.join(['<script type="text/javascript" src="/static/CACHE/js/153fcbd56af1.js"></script>',
+                         '<script type="text/javascript" src="/static/CACHE/js/188074e83ceb.js"></script>'])
+        self.assertEqual(out, template.render(context))
+
     def test_nonascii_js_tag(self):
         template = self.env.from_string("""{% compress js -%}
         <script src="{{ STATIC_URL }}js/nonasc.js" type="text/javascript" charset="utf-8"></script>
@@ -107,6 +142,17 @@ class TestJinja2CompressorExtension(TestCase):
         out = '<script type="text/javascript" src="/static/CACHE/js/a18195c6ae48.js"></script>'
         self.assertEqual(out, template.render(context))
 
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_nonascii_js_tag_no_group(self):
+        template = self.env.from_string("""{% compress js -%}
+        <script src="{{ STATIC_URL }}js/nonasc.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">var test_value = "\u2014";</script>
+        {% endcompress %}""")
+        context = {'STATIC_URL': settings.COMPRESS_URL}
+        out = '\n'.join(['<script type="text/javascript" src="/static/CACHE/js/67b8ab34d456.js"></script>',
+                         '<script type="text/javascript" src="/static/CACHE/js/67b8ab34d456.js"></script>'])
+        self.assertEqual(out, template.render(context))
+
     def test_nonascii_latin1_js_tag(self):
         template = self.env.from_string("""{% compress js -%}
         <script src="{{ STATIC_URL }}js/nonasc-latin1.js" type="text/javascript" charset="latin-1"></script>
@@ -114,6 +160,17 @@ class TestJinja2CompressorExtension(TestCase):
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
         out = '<script type="text/javascript" src="/static/CACHE/js/f64debbd8878.js"></script>'
+        self.assertEqual(out, template.render(context))
+
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_nonascii_latin1_js_tag_no_group(self):
+        template = self.env.from_string("""{% compress js -%}
+        <script src="{{ STATIC_URL }}js/nonasc-latin1.js" type="text/javascript" charset="latin-1"></script>
+        <script type="text/javascript">var test_value = "\u2014";</script>
+        {% endcompress %}""")
+        context = {'STATIC_URL': settings.COMPRESS_URL}
+        out = '\n'.join(['<script type="text/javascript" src="/static/CACHE/js/78573a09aa12.js"></script>',
+                         '<script type="text/javascript" src="/static/CACHE/js/67b8ab34d456.js"></script>'])
         self.assertEqual(out, template.render(context))
 
     def test_css_inline(self):
@@ -128,6 +185,18 @@ class TestJinja2CompressorExtension(TestCase):
         ])
         self.assertEqual(out, template.render(context))
 
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_css_inline_no_group(self):
+        template = self.env.from_string("""{% compress css, inline -%}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css" charset="utf-8">
+        <style type="text/css">p { border:5px solid green;}</style>
+        {% endcompress %}""")
+        context = {'STATIC_URL': settings.COMPRESS_URL}
+        out = '\n'.join([
+            '<style type="text/css">body { background:#990; }</style>',
+            '<style type="text/css">p { border:5px solid green;}</style>'])
+        self.assertEqual(out, template.render(context))
+
     def test_js_inline(self):
         template = self.env.from_string("""{% compress js, inline -%}
         <script src="{{ STATIC_URL }}js/one.js" type="text/css" type="text/javascript" charset="utf-8"></script>
@@ -135,6 +204,17 @@ class TestJinja2CompressorExtension(TestCase):
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
         out = '<script type="text/javascript">;obj={};;obj.value="value";</script>'
+        self.assertEqual(out, template.render(context))
+
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_js_inline_no_group(self):
+        template = self.env.from_string("""{% compress js, inline -%}
+        <script src="{{ STATIC_URL }}js/one.js" type="text/css" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+        {% endcompress %}""")
+        context = {'STATIC_URL': settings.COMPRESS_URL}
+        out = '\n'.join(['<script type="text/javascript">;obj={};</script>',
+                         '<script type="text/javascript">;obj.value="value";</script>'])
         self.assertEqual(out, template.render(context))
 
     def test_nonascii_inline_css(self):

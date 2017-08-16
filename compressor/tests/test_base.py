@@ -184,6 +184,13 @@ class CompressorTestCase(SimpleTestCase):
         output = css_tag('/static/CACHE/css/58a8c0714e59.css')
         self.assertEqual(output, self.css_node.output().strip())
 
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_css_return_if_on_no_group(self):
+        output = '\n'.join([css_tag('/static/CACHE/css/cdd1a7452e1d.css'),
+                            css_tag('/static/CACHE/css/13c6e6521347.css'),
+                            css_tag('/static/CACHE/css/652d0fbfecf5.css')])
+        self.assertEqual(output, self.css_node.output().strip())
+
     def test_js_split(self):
         out = [
             (
@@ -211,14 +218,35 @@ class CompressorTestCase(SimpleTestCase):
         out = '<script type="text/javascript" src="/static/CACHE/js/74e158ccb432.js"></script>'
         self.assertEqual(out, self.js_node.output())
 
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_js_output_no_group(self):
+        out = '\n'.join(['<script type="text/javascript" src="/static/CACHE/js/153fcbd56af1.js"></script>',
+                        '<script type="text/javascript" src="/static/CACHE/js/188074e83ceb.js"></script>'])
+        self.assertEqual(out, self.js_node.output())
+
     def test_js_override_url(self):
         self.js_node.context.update({'url': 'This is not a url, just a text'})
         out = '<script type="text/javascript" src="/static/CACHE/js/74e158ccb432.js"></script>'
         self.assertEqual(out, self.js_node.output())
 
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_js_override_url_no_group(self):
+        self.js_node.context.update({'url': 'This is not a url, just a text'})
+        out = '\n'.join(['<script type="text/javascript" src="/static/CACHE/js/153fcbd56af1.js"></script>',
+                         '<script type="text/javascript" src="/static/CACHE/js/188074e83ceb.js"></script>'])
+        self.assertEqual(out, self.js_node.output())
+
     def test_css_override_url(self):
         self.css_node.context.update({'url': 'This is not a url, just a text'})
         output = css_tag('/static/CACHE/css/58a8c0714e59.css')
+        self.assertEqual(output, self.css_node.output().strip())
+
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_css_override_url_no_group(self):
+        self.css_node.context.update({'url': 'This is not a url, just a text'})
+        output = '\n'.join([css_tag('/static/CACHE/css/cdd1a7452e1d.css'),
+                            css_tag('/static/CACHE/css/13c6e6521347.css'),
+                            css_tag('/static/CACHE/css/652d0fbfecf5.css')])
         self.assertEqual(output, self.css_node.output().strip())
 
     @override_settings(COMPRESS_PRECOMPILERS=(), COMPRESS_ENABLED=False)
@@ -229,9 +257,21 @@ class CompressorTestCase(SimpleTestCase):
         output = '<script type="text/javascript" src="/static/CACHE/js/74e158ccb432.js"></script>'
         self.assertEqual(output, self.js_node.output())
 
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_js_return_if_on_no_group(self):
+        output = '\n'.join(['<script type="text/javascript" src="/static/CACHE/js/153fcbd56af1.js"></script>',
+                            '<script type="text/javascript" src="/static/CACHE/js/188074e83ceb.js"></script>'])
+        self.assertEqual(output, self.js_node.output())
+
     @override_settings(COMPRESS_OUTPUT_DIR='custom')
     def test_custom_output_dir1(self):
         output = '<script type="text/javascript" src="/static/custom/js/74e158ccb432.js"></script>'
+        self.assertEqual(output, JsCompressor(self.js).output())
+
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_custom_output_dir1_no_group(self):
+        output = '\n'.join(['<script type="text/javascript" src="/static/CACHE/js/153fcbd56af1.js"></script>',
+                            '<script type="text/javascript" src="/static/CACHE/js/188074e83ceb.js"></script>'])
         self.assertEqual(output, JsCompressor(self.js).output())
 
     @override_settings(COMPRESS_OUTPUT_DIR='')
@@ -239,9 +279,21 @@ class CompressorTestCase(SimpleTestCase):
         output = '<script type="text/javascript" src="/static/js/74e158ccb432.js"></script>'
         self.assertEqual(output, JsCompressor(self.js).output())
 
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_custom_output_dir2_no_group(self):
+        output = '\n'.join(['<script type="text/javascript" src="/static/CACHE/js/153fcbd56af1.js"></script>',
+                            '<script type="text/javascript" src="/static/CACHE/js/188074e83ceb.js"></script>'])
+        self.assertEqual(output, JsCompressor(self.js).output())
+
     @override_settings(COMPRESS_OUTPUT_DIR='/custom/nested/')
     def test_custom_output_dir3(self):
         output = '<script type="text/javascript" src="/static/custom/nested/js/74e158ccb432.js"></script>'
+        self.assertEqual(output, JsCompressor(self.js).output())
+
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_custom_output_dir3_no_group(self):
+        output = '\n'.join(['<script type="text/javascript" src="/static/CACHE/js/153fcbd56af1.js"></script>',
+                            '<script type="text/javascript" src="/static/CACHE/js/188074e83ceb.js"></script>'])
         self.assertEqual(output, JsCompressor(self.js).output())
 
     @override_settings(COMPRESS_PRECOMPILERS=(
@@ -338,18 +390,41 @@ class JsAsyncDeferTestCase(SimpleTestCase):
             <script type="text/javascript">obj.value = "value";</script>
             <script src="/static/js/one.js" type="text/javascript" async></script>
             <script src="/static/js/two.js" type="text/javascript" async></script>
+            <script src="/static/js/three.js" type="text/javascript"></script>
+            <script type="text/javascript">obj.value = "value";</script>
+            <script src="/static/js/one.js" type="text/javascript" crossorigin></script>
+            <script src="/static/js/two.js" type="text/javascript" crossorigin></script>
+            <script src="/static/js/three.js" type="text/javascript"></script>
+            <script src="/static/js/one.js" type="text/javascript" crossorigin async></script>
+            <script src="/static/js/two.js" type="text/javascript" crossorigin></script>
             <script src="/static/js/three.js" type="text/javascript"></script>"""
 
+    def _extract_attr(self, tag):
+        if tag.has_attr('async') and tag.has_attr('crossorigin'):
+            return 'crossorigin async'
+        if tag.has_attr('defer') and tag.has_attr('crossorigin'):
+            return 'crossorigin defer'
+        if tag.has_attr('async'):
+            return 'async'
+        if tag.has_attr('defer'):
+            return 'defer'
+        if tag.has_attr('crossorigin'):
+            return 'crossorigin'
+
     def test_js_output(self):
-        def extract_attr(tag):
-            if tag.has_attr('async'):
-                return 'async'
-            if tag.has_attr('defer'):
-                return 'defer'
         js_node = JsCompressor(self.js)
-        output = [None, 'async', 'defer', None, 'async', None]
+        output = [None, 'async', 'defer', None, 'async', None, 'crossorigin', None, 'crossorigin async', 'crossorigin', None]
         scripts = make_soup(js_node.output()).find_all('script')
-        attrs = [extract_attr(s) for s in scripts]
+        attrs = [self._extract_attr(s) for s in scripts]
+        self.assertEqual(output, attrs)
+
+    @override_settings(COMPRESS_OFFLINE_GROUP_FILES=False)
+    def test_js_output_no_group(self):
+        js_node = JsCompressor(self.js)
+        output = [None, 'async', 'defer', None, 'async', 'async', None, None, 'crossorigin', 'crossorigin', None,
+                  'crossorigin async', 'crossorigin', None]
+        scripts = make_soup(js_node.output()).find_all('script')
+        attrs = [self._extract_attr(s) for s in scripts]
         self.assertEqual(output, attrs)
 
 
