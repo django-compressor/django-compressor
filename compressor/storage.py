@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 import errno
 import gzip
-import brotli
 import os
 from datetime import datetime
 import time
@@ -88,17 +87,21 @@ class GzipCompressorFileStorage(CompressorFileStorage):
 
 class BrotliCompressorFileStorage(CompressorFileStorage):
     """
-    The standard compressor file system storage that gzips storage files
+    The standard compressor file system storage that brotli storage files
     additionally to the usual files.
     """
     chunk_size = 1024
+
+    def get_compressor(self):
+        import brotli
+        return brotli.Compressor()
 
     def save(self, filename, content):
         filename = super(BrotliCompressorFileStorage, self).save(filename, content)
         orig_path = self.path(filename)
         compressed_path = '%s.br' % orig_path
 
-        br_compressor = brotli.Compressor()
+        br_compressor = self.get_compressor()
         with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
             for f_in_data in iter(lambda: f_in.read(self.chunk_size), b''):
                 compressed_data = br_compressor.compress(f_in_data)
