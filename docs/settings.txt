@@ -77,15 +77,18 @@ Backend settings
 
     - ``compressor.filters.css_default.CssAbsoluteFilter``
 
-      A filter that normalizes the URLs used in ``url()`` CSS statements.
+      A filter that normalizes the URLs used in ``url()`` CSS statements. This
+      is necessary since the output css files produced by Django Compressor
+      are in a different location than the source files and relative paths
+      might have become invalid. The filter also appends a hash as query string
+      to the normalized URLs to help with cache busting.
 
       .. attribute:: COMPRESS_CSS_HASHING_METHOD
 
-         The method to use when calculating the suffix to append to URLs in
-         your processed CSS files. Either ``None``, ``'mtime'`` (default) or
-         ``'content'``. Use the ``None`` if you want to completely disable that
-         feature, and the ``'content'`` in case you're using multiple servers
-         to serve your content.
+         The method to use when calculating the query string.  Either ``None``,
+         ``'mtime'`` (default) or ``'content'``. Use the ``None`` if you want
+         to completely disable that feature, and the ``'content'`` in case
+         you're using multiple servers to serve your content.
 
     - ``compressor.filters.css_default.CssRelativeFilter``
 
