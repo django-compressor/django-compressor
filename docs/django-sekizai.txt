@@ -11,6 +11,10 @@ included templates to the master template.
 It requires django-sekizai to be installed. Refer to the `django-sekizai docs`_
 for how to use ``render_block``
 
+Please note that the sekizai integration does not work with :ref:`offline compression <offline_compression>`.
+See `this issue`_ for details.
+
+
 Usage
 -----
 
@@ -22,3 +26,4 @@ Usage
 
 .. _django-sekizai: https://github.com/ojii/django-sekizai
 .. _django-sekizai docs: https://django-sekizai.readthedocs.io/en/latest/
+.. _this issue: https://github.com/django-compressor/django-compressor/issues/351
