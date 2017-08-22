@@ -142,36 +142,14 @@ def compress(parser, token):
 
     Syntax::
 
-        {% compress <js/css> %}
+        {% compress <js/css> [<file/inline> [block_name]] %}
         <html of inline or linked JS/CSS>
         {% endcompress %}
 
     Examples::
 
-        {% compress css %}
-        <link rel="stylesheet" href="/static/css/one.css" type="text/css" charset="utf-8">
-        <style type="text/css">p { border:5px solid green;}</style>
-        <link rel="stylesheet" href="/static/css/two.css" type="text/css" charset="utf-8">
-        {% endcompress %}
+        See docs/usage.rst
 
-    Which would be rendered something like::
-
-        <link rel="stylesheet" href="/static/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">
-
-    or::
-
-        {% compress js %}
-        <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
-        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
-        {% endcompress %}
-
-    Which would be rendered something like::
-
-        <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
-
-    Linked files must be on your COMPRESS_URL (which defaults to STATIC_URL).
-    If DEBUG is true off-site files will throw exceptions. If DEBUG is false
-    they will be silently stripped.
     """
 
     nodelist = parser.parse(('endcompress',))

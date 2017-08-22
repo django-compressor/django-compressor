@@ -39,7 +39,7 @@ Base settings
     like this::
 
         <script type="text/javascript" src="/static/js/site-base.js"></script>
-        <script type="text/javascript" src="/static/CACHE/js/8dd1a2872443.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/static/CACHE/js/awesome.8dd1a2872443.js" charset="utf-8"></script>
 
 .. attribute:: COMPRESS_URL
 
@@ -301,7 +301,7 @@ Backend settings
 
     This would give you something like this::
 
-        <script type="text/javascript" src="/static/CACHE/js/8dd1a2872443.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/static/CACHE/js/output.8dd1a2872443.js" charset="utf-8"></script>
 
     The same works for less_, too:
 
@@ -322,7 +322,7 @@ Backend settings
 
     Which would be rendered something like::
 
-        <link rel="stylesheet" href="/static/CACHE/css/8ccf8d877f18.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/static/CACHE/css/output.8ccf8d877f18.css" type="text/css" charset="utf-8">
 
     .. _less: http://lesscss.org/
     .. _CoffeeScript: http://coffeescript.org/

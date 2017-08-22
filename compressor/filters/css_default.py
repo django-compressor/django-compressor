@@ -139,7 +139,7 @@ class CssRelativeFilter(CssAbsoluteFilter):
 
         - original file URL: '/static/my-app/style.css'
         - it has an image link: ``url(images/logo.svg)``
-        - compiled file URL: '/static/CACHE/css/abcdef123456.css'
+        - compiled file URL: '/static/CACHE/css/output.abcdef123456.css'
         - replaced image link URL: ``url(../../my-app/images/logo.svg)``
         """
         old_prefix = self.url
