@@ -92,9 +92,13 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
     """
     chunk_size = 1024
 
-    def get_compressor(self):
+    def __init__(self, *args, **kwargs):
         import brotli
-        return brotli.Compressor()
+        self.Compressor = brotli.Compressor
+        super(BrotliCompressorFileStorage, self).__init__(*args, **kwargs)
+
+    def get_compressor(self):
+        return self.Compressor()
 
     def save(self, filename, content):
         filename = super(BrotliCompressorFileStorage, self).save(filename, content)
