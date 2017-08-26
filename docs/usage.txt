@@ -13,38 +13,56 @@ Usage
 Examples
 --------
 
-.. code-block:: django
+Basic example:
 
-    {% load compress %}
+    .. code-block:: django
 
-    {% compress css %}
-    <link rel="stylesheet" href="/static/css/one.css" type="text/css" charset="utf-8">
-    <style type="text/css">p { border:5px solid green;}</style>
-    <link rel="stylesheet" href="/static/css/two.css" type="text/css" charset="utf-8">
-    {% endcompress %}
+        {% compress css %}
+        <link rel="stylesheet" href="/static/css/one.css" type="text/css" charset="utf-8">
+        <style type="text/css">p { border:5px solid green;}</style>
+        <link rel="stylesheet" href="/static/css/two.css" type="text/css" charset="utf-8">
+        {% endcompress %}
 
-Which would be rendered something like:
+Result:
 
-.. code-block:: django
+    .. code-block:: django
 
-    <link rel="stylesheet" href="/static/CACHE/css/f7c661b7a124.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/static/CACHE/css/output.f7c661b7a124.css" type="text/css" charset="utf-8">
 
-or:
+Adding the ``inline`` parameter will put the content directly to the
+rendered page instead of a file:
 
-.. code-block:: django
+    .. code-block:: django
 
-    {% load compress %}
+        {% compress js inline %}
+        <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+        {% endcompress %}
 
-    {% compress js %}
-    <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
-    <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
-    {% endcompress %}
+Result:
 
-Which would be rendered something like:
+    .. code-block:: django
 
-.. code-block:: django
+        <script type="text/javascript" charset="utf-8">
+        obj = {};
+        obj.value = "value";
+        </script>
 
-    <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
+Specifying a ``block_name`` will change the output filename. It can also be
+accessed in the :ref:`post_compress signal <signals>` in the ``context`` parameter.
+
+    .. code-block:: django
+
+        {% compress js file base %}
+        <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+        {% endcompress %}
+
+Result:
+
+    .. code-block:: django
+
+        <script type="text/javascript" src="/static/CACHE/js/base.3f33b9146e12.js" charset="utf-8"></script>
 
 .. note::
 
@@ -61,7 +79,7 @@ and simply returns exactly what it was given.
 
     If you've configured any
     :attr:`precompilers <django.conf.settings.COMPRESS_PRECOMPILERS>`
-    setting :attr:`~django.conf.settings.COMPRESS_ENABLED` to ``False`` won't
+    setting, :attr:`~django.conf.settings.COMPRESS_ENABLED` to ``False`` won't
     affect the processing of those files. Only the
     :attr:`CSS <django.conf.settings.COMPRESS_CSS_FILTERS>` and
     :attr:`JavaScript filters <django.conf.settings.COMPRESS_JS_FILTERS>`
@@ -79,31 +97,6 @@ exception. If DEBUG is ``False`` these files will be silently stripped.
     :attr:`~django.conf.settings.COMPRESS_CACHE_BACKEND` and
     Django's `caching documentation`_).
 
-The compress template tag supports a second argument specifying the output
-mode and defaults to saving the result in a file. Alternatively you can
-pass '``inline``' to the template tag to return the content directly to the
-rendered page, e.g.:
-
-.. code-block:: django
-
-    {% load compress %}
-
-    {% compress js inline %}
-    <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
-    <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
-    {% endcompress %}
-
-would be rendered something like::
-
-    <script type="text/javascript" charset="utf-8">
-    obj = {};
-    obj.value = "value";
-    </script>
-
-The compress template tag also supports a third argument for naming the output
-of that particular compress tag.  This is then added to the context so you can
-access it in the `post_compress signal <signals>`.
-
 .. _memcached: http://memcached.org/
 .. _caching documentation: https://docs.djangoproject.com/en/1.8/topics/cache/#memcached
 
@@ -111,7 +104,7 @@ access it in the `post_compress signal <signals>`.
 .. _offline_compression:
 
 Offline Compression
----------------
+-------------------
 
 Django Compressor has the ability to run the compression "offline",
 i.e. outside of the request/response loop -- independent from user requests.

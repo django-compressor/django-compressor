@@ -286,7 +286,7 @@ class Compressor(object):
                 pass
         return content
 
-    def output(self, mode='file', forced=False):
+    def output(self, mode='file', forced=False, basename=None):
         """
         The general output method, override in subclass if you need to do
         any custom modification. Calls other mode specific methods or simply
@@ -299,7 +299,7 @@ class Compressor(object):
 
         if settings.COMPRESS_ENABLED or forced:
             filtered_output = self.filter_output(output)
-            return self.handle_output(mode, filtered_output, forced)
+            return self.handle_output(mode, filtered_output, forced, basename)
 
         return output
 

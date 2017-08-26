@@ -47,6 +47,7 @@ class OfflineTestCaseMixin(object):
     verbosity = 0
     # Change this for each test class
     templates_dir = ''
+    expected_basename = 'output'
     expected_hash = ''
     # Engines to test
     engines = ('django', 'jinja2')
@@ -134,17 +135,17 @@ class OfflineTestCaseMixin(object):
 
     def _render_script(self, hash):
         return (
-            '<script type="text/javascript" src="{}CACHE/js/{}.js">'
+            '<script type="text/javascript" src="{}CACHE/js/{}.{}.js">'
             '</script>'.format(
-                settings.COMPRESS_URL_PLACEHOLDER, hash
+                settings.COMPRESS_URL_PLACEHOLDER, self.expected_basename, hash
             )
         )
 
     def _render_link(self, hash):
         return (
-            '<link rel="stylesheet" href="{}CACHE/css/{}.css" '
+            '<link rel="stylesheet" href="{}CACHE/css/{}.{}.css" '
             'type="text/css" />'.format(
-                settings.COMPRESS_URL_PLACEHOLDER, hash
+                settings.COMPRESS_URL_PLACEHOLDER, self.expected_basename, hash
             )
         )
 
@@ -367,6 +368,14 @@ class OfflineCompressTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
 class OfflineCompressStaticTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_static_templatetag'
     expected_hash = '2607a2085687'
+
+
+class OfflineCompressTemplateTagNamedTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_templatetag_named'
+    expected_basename = 'output_name'
+    expected_hash = 'a432b6ddb2c4'
+    # block naming unsupported in jinga2
+    engines = ('django',)
 
 
 class OfflineCompressTestCaseWithContext(OfflineTestCaseMixin, TestCase):
