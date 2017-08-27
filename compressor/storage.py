@@ -85,6 +85,45 @@ class GzipCompressorFileStorage(CompressorFileStorage):
         return filename
 
 
+class BrotliCompressorFileStorage(CompressorFileStorage):
+    """
+    The standard compressor file system storage that brotli storage files
+    additionally to the usual files.
+    """
+    chunk_size = 1024
+
+    def __init__(self, *args, **kwargs):
+        import brotli
+        self.Compressor = brotli.Compressor
+        super(BrotliCompressorFileStorage, self).__init__(*args, **kwargs)
+
+    def get_compressor(self):
+        return self.Compressor()
+
+    def save(self, filename, content):
+        filename = super(BrotliCompressorFileStorage, self).save(filename, content)
+        orig_path = self.path(filename)
+        compressed_path = '%s.br' % orig_path
+
+        br_compressor = self.get_compressor()
+        with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
+            for f_in_data in iter(lambda: f_in.read(self.chunk_size), b''):
+                compressed_data = br_compressor.compress(f_in_data)
+                if not compressed_data:
+                    compressed_data = br_compressor.flush()
+                f_out.write(compressed_data)
+            f_out.write(br_compressor.finish())
+        # Ensure the file timestamps match.
+        # os.stat() returns nanosecond resolution on Linux, but os.utime()
+        # only sets microsecond resolution.  Set times on both files to
+        # ensure they are equal.
+        stamp = time.time()
+        os.utime(orig_path, (stamp, stamp))
+        os.utime(compressed_path, (stamp, stamp))
+
+        return filename
+
+
 class DefaultStorage(LazyObject):
     def _setup(self):
         self._wrapped = get_storage_class(settings.COMPRESS_STORAGE)()
