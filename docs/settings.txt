@@ -347,8 +347,8 @@ Backend settings
     * ``'compressor.storage.BrotliCompressorFileStorage'``
 
       A subclass of the default storage backend, which will additionally
-      create ``*.br`` files of each of the compressed files. It has using
-      maximum level of compression (11) so compression speed will be low.
+      create ``*.br`` files of each of the compressed files. It is using
+      the maximum level of compression (11) so compression speed will be low.
 
 .. attribute:: COMPRESS_PARSER
 

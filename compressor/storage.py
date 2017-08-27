@@ -62,8 +62,7 @@ compressor_file_storage = SimpleLazyObject(
 
 class GzipCompressorFileStorage(CompressorFileStorage):
     """
-    The standard compressor file system storage that gzips storage files
-    additionally to the usual files.
+    File system storage that stores gzipped files in addition to the usual files.
     """
     def save(self, filename, content):
         filename = super(GzipCompressorFileStorage, self).save(filename, content)
@@ -87,8 +86,7 @@ class GzipCompressorFileStorage(CompressorFileStorage):
 
 class BrotliCompressorFileStorage(CompressorFileStorage):
     """
-    The standard compressor file system storage that brotli storage files
-    additionally to the usual files.
+    File system storage that stores brotli files in addition to the usual files.
     """
     chunk_size = 1024
 
@@ -97,15 +95,12 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
         self.Compressor = brotli.Compressor
         super(BrotliCompressorFileStorage, self).__init__(*args, **kwargs)
 
-    def get_compressor(self):
-        return self.Compressor()
-
     def save(self, filename, content):
         filename = super(BrotliCompressorFileStorage, self).save(filename, content)
         orig_path = self.path(filename)
         compressed_path = '%s.br' % orig_path
 
-        br_compressor = self.get_compressor()
+        br_compressor = self.Compressor()
         with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
             for f_in_data in iter(lambda: f_in.read(self.chunk_size), b''):
                 compressed_data = br_compressor.compress(f_in_data)
