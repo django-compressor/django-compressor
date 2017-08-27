@@ -84,7 +84,7 @@ class Jinja2Parser(object):
 
         # Allow offline context to override the globals.
         context = self.env.globals.copy()
-        context.update(offline_context)
+        context.update(flatten_context(offline_context))
 
         return context
 
