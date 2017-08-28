@@ -66,7 +66,7 @@ class CompressorMixin(object):
         offline_manifest = get_offline_manifest()
         if key in offline_manifest:
             return offline_manifest[key].replace(
-                settings.COMPRESS_URL_PLACEHOLDER, settings.COMPRESS_URL
+                settings.COMPRESS_URL_PLACEHOLDER, str(settings.COMPRESS_URL)
             )
         else:
             raise OfflineGenerationError('You have offline compression '
