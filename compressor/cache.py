@@ -7,6 +7,7 @@ from importlib import import_module
 
 from django.core.cache import caches
 from django.core.files.base import ContentFile
+from django.utils import six
 from django.utils.encoding import force_text, smart_bytes
 from django.utils.functional import SimpleLazyObject
 
@@ -52,7 +53,7 @@ def get_mtime_cachekey(filename):
 def get_offline_hexdigest(render_template_string):
     return get_hexdigest(
         # Make the hexdigest determination independent of STATIC_URL
-        render_template_string.replace(str(settings.STATIC_URL), '')
+        render_template_string.replace(six.text_type(settings.STATIC_URL), '')
     )
 
 
