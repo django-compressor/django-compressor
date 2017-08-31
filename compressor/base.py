@@ -5,6 +5,7 @@ from importlib import import_module
 
 from django import VERSION
 from django.core.files.base import ContentFile
+from django.utils import six
 from django.utils.safestring import mark_safe
 from django.utils.six.moves.urllib.request import url2pathname
 from django.template.loader import render_to_string
@@ -79,6 +80,13 @@ class Compressor(object):
             base_url = self.storage.base_url
         except AttributeError:
             base_url = settings.COMPRESS_URL
+
+        # Cast ``base_url`` to a string to allow it to be
+        # a string-alike object to e.g. add ``SCRIPT_NAME``
+        # WSGI param as a *path prefix* to the output URL.
+        # See https://code.djangoproject.com/ticket/25598.
+        base_url = six.text_type(base_url)
+
         if not url.startswith(base_url):
             raise UncompressableFileError("'%s' isn't accessible via "
                                           "COMPRESS_URL ('%s') and can't be "
