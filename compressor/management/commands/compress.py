@@ -173,7 +173,6 @@ class Command(BaseCommand):
         fine_templates = []
 
         log.write("Compressing... ")
-        verbosity = 1
 
         for template_name in templates:
             try:

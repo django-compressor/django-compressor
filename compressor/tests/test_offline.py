@@ -159,7 +159,7 @@ class OfflineTestCaseMixin(object):
         if not isinstance(hashes, (list, tuple)):
             hashes = [hashes]
         count, result = CompressCommand().handle_inner(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+            log=self.log, verbosity=self.verbosity, engines=[engine])
         self.assertEqual(len(hashes), count)
         self.assertEqual([self._render_script(h) for h in hashes], result)
         rendered_template = self._render_template(engine)
@@ -209,28 +209,28 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
     @patch.object(CompressCommand, 'compress')
     def test_handle_no_args(self, compress_mock):
         compress_mock.return_value = {}, 1, []
-        CompressCommand().handle_inner()
+        CompressCommand().handle()
         self.assertEqual(compress_mock.call_count, 1)
 
     @patch.object(CompressCommand, 'compress')
     def test_handle_compress_disabled(self, compress_mock):
         with self.settings(COMPRESS_ENABLED=False):
             with self.assertRaises(CommandError):
-                CompressCommand().handle_inner()
+                CompressCommand().handle()
         self.assertEqual(compress_mock.call_count, 0)
 
     @patch.object(CompressCommand, 'compress')
     def test_handle_compress_offline_disabled(self, compress_mock):
         with self.settings(COMPRESS_OFFLINE=False):
             with self.assertRaises(CommandError):
-                CompressCommand().handle_inner()
+                CompressCommand().handle()
         self.assertEqual(compress_mock.call_count, 0)
 
     @patch.object(CompressCommand, 'compress')
     def test_handle_compress_offline_disabled_force(self, compress_mock):
         compress_mock.return_value = {}, 1, []
         with self.settings(COMPRESS_OFFLINE=False):
-            CompressCommand().handle_inner(force=True)
+            CompressCommand().handle(force=True)
         self.assertEqual(compress_mock.call_count, 1)
 
     def test_rendering_without_manifest_raises_exception(self):
@@ -247,7 +247,7 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
 
     def _test_deleting_manifest_does_not_affect_rendering(self, engine):
         count, result = CompressCommand().handle_inner(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+            log=self.log, verbosity=self.verbosity, engines=[engine])
         get_offline_manifest()
         manifest_path = os.path.join('CACHE', 'manifest.json')
         if default_storage.exists(manifest_path):
@@ -281,7 +281,7 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
            side_effect=Exception(b"non-ascii character here:\xc3\xa4"))
     def test_non_ascii_exception_messages(self, mock):
         with self.assertRaises(CommandError):
-            CompressCommand().handle_inner()
+            CompressCommand().handle(log=self.log)
 
 
 class OfflineCompressSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
@@ -292,7 +292,7 @@ class OfflineCompressSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
 
     def _test_offline(self, engine):
         count, result = CompressCommand().handle_inner(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+            log=self.log, verbosity=self.verbosity, engines=[engine])
         # Only one block compressed, the second identical one was skipped.
         self.assertEqual(1, count)
         # Only 1 <script> block in returned result as well.
@@ -342,7 +342,7 @@ class OfflineCompressBlockSuperTestCaseWithExtraContent(
 
     def _test_offline(self, engine):
         count, result = CompressCommand().handle_inner(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+            log=self.log, verbosity=self.verbosity, engines=[engine])
         self.assertEqual(2, count)
         self.assertEqual([
             self._render_script('9717f9c7e9ff'),
@@ -479,7 +479,7 @@ class OfflineCompressStaticUrlIndependenceTestCase(
 
     def _test_offline(self, engine):
         count, result = CompressCommand().handle_inner(
-            log=self.log, verbosity=self.verbosity, engine=engine
+            log=self.log, verbosity=self.verbosity, engines=[engine]
         )
         self.assertEqual(1, count)
         self.assertEqual([self._render_script(self.expected_hash)], result)
@@ -537,31 +537,31 @@ class OfflineCompressTestCaseWithContextGeneratorImportError(
                 COMPRESS_OFFLINE_CONTEXT='invalid_mod.invalid_func'):
             # Path with invalid module name -- ImportError:
             self.assertRaises(
-                ImportError, CompressCommand().compress, engine=engine)
+                ImportError, CompressCommand().handle_inner, engines=[engine])
 
         with self.settings(COMPRESS_OFFLINE_CONTEXT='compressor'):
             # Valid module name only without function -- AttributeError:
             self.assertRaises(
-                ImportError, CompressCommand().compress, engine=engine)
+                ImportError, CompressCommand().handle_inner, engines=[engine])
 
         with self.settings(
                 COMPRESS_OFFLINE_CONTEXT='compressor.tests.invalid_function'):
             # Path with invalid function name -- AttributeError:
             self.assertRaises(
-                ImportError, CompressCommand().compress, engine=engine)
+                ImportError, CompressCommand().handle_inner, engines=[engine])
 
         with self.settings(
                 COMPRESS_OFFLINE_CONTEXT='compressor.tests.test_offline'):
             # Path without function attempts call on module -- TypeError:
             self.assertRaises(
-                ImportError, CompressCommand().compress, engine=engine)
+                ImportError, CompressCommand().handle_inner, engines=[engine])
 
         valid_path = 'compressor.tests.test_offline.offline_context_generator'
         with self.settings(COMPRESS_OFFLINE_CONTEXT=valid_path):
             # Valid path to generator function -- no ImportError:
 
             try:
-                CompressCommand().handle_inner(engine=engine)
+                CompressCommand().handle_inner(log=self.log, engines=[engine])
             except ImportError:
                 self.fail('Valid path to offline context generator must'
                           ' not raise ImportError.')
@@ -572,9 +572,20 @@ class OfflineCompressTestCaseErrors(OfflineTestCaseMixin, TestCase):
 
     def _test_offline(self, engine):
         count, result = CompressCommand().handle_inner(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+            log=self.log, verbosity=self.verbosity, engines=[engine])
 
-        self.assertEqual(2, count)
+        if engine == 'django':
+            self.assertEqual(2, count)
+        else:
+            # Because we use env.parse in Jinja2Parser, the engine does not
+            # actually load the 'extends' and 'includes' templates, and so
+            # it is unable to detect that they are missing. So all the
+            # 'compress' nodes are processed correctly.
+            self.assertEqual(4, count)
+            self.assertEqual(engine, 'jinja2')
+            self.assertIn(self._render_link('7ff52cb38987'), result)
+            self.assertIn(self._render_link('2db2b4d36380'), result)
+
         self.assertIn(self._render_script('3910ce35946a'), result)
         self.assertIn(self._render_script('244f05154671'), result)
 
@@ -593,11 +604,11 @@ class OfflineCompressTestCaseWithError(OfflineTestCaseMixin, TestCase):
         """
         with self.settings(DEBUG=True):
             self.assertRaises(
-                CommandError, CompressCommand().compress, engine=engine)
+                CommandError, CompressCommand().handle_inner, engines=[engine], log=self.log)
 
         with self.settings(DEBUG=False):
             self.assertRaises(
-                CommandError, CompressCommand().compress, engine=engine)
+                CommandError, CompressCommand().handle_inner, engines=[engine], log=self.log)
 
 
 class OfflineCompressEmptyTag(OfflineTestCaseMixin, TestCase):
@@ -612,8 +623,8 @@ class OfflineCompressEmptyTag(OfflineTestCaseMixin, TestCase):
     engines = ('django',)
 
     def _test_offline(self, engine):
-        count, result = CompressCommand().handle_inner(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        CompressCommand().handle_inner(
+            log=self.log, verbosity=self.verbosity, engines=[engine])
         manifest = get_offline_manifest()
         manifest[list(manifest)[0]] = ''
         self.assertEqual(self._render_template(engine), '\n')
@@ -652,7 +663,7 @@ class OfflineCompressBlockSuperBaseCompressed(OfflineTestCaseMixin, TestCase):
 
     def _test_offline(self, engine):
         count, result = CompressCommand().handle_inner(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+            log=self.log, verbosity=self.verbosity, engines=[engine])
         self.assertEqual(len(self.expected_hash), count)
         for expected_hash, template in zip(self.expected_hash_offline, self.templates):
             expected = self._render_script(expected_hash)
@@ -671,8 +682,8 @@ class OfflineCompressInlineNonAsciiTestCase(OfflineTestCaseMixin, TestCase):
     }
 
     def _test_offline(self, engine):
-        count, result = CompressCommand().handle_inner(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        _, result = CompressCommand().handle_inner(
+            log=self.log, verbosity=self.verbosity, engines=[engine])
         rendered_template = self._render_template(engine)
         self.assertEqual(rendered_template, ''.join(result) + '\n')
 
@@ -691,7 +702,7 @@ class OfflineCompressComplexTestCase(OfflineTestCaseMixin, TestCase):
 
     def _test_offline(self, engine):
         count, result = CompressCommand().handle_inner(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+            log=self.log, verbosity=self.verbosity, engines=[engine])
         self.assertEqual(3, count)
         self.assertEqual([
             self._render_script('2c1f0f85a90d'),
@@ -725,8 +736,8 @@ class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
 
     @override_settings(INSTALLED_APPS=INSTALLED_APPS)
     def _test_offline(self, engine):
-        count, result = CompressCommand().handle_inner(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        count, _ = CompressCommand().handle_inner(
+            log=self.log, verbosity=self.verbosity, engines=[engine])
         self.assertEqual(count, 1)
 
 
