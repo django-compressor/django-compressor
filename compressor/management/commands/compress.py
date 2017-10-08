@@ -22,16 +22,6 @@ from compressor.exceptions import (OfflineGenerationError, TemplateSyntaxError,
                                    TemplateDoesNotExist)
 from compressor.utils import get_mod_func
 
-if six.PY3:
-    # there is an 'io' module in python 2.6+, but io.StringIO does not
-    # accept regular strings, just unicode objects
-    from io import StringIO
-else:
-    try:
-        from cStringIO import StringIO
-    except ImportError:
-        from StringIO import StringIO
-
 
 class Command(BaseCommand):
     help = "Compress content outside of the request/response cycle"
@@ -94,7 +84,7 @@ class Command(BaseCommand):
 
         return parser
 
-    def compress(self, log=None, **options):
+    def compress(self, engine, extensions, verbosity, follow_links, log):
         """
         Searches templates containing 'compress' nodes and compresses them
         "offline" -- outside of the request/response cycle.
@@ -102,12 +92,7 @@ class Command(BaseCommand):
         The result is cached with a cache-key derived from the content of the
         compress nodes (not the content of the possibly linked files!).
         """
-        engine = options.get("engine", "django")
-        extensions = options.get('extensions')
-        extensions = self.handle_extensions(extensions or ['html'])
-        verbosity = int(options.get("verbosity", 0))
-        if not log:
-            log = StringIO()
+
         if not self.get_loaders():
             raise OfflineGenerationError("No template loaders defined. You "
                                          "must set TEMPLATE_LOADERS in your "
@@ -139,8 +124,7 @@ class Command(BaseCommand):
                 log.write("Considering paths:\n\t" + "\n\t".join(paths) + "\n")
 
             for path in paths:
-                for root, dirs, files in os.walk(path,
-                        followlinks=options.get('followlinks', False)):
+                for root, dirs, files in os.walk(path, followlinks=follow_links):
                     templates.update(os.path.join(root, name)
                         for name in files if not name.startswith('.') and
                             any(fnmatch(name, "*%s" % glob) for glob in extensions))
@@ -297,16 +281,17 @@ class Command(BaseCommand):
                     "Offline compression is disabled. Set "
                     "COMPRESS_OFFLINE or use the --force to override.")
 
-        options.setdefault("log", sys.stdout)
+        log = options.get("log", sys.stdout)
+        verbosity = options.get("verbosity", 0)
+        follow_links = options.get("follow_links", False)
+        extensions = self.handle_extensions(options.get("extensions") or ["html"])
+        engines = [e.strip() for e in options.get("engines", [])] or ["django"]
 
         final_offline_manifest = {}
         final_block_count = 0
         final_results = []
-        engines = [e.strip() for e in options.get("engines", [])] or ["django"]
         for engine in engines:
-            opts = options.copy()
-            opts["engine"] = engine
-            offline_manifest, block_count, results = self.compress(**opts)
+            offline_manifest, block_count, results = self.compress(engine, extensions, verbosity, follow_links, log)
             final_results.extend(results)
             final_block_count += block_count
             final_offline_manifest.update(offline_manifest)
