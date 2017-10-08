@@ -120,7 +120,7 @@ class Command(BaseCommand):
                                              "https://docs.djangoproject.com/en/1.8/topics/templates/ "
                                              "for more information on template "
                                              "loaders.")
-            if verbosity > 1:
+            if verbosity >= 2:
                 log.write("Considering paths:\n\t" + "\n\t".join(paths) + "\n")
 
             for path in paths:
@@ -139,7 +139,7 @@ class Command(BaseCommand):
             raise OfflineGenerationError("No templates found. Make sure your "
                                          "TEMPLATE_LOADERS and TEMPLATE_DIRS "
                                          "settings are correct.")
-        if verbosity > 1:
+        if verbosity >= 2:
             log.write("Found templates:\n\t" + "\n\t".join(templates) + "\n")
 
         contexts = settings.COMPRESS_OFFLINE_CONTEXT
@@ -156,7 +156,8 @@ class Command(BaseCommand):
         parser = self.__get_parser(engine)
         fine_templates = []
 
-        log.write("Compressing... ")
+        if verbosity >= 1:
+            log.write("Compressing... ")
 
         for template_name in templates:
             try:
@@ -164,19 +165,19 @@ class Command(BaseCommand):
                 template.template_name = template_name
                 fine_templates.append(template)
             except IOError:  # unreadable file -> ignore
-                if verbosity > 0:
+                if verbosity >= 1:
                     log.write("Unreadable template at: %s\n" % template_name)
                 continue
             except TemplateSyntaxError as e:  # broken template -> ignore
-                if verbosity > 0:
+                if verbosity >= 1:
                     log.write("Invalid template %s: %s\n" % (template_name, smart_text(e)))
                 continue
             except TemplateDoesNotExist:  # non existent template -> ignore
-                if verbosity > 0:
+                if verbosity >= 1:
                     log.write("Non-existent template at: %s\n" % template_name)
                 continue
             except UnicodeDecodeError:
-                if verbosity > 0:
+                if verbosity >= 1:
                     log.write("UnicodeDecodeError while trying to read "
                               "template %s\n" % template_name)
                 continue
@@ -195,7 +196,7 @@ class Command(BaseCommand):
                     nodes = list(parser.walk_nodes(template, context=context))
                 except (TemplateDoesNotExist, TemplateSyntaxError) as e:
                     # Could be an error in some base template
-                    if verbosity > 0:
+                    if verbosity >= 1:
                         log.write("Error parsing template %s: %s\n" %
                                   (template.template_name, smart_text(e)))
                     continue
@@ -242,8 +243,9 @@ class Command(BaseCommand):
                 "Try running compress command with --follow-links and/or"
                 "--extension=EXTENSIONS")
 
-        log.write("done\nCompressed %d block(s) from %d template(s) for %d context(s).\n" %
-                  (block_count, nodes_count, contexts_count))
+        if verbosity >= 1:
+            log.write("done\nCompressed %d block(s) from %d template(s) for %d context(s).\n" %
+                      (block_count, nodes_count, contexts_count))
         return offline_manifest, block_count, results
 
     def handle_extensions(self, extensions=('html',)):
@@ -282,7 +284,7 @@ class Command(BaseCommand):
                     "COMPRESS_OFFLINE or use the --force to override.")
 
         log = options.get("log", sys.stdout)
-        verbosity = options.get("verbosity", 0)
+        verbosity = options.get("verbosity", 1)
         follow_links = options.get("follow_links", False)
         extensions = self.handle_extensions(options.get("extensions") or ["html"])
         engines = [e.strip() for e in options.get("engines", [])] or ["django"]
