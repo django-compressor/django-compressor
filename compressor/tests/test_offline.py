@@ -13,7 +13,6 @@ from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils import six
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.conf import settings
@@ -21,16 +20,6 @@ from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_storage
 from compressor.utils import get_mod_func
-
-if six.PY3:
-    # there is an 'io' module in python 2.6+, but io.StringIO does not
-    # accept regular strings, just unicode objects
-    from io import StringIO
-else:
-    try:
-        from cStringIO import StringIO
-    except ImportError:
-        from StringIO import StringIO
 
 
 def offline_context_generator():
@@ -44,7 +33,6 @@ def static_url_context_generator():
 
 class OfflineTestCaseMixin(object):
     template_name = 'test_compressor_offline.html'
-    verbosity = 0
     # Change this for each test class
     templates_dir = ''
     expected_basename = 'output'
@@ -54,8 +42,6 @@ class OfflineTestCaseMixin(object):
     additional_test_settings = None
 
     def setUp(self):
-        self.log = StringIO()
-
         # Reset template dirs, because it enables us to force compress to
         # consider only a specific directory (helps us make true,
         # independent unit tests).
@@ -158,8 +144,7 @@ class OfflineTestCaseMixin(object):
         hashes = self.expected_hash
         if not isinstance(hashes, (list, tuple)):
             hashes = [hashes]
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         self.assertEqual(len(hashes), count)
         self.assertEqual([self._render_script(h) for h in hashes], result)
         rendered_template = self._render_template(engine)
@@ -208,6 +193,7 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
 
     @patch.object(CompressCommand, 'compress')
     def test_handle_no_args(self, compress_mock):
+        compress_mock.return_value = {}, 1, []
         CompressCommand().handle()
         self.assertEqual(compress_mock.call_count, 1)
 
@@ -227,6 +213,7 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
 
     @patch.object(CompressCommand, 'compress')
     def test_handle_compress_offline_disabled_force(self, compress_mock):
+        compress_mock.return_value = {}, 1, []
         with self.settings(COMPRESS_OFFLINE=False):
             CompressCommand().handle(force=True)
         self.assertEqual(compress_mock.call_count, 1)
@@ -244,8 +231,7 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
                           self.template_jinja2.render, {})
 
     def _test_deleting_manifest_does_not_affect_rendering(self, engine):
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         get_offline_manifest()
         manifest_path = os.path.join('CACHE', 'manifest.json')
         if default_storage.exists(manifest_path):
@@ -279,7 +265,7 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
            side_effect=Exception(b"non-ascii character here:\xc3\xa4"))
     def test_non_ascii_exception_messages(self, mock):
         with self.assertRaises(CommandError):
-            CompressCommand().handle()
+            CompressCommand().handle(verbosity=0)
 
 
 class OfflineCompressSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
@@ -289,8 +275,7 @@ class OfflineCompressSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
     engines = ('django',)
 
     def _test_offline(self, engine):
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         # Only one block compressed, the second identical one was skipped.
         self.assertEqual(1, count)
         # Only 1 <script> block in returned result as well.
@@ -339,8 +324,7 @@ class OfflineCompressBlockSuperTestCaseWithExtraContent(
     engines = ('django',)
 
     def _test_offline(self, engine):
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         self.assertEqual(2, count)
         self.assertEqual([
             self._render_script('9717f9c7e9ff'),
@@ -476,9 +460,7 @@ class OfflineCompressStaticUrlIndependenceTestCase(
     }
 
     def _test_offline(self, engine):
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine
-        )
+        count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         self.assertEqual(1, count)
         self.assertEqual([self._render_script(self.expected_hash)], result)
         self.assertEqual(
@@ -535,31 +517,31 @@ class OfflineCompressTestCaseWithContextGeneratorImportError(
                 COMPRESS_OFFLINE_CONTEXT='invalid_mod.invalid_func'):
             # Path with invalid module name -- ImportError:
             self.assertRaises(
-                ImportError, CompressCommand().compress, engine=engine)
+                ImportError, CompressCommand().handle_inner, engines=[engine])
 
         with self.settings(COMPRESS_OFFLINE_CONTEXT='compressor'):
             # Valid module name only without function -- AttributeError:
             self.assertRaises(
-                ImportError, CompressCommand().compress, engine=engine)
+                ImportError, CompressCommand().handle_inner, engines=[engine])
 
         with self.settings(
                 COMPRESS_OFFLINE_CONTEXT='compressor.tests.invalid_function'):
             # Path with invalid function name -- AttributeError:
             self.assertRaises(
-                ImportError, CompressCommand().compress, engine=engine)
+                ImportError, CompressCommand().handle_inner, engines=[engine])
 
         with self.settings(
                 COMPRESS_OFFLINE_CONTEXT='compressor.tests.test_offline'):
             # Path without function attempts call on module -- TypeError:
             self.assertRaises(
-                ImportError, CompressCommand().compress, engine=engine)
+                ImportError, CompressCommand().handle_inner, engines=[engine])
 
         valid_path = 'compressor.tests.test_offline.offline_context_generator'
         with self.settings(COMPRESS_OFFLINE_CONTEXT=valid_path):
             # Valid path to generator function -- no ImportError:
 
             try:
-                CompressCommand().compress(engine=engine)
+                CompressCommand().handle_inner(engines=[engine], verbosity=0)
             except ImportError:
                 self.fail('Valid path to offline context generator must'
                           ' not raise ImportError.')
@@ -569,8 +551,7 @@ class OfflineCompressTestCaseErrors(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_error_handling'
 
     def _test_offline(self, engine):
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
 
         if engine == 'django':
             self.assertEqual(2, count)
@@ -602,11 +583,11 @@ class OfflineCompressTestCaseWithError(OfflineTestCaseMixin, TestCase):
         """
         with self.settings(DEBUG=True):
             self.assertRaises(
-                CommandError, CompressCommand().compress, engine=engine)
+                CommandError, CompressCommand().handle_inner, engines=[engine], verbosity=0)
 
         with self.settings(DEBUG=False):
             self.assertRaises(
-                CommandError, CompressCommand().compress, engine=engine)
+                CommandError, CompressCommand().handle_inner, engines=[engine], verbosity=0)
 
 
 class OfflineCompressEmptyTag(OfflineTestCaseMixin, TestCase):
@@ -621,8 +602,7 @@ class OfflineCompressEmptyTag(OfflineTestCaseMixin, TestCase):
     engines = ('django',)
 
     def _test_offline(self, engine):
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        CompressCommand().handle_inner(engines=[engine], verbosity=0)
         manifest = get_offline_manifest()
         manifest[list(manifest)[0]] = ''
         self.assertEqual(self._render_template(engine), '\n')
@@ -660,8 +640,7 @@ class OfflineCompressBlockSuperBaseCompressed(OfflineTestCaseMixin, TestCase):
             return None
 
     def _test_offline(self, engine):
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         self.assertEqual(len(self.expected_hash), count)
         for expected_hash, template in zip(self.expected_hash_offline, self.templates):
             expected = self._render_script(expected_hash)
@@ -680,8 +659,7 @@ class OfflineCompressInlineNonAsciiTestCase(OfflineTestCaseMixin, TestCase):
     }
 
     def _test_offline(self, engine):
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        _, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         rendered_template = self._render_template(engine)
         self.assertEqual(rendered_template, ''.join(result) + '\n')
 
@@ -699,8 +677,7 @@ class OfflineCompressComplexTestCase(OfflineTestCaseMixin, TestCase):
     }
 
     def _test_offline(self, engine):
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         self.assertEqual(3, count)
         self.assertEqual([
             self._render_script('2c1f0f85a90d'),
@@ -734,8 +711,7 @@ class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
 
     @override_settings(INSTALLED_APPS=INSTALLED_APPS)
     def _test_offline(self, engine):
-        count, result = CompressCommand().compress(
-            log=self.log, verbosity=self.verbosity, engine=engine)
+        count, _ = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         self.assertEqual(count, 1)
 
 
@@ -754,7 +730,6 @@ class TestCompressCommand(OfflineTestCaseMixin, TestCase):
         opts = {
             "force": True,
             "verbosity": 0,
-            "log": StringIO(),
         }
 
         call_command('compress', engines=["django"], **opts)
