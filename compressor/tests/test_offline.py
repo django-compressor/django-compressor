@@ -187,7 +187,7 @@ class OfflineTestCaseMixin(object):
 
     def _render_result(self, result, separator='\n'):
         return (separator.join(result) + '\n').replace(
-            settings.COMPRESS_URL_PLACEHOLDER, str(settings.COMPRESS_URL)
+            settings.COMPRESS_URL_PLACEHOLDER, six.text_type(settings.COMPRESS_URL)
         )
 
     def _test_offline(self, engine):
