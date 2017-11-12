@@ -15,7 +15,6 @@ from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.urls.base import get_script_prefix, set_script_prefix
 from django.utils import six
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
@@ -24,6 +23,11 @@ from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_storage
 from compressor.utils import get_mod_func
+
+if django.VERSION < (1, 10):
+    from django.core.urlresolvers import get_script_prefix, set_script_prefix
+else:
+    from django.urls import get_script_prefix, set_script_prefix
 
 
 def offline_context_generator():
@@ -56,16 +60,22 @@ class LazyScriptNamePrefixedUrl(six.text_type):
     in order to work correctly with the rest of Django core.
     """
     def __str__(self):
-        if self.startswith('/'):
-            return get_script_prefix() + self[1:]
-        else:
-            return self
+        return get_script_prefix() + self[1:] if self.startswith('/') else self
+
+    def __unicode__(self):
+        return str(self)
 
     def split(self, *args, **kwargs):
         """
-        We must override ``.split()`` method to make it work with ``{% static %}``.
+        Override ``.split()`` method to make it work with ``{% static %}`` in Django >= 1.10.
         """
-        return str(self).split(*args, **kwargs)
+        return six.text_type(self).split(*args, **kwargs)
+
+    def encode(self, *args, **kwargs):
+        """
+        Override ``.encode()`` method to make it work with ``{% static %}`` in Django <= 1.9.
+        """
+        return six.text_type(self).encode(*args, **kwargs)
 
 
 @contextmanager
@@ -73,7 +83,7 @@ def script_prefix(new_prefix):
     """
     Override ``SCRIPT_NAME`` WSGI param, yield, then restore its original value.
 
-    :param new_prefix: New SCRIPT_NAME value.
+    :param new_prefix: New ``SCRIPT_NAME`` value.
     """
     old_prefix = get_script_prefix()
     set_script_prefix(new_prefix)
@@ -501,8 +511,8 @@ class OfflineCompressStaticUrlIndependenceTestCase(
     expected_hash = '5014de5edcbe'
     additional_test_settings = {
         'STATIC_URL': '/custom/static/url/',
-        # We use COMPRESS_OFFLINE_CONTEXT generator to make sure that
-        # STATIC_URL is not cached when rendering the template.
+        # We use ``COMPRESS_OFFLINE_CONTEXT`` generator to make sure that
+        # ``STATIC_URL`` is not cached when rendering the template.
         'COMPRESS_OFFLINE_CONTEXT': (
             'compressor.tests.test_offline.static_url_context_generator'
         )
@@ -830,8 +840,8 @@ class OfflineCompressTestCaseWithLazyStringAlikeUrls(OfflineCompressTestCaseWith
     additional_test_settings = {
         'STATIC_URL': LazyScriptNamePrefixedUrl('/static/'),
         'COMPRESS_URL': LazyScriptNamePrefixedUrl('/static/'),
-        # We use COMPRESS_OFFLINE_CONTEXT generator to make sure that
-        # STATIC_URL is not cached when rendering the template.
+        # We use ``COMPRESS_OFFLINE_CONTEXT`` generator to make sure that
+        # ``STATIC_URL`` is not cached when rendering the template.
         'COMPRESS_OFFLINE_CONTEXT': (
             'compressor.tests.test_offline.static_url_context_generator'
         )
@@ -842,7 +852,7 @@ class OfflineCompressTestCaseWithLazyStringAlikeUrls(OfflineCompressTestCaseWith
         count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         self.assertEqual(1, count)
 
-        # Change SCRIPT_NAME WSGI param - it can be changed on every HTTP request,
+        # Change ``SCRIPT_NAME`` WSGI param - it can be changed on every HTTP request,
         # e.g. passed via HTTP header.
         for script_name in ['', '/app/prefix/', '/another/prefix/']:
             with script_prefix(script_name):
