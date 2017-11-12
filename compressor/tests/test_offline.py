@@ -43,7 +43,7 @@ class LazyScriptNamePrefixedUrl(six.text_type):
 
         settings.STATIC_URL = LazyScriptNamePrefixedUrl('/static/')
 
-        # HTTP request to '/some/page/` without SCRIPT_NAME
+        # HTTP request to '/some/page/' without SCRIPT_NAME
         str(settings.STATIC_URL) == '/static/'
 
         # HTTP request to '/app/prefix/some/page/` with SCRIPT_NAME = '/app/prefix/'
