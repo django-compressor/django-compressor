@@ -66,7 +66,12 @@ class CompressorMixin(object):
         offline_manifest = get_offline_manifest()
         if key in offline_manifest:
             return offline_manifest[key].replace(
-                settings.COMPRESS_URL_PLACEHOLDER, settings.COMPRESS_URL
+                settings.COMPRESS_URL_PLACEHOLDER,
+                # Cast ``settings.COMPRESS_URL`` to a string to allow it to be
+                # a string-alike object to e.g. add ``SCRIPT_NAME`` WSGI param
+                # as a *path prefix* to the output URL.
+                # See https://code.djangoproject.com/ticket/25598.
+                six.text_type(settings.COMPRESS_URL)
             )
         else:
             raise OfflineGenerationError('You have offline compression '

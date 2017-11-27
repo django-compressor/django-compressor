@@ -1,5 +1,7 @@
 from __future__ import with_statement, unicode_literals
 import copy
+from contextlib import contextmanager
+
 import django
 import io
 import os
@@ -13,6 +15,7 @@ from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.utils import six
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.conf import settings
@@ -20,6 +23,11 @@ from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_storage
 from compressor.utils import get_mod_func
+
+if django.VERSION < (1, 10):
+    from django.core.urlresolvers import get_script_prefix, set_script_prefix
+else:
+    from django.urls import get_script_prefix, set_script_prefix
 
 
 def offline_context_generator():
@@ -29,6 +37,58 @@ def offline_context_generator():
 
 def static_url_context_generator():
     yield {'STATIC_URL': settings.STATIC_URL}
+
+
+class LazyScriptNamePrefixedUrl(six.text_type):
+    """
+    Lazy URL with ``SCRIPT_NAME`` WSGI param as path prefix.
+
+    .. code-block :: python
+
+        settings.STATIC_URL = LazyScriptNamePrefixedUrl('/static/')
+
+        # HTTP request to '/some/page/' without SCRIPT_NAME
+        str(settings.STATIC_URL) == '/static/'
+
+        # HTTP request to '/app/prefix/some/page/` with SCRIPT_NAME = '/app/prefix/'
+        str(settings.STATIC_URL) == '/app/prefix/static/'
+
+        # HTTP request to '/another/prefix/some/page/` with SCRIPT_NAME = '/another/prefix/'
+        str(settings.STATIC_URL) == '/another/prefix/static/'
+
+    The implementation is incomplete, all ``str`` methods must be overridden
+    in order to work correctly with the rest of Django core.
+    """
+    def __str__(self):
+        return get_script_prefix() + self[1:] if self.startswith('/') else self
+
+    def __unicode__(self):
+        return str(self)
+
+    def split(self, *args, **kwargs):
+        """
+        Override ``.split()`` method to make it work with ``{% static %}`` in Django >= 1.10.
+        """
+        return six.text_type(self).split(*args, **kwargs)
+
+    def encode(self, *args, **kwargs):
+        """
+        Override ``.encode()`` method to make it work with ``{% static %}`` in Django <= 1.9.
+        """
+        return six.text_type(self).encode(*args, **kwargs)
+
+
+@contextmanager
+def script_prefix(new_prefix):
+    """
+    Override ``SCRIPT_NAME`` WSGI param, yield, then restore its original value.
+
+    :param new_prefix: New ``SCRIPT_NAME`` value.
+    """
+    old_prefix = get_script_prefix()
+    set_script_prefix(new_prefix)
+    yield
+    set_script_prefix(old_prefix)
 
 
 class OfflineTestCaseMixin(object):
@@ -137,7 +197,7 @@ class OfflineTestCaseMixin(object):
 
     def _render_result(self, result, separator='\n'):
         return (separator.join(result) + '\n').replace(
-            settings.COMPRESS_URL_PLACEHOLDER, settings.COMPRESS_URL
+            settings.COMPRESS_URL_PLACEHOLDER, six.text_type(settings.COMPRESS_URL)
         )
 
     def _test_offline(self, engine):
@@ -446,14 +506,13 @@ class OfflineCompressStaticUrlIndependenceTestCase(
     """
     Test that the offline manifest is independent of STATIC_URL.
     I.e. users can use the manifest with any other STATIC_URL in the future.
-
-    We use COMPRESS_OFFLINE_CONTEXT generator to make sure that
-    STATIC_URL is not cached when rendering the template.
     """
     templates_dir = 'test_static_url_independence'
     expected_hash = '5014de5edcbe'
     additional_test_settings = {
         'STATIC_URL': '/custom/static/url/',
+        # We use ``COMPRESS_OFFLINE_CONTEXT`` generator to make sure that
+        # ``STATIC_URL`` is not cached when rendering the template.
         'COMPRESS_OFFLINE_CONTEXT': (
             'compressor.tests.test_offline.static_url_context_generator'
         )
@@ -750,3 +809,65 @@ class TestCompressCommand(OfflineTestCaseMixin, TestCase):
             {'0fed9c02607acba22316a328075a81a74e0983ae79470daa9d3707a337623dc3': '023629c58235',
              '077408d23d4a829b8f88db2eadcf902b29d71b14f94018d900f38a3f8ed24c94': 'b6695d1aa847'})
         self.assertEqual(manifest_both, manifest_both_expected)
+
+
+class OfflineCompressTestCaseWithLazyStringAlikeUrls(OfflineCompressTestCaseWithContextGenerator):
+    """
+    Test offline compressing with ``STATIC_URL`` and ``COMPRESS_URL`` as instances of
+    *lazy string-alike objects* instead of strings.
+
+    In particular, lazy string-alike objects that add ``SCRIPT_NAME`` WSGI param
+    as URL path prefix.
+
+    For example:
+
+    - We've generated offline assets and deployed them with our Django project.
+    - We've configured HTTP server (e.g. Nginx) to serve our app at two different URLs:
+      ``http://example.com/my/app/`` and ``http://app.example.com/``.
+    - Both URLs are leading to the same app, but in the first case we pass
+      ``SCRIPT_NAME = /my/app/`` to WSGI app server (e.g. to uWSGI, which is *behind* Nginx).
+    - Django (1.11.7, as of today) *ignores* ``SCRIPT_NAME`` when generating
+      static URLs, while it uses ``SCRIPT_NAME`` when generating Django views URLs -
+      see https://code.djangoproject.com/ticket/25598.
+    - As a solution - we can use a lazy string-alike object instead of ``str`` for ``STATIC_URL``
+      so it will know about ``SCRIPT_NAME`` and add it as a prefix every time we do any
+      string operation with ``STATIC_URL``.
+    - However, there are some cases when we cannot force CPython to render our lazy string
+      correctly - e.g. ``some_string.replace(STATIC_URL, '...')``. So we need to do explicit
+      ``str`` type cast: ``some_string.replace(str(STATIC_URL), '...')``.
+    """
+    templates_dir = 'test_static_templatetag'
+    additional_test_settings = {
+        'STATIC_URL': LazyScriptNamePrefixedUrl('/static/'),
+        'COMPRESS_URL': LazyScriptNamePrefixedUrl('/static/'),
+        # We use ``COMPRESS_OFFLINE_CONTEXT`` generator to make sure that
+        # ``STATIC_URL`` is not cached when rendering the template.
+        'COMPRESS_OFFLINE_CONTEXT': (
+            'compressor.tests.test_offline.static_url_context_generator'
+        )
+    }
+    expected_hash = '2607a2085687'
+
+    def _test_offline(self, engine):
+        count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
+        self.assertEqual(1, count)
+
+        # Change ``SCRIPT_NAME`` WSGI param - it can be changed on every HTTP request,
+        # e.g. passed via HTTP header.
+        for script_name in ['', '/app/prefix/', '/another/prefix/']:
+            with script_prefix(script_name):
+                self.assertEqual(
+                    six.text_type(settings.STATIC_URL),
+                    script_name.rstrip('/') + '/static/'
+                )
+
+                self.assertEqual(
+                    six.text_type(settings.COMPRESS_URL),
+                    script_name.rstrip('/') + '/static/'
+                )
+
+                expected_result = self._render_result(result)
+                actual_result = self._render_template(engine)
+
+                self.assertEqual(actual_result, expected_result)
+                self.assertIn(six.text_type(settings.COMPRESS_URL), actual_result)
