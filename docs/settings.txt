@@ -337,7 +337,7 @@ Backend settings
     The dotted path to a Django Storage backend to be used to save the
     compressed files.
 
-    Django Compressor ships with one additional storage backend:
+    Django Compressor ships with some additional storage backends:
 
     * ``'compressor.storage.GzipCompressorFileStorage'``
 
