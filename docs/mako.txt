@@ -1,0 +1,47 @@
+.. _mako_template_support:
+
+Mako Template Support
+=====================
+
+Django Compressor comes with `mako template`_ support via an extension.
+
+Usage
+=====
+
+All you need to do is to import extension namespace and using it with mako
+syntax:
+
+.. code-block:: mako
+
+    <%namespace name="compress" module="compressor.contrib.mako"/>
+
+    <%compress:compress kind="css">
+    <link rel="stylesheet" href="/static/css/style.css" type="text/css" />
+    </%compress:compress>
+
+All django-compressor arguments are supported but must be explicitly named:
+
+* ``kind``: mandatory, "css" or "js".
+* ``mode``: optional, compressor mode, "file" or "inline".
+* ``name``: optional but requires ``mode``, output file name.
+
+Shorter functions
+=================
+
+Additionally two shorter functions are provided, ``css`` and ``js``, same
+arguments can be passed except ``kind`` which is set by default depending on
+which one is used, eg.:
+
+.. code-block:: mako
+
+    <%namespace name="compress" module="compressor.contrib.mako"/>
+
+    <%compress:css>
+    <link rel="stylesheet" href="/static/css/style.css" type="text/css" />
+    </%compress:css>
+
+    <%compress:js>
+    <script type="text/javascript" src="/static/js/script.js">
+    </%compress:js>
+
+.. _mako template: http://www.makotemplates.org/
