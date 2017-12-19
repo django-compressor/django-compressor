@@ -19,7 +19,9 @@ _cachekey_func = None
 
 
 def get_hexdigest(plaintext, length=None):
-    digest = hashlib.sha256(smart_bytes(plaintext)).hexdigest()
+    hashlib_function_name = getattr(settings, 'COMPRESS_CACHE_HASHLIB_FUNCTION', 'sha256')
+    hashlib_function = getattr(hashlib, hashlib_function_name)
+    digest = hashlib_function(smart_bytes(plaintext)).hexdigest()
     if length:
         return digest[:length]
     return digest

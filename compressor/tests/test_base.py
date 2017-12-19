@@ -390,6 +390,17 @@ class CacheTestCase(SimpleTestCase):
         except TypeError:
             self.fail("get_precompiler_cachekey raised TypeError unexpectedly")
 
+    def test_get_hexdigest_default(self):
+        css_filename = os.path.join(settings.COMPRESS_ROOT, "css", "one.css")
+        with open(css_filename, 'rb') as fh:
+            self.assertEqual(get_hexdigest(fh.read(), 12), '64f74be417da')
+
+    @override_settings(COMPRESS_CACHE_HASHLIB_FUNCTION='md5')
+    def test_get_hexdigest_md5(self):
+        css_filename = os.path.join(settings.COMPRESS_ROOT, "css", "one.css")
+        with open(css_filename, 'rb') as fh:
+            self.assertEqual(get_hexdigest(fh.read(), 12), 'cdd1a7452e1d')
+
 
 class CompressorInDebugModeTestCase(SimpleTestCase):
 
