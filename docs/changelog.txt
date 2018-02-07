@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Unreleased
+-------------------
+
+- Add Django 2.0 compatibility
+
 v2.2 (2017-08-16)
 -------------------
 
