@@ -88,7 +88,7 @@ class CompressorMixin(object):
         cache_content = cache_get(cache_key)
         return cache_key, cache_content
 
-    def render_compressed(self, context, kind, mode, forced=False):
+    def render_compressed(self, context, kind, mode, name=None, forced=False):
 
         # See if it has been rendered offline
         if self.is_offline_compression_enabled(forced) and not forced:
@@ -99,7 +99,7 @@ class CompressorMixin(object):
                 not settings.COMPRESS_PRECOMPILERS and not forced):
             return self.get_original_content(context)
 
-        context['compressed'] = {'name': getattr(self, 'name', None)}
+        context['compressed'] = {'name': getattr(self, 'name', name)}
         compressor = self.get_compressor(context, kind)
 
         # Check cache
