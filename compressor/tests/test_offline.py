@@ -331,9 +331,6 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
 class OfflineCompressSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_duplicate'
 
-    # We don't need to test multiples engines here.
-    engines = ('django',)
-
     def _test_offline(self, engine):
         count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         # Only one block compressed, the second identical one was skipped.
@@ -346,27 +343,27 @@ class OfflineCompressSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
             rendered_template, self._render_result(result * 2, ''))
 
 
-class OfflineCompressBlockSuperTestCase(OfflineTestCaseMixin, TestCase):
-    templates_dir = 'test_block_super'
-    expected_hash = '68c645740177'
+class SuperMixin:
     # Block.super not supported for Jinja2 yet.
     engines = ('django',)
+
+
+class OfflineCompressBlockSuperTestCase(
+        SuperMixin, OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_block_super'
+    expected_hash = '68c645740177'
 
 
 class OfflineCompressBlockSuperMultipleTestCase(
-        OfflineTestCaseMixin, TestCase):
+        SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_block_super_multiple'
     expected_hash = 'f87403f4d8af'
-    # Block.super not supported for Jinja2 yet.
-    engines = ('django',)
 
 
 class OfflineCompressBlockSuperMultipleCachedLoaderTestCase(
-        OfflineTestCaseMixin, TestCase):
+        SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_block_super_multiple_cached'
     expected_hash = 'ea860151aa21'
-    # Block.super not supported for Jinja2 yet.
-    engines = ('django',)
     additional_test_settings = {
         'TEMPLATE_LOADERS': (
             ('django.template.loaders.cached.Loader', (
@@ -378,10 +375,8 @@ class OfflineCompressBlockSuperMultipleCachedLoaderTestCase(
 
 
 class OfflineCompressBlockSuperTestCaseWithExtraContent(
-        OfflineTestCaseMixin, TestCase):
+        SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_block_super_extra'
-    # Block.super not supported for Jinja2 yet.
-    engines = ('django',)
 
     def _test_offline(self, engine):
         count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
@@ -418,8 +413,6 @@ class OfflineCompressTemplateTagNamedTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_templatetag_named'
     expected_basename = 'output_name'
     expected_hash = 'a432b6ddb2c4'
-    # block naming unsupported in jinga2
-    engines = ('django',)
 
 
 class OfflineCompressTestCaseWithContext(OfflineTestCaseMixin, TestCase):
@@ -432,7 +425,8 @@ class OfflineCompressTestCaseWithContext(OfflineTestCaseMixin, TestCase):
     }
 
 
-class OfflineCompressTestCaseWithContextSuper(OfflineTestCaseMixin, TestCase):
+class OfflineCompressTestCaseWithContextSuper(
+        SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_with_context_super'
     expected_hash = '9a8b47adfe17'
     additional_test_settings = {
@@ -440,8 +434,6 @@ class OfflineCompressTestCaseWithContextSuper(OfflineTestCaseMixin, TestCase):
             'content': 'OK!',
         }
     }
-    # Block.super not supported for Jinja2 yet.
-    engines = ('django',)
 
 
 class OfflineCompressTestCaseWithContextList(OfflineTestCaseMixin, TestCase):
@@ -460,14 +452,12 @@ class OfflineCompressTestCaseWithContextList(OfflineTestCaseMixin, TestCase):
 
 
 class OfflineCompressTestCaseWithContextListSuper(
-        OfflineCompressTestCaseWithContextList):
+        SuperMixin, OfflineCompressTestCaseWithContextList):
     templates_dir = 'test_with_context_super'
     expected_hash = ['dc68dd60aed4', 'c2e50f475853', '045b48455bee']
     additional_test_settings = {
         'COMPRESS_OFFLINE_CONTEXT': list(offline_context_generator())
     }
-    # Block.super not supported for Jinja2 yet.
-    engines = ('django',)
 
 
 class OfflineCompressTestCaseWithContextGenerator(
@@ -490,15 +480,13 @@ class OfflineCompressTestCaseWithContextGenerator(
 
 
 class OfflineCompressTestCaseWithContextGeneratorSuper(
-        OfflineCompressTestCaseWithContextGenerator):
+        SuperMixin, OfflineCompressTestCaseWithContextGenerator):
     templates_dir = 'test_with_context_super'
     expected_hash = ['dc68dd60aed4', 'c2e50f475853', '045b48455bee']
     additional_test_settings = {
         'COMPRESS_OFFLINE_CONTEXT': 'compressor.tests.test_offline.'
                                     'offline_context_generator'
     }
-    # Block.super not supported for Jinja2 yet.
-    engines = ('django',)
 
 
 class OfflineCompressStaticUrlIndependenceTestCase(
@@ -549,7 +537,7 @@ class OfflineCompressTestCaseWithContextVariableInheritance(
 
 
 class OfflineCompressTestCaseWithContextVariableInheritanceSuper(
-        OfflineTestCaseMixin, TestCase):
+        SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_with_context_variable_inheritance_super'
     additional_test_settings = {
         'COMPRESS_OFFLINE_CONTEXT': [{
@@ -559,8 +547,6 @@ class OfflineCompressTestCaseWithContextVariableInheritanceSuper(
         }]
     }
     expected_hash = ['6a2f85c623c6', '04b482ba2855']
-    # Block.super not supported for Jinja2 yet.
-    engines = ('django',)
 
 
 class OfflineCompressTestCaseWithContextGeneratorImportError(
@@ -658,7 +644,6 @@ class OfflineCompressEmptyTag(OfflineTestCaseMixin, TestCase):
     """
     templates_dir = 'basic'
     expected_hash = 'a432b6ddb2c4'
-    engines = ('django',)
 
     def _test_offline(self, engine):
         CompressCommand().handle_inner(engines=[engine], verbosity=0)
@@ -758,7 +743,6 @@ class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
     (e.g. admin/index.html) don't cause an infinite test_extends_recursion
     """
     templates_dir = 'test_extends_recursion'
-    engines = ('django',)
 
     INSTALLED_APPS = [
         'django.contrib.admin',
