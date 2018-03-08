@@ -1,4 +1,3 @@
-from __future__ import with_statement, unicode_literals
 from django.test import SimpleTestCase
 from django.test.utils import override_settings
 from django.core.exceptions import ImproperlyConfigured
