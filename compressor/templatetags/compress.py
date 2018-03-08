@@ -22,21 +22,22 @@ class CompressorMixin(object):
 
     @property
     def compressors(self):
-        return {
-            'js': settings.COMPRESS_JS_COMPRESSOR,
-            'css': settings.COMPRESS_CSS_COMPRESSOR,
-        }
+        return settings.COMPRESSORS
 
-    def compressor_cls(self, kind, *args, **kwargs):
+    def compressor_cls(self, kind):
         if kind not in self.compressors.keys():
             raise template.TemplateSyntaxError(
-                "The compress tag's argument must be 'js' or 'css'.")
+                "The compress tag's argument must be one of: %s."
+                % ', '.join(map(repr, self.compressors.keys())))
         return get_class(self.compressors.get(kind),
-                         exception=ImproperlyConfigured)(*args, **kwargs)
+                         exception=ImproperlyConfigured)
 
     def get_compressor(self, context, kind):
-        return self.compressor_cls(kind,
-            content=self.get_original_content(context), context=context)
+        cls = self.compressor_cls(kind)
+        return cls(
+            kind,
+            content=self.get_original_content(context),
+            context=context)
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:

@@ -4,9 +4,8 @@ from compressor.base import Compressor, SOURCE_HUNK, SOURCE_FILE
 
 class JsCompressor(Compressor):
 
-    def __init__(self, content=None, output_prefix="js", context=None):
-        filters = list(settings.COMPRESS_JS_FILTERS)
-        super(JsCompressor, self).__init__(content, output_prefix, context, filters)
+    output_prefix = 'js'
+    output_mimetypes = {'text/javascript'}
 
     def split_contents(self):
         if self.split_content:
@@ -33,8 +32,7 @@ class JsCompressor(Compressor):
             if append_to_previous and settings.COMPRESS_ENABLED:
                 self.extra_nodes[-1][1].split_content.append(content)
             else:
-                node = self.__class__(content=self.parser.elem_str(elem),
-                                      context=self.context)
+                node = self.copy(content=self.parser.elem_str(elem))
                 node.split_content.append(content)
                 self.extra_nodes.append((extra, node))
         return self.split_content
