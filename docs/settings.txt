@@ -393,6 +393,12 @@ Caching settings
     The cache to use by Django Compressor. Must be a cache alias specified in
     your ``CACHES`` setting.
 
+.. attribute:: COMPRESS_CACHE_HASHLIB_FUNCTION
+
+    :Default: ``"sha256"``
+
+    The name of the hashlib function to use by Django Compressor. 
+
 .. attribute:: COMPRESS_REBUILD_TIMEOUT
 
     :Default: ``2592000`` (30 days in seconds)
