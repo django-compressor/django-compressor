@@ -4,7 +4,6 @@ from compressor.conf import settings
 
 class CssCompressor(Compressor):
 
-    output_prefix = 'css'
     output_mimetypes = {'text/css'}
 
     def split_contents(self):

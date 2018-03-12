@@ -32,7 +32,7 @@ class CompressorConf(AppConf):
     URL = None
     ROOT = None
 
-    # These are resolved in configure()
+    # Filters are resolved in configure()
     FILTERS = {}
     CSS_FILTERS = None
     JS_FILTERS = None

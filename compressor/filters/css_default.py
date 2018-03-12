@@ -20,9 +20,6 @@ SCHEMES = ('http://', 'https://', '/')
 
 class CssAbsoluteFilter(FilterBase):
 
-    # Since precompiling moves files around, it breaks url()
-    # statements in css files. therefore we run the this filter
-    # on precompiled css files even if compression is disabled.
     run_with_compression_disabled = True
 
     def __init__(self, *args, **kwargs):
@@ -130,9 +127,6 @@ class CssRelativeFilter(CssAbsoluteFilter):
     but add a *relative URL prefix* instead of ``settings.COMPRESS_URL``.
     """
 
-    # Since precompiling moves files around, it breaks url()
-    # statements in css files. therefore we run the this filter
-    # on precompiled css files even if compression is disabled.
     run_with_compression_disabled = True
 
     def post_process_url(self, url):

@@ -31,22 +31,24 @@ class Compressor(object):
     depending implementations details.
     """
 
-    output_prefix = 'compressed'
     output_mimetypes = {}
 
     def __init__(self, resource_kind, content=None, output_prefix=None,
                  context=None, filters=None, *args, **kwargs):
         if filters is None:
-            filters = settings.COMPRESS_FILTERS[resource_kind]
-        self.content = content or ""  # rendered contents of {% compress %} tag
-        if output_prefix:
+            self.filters = settings.COMPRESS_FILTERS[resource_kind]
+        else:
+            self.filters = filters
+        if output_prefix is None:
+            self.output_prefix = resource_kind
+        else:
             self.output_prefix = output_prefix
+        self.content = content or ""  # rendered contents of {% compress %} tag
         self.output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
         self.charset = settings.DEFAULT_CHARSET
         self.split_content = []
         self.context = context or {}
         self.resource_kind = resource_kind
-        self.filters = filters
         self.extra_context = {}
         self.precompiler_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
         self.finders = staticfiles.finders
@@ -229,10 +231,6 @@ class Compressor(object):
             if enabled:
                 yield self.filter(value, self.cached_filters, **options)
             elif precompiled:
-                # Since precompiling moves files around, it breaks url()
-                # statements in css files. therefore we run
-                # the absolute and relative filter on precompiled css files
-                # even if compression is disabled.
                 for filter_cls in self.cached_filters:
                     if filter_cls.run_with_compression_disabled:
                         value = self.filter(value, [filter_cls], **options)

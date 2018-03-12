@@ -4,7 +4,6 @@ from compressor.base import Compressor, SOURCE_HUNK, SOURCE_FILE
 
 class JsCompressor(Compressor):
 
-    output_prefix = 'js'
     output_mimetypes = {'text/javascript'}
 
     def split_contents(self):
