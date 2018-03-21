@@ -146,7 +146,7 @@ class CompressorConf(AppConf):
         data = self.configured_data
         for kind in {'css', 'js'}:
             setting_name = '%s_FILTERS' % kind.upper()
-            filters = data[setting_name]
+            filters = data.pop(setting_name)
             if filters is not None:
                 # filters for this kind are set using <kind>_FILTERS
                 if kind in data['FILTERS']:
@@ -161,10 +161,7 @@ class CompressorConf(AppConf):
                             main_setting=self._meta.prefixed_name('FILTERS'),
                             kind=kind))
                 data['FILTERS'][kind] = filters
-            elif kind in data['FILTERS']:
-                # filters for this kind are set using FILTERS[<kind>]
-                data[setting_name] = data['FILTERS'][kind]
-            else:
+            elif kind not in data['FILTERS']:
                 # filters are not defined
-                data['FILTERS'][kind] = data[setting_name] = default_filters[kind]
+                data['FILTERS'][kind] = default_filters[kind]
         return data

@@ -25,40 +25,40 @@ class ConfTestCase(SimpleTestCase):
     def test_filter_defaults(self):
         # This used the settings from compressor/test_settings.py
         # which contains no values for filers and therefore uses the defaults.
-        self.assertEqual(settings.COMPRESS_CSS_FILTERS, default_css_filters)
-        self.assertEqual(settings.COMPRESS_JS_FILTERS, default_js_filters)
         self.assertEqual(settings.COMPRESS_FILTERS['css'], default_css_filters)
         self.assertEqual(settings.COMPRESS_FILTERS['js'], default_js_filters)
+        self.assertFalse(hasattr(settings, 'COMPRESS_CSS_FILTERS'))
+        self.assertFalse(hasattr(settings, 'COMPRESS_JS_FILTERS'))
 
     @override_settings(COMPRESS_FILTERS=dict(),
                        COMPRESS_CSS_FILTERS=None,
                        COMPRESS_JS_FILTERS=None)
     def test_filters_by_default(self):
         conf = create_conf()
-        self.assertEqual(conf.CSS_FILTERS, default_css_filters)
-        self.assertEqual(conf.JS_FILTERS, default_js_filters)
         self.assertEqual(conf.FILTERS['css'], default_css_filters)
         self.assertEqual(conf.FILTERS['js'], default_js_filters)
+        self.assertFalse(hasattr(conf, 'COMPRESS_CSS_FILTERS'))
+        self.assertFalse(hasattr(conf, 'COMPRESS_JS_FILTERS'))
 
     @override_settings(COMPRESS_FILTERS=dict(),
                        COMPRESS_CSS_FILTERS=['ham'],
                        COMPRESS_JS_FILTERS=['spam'])
     def test_filters_by_specific_settings(self):
         conf = create_conf()
-        self.assertEqual(conf.CSS_FILTERS, ['ham'])
-        self.assertEqual(conf.JS_FILTERS, ['spam'])
         self.assertEqual(conf.FILTERS['css'], ['ham'])
         self.assertEqual(conf.FILTERS['js'], ['spam'])
+        self.assertFalse(hasattr(conf, 'COMPRESS_CSS_FILTERS'))
+        self.assertFalse(hasattr(conf, 'COMPRESS_JS_FILTERS'))
 
     @override_settings(COMPRESS_FILTERS=dict(css=['ham'], js=['spam']),
                        COMPRESS_CSS_FILTERS=None,
                        COMPRESS_JS_FILTERS=None)
     def test_filters_by_main_setting(self):
         conf = create_conf()
-        self.assertEqual(conf.CSS_FILTERS, ['ham'])
-        self.assertEqual(conf.JS_FILTERS, ['spam'])
         self.assertEqual(conf.FILTERS['css'], ['ham'])
         self.assertEqual(conf.FILTERS['js'], ['spam'])
+        self.assertFalse(hasattr(conf, 'COMPRESS_CSS_FILTERS'))
+        self.assertFalse(hasattr(conf, 'COMPRESS_JS_FILTERS'))
 
     @override_settings(COMPRESS_FILTERS=dict(css=['ham']),
                        COMPRESS_CSS_FILTERS=['spam'])
