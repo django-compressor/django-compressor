@@ -81,6 +81,8 @@ Backend settings
 
     - CSS Filters
 
+      .. _compress_css_filters:
+
       :default: ``['compressor.filters.css_default.CssAbsoluteFilter']``
 
       A list of filters that will be applied to CSS.

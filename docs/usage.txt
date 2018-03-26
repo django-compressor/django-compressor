@@ -78,11 +78,10 @@ and simply returns exactly what it was given.
 .. note::
 
     If you've configured any
-    :attr:`precompilers <django.conf.settings.COMPRESS_PRECOMPILERS>`
-    setting, :attr:`~django.conf.settings.COMPRESS_ENABLED` to ``False`` won't
+    :attr:`precompilers <django.conf.settings.COMPRESS_PRECOMPILERS>`,
+    setting :attr:`~django.conf.settings.COMPRESS_ENABLED` to ``False`` won't
     affect the processing of those files. Only the
-    :attr:`CSS <django.conf.settings.COMPRESS_CSS_FILTERS>` and
-    :attr:`JavaScript filters <django.conf.settings.COMPRESS_JS_FILTERS>`
+    :attr:`~django.conf.settings.COMPRESS_FILTERS`
     will be disabled.
 
 If both DEBUG and :attr:`~django.conf.settings.COMPRESS_ENABLED` are set to
