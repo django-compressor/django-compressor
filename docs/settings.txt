@@ -67,183 +67,211 @@ Base settings
 Backend settings
 ----------------
 
+.. attribute:: COMPRESS_FILTERS
+
+    :default: ``{'css': ['compressor.filters.css_default.CssAbsoluteFilter'], 'js': ['compressor.filters.jsmin.JSMinFilter']}``
+
+    A mapping of resource kinds to the list of filters to apply.
+    The key is used to refer to this resource type in templates
+    when using the `{% compress [resource_kind] %}` template tag.
+    The value is a list of filters to apply in the given order
+    for that resource.
+
+    This library currently includes filters for CSS and Javascript.
+
+    - CSS Filters
+
+      .. _compress_css_filters:
+
+      :default: ``['compressor.filters.css_default.CssAbsoluteFilter']``
+
+      A list of filters that will be applied to CSS.
+
+      Possible options for CSS filters are (including their settings):
+
+      - ``compressor.filters.css_default.CssAbsoluteFilter``
+
+        A filter that normalizes the URLs used in ``url()`` CSS statements. This
+        is necessary since the output css files produced by Django Compressor
+        are in a different location than the source files and relative paths
+        might have become invalid. The filter also appends a hash as query string
+        to the normalized URLs to help with cache busting.
+
+        .. attribute:: COMPRESS_CSS_HASHING_METHOD
+
+           The method to use when calculating the query string.  Either ``None``,
+           ``'mtime'`` (default) or ``'content'``. Use the ``None`` if you want
+           to completely disable that feature, and the ``'content'`` in case
+           you're using multiple servers to serve your content.
+
+      - ``compressor.filters.css_default.CssRelativeFilter``
+
+        An alternative to ``CssAbsoluteFilter``. It uses a relative instead of an
+        absolute path to prefix URLs. Specifically, the prefix will be  ``'../' * (N + 1)``
+        where ``N`` is the *depth* of ``settings.COMPRESS_OUTPUT_DIR`` folder
+        (i.e. ``1`` for ``'CACHE'``, or ``2``for ``CACHE/data`` etc). This can be
+        useful if you don't want to hard-code :attr:`~django.conf.settings.COMPRESS_URL`
+        into CSS code.
+
+      - ``compressor.filters.datauri.CssDataUriFilter``
+
+        A filter for embedding media as `data: URIs`_ in the CSS.
+
+        .. attribute:: COMPRESS_DATA_URI_MAX_SIZE
+
+           Only files that are smaller than this in bytes value will be embedded.
+
+      - ``compressor.filters.yui.YUICSSFilter``
+
+        A filter that passes the CSS content to the `YUI compressor`_.
+
+        .. attribute:: COMPRESS_YUI_BINARY
+
+           The YUI compressor filesystem path. Make sure to also prepend this
+           setting with ``java -jar`` if you use that kind of distribution.
+
+        .. attribute:: COMPRESS_YUI_CSS_ARGUMENTS
+
+           The arguments passed to the compressor.
+
+      - ``compressor.filters.yuglify.YUglifyCSSFilter``
+
+        A filter that passes the CSS content to the `yUglify compressor`_.
+
+        .. attribute:: COMPRESS_YUGLIFY_BINARY
+
+           The yUglify compressor filesystem path.
+
+        .. attribute:: COMPRESS_YUGLIFY_CSS_ARGUMENTS
+
+           The arguments passed to the compressor. Defaults to --terminal.
+
+      .. _csscompressor_filter:
+
+      - ``compressor.filters.cssmin.CSSCompressorFilter``
+
+        A filter that uses Yury Selivanov's Python port of the YUI CSS compression
+        algorithm csscompressor_.
+
+      - ``compressor.filters.cssmin.rCSSMinFilter``
+
+        A filter that uses the cssmin implementation rCSSmin_ to compress CSS
+        (installed by default).
+
+      - ``compressor.filters.cleancss.CleanCSSFilter``
+
+        A filter that passes the CSS content to the `clean-css`_ tool.
+
+        .. attribute:: COMPRESS_CLEAN_CSS_BINARY
+
+           The clean-css binary filesystem path.
+
+        .. attribute:: COMPRESS_CLEAN_CSS_ARGUMENTS
+
+           The arguments passed to clean-css.
+
+
+      .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
+      .. _csscompressor: http://pypi.python.org/pypi/csscompressor/
+      .. _rCSSmin: http://opensource.perlig.de/rcssmin/
+      .. _`clean-css`: https://github.com/GoalSmashers/clean-css/
+
+
+      - ``compressor.filters.template.TemplateFilter``
+
+        A filter that renders the CSS content with Django templating system.
+
+        .. attribute:: COMPRESS_TEMPLATE_FILTER_CONTEXT
+
+           The context to render your css files with.
+
+
+    - Javascript Filters
+
+      .. _compress_js_filters:
+
+      :Default: ``['compressor.filters.jsmin.JSMinFilter']``
+
+      A list of filters that will be applied to javascript.
+
+      Possible options are:
+
+      - ``compressor.filters.jsmin.JSMinFilter``
+
+        A filter that uses the jsmin implementation rJSmin_ to compress
+        JavaScript code (installed by default).
+
+      .. _slimit_filter:
+
+      - ``compressor.filters.jsmin.SlimItFilter``
+
+        A filter that uses the jsmin implementation `Slim It`_ to compress
+        JavaScript code.
+
+      - ``compressor.filters.closure.ClosureCompilerFilter``
+
+        A filter that uses `Google Closure compiler`_.
+
+        .. attribute:: COMPRESS_CLOSURE_COMPILER_BINARY
+
+           The Closure compiler filesystem path. Make sure to also prepend
+           this setting with ``java -jar`` if you use that kind of distribution.
+
+        .. attribute:: COMPRESS_CLOSURE_COMPILER_ARGUMENTS
+
+           The arguments passed to the compiler.
+
+      - ``compressor.filters.yui.YUIJSFilter``
+
+        A filter that passes the JavaScript code to the `YUI compressor`_.
+
+        .. attribute:: COMPRESS_YUI_BINARY
+
+           The YUI compressor filesystem path.
+
+        .. attribute:: COMPRESS_YUI_JS_ARGUMENTS
+
+           The arguments passed to the compressor.
+
+      - ``compressor.filters.yuglify.YUglifyJSFilter``
+
+        A filter that passes the JavaScript code to the `yUglify compressor`_.
+
+        .. attribute:: COMPRESS_YUGLIFY_BINARY
+
+           The yUglify compressor filesystem path.
+
+        .. attribute:: COMPRESS_YUGLIFY_JS_ARGUMENTS
+
+           The arguments passed to the compressor.
+
+      - ``compressor.filters.template.TemplateFilter``
+
+        A filter that renders the JavaScript code with Django templating system.
+
+        .. attribute:: COMPRESS_TEMPLATE_FILTER_CONTEXT
+
+           The context to render your JavaScript code with.
+
+      .. _rJSmin: http://opensource.perlig.de/rjsmin/
+      .. _`Google Closure compiler`: http://code.google.com/closure/compiler/
+      .. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
+      .. _`yUglify compressor`: https://github.com/yui/yuglify
+      .. _`Slim It`: https://github.com/rspivak/slimit
+
 .. attribute:: COMPRESS_CSS_FILTERS
 
-    :default: ``['compressor.filters.css_default.CssAbsoluteFilter']``
-
-    A list of filters that will be applied to CSS.
-
-    Possible options are (including their settings):
-
-    - ``compressor.filters.css_default.CssAbsoluteFilter``
-
-      A filter that normalizes the URLs used in ``url()`` CSS statements. This
-      is necessary since the output css files produced by Django Compressor
-      are in a different location than the source files and relative paths
-      might have become invalid. The filter also appends a hash as query string
-      to the normalized URLs to help with cache busting.
-
-      .. attribute:: COMPRESS_CSS_HASHING_METHOD
-
-         The method to use when calculating the query string.  Either ``None``,
-         ``'mtime'`` (default) or ``'content'``. Use the ``None`` if you want
-         to completely disable that feature, and the ``'content'`` in case
-         you're using multiple servers to serve your content.
-
-    - ``compressor.filters.css_default.CssRelativeFilter``
-
-      An alternative to ``CssAbsoluteFilter``. It uses a relative instead of an
-      absolute path to prefix URLs. Specifically, the prefix will be  ``'../' * (N + 1)``
-      where ``N`` is the *depth* of ``settings.COMPRESS_OUTPUT_DIR`` folder
-      (i.e. ``1`` for ``'CACHE'``, or ``2``for ``CACHE/data`` etc). This can be
-      useful if you don't want to hard-code :attr:`~django.conf.settings.COMPRESS_URL`
-      into CSS code.
-
-    - ``compressor.filters.datauri.CssDataUriFilter``
-
-      A filter for embedding media as `data: URIs`_ in the CSS.
-
-      .. attribute:: COMPRESS_DATA_URI_MAX_SIZE
-
-         Only files that are smaller than this in bytes value will be embedded.
-
-    - ``compressor.filters.yui.YUICSSFilter``
-
-      A filter that passes the CSS content to the `YUI compressor`_.
-
-      .. attribute:: COMPRESS_YUI_BINARY
-
-         The YUI compressor filesystem path. Make sure to also prepend this
-         setting with ``java -jar`` if you use that kind of distribution.
-
-      .. attribute:: COMPRESS_YUI_CSS_ARGUMENTS
-
-         The arguments passed to the compressor.
-
-    - ``compressor.filters.yuglify.YUglifyCSSFilter``
-
-      A filter that passes the CSS content to the `yUglify compressor`_.
-
-      .. attribute:: COMPRESS_YUGLIFY_BINARY
-
-         The yUglify compressor filesystem path.
-
-      .. attribute:: COMPRESS_YUGLIFY_CSS_ARGUMENTS
-
-         The arguments passed to the compressor. Defaults to --terminal.
-
-    .. _csscompressor_filter:
-
-    - ``compressor.filters.cssmin.CSSCompressorFilter``
-
-      A filter that uses Yury Selivanov's Python port of the YUI CSS compression
-      algorithm csscompressor_.
-
-    - ``compressor.filters.cssmin.rCSSMinFilter``
-
-      A filter that uses the cssmin implementation rCSSmin_ to compress CSS
-      (installed by default).
-
-    - ``compressor.filters.cleancss.CleanCSSFilter``
-
-      A filter that passes the CSS content to the `clean-css`_ tool.
-
-      .. attribute:: COMPRESS_CLEAN_CSS_BINARY
-
-         The clean-css binary filesystem path.
-
-      .. attribute:: COMPRESS_CLEAN_CSS_ARGUMENTS
-
-         The arguments passed to clean-css.
-
-
-    .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
-    .. _csscompressor: http://pypi.python.org/pypi/csscompressor/
-    .. _rCSSmin: http://opensource.perlig.de/rcssmin/
-    .. _`clean-css`: https://github.com/GoalSmashers/clean-css/
-
-
-    - ``compressor.filters.template.TemplateFilter``
-
-      A filter that renders the CSS content with Django templating system.
-
-      .. attribute:: COMPRESS_TEMPLATE_FILTER_CONTEXT
-
-         The context to render your css files with.
-
-
-.. _compress_js_filters:
+    Backwards-compatible alias for the ``'css'`` key of
+    :attr:`~django.conf.settings.COMPRESS_FILTERS`.
+    If you haven't defined that key you can still continue
+    using this setting, although we encourage you to convert it to the new form.
 
 .. attribute:: COMPRESS_JS_FILTERS
 
-    :Default: ``['compressor.filters.jsmin.JSMinFilter']``
-
-    A list of filters that will be applied to javascript.
-
-    Possible options are:
-
-    - ``compressor.filters.jsmin.JSMinFilter``
-
-      A filter that uses the jsmin implementation rJSmin_ to compress
-      JavaScript code (installed by default).
-
-    .. _slimit_filter:
-
-    - ``compressor.filters.jsmin.SlimItFilter``
-
-      A filter that uses the jsmin implementation `Slim It`_ to compress
-      JavaScript code.
-
-    - ``compressor.filters.closure.ClosureCompilerFilter``
-
-      A filter that uses `Google Closure compiler`_.
-
-      .. attribute:: COMPRESS_CLOSURE_COMPILER_BINARY
-
-         The Closure compiler filesystem path. Make sure to also prepend
-         this setting with ``java -jar`` if you use that kind of distribution.
-
-      .. attribute:: COMPRESS_CLOSURE_COMPILER_ARGUMENTS
-
-         The arguments passed to the compiler.
-
-    - ``compressor.filters.yui.YUIJSFilter``
-
-      A filter that passes the JavaScript code to the `YUI compressor`_.
-
-      .. attribute:: COMPRESS_YUI_BINARY
-
-         The YUI compressor filesystem path.
-
-      .. attribute:: COMPRESS_YUI_JS_ARGUMENTS
-
-         The arguments passed to the compressor.
-
-    - ``compressor.filters.yuglify.YUglifyJSFilter``
-
-      A filter that passes the JavaScript code to the `yUglify compressor`_.
-
-      .. attribute:: COMPRESS_YUGLIFY_BINARY
-
-         The yUglify compressor filesystem path.
-
-      .. attribute:: COMPRESS_YUGLIFY_JS_ARGUMENTS
-
-         The arguments passed to the compressor.
-
-    - ``compressor.filters.template.TemplateFilter``
-
-      A filter that renders the JavaScript code with Django templating system.
-
-      .. attribute:: COMPRESS_TEMPLATE_FILTER_CONTEXT
-
-         The context to render your JavaScript code with.
-
-    .. _rJSmin: http://opensource.perlig.de/rjsmin/
-    .. _`Google Closure compiler`: http://code.google.com/closure/compiler/
-    .. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
-    .. _`yUglify compressor`: https://github.com/yui/yuglify
-    .. _`Slim It`: https://github.com/rspivak/slimit
+    Backwards-compatible alias for the ``'js'`` key of
+    :attr:`~django.conf.settings.COMPRESS_FILTERS`.
+    If you haven't defined that key you can still continue
+    using this setting, although we encourage you to convert it to the new form.
 
 .. attribute:: COMPRESS_PRECOMPILERS
 

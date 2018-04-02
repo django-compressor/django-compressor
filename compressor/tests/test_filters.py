@@ -333,7 +333,7 @@ p { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='%(compress_u
         <link rel="stylesheet" href="/static/css/url/url1.css" type="text/css">
         <link rel="stylesheet" href="/static/css/url/2/url2.css" type="text/css">
         """
-        css_node = CssCompressor(css)
+        css_node = CssCompressor('css', css)
 
         self.assertEqual([css1, css2], list(css_node.hunks()))
 
@@ -386,7 +386,7 @@ class CssAbsolutizingTestCaseWithHash(CssAbsolutizingTestCase):
 @override_settings(
     COMPRESS_ENABLED=True,
     COMPRESS_URL='/static/',
-    COMPRESS_CSS_FILTERS=['compressor.filters.css_default.CssRelativeFilter']
+    COMPRESS_FILTERS={'css': ['compressor.filters.css_default.CssRelativeFilter']}
 )
 class CssRelativizingTestCase(CssAbsolutizingTestCase):
     filter_class = CssRelativeFilter
@@ -410,10 +410,10 @@ class CssRelativizingTestCase(CssAbsolutizingTestCase):
 
 @override_settings(
     COMPRESS_ENABLED=True,
-    COMPRESS_CSS_FILTERS=[
+    COMPRESS_FILTERS={'css': [
         'compressor.filters.css_default.CssAbsoluteFilter',
         'compressor.filters.datauri.CssDataUriFilter',
-    ],
+    ]},
     COMPRESS_URL='/static/',
     COMPRESS_CSS_HASHING_METHOD='mtime'
 )
@@ -422,7 +422,7 @@ class CssDataUriTestCase(TestCase):
         self.css = """
         <link rel="stylesheet" href="/static/css/datauri.css" type="text/css">
         """
-        self.css_node = CssCompressor(self.css)
+        self.css_node = CssCompressor('css', self.css)
 
     def test_data_uris(self):
         datauri_hash = get_hashed_mtime(os.path.join(settings.COMPRESS_ROOT, 'img/python.png'))
