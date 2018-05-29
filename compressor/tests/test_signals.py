@@ -19,12 +19,12 @@ class PostCompressSignalTestCase(TestCase):
 <link rel="stylesheet" href="/static/css/one.css" type="text/css" />
 <style type="text/css">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="/static/css/two.css" type="text/css" />"""
-        self.css_node = CssCompressor(self.css)
+        self.css_node = CssCompressor('css', self.css)
 
         self.js = """\
 <script src="/static/js/one.js" type="text/javascript"></script>
 <script type="text/javascript">obj.value = "value";</script>"""
-        self.js_node = JsCompressor(self.js)
+        self.js_node = JsCompressor('js', self.js)
 
     def tearDown(self):
         post_compress.disconnect()
@@ -60,7 +60,7 @@ class PostCompressSignalTestCase(TestCase):
 <link rel="stylesheet" href="/static/css/one.css" media="handheld" type="text/css" />
 <style type="text/css" media="print">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="/static/css/two.css" type="text/css" />"""
-        css_node = CssCompressor(css)
+        css_node = CssCompressor('css', css)
 
         def listener(sender, **kwargs):
             pass

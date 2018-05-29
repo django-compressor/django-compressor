@@ -20,6 +20,8 @@ SCHEMES = ('http://', 'https://', '/')
 
 class CssAbsoluteFilter(FilterBase):
 
+    run_with_compression_disabled = True
+
     def __init__(self, *args, **kwargs):
         super(CssAbsoluteFilter, self).__init__(*args, **kwargs)
         self.root = settings.COMPRESS_ROOT
@@ -124,6 +126,9 @@ class CssRelativeFilter(CssAbsoluteFilter):
     Do similar to ``CssAbsoluteFilter`` URL processing
     but add a *relative URL prefix* instead of ``settings.COMPRESS_URL``.
     """
+
+    run_with_compression_disabled = True
+
     def post_process_url(self, url):
         """
         Replace ``settings.COMPRESS_URL`` URL prefix with  '../' * (N + 1)
@@ -139,7 +144,7 @@ class CssRelativeFilter(CssAbsoluteFilter):
 
         - original file URL: '/static/my-app/style.css'
         - it has an image link: ``url(images/logo.svg)``
-        - compiled file URL: '/static/CACHE/css/abcdef123456.css'
+        - compiled file URL: '/static/CACHE/css/output.abcdef123456.css'
         - replaced image link URL: ``url(../../my-app/images/logo.svg)``
         """
         old_prefix = self.url

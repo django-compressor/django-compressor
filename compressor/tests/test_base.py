@@ -66,8 +66,10 @@ class PrecompilerAndAbsoluteFilterTestCase(SimpleTestCase):
         precompiler = (('text/css', 'compressor.tests.test_base.PassthroughPrecompiler'),) if use_precompiler else ()
         filters = ('compressor.filters.css_default.CssAbsoluteFilter',) if use_absolute_filter else ()
 
-        with self.settings(COMPRESS_ENABLED=enabled, COMPRESS_PRECOMPILERS=precompiler, COMPRESS_CSS_FILTERS=filters):
-            css_node = CssCompressor(self.html_orig)
+        with self.settings(COMPRESS_ENABLED=enabled,
+                           COMPRESS_PRECOMPILERS=precompiler,
+                           COMPRESS_FILTERS={'css': filters}):
+            css_node = CssCompressor('css', self.html_orig)
             output = list(css_node.hunks())[0]
             self.assertEqual(output, expected_output)
 
@@ -101,12 +103,12 @@ class CompressorTestCase(SimpleTestCase):
 <link rel="stylesheet" href="/static/css/one.css" type="text/css" />
 <style type="text/css">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="/static/css/two.css" type="text/css" />"""
-        self.css_node = CssCompressor(self.css)
+        self.css_node = CssCompressor('css', self.css)
 
         self.js = """\
 <script src="/static/js/one.js" type="text/javascript"></script>
 <script type="text/javascript">obj.value = "value";</script>"""
-        self.js_node = JsCompressor(self.js)
+        self.js_node = JsCompressor('js', self.js)
 
     def assertEqualCollapsed(self, a, b):
         """
@@ -161,7 +163,7 @@ class CompressorTestCase(SimpleTestCase):
         out = 'body { background:#990; }\n.compress-test {color: red;}'
         css = ("""<link rel="stylesheet" href="/static/css/one.css" type="text/css" />
         <link rel="stylesheet" href="/static/css/utf-8_with-BOM.css" type="text/css" />""")
-        css_node_with_bom = CssCompressor(css)
+        css_node_with_bom = CssCompressor('css', css)
         hunks = '\n'.join([h for h in css_node_with_bom.hunks()])
         self.assertEqual(out, hunks)
 
@@ -232,24 +234,24 @@ class CompressorTestCase(SimpleTestCase):
     @override_settings(COMPRESS_OUTPUT_DIR='custom')
     def test_custom_output_dir1(self):
         output = '<script type="text/javascript" src="/static/custom/js/74e158ccb432.js"></script>'
-        self.assertEqual(output, JsCompressor(self.js).output())
+        self.assertEqual(output, JsCompressor('js', self.js).output())
 
     @override_settings(COMPRESS_OUTPUT_DIR='')
     def test_custom_output_dir2(self):
         output = '<script type="text/javascript" src="/static/js/74e158ccb432.js"></script>'
-        self.assertEqual(output, JsCompressor(self.js).output())
+        self.assertEqual(output, JsCompressor('js', self.js).output())
 
     @override_settings(COMPRESS_OUTPUT_DIR='/custom/nested/')
     def test_custom_output_dir3(self):
         output = '<script type="text/javascript" src="/static/custom/nested/js/74e158ccb432.js"></script>'
-        self.assertEqual(output, JsCompressor(self.js).output())
+        self.assertEqual(output, JsCompressor('js', self.js).output())
 
     @override_settings(COMPRESS_PRECOMPILERS=(
         ('text/foobar', 'compressor.tests.test_base.TestPrecompiler'),
     ), COMPRESS_ENABLED=True)
     def test_precompiler_class_used(self):
         css = '<style type="text/foobar">p { border:10px solid red;}</style>'
-        css_node = CssCompressor(css)
+        css_node = CssCompressor('css', css)
         output = make_soup(css_node.output('inline'))
         self.assertEqual(output.text, 'OUTPUT')
 
@@ -258,7 +260,7 @@ class CompressorTestCase(SimpleTestCase):
     ), COMPRESS_ENABLED=True)
     def test_nonexistent_precompiler_class_error(self):
         css = '<style type="text/foobar">p { border:10px solid red;}</style>'
-        css_node = CssCompressor(css)
+        css_node = CssCompressor('css', css)
         self.assertRaises(FilterDoesNotExist, css_node.output, 'inline')
 
     @override_settings(COMPRESS_PRECOMPILERS=(
@@ -266,7 +268,7 @@ class CompressorTestCase(SimpleTestCase):
     ), COMPRESS_ENABLED=True)
     def test_command_with_dot_precompiler(self):
         css = '<style type="text/foobar">p { border:10px solid red;}</style>'
-        css_node = CssCompressor(css)
+        css_node = CssCompressor('css', css)
         self.assertRaises(FilterError, css_node.output, 'inline')
 
     @override_settings(COMPRESS_PRECOMPILERS=(
@@ -274,7 +276,7 @@ class CompressorTestCase(SimpleTestCase):
     ), COMPRESS_ENABLED=True)
     def test_template_precompiler(self):
         css = '<style type="text/django">p { border:10px solid {% if 1 %}green{% else %}red{% endif %};}</style>'
-        css_node = CssCompressor(css)
+        css_node = CssCompressor('css', css)
         output = make_soup(css_node.output('inline'))
         self.assertEqual(output.text, 'p { border:10px solid green;}')
 
@@ -288,7 +290,7 @@ class CssMediaTestCase(SimpleTestCase):
 <style type="text/css">h1 { border:5px solid green;}</style>"""
 
     def test_css_output(self):
-        css_node = CssCompressor(self.css)
+        css_node = CssCompressor('css', self.css)
         links = make_soup(css_node.output()).find_all('link')
         media = ['screen', 'print', 'all', None]
         self.assertEqual(len(links), 4)
@@ -296,7 +298,7 @@ class CssMediaTestCase(SimpleTestCase):
 
     def test_avoid_reordering_css(self):
         css = self.css + '<style type="text/css" media="print">p { border:10px solid red;}</style>'
-        css_node = CssCompressor(css)
+        css_node = CssCompressor('css', css)
         media = ['screen', 'print', 'all', None, 'print']
         links = make_soup(css_node.output()).find_all('link')
         self.assertEqual(media, [l.get('media', None) for l in links])
@@ -309,7 +311,7 @@ class CssMediaTestCase(SimpleTestCase):
 <link rel="stylesheet" href="/static/css/one.css" type="text/css" media="screen">
 <link rel="stylesheet" href="/static/css/two.css" type="text/css" media="screen">
 <style type="text/foobar" media="screen">h1 { border:5px solid green;}</style>"""
-        css_node = CssCompressor(css)
+        css_node = CssCompressor('css', css)
         output = make_soup(css_node.output()).find_all(['link', 'style'])
         self.assertEqual(['/static/css/one.css', '/static/css/two.css', None],
                          [l.get('href', None) for l in output])
@@ -346,7 +348,7 @@ class JsAsyncDeferTestCase(SimpleTestCase):
                 return 'async'
             if tag.has_attr('defer'):
                 return 'defer'
-        js_node = JsCompressor(self.js)
+        js_node = JsCompressor('js', self.js)
         output = [None, 'async', 'defer', None, 'async', None]
         scripts = make_soup(js_node.output()).find_all('script')
         attrs = [extract_attr(s) for s in scripts]
@@ -361,7 +363,7 @@ class JSWithParensTestCase(SimpleTestCase):
         """
 
     def test_js_content(self):
-        js_node = JsCompressor(self.js)
+        js_node = JsCompressor('js', self.js)
 
         content = js_node.filter_input()
         self.assertEqual(content[0], ';obj = {};')
@@ -431,7 +433,7 @@ class CompressorInDebugModeTestCase(SimpleTestCase):
         # We should generate a link with the hash of the original content, not
         # the modified one
         expected = '<link rel="stylesheet" href="/static/CACHE/css/%s.css" type="text/css" />' % hashed
-        compressor = CssCompressor(self.css)
+        compressor = CssCompressor('css', self.css)
         compressor.storage = DefaultStorage()
         output = compressor.output()
         self.assertEqual(expected, output)

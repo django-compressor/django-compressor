@@ -9,3 +9,4 @@ django-sekizai==0.9.0
 csscompressor==0.9.4
 rcssmin==1.0.6
 rjsmin==1.0.12
+brotlipy==0.7.0

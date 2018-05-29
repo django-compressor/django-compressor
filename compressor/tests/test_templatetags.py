@@ -45,7 +45,16 @@ class TemplatetagTestCase(TestCase):
 <style type="text/css">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
 {% endcompress %}"""
-        out = css_tag("/static/CACHE/css/58a8c0714e59.css")
+        out = css_tag("/static/CACHE/css/output.58a8c0714e59.css")
+        self.assertEqual(out, render(template, self.context))
+
+    def test_css_tag_with_block(self):
+        template = """{% load compress %}{% compress css file block_name %}
+<link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
+<style type="text/css">p { border:5px solid blue;}</style>
+<link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
+{% endcompress %}"""
+        out = css_tag("/static/CACHE/css/block_name.393dbcddb48e.css")
         self.assertEqual(out, render(template, self.context))
 
     def test_missing_rel_leaves_empty_result(self):
@@ -62,7 +71,7 @@ class TemplatetagTestCase(TestCase):
 <style type="text/css">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
 {% endcompress %}"""
-        out = css_tag("/static/CACHE/css/58a8c0714e59.css")
+        out = css_tag("/static/CACHE/css/output.58a8c0714e59.css")
         self.assertEqual(out, render(template, self.context))
 
     def test_uppercase_rel(self):
@@ -71,7 +80,7 @@ class TemplatetagTestCase(TestCase):
 <style type="text/css">p { border:5px solid green;}</style>
 <link rel="StyleSheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
 {% endcompress %}"""
-        out = css_tag("/static/CACHE/css/58a8c0714e59.css")
+        out = css_tag("/static/CACHE/css/output.58a8c0714e59.css")
         self.assertEqual(out, render(template, self.context))
 
     def test_nonascii_css_tag(self):
@@ -80,7 +89,7 @@ class TemplatetagTestCase(TestCase):
         <style type="text/css">p { border:5px solid green;}</style>
         {% endcompress %}
         """
-        out = css_tag("/static/CACHE/css/4263023f49d6.css")
+        out = css_tag("/static/CACHE/css/output.4263023f49d6.css")
         self.assertEqual(out, render(template, self.context))
 
     def test_js_tag(self):
@@ -89,7 +98,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
         """
-        out = '<script type="text/javascript" src="/static/CACHE/js/74e158ccb432.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/output.74e158ccb432.js"></script>'
         self.assertEqual(out, render(template, self.context))
 
     def test_nonascii_js_tag(self):
@@ -98,7 +107,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">var test_value = "\u2014";</script>
         {% endcompress %}
         """
-        out = '<script type="text/javascript" src="/static/CACHE/js/a18195c6ae48.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/output.a18195c6ae48.js"></script>'
         self.assertEqual(out, render(template, self.context))
 
     def test_nonascii_latin1_js_tag(self):
@@ -107,7 +116,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">var test_value = "\u2014";</script>
         {% endcompress %}
         """
-        out = '<script type="text/javascript" src="/static/CACHE/js/f64debbd8878.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/output.f64debbd8878.js"></script>'
         self.assertEqual(out, render(template, self.context))
 
     def test_compress_tag_with_illegal_arguments(self):
@@ -168,7 +177,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">var tmpl="{% templatetag openblock %} if x == 3 %}x IS 3{% templatetag openblock %} endif %}"</script>
         {% endaddtoblock %}{% render_block "js" postprocessor "compressor.contrib.sekizai.compress" %}
         """
-        out = '<script type="text/javascript" src="/static/CACHE/js/4d88842b99b3.js"></script>'
+        out = '<script type="text/javascript" src="/static/CACHE/js/output.4d88842b99b3.js"></script>'
         self.assertEqual(out, render(template, self.context, SekizaiContext))
 
 
@@ -197,7 +206,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
         template = """{% load compress %}{% compress js %}
             <script type="text/coffeescript"># this is a comment.</script>
             {% endcompress %}"""
-        out = script(src="/static/CACHE/js/fb128b610c3e.js")
+        out = script(src="/static/CACHE/js/output.fb128b610c3e.js")
         self.assertEqual(out, render(template, self.context))
 
     def test_compress_coffeescript_tag_and_javascript_tag(self):
@@ -205,7 +214,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <script type="text/coffeescript"># this is a comment.</script>
             <script type="text/javascript"># this too is a comment.</script>
             {% endcompress %}"""
-        out = script(src="/static/CACHE/js/cf3495aaff6e.js")
+        out = script(src="/static/CACHE/js/output.cf3495aaff6e.js")
         self.assertEqual(out, render(template, self.context))
 
     @override_settings(COMPRESS_ENABLED=False)

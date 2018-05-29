@@ -22,21 +22,22 @@ class CompressorMixin(object):
 
     @property
     def compressors(self):
-        return {
-            'js': settings.COMPRESS_JS_COMPRESSOR,
-            'css': settings.COMPRESS_CSS_COMPRESSOR,
-        }
+        return settings.COMPRESSORS
 
-    def compressor_cls(self, kind, *args, **kwargs):
+    def compressor_cls(self, kind):
         if kind not in self.compressors.keys():
             raise template.TemplateSyntaxError(
-                "The compress tag's argument must be 'js' or 'css'.")
+                "The compress tag's argument must be one of: %s."
+                % ', '.join(map(repr, self.compressors.keys())))
         return get_class(self.compressors.get(kind),
-                         exception=ImproperlyConfigured)(*args, **kwargs)
+                         exception=ImproperlyConfigured)
 
     def get_compressor(self, context, kind):
-        return self.compressor_cls(kind,
-            content=self.get_original_content(context), context=context)
+        cls = self.compressor_cls(kind)
+        return cls(
+            kind,
+            content=self.get_original_content(context),
+            context=context)
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
@@ -66,7 +67,12 @@ class CompressorMixin(object):
         offline_manifest = get_offline_manifest()
         if key in offline_manifest:
             return offline_manifest[key].replace(
-                settings.COMPRESS_URL_PLACEHOLDER, settings.COMPRESS_URL
+                settings.COMPRESS_URL_PLACEHOLDER,
+                # Cast ``settings.COMPRESS_URL`` to a string to allow it to be
+                # a string-alike object to e.g. add ``SCRIPT_NAME`` WSGI param
+                # as a *path prefix* to the output URL.
+                # See https://code.djangoproject.com/ticket/25598.
+                six.text_type(settings.COMPRESS_URL)
             )
         else:
             raise OfflineGenerationError('You have offline compression '
@@ -83,7 +89,7 @@ class CompressorMixin(object):
         cache_content = cache_get(cache_key)
         return cache_key, cache_content
 
-    def render_compressed(self, context, kind, mode, forced=False):
+    def render_compressed(self, context, kind, mode, name=None, forced=False):
 
         # See if it has been rendered offline
         if self.is_offline_compression_enabled(forced) and not forced:
@@ -94,7 +100,8 @@ class CompressorMixin(object):
                 not settings.COMPRESS_PRECOMPILERS and not forced):
             return self.get_original_content(context)
 
-        context['compressed'] = {'name': getattr(self, 'name', None)}
+        name = name or getattr(self, 'name', None)
+        context['compressed'] = {'name': name}
         compressor = self.get_compressor(context, kind)
 
         # Check cache
@@ -104,7 +111,11 @@ class CompressorMixin(object):
             if cache_content is not None:
                 return cache_content
 
-        rendered_output = compressor.output(mode, forced=forced)
+        file_basename = name or getattr(self, 'basename', None)
+        if file_basename is None:
+            file_basename = 'output'
+
+        rendered_output = compressor.output(mode, forced=forced, basename=file_basename)
         assert isinstance(rendered_output, six.string_types)
         if cache_key:
             cache_set(cache_key, rendered_output)
@@ -138,36 +149,14 @@ def compress(parser, token):
 
     Syntax::
 
-        {% compress <js/css> %}
+        {% compress <js/css> [<file/inline> [block_name]] %}
         <html of inline or linked JS/CSS>
         {% endcompress %}
 
     Examples::
 
-        {% compress css %}
-        <link rel="stylesheet" href="/static/css/one.css" type="text/css" charset="utf-8">
-        <style type="text/css">p { border:5px solid green;}</style>
-        <link rel="stylesheet" href="/static/css/two.css" type="text/css" charset="utf-8">
-        {% endcompress %}
+        See docs/usage.rst
 
-    Which would be rendered something like::
-
-        <link rel="stylesheet" href="/static/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">
-
-    or::
-
-        {% compress js %}
-        <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
-        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
-        {% endcompress %}
-
-    Which would be rendered something like::
-
-        <script type="text/javascript" src="/static/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
-
-    Linked files must be on your COMPRESS_URL (which defaults to STATIC_URL).
-    If DEBUG is true off-site files will throw exceptions. If DEBUG is false
-    they will be silently stripped.
     """
 
     nodelist = parser.parse(('endcompress',))

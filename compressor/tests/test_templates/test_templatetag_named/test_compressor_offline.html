@@ -1,0 +1,7 @@
+{% load compress %}{% spaceless %}
+
+{% compress js file output_name %}
+    <script type="text/javascript">
+        alert("Basic test");
+    </script>
+{% endcompress %}{% endspaceless %}

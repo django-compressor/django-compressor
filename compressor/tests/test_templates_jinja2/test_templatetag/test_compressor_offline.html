@@ -1,7 +1,9 @@
 {% spaceless %}
 
-{% compress js %}
+{% compress 'js' file %}
     <script type="text/javascript">
         alert("{{ "testtemplateTAG"|lower }}");
     </script>
-{% endcompress %}{% endspaceless %}
+{% endcompress %}
+
+{% endspaceless %}
