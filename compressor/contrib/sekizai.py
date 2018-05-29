@@ -22,14 +22,14 @@ def compress(context, data, name):
     """
     # separate compressable from uncompressable files
     parser = get_class(settings.COMPRESS_PARSER)(data)
-    compressor = Compressor()
+    js_compressor, css_compressor = Compressor('js'), Compressor('css')
     compressable_elements, expanded_elements, deferred_elements = [], [], []
     if name == 'js':
         for elem in parser.js_elems():
             attribs = parser.elem_attribs(elem)
             try:
                 if 'src' in attribs:
-                    compressor.get_basename(attribs['src'])
+                    js_compressor.get_basename(attribs['src'])
             except UncompressableFileError:
                 if 'defer' in attribs:
                     deferred_elements.append(elem)
@@ -42,7 +42,7 @@ def compress(context, data, name):
             attribs = parser.elem_attribs(elem)
             try:
                 if parser.elem_name(elem) == 'link' and attribs['rel'].lower() == 'stylesheet':
-                    compressor.get_basename(attribs['href'])
+                    css_compressor.get_basename(attribs['href'])
             except UncompressableFileError:
                 expanded_elements.append(elem)
             else:
