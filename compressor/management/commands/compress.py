@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 # flake8: noqa
 import os
 import sys
+import threading
 
 from collections import OrderedDict, defaultdict
 from fnmatch import fnmatch
@@ -187,9 +188,9 @@ class Command(BaseCommand):
 
         contexts_count = 0
         nodes_count = 0
-        block_count = 0
         offline_manifest = OrderedDict()
-        results = []
+        errors = []
+
         for context_dict in contexts:
             compressor_nodes = OrderedDict()
             for template in fine_templates:
@@ -210,37 +211,24 @@ class Command(BaseCommand):
                         nodes_count += 1
                         template_nodes.setdefault(node, []).append(context)
 
+            threads = []
             for template, nodes in compressor_nodes.items():
                 template._log = log
                 template._log_verbosity = verbosity
 
-                for node, node_contexts in nodes.items():
-                    for context in node_contexts:
-                        context.push()
-                        if not parser.process_template(template, context):
-                            continue
+                thread = threading.Thread(target=self._compress_template, args=(offline_manifest, nodes, parser, template, errors))
+                # Sticks the thread in a list so that it remains accessible and start thread
+                threads.append(thread)
+                thread.start()
 
-                        parser.process_node(template, context, node)
-                        rendered = parser.render_nodelist(template, context, node)
-                        key = get_offline_hexdigest(rendered)
+            # Execute tasks in parallel
+            for thread in threads:
+                thread.join()
 
-                        if key in offline_manifest:
-                            continue
-
-                        try:
-                            result = parser.render_node(template, context, node)
-                        except Exception as e:
-                            raise CommandError("An error occurred during rendering %s: "
-                                               "%s" % (template.template_name, smart_str(e)))
-                        result = result.replace(
-                            settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
-                        )
-                        offline_manifest[key] = result
-                        context.pop()
-                        results.append(result)
-                        block_count += 1
-
-        if not nodes_count:
+        # If errors exist, raise the first one in the list
+        if errors:
+            raise errors[0]
+        elif not nodes_count:
             raise OfflineGenerationError(
                 "No 'compress' template tags found in templates."
                 "Try running compress command with --follow-links and/or"
@@ -248,8 +236,35 @@ class Command(BaseCommand):
 
         if verbosity >= 1:
             log.write("done\nCompressed %d block(s) from %d template(s) for %d context(s).\n" %
-                      (block_count, nodes_count, contexts_count))
-        return offline_manifest, block_count, results
+                      (len(offline_manifest), nodes_count, contexts_count))
+        return offline_manifest, len(offline_manifest), offline_manifest.values()
+
+    @staticmethod
+    def _compress_template(offline_manifest, nodes, parser, template, errors):
+        for node, node_contexts in nodes.items():
+            for context in node_contexts:
+                context.push()
+                if not parser.process_template(template, context):
+                    continue
+
+                parser.process_node(template, context, node)
+                rendered = parser.render_nodelist(template, context, node)
+                key = get_offline_hexdigest(rendered)
+
+                if key in offline_manifest:
+                    continue
+
+                try:
+                    result = parser.render_node(template, context, node)
+                except Exception as e:
+                    errors.append(CommandError("An error occurred during rendering %s: "
+                                        "%s" % (template.template_name, smart_str(e))))
+                    return
+                result = result.replace(
+                    settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
+                )
+                offline_manifest[key] = result
+                context.pop()
 
     def handle_extensions(self, extensions=('html',)):
         """
