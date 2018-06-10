@@ -34,7 +34,7 @@ use any of these directives to import Stylesheets and JavaScript files:
     {% addtoblock "js" %}<script async="async" defer="defer" src="https://maps.googleapis.com/maps/api/js?key={{ config.apiKey }}&callback=initMap"></script>{% endaddtoblock %}
 
 Note that some files are loaded by the browser directly from a CDN and thus can not be compressed
-by django-compressor. Therefore the Sekizai compressor checks whether is a file is compressable, and
+by django-compressor. Therefore the Sekizai compressor checks whether a file is compressable, and
 only if so, concatenates its payload.
 
 .. code-block:: django
