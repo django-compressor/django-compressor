@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 # flake8: noqa
 import os
 import sys
-import threading
+import concurrent.futures
 
 from collections import OrderedDict, defaultdict
 from fnmatch import fnmatch
@@ -186,7 +186,6 @@ class Command(BaseCommand):
                               "template %s\n" % template_name)
                 continue
 
-        contexts_count = 0
         nodes_count = 0
         offline_manifest = OrderedDict()
         errors = []
@@ -211,19 +210,14 @@ class Command(BaseCommand):
                         nodes_count += 1
                         template_nodes.setdefault(node, []).append(context)
 
-            threads = []
+            pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
             for template, nodes in compressor_nodes.items():
                 template._log = log
                 template._log_verbosity = verbosity
 
-                thread = threading.Thread(target=self._compress_template, args=(offline_manifest, nodes, parser, template, errors))
-                # Sticks the thread in a list so that it remains accessible and start thread
-                threads.append(thread)
-                thread.start()
+                pool.submit(self._compress_template, offline_manifest, nodes, parser, template, errors)
 
-            # Execute tasks in parallel
-            for thread in threads:
-                thread.join()
+            pool.shutdown(wait=True)
 
         # If errors exist, raise the first one in the list
         if errors:
@@ -236,7 +230,7 @@ class Command(BaseCommand):
 
         if verbosity >= 1:
             log.write("done\nCompressed %d block(s) from %d template(s) for %d context(s).\n" %
-                      (len(offline_manifest), nodes_count, contexts_count))
+                      (len(offline_manifest), nodes_count, len(contexts)))
         return offline_manifest, len(offline_manifest), offline_manifest.values()
 
     @staticmethod
