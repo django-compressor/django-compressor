@@ -5,6 +5,7 @@ Unreleased
 -------------------
 
 - Add Django 2.0 compatibility
+- Allow the mixed use of JS/CSS in Sekizai's templatetags `{% addtoblock "js" %}` and `{% addtoblock "css" %}`.
 
 v2.2 (2017-08-16)
 -------------------
