@@ -50,8 +50,7 @@ class StorageTestCase(TestCase):
         br_decompressor = brotli.Decompressor()
         with open(os.path.join(settings.COMPRESS_ROOT, 'test.txt.br'), 'rb') as f:
             for data in iter(lambda: f.read(chunk_size), b''):
-                decompressed_data += br_decompressor.decompress(data)
-            decompressed_data += br_decompressor.finish()
+                decompressed_data += br_decompressor.process(data)
         self.assertEqual(payload, decompressed_data)
 
     def test_css_tag_with_storage(self):

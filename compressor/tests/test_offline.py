@@ -2,13 +2,12 @@ from __future__ import with_statement, unicode_literals
 import copy
 from contextlib import contextmanager
 
-import django
 import io
 import os
 from importlib import import_module
 
 from mock import patch
-from unittest import SkipTest, skipIf
+from unittest import SkipTest
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
@@ -24,10 +23,7 @@ from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_storage
 from compressor.utils import get_mod_func
 
-if django.VERSION < (1, 10):
-    from django.core.urlresolvers import get_script_prefix, set_script_prefix
-else:
-    from django.urls import get_script_prefix, set_script_prefix
+from django.urls import get_script_prefix, set_script_prefix
 
 
 def offline_context_generator():
@@ -67,15 +63,9 @@ class LazyScriptNamePrefixedUrl(six.text_type):
 
     def split(self, *args, **kwargs):
         """
-        Override ``.split()`` method to make it work with ``{% static %}`` in Django >= 1.10.
+        Override ``.split()`` method to make it work with ``{% static %}``.
         """
         return six.text_type(self).split(*args, **kwargs)
-
-    def encode(self, *args, **kwargs):
-        """
-        Override ``.encode()`` method to make it work with ``{% static %}`` in Django <= 1.9.
-        """
-        return six.text_type(self).encode(*args, **kwargs)
 
 
 @contextmanager
@@ -733,10 +723,6 @@ class OfflineCompressComplexTestCase(OfflineTestCaseMixin, TestCase):
             rendered_template, self._render_result([result[0], result[2]], ''))
 
 
-@skipIf(
-    django.VERSION < (1, 9),
-    "Needs Django >= 1.9, recursive templates were fixed in Django 1.9"
-)
 class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
     """
     Test that templates extending templates with the same name

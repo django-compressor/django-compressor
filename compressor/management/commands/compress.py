@@ -117,7 +117,7 @@ class Command(BaseCommand):
                 raise OfflineGenerationError("No template paths found. None of "
                                              "the configured template loaders "
                                              "provided template paths. See "
-                                             "https://docs.djangoproject.com/en/1.8/topics/templates/ "
+                                             "https://docs.djangoproject.com/en/2.1/topics/templates/ "
                                              "for more information on template "
                                              "loaders.")
             if verbosity >= 2:

@@ -90,20 +90,16 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
     """
     chunk_size = 1024
 
-    def __init__(self, *args, **kwargs):
-        import brotli
-        self.Compressor = brotli.Compressor
-        super(BrotliCompressorFileStorage, self).__init__(*args, **kwargs)
-
     def save(self, filename, content):
         filename = super(BrotliCompressorFileStorage, self).save(filename, content)
         orig_path = self.path(filename)
         compressed_path = '%s.br' % orig_path
 
-        br_compressor = self.Compressor()
+        import brotli
+        br_compressor = brotli.Compressor()
         with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
             for f_in_data in iter(lambda: f_in.read(self.chunk_size), b''):
-                compressed_data = br_compressor.compress(f_in_data)
+                compressed_data = br_compressor.process(f_in_data)
                 if not compressed_data:
                     compressed_data = br_compressor.flush()
                 f_out.write(compressed_data)
@@ -122,5 +118,6 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
 class DefaultStorage(LazyObject):
     def _setup(self):
         self._wrapped = get_storage_class(settings.COMPRESS_STORAGE)()
+
 
 default_storage = DefaultStorage()

@@ -16,7 +16,7 @@ class Html5LibParser(ParserBase):
 
     def _serialize(self, elem):
         return self.html5lib.serialize(
-            elem, tree="etree", quote_attr_values=True,
+            elem, tree="etree", quote_attr_values="always",
             omit_optional_tags=False, use_trailing_solidus=True,
         )
 

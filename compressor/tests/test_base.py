@@ -115,7 +115,8 @@ class CompressorTestCase(SimpleTestCase):
         assertEqual with internal newlines collapsed to single, and
         trailing whitespace removed.
         """
-        collapse = lambda x: re.sub(r'\n+', '\n', x).rstrip()
+        def collapse(s):
+            return re.sub(r'\n+', '\n', s).rstrip()
         self.assertEqual(collapse(a), collapse(b))
 
     def assertEqualSplits(self, a, b):
@@ -123,7 +124,8 @@ class CompressorTestCase(SimpleTestCase):
         assertEqual for splits, particularly ignoring the presence of
         a trailing newline on the content.
         """
-        mangle = lambda split: [(x[0], x[1], x[2], x[3].rstrip()) for x in split]
+        def mangle(split):
+            return [(x[0], x[1], x[2], x[3].rstrip()) for x in split]
         self.assertEqual(mangle(a), mangle(b))
 
     def test_css_split(self):

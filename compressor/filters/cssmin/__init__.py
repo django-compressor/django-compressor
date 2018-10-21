@@ -17,5 +17,6 @@ class rCSSMinFilter(CallbackOutputFilter):
         "keep_bang_comments": True
     }
 
+
 # This is for backwards compatibility.
 CSSMinFilter = rCSSMinFilter
