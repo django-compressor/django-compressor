@@ -69,7 +69,7 @@ The source code for Django Compressor can be found and contributed to on
 `github.com/django-compressor/django-compressor`_. There you can also file tickets.
 
 The in-development version of Django Compressor can be installed with
-``pip install http://github.com/django-compressor/django-compressor/tarball/develop``.
+``pip install git+https://github.com/django-compressor/django-compressor.git``
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/
