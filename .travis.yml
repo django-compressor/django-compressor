@@ -8,7 +8,8 @@ env:
   - TOXENV=py27-1.11.X
   - TOXENV=py34-1.11.X
   - TOXENV=py34-2.0.X
-# https://github.com/travis-ci/travis-ci/issues/4794
+# for python 3.5 and 3.6, see https://github.com/travis-ci/travis-ci/issues/4794
+# for python 3.7, see https://github.com/travis-ci/travis-ci/issues/9815
 matrix:
   include:
     - python: 3.5
@@ -19,6 +20,18 @@ matrix:
       env: TOXENV=py35-2.0.X
     - python: 3.6
       env: TOXENV=py36-2.0.X
+    - python: 3.7
+      env: TOXENV=py37-2.0.X
+      dist: xenial
+      sudo: true
+    - python: 3.5
+      env: TOXENV=py35-2.1.X
+    - python: 3.6
+      env: TOXENV=py36-2.1.X
+    - python: 3.7
+      env: TOXENV=py37-2.1.X
+      dist: xenial
+      sudo: true
 notifications:
   irc: "irc.freenode.org#django-compressor"
 after_success:
