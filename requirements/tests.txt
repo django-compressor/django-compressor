@@ -1,4 +1,4 @@
-flake8==2.4.0
+flake8==3.5.0
 coverage==4.4
 html5lib==0.9999999
 mock==1.0.1
