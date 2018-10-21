@@ -5,24 +5,12 @@ install:
 script:
   - tox
 env:
-  - TOXENV=py27-1.8.X
-  - TOXENV=py34-1.8.X
-  - TOXENV=py27-1.9.X
-  - TOXENV=py34-1.9.X
-  - TOXENV=py27-1.10.X
-  - TOXENV=py34-1.10.X
   - TOXENV=py27-1.11.X
   - TOXENV=py34-1.11.X
   - TOXENV=py34-2.0.X
 # https://github.com/travis-ci/travis-ci/issues/4794
 matrix:
   include:
-    - python: 3.5
-      env: TOXENV=py35-1.8.X
-    - python: 3.5
-      env: TOXENV=py35-1.9.X
-    - python: 3.5
-      env: TOXENV=py35-1.10.X
     - python: 3.5
       env: TOXENV=py35-1.11.X
     - python: 3.6

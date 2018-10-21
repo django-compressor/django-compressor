@@ -97,7 +97,7 @@ exception. If DEBUG is ``False`` these files will be silently stripped.
     Django's `caching documentation`_).
 
 .. _memcached: http://memcached.org/
-.. _caching documentation: https://docs.djangoproject.com/en/1.8/topics/cache/#memcached
+.. _caching documentation: https://docs.djangoproject.com/en/2.1/topics/cache/#memcached
 
 
 .. _offline_compression:

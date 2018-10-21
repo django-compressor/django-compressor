@@ -4,6 +4,7 @@ Changelog
 Unreleased
 -------------------
 
+- Drop support for Django 1.8, 1.9 and 1.10
 - Add Django 2.0 compatibility
 - Allow the mixed use of JS/CSS in Sekizai's templatetags `{% addtoblock "js" %}` and `{% addtoblock "css" %}`.
 

@@ -3,7 +3,6 @@ import os
 import codecs
 from importlib import import_module
 
-from django import VERSION
 from django.core.files.base import ContentFile
 from django.utils import six
 from django.utils.safestring import mark_safe
@@ -363,10 +362,8 @@ class Compressor(object):
         self.context['compressed'].update(context or {})
         self.context['compressed'].update(self.extra_context)
 
-        if hasattr(self.context, 'flatten') and VERSION >= (1, 9):
+        if hasattr(self.context, 'flatten'):
             # Passing Contexts to Template.render is deprecated since Django 1.8.
-            # However, we use the fix below only for django 1.9 and above, since
-            # the flatten method is buggy in 1.8, see https://code.djangoproject.com/ticket/24765
             final_context = self.context.flatten()
         else:
             final_context = self.context
