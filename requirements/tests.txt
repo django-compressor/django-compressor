@@ -1,10 +1,10 @@
 flake8==3.5.0
 coverage==4.4
-html5lib==0.9999999
+html5lib==1.0.1
 mock==1.0.1
 Jinja2==2.7.3
-lxml==3.4.2
-beautifulsoup4==4.4.0
+lxml==4.2.5
+beautifulsoup4==4.6.3
 django-sekizai==0.9.0
 csscompressor==0.9.4
 rcssmin==1.0.6
