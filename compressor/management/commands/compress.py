@@ -235,7 +235,7 @@ class Command(BaseCommand):
                             settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
                         )
                         offline_manifest[key] = result
-                        rendered_map[key] = {'rendered': rendered, 'template_name': template.name}
+                        rendered_map[key] = {'rendered': rendered, 'template_name': template.template_name}
                         context.pop()
                         results.append(result)
                         block_count += 1
