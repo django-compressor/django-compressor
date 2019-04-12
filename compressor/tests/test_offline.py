@@ -82,6 +82,9 @@ def script_prefix(new_prefix):
 
 
 class OfflineTestCaseMixin(object):
+    CHARSET = (
+        settings.FILE_CHARSET if hasattr(settings, 'FILE_CHARSET') else 'utf-8'
+    )
     template_name = 'test_compressor_offline.html'
     # Change this for each test class
     templates_dir = ''
@@ -131,7 +134,7 @@ class OfflineTestCaseMixin(object):
                 django_template_dir, self.template_name)
 
             with io.open(self.template_path,
-                         encoding=settings.FILE_CHARSET) as file_:
+                         encoding=self.CHARSET) as file_:
                 self.template = Template(file_.read())
 
         if 'jinja2' in self.engines:
@@ -140,7 +143,7 @@ class OfflineTestCaseMixin(object):
             jinja2_env = override_settings['COMPRESS_JINJA2_GET_ENVIRONMENT']()
 
             with io.open(self.template_path_jinja2,
-                         encoding=settings.FILE_CHARSET) as file_:
+                         encoding=self.CHARSET) as file_:
                 self.template_jinja2 = jinja2_env.from_string(file_.read())
 
     def tearDown(self):
@@ -233,7 +236,7 @@ class OfflineTestCaseMixin(object):
         import jinja2
 
         loader = jinja2.FileSystemLoader(
-            settings.TEMPLATES[1]['DIRS'], encoding=settings.FILE_CHARSET)
+            settings.TEMPLATES[1]['DIRS'], encoding=self.CHARSET)
         return loader
 
 
@@ -661,7 +664,7 @@ class OfflineCompressBlockSuperBaseCompressed(OfflineTestCaseMixin, TestCase):
                 settings.TEMPLATES[0]['DIRS'][0], template_name)
             self.template_paths.append(template_path)
             with io.open(template_path,
-                         encoding=settings.FILE_CHARSET) as file_:
+                         encoding=self.CHARSET) as file_:
                 template = Template(file_.read())
             self.templates.append(template)
 

@@ -119,7 +119,9 @@ class CompilerFilter(FilterBase):
     """
     command = None
     options = ()
-    default_encoding = settings.FILE_CHARSET
+    default_encoding = (
+        settings.FILE_CHARSET if hasattr(settings, 'FILE_CHARSET') else 'utf-8'
+    )
 
     def __init__(self, content, command=None, **kwargs):
         super(CompilerFilter, self).__init__(content, **kwargs)
