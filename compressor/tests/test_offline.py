@@ -82,9 +82,7 @@ def script_prefix(new_prefix):
 
 
 class OfflineTestCaseMixin(object):
-    CHARSET = (
-        settings.FILE_CHARSET if hasattr(settings, 'FILE_CHARSET') else 'utf-8'
-    )
+    CHARSET = 'utf-8'
     template_name = 'test_compressor_offline.html'
     # Change this for each test class
     templates_dir = ''

@@ -73,8 +73,8 @@ class Command(BaseCommand):
 
     def __get_parser(self, engine):
         charset = (
-            settings.FILE_CHARSET if hasattr(settings, 'FILE_CHARSET') else
-            'utf-8'
+            settings.FILE_CHARSET if settings.is_overridden('FILE_CHARSET')
+            else 'utf-8'
         )
         if engine == "jinja2":
             from compressor.offline.jinja2 import Jinja2Parser

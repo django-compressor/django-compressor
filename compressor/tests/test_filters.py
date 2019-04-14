@@ -31,9 +31,7 @@ def blankdict(*args, **kwargs):
 
 @override_settings(COMPRESS_CACHEABLE_PRECOMPILERS=('text/css',))
 class PrecompilerTestCase(TestCase):
-    CHARSET = (
-        settings.FILE_CHARSET if hasattr(settings, 'FILE_CHARSET') else 'utf-8'
-    )
+    CHARSET = 'utf-8'
 
     def setUp(self):
         self.test_precompiler = os.path.join(test_dir, 'precompiler.py')
