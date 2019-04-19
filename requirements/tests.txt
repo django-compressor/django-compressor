@@ -8,5 +8,5 @@ beautifulsoup4==4.6.3
 django-sekizai==0.10.0
 csscompressor==0.9.5
 rcssmin==1.0.6
-rjsmin==1.0.12
+rjsmin==1.1.0
 brotli==1.0.6
