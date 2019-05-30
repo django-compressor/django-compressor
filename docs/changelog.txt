@@ -1,16 +1,25 @@
 Changelog
 =========
 
-Unreleased
--------------------
+v2.3 (2019-06-31)
+-----------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.2...2.3>`_
 
 - Drop support for Django 1.8, 1.9 and 1.10
-- Add Django 2.0, Django 2.1, and Python 3.7 support
+- Add support for Django 2.1 and 2.2, as well as Python 3.7
 - Update all dependencies. This required minor code changes, you might need to update some optional dependencies if you use any
-- Allow the mixed use of JS/CSS in Sekizai's templatetags `{% addtoblock "js" %}` and `{% addtoblock "css" %}`.
+- Allow the mixed use of JS/CSS in Sekizai's templatetags `{% addtoblock "js" %}` and `{% addtoblock "css" %}` (#891)
+- Allow the implementation of new types other than css and js. (#900)
+- Update jinja2 extension to behave similar to the django tag (#899)
+- Fix crash in offline compression when child nodelist is None, again (#605)
+- Support STATIC_URL and COMPRESS_URL being string-like objects
+- Improve compress command memory usage (#870)
+- Ensure generated file always contains a base name (#775)
+- Add BrotliCompressorFileStorage (#867)
 
 v2.2 (2017-08-16)
--------------------
+-----------------
 
 `Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.1.1...2.2>`_
 
