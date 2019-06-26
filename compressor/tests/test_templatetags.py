@@ -125,6 +125,19 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}"""
         self.assertRaises(TemplateSyntaxError, render, template, {})
 
+    @override_settings(django_csp_nonce=True)
+    def test_csp_nonce_tag(self):
+        self.context['django_csp_nonce'] = True
+        self.context['request'] = {}
+        self.context['request']['csp_nonce'] = '123'
+        template = """{% load compress %}{% compress js inline %}
+        <script src="{{ STATIC_URL }}js/nonasc-latin1.js" charset="latin-1"></script>
+        <script> var test_value = "\u2014";</script>
+        {% endcompress %}
+        """
+        out = '<script nonce=123 >var test_value="\xdcberstr\xedng";;var test_value="\u2014";;</script>'
+        self.assertEqual(out, render(template, self.context))
+
     @override_settings(COMPRESS_DEBUG_TOGGLE='togglecompress')
     def test_debug_toggle(self):
         template = """{% load compress %}{% compress js %}

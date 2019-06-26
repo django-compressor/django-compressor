@@ -1,1 +1,1 @@
-<script type="text/javascript">{{ compressed.content|safe }}</script>
+<script{% if django_csp_nonce %} nonce=__django_compressor_csp_nonce {% endif %}>{{ compressed.content|safe }}</script>
