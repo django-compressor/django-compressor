@@ -9,12 +9,12 @@ from importlib import import_module
 from mock import patch
 from unittest import SkipTest
 
+import six
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils import six
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.conf import settings
