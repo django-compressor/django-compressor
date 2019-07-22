@@ -349,6 +349,13 @@ class Compressor(object):
         """
         return self.render_output(mode, {"content": content})
 
+    def output_preload(self, mode, content, forced=False, basename=None):
+        """
+        The output method that returns <link> with rel="preload" and
+        proper href attribute for given file.
+        """
+        return self.output_file(mode, content, forced, basename)
+
     def render_output(self, mode, context=None):
         """
         Renders the compressor output with the appropriate template for
