@@ -61,6 +61,6 @@ class JsCompressor(Compressor):
             # error like TypeError...
             # Forcing a semicolon in between fixes it.
             if settings.COMPRESS_ENABLED or forced:
-                hunk = ";" + hunk
+                hunk += ";"
             content.append(hunk)
         return content

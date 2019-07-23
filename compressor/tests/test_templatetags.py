@@ -98,7 +98,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
         """
-        out = '<script type="text/javascript" src="/static/CACHE/js/output.74e158ccb432.js"></script>'
+        out = '<script src="/static/CACHE/js/output.8a0fed36c317.js"></script>'
         self.assertEqual(out, render(template, self.context))
 
     def test_nonascii_js_tag(self):
@@ -107,7 +107,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">var test_value = "\u2014";</script>
         {% endcompress %}
         """
-        out = '<script type="text/javascript" src="/static/CACHE/js/output.a18195c6ae48.js"></script>'
+        out = '<script src="/static/CACHE/js/output.8c00f1cf1e0a.js"></script>'
         self.assertEqual(out, render(template, self.context))
 
     def test_nonascii_latin1_js_tag(self):
@@ -116,7 +116,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">var test_value = "\u2014";</script>
         {% endcompress %}
         """
-        out = '<script type="text/javascript" src="/static/CACHE/js/output.f64debbd8878.js"></script>'
+        out = '<script src="/static/CACHE/js/output.06a98ccfd380.js"></script>'
         self.assertEqual(out, render(template, self.context))
 
     def test_compress_tag_with_illegal_arguments(self):
@@ -151,7 +151,7 @@ class TemplatetagTestCase(TestCase):
         <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
         {% endcompress %}"""
 
-        out_js = '<script type="text/javascript">;obj={};;obj.value="value";</script>'
+        out_js = '<script>obj={};;obj.value="value";;</script>'
         out_css = '\n'.join(('<style type="text/css">body { background:#990; }',
                              'p { border:5px solid green;}',
                              'body { color:#fff; }</style>'))
@@ -177,7 +177,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">var tmpl="{% templatetag openblock %} if x == 3 %}x IS 3{% templatetag openblock %} endif %}"</script>
         {% endaddtoblock %}{% render_block "js" postprocessor "compressor.contrib.sekizai.compress" %}
         """
-        out = '<script type="text/javascript" src="/static/CACHE/js/output.4d88842b99b3.js"></script>'
+        out = '<script src="/static/CACHE/js/output.ffc39dec05fd.js"></script>'
         self.assertEqual(out, render(template, self.context, SekizaiContext))
 
 
@@ -206,7 +206,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
         template = """{% load compress %}{% compress js %}
             <script type="text/coffeescript"># this is a comment.</script>
             {% endcompress %}"""
-        out = script(src="/static/CACHE/js/output.fb128b610c3e.js")
+        out = script(src="/static/CACHE/js/output.ec862f0ff42c.js")
         self.assertEqual(out, render(template, self.context))
 
     def test_compress_coffeescript_tag_and_javascript_tag(self):
@@ -214,7 +214,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <script type="text/coffeescript"># this is a comment.</script>
             <script type="text/javascript"># this too is a comment.</script>
             {% endcompress %}"""
-        out = script(src="/static/CACHE/js/output.cf3495aaff6e.js")
+        out = script(src="/static/CACHE/js/output.fb4a0d84e914.js")
         self.assertEqual(out, render(template, self.context))
 
     @override_settings(COMPRESS_ENABLED=False)
@@ -224,7 +224,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <script type="text/javascript"># this too is a comment.</script>
             {% endcompress %}"""
         out = (script('# this is a comment.\n') + '\n' +
-               script('# this too is a comment.'))
+               script('# this too is a comment.', scripttype="text/javascript"))
         self.assertEqual(out, render(template, self.context))
 
     @override_settings(COMPRESS_ENABLED=False)
@@ -293,7 +293,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
         self.assertEqual(out, render(template, self.context))
 
 
-def script(content="", src="", scripttype="text/javascript"):
+def script(content="", src="", scripttype=""):
     """
     returns a unicode text html script element.
 
