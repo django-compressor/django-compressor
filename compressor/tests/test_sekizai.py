@@ -24,7 +24,7 @@ class TestSekizaiCompressorExtension(TestCase):
         html = template.render(context).strip()
         self.assertEqual(html,
 '''<script src="https://code.jquery.com/jquery-3.3.1.min.js" type="text/javascript"></script>
-<script type="text/javascript" src="/static/CACHE/js/output.cb5ca6a608a4.js"></script>
+<script src="/static/CACHE/js/output.e682d84f6b17.js"></script>
 <script async="async" defer="defer" src="https://maps.googleapis.com/maps/api/js?key=XYZ"></script>''')
 
     def test_postprocess_css(self):
