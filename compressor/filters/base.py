@@ -20,8 +20,8 @@ else:
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 
+import six
 from django.utils.encoding import smart_text
-from django.utils import six
 
 from compressor.cache import cache, get_precompiler_cachekey
 
@@ -119,7 +119,10 @@ class CompilerFilter(FilterBase):
     """
     command = None
     options = ()
-    default_encoding = settings.FILE_CHARSET
+    default_encoding = (
+        settings.FILE_CHARSET if settings.is_overridden('FILE_CHARSET') else
+        'utf-8'
+    )
 
     def __init__(self, content, command=None, **kwargs):
         super(CompilerFilter, self).__init__(content, **kwargs)

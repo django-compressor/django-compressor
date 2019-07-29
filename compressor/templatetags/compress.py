@@ -1,6 +1,6 @@
+import six
 from django import template
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import six
 
 from compressor.cache import (cache_get, cache_set, get_offline_hexdigest,
                               get_offline_manifest, get_templatetag_cachekey)
