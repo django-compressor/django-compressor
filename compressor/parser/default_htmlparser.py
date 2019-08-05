@@ -83,6 +83,6 @@ class DefaultHtmlParser(ParserBase, six.moves.html_parser.HTMLParser):
         if len(elem['attrs']):
             tag['attrs'] = ' %s' % ' '.join(['%s="%s"' % (name, value) for name, value in elem['attrs']])
         if elem['tag'] == 'link':
-            return '<%(tag)s%(attrs)s />' % tag
+            return '<%(tag)s%(attrs)s>' % tag
         else:
             return '<%(tag)s%(attrs)s>%(text)s</%(tag)s>' % tag
