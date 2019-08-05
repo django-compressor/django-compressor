@@ -181,7 +181,7 @@ class OfflineTestCaseMixin(object):
     def _render_link(self, hash):
         return (
             '<link rel="stylesheet" href="{}CACHE/css/{}.{}.css" '
-            'type="text/css" />'.format(
+            'type="text/css">'.format(
                 settings.COMPRESS_URL_PLACEHOLDER, self.expected_basename, hash
             )
         )

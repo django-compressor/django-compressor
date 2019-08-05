@@ -38,5 +38,5 @@ class TestSekizaiCompressorExtension(TestCase):
         context = SekizaiContext()
         html = template.render(context).strip()
         self.assertEqual(html,
-'''<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/css/select2.min.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="/static/CACHE/css/output.20f9b535162f.css" type="text/css" />''')
+'''<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/css/select2.min.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="/static/CACHE/css/output.20f9b535162f.css" type="text/css">''')

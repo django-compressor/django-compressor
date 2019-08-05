@@ -147,10 +147,7 @@ class BeautifulSoupParserTests(ParserTestCase, CompressorTestCase):
 
     @override_settings(COMPRESS_ENABLED=False)
     def test_css_return_if_off(self):
-        # in addition to unspecified attribute order,
-        # bs4 output doesn't have the extra space, so we add that here
-        fixed_output = self.css_node.output().replace('"/>', '" />')
-        self.assertEqual(len(self.css), len(fixed_output))
+        self.assertEqual(len(self.css), len(self.css_node.output()))
 
 
 class HtmlParserTests(ParserTestCase, CompressorTestCase):

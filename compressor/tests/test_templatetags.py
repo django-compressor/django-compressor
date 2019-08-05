@@ -272,8 +272,8 @@ class PrecompilerTemplatetagTestCase(TestCase):
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/two.css"></link>
         {% endcompress %}"""
 
-        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css" />',
-                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css" />'])
+        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css">',
+                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css">'])
 
         self.assertEqual(out, render(template, self.context))
 
@@ -287,9 +287,9 @@ class PrecompilerTemplatetagTestCase(TestCase):
         <link rel="stylesheet" type="text/less" href="{{ STATIC_URL }}css/url/test.css"/>
         {% endcompress %}"""
 
-        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css" />',
-                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css" />',
-                       '<link rel="stylesheet" href="/static/CACHE/css/test.222f958fb191.css" type="text/css" />'])
+        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css">',
+                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css">',
+                       '<link rel="stylesheet" href="/static/CACHE/css/test.222f958fb191.css" type="text/css">'])
         self.assertEqual(out, render(template, self.context))
 
 

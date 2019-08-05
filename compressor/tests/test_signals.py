@@ -16,9 +16,9 @@ from compressor.signals import post_compress
 class PostCompressSignalTestCase(TestCase):
     def setUp(self):
         self.css = """\
-<link rel="stylesheet" href="/static/css/one.css" type="text/css" />
+<link rel="stylesheet" href="/static/css/one.css" type="text/css">
 <style type="text/css">p { border:5px solid green;}</style>
-<link rel="stylesheet" href="/static/css/two.css" type="text/css" />"""
+<link rel="stylesheet" href="/static/css/two.css" type="text/css">"""
         self.css_node = CssCompressor('css', self.css)
 
         self.js = """\
@@ -59,7 +59,7 @@ class PostCompressSignalTestCase(TestCase):
         css = """\
 <link rel="stylesheet" href="/static/css/one.css" media="handheld" type="text/css" />
 <style type="text/css" media="print">p { border:5px solid green;}</style>
-<link rel="stylesheet" href="/static/css/two.css" type="text/css" />"""
+<link rel="stylesheet" href="/static/css/two.css" type="text/css">"""
         css_node = CssCompressor('css', css)
 
         def listener(sender, **kwargs):
