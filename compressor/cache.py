@@ -109,10 +109,10 @@ def get_mtime(filename):
         key = get_mtime_cachekey(filename)
         mtime = cache.get(key)
         if mtime is None:
-            mtime = os.path.getmtime(filename)
+            mtime = default_storage.get_modified_time(filename).timestamp()
             cache.set(key, mtime, settings.COMPRESS_MTIME_DELAY)
         return mtime
-    return os.path.getmtime(filename)
+    return default_storage.get_modified_time(filename).timestamp()
 
 
 def get_hashed_mtime(filename, length=12):

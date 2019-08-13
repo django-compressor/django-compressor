@@ -15,7 +15,7 @@ from compressor.conf import settings
 from compressor.exceptions import (CompressorError, UncompressableFileError,
         FilterDoesNotExist)
 from compressor.filters import CachedCompilerFilter
-from compressor.storage import compressor_file_storage
+from compressor.storage import compressor_file_storage, default_storage
 from compressor.signals import post_compress
 from compressor.utils import get_class, get_mod_func, staticfiles
 
@@ -180,6 +180,16 @@ class Compressor(object):
                                               "charset %s: %s" %
                                               (filename, charset, e))
 
+    def get_binaryfile_content(self, filename, charset):
+        """
+        Reads file contents using given `charset` and returns it as text.
+        """
+        if charset == 'utf-8':
+            # Removes BOM
+            charset = 'utf-8-sig'
+        with default_storage.open(filename) as f:
+            return f.read().decode(charset)
+
     @cached_property
     def parser(self):
         return get_class(settings.COMPRESS_PARSER)(self.content)
@@ -222,7 +232,7 @@ class Compressor(object):
 
             if kind == SOURCE_FILE:
                 options = dict(options, filename=value)
-                value = self.get_filecontent(value, charset)
+                value = self.get_binaryfile_content(value, charset)
 
             if self.precompiler_mimetypes:
                 precompiled, value = self.precompile(value, **options)
