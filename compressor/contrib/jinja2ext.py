@@ -49,7 +49,7 @@ class CompressorExtension(compress.CompressorMixin, Extension):
                 # The file mode optionally accepts a name
                 if parser.stream.current.type != 'block_end':
                     namearg = const(parser.parse_expression())
-            elif modearg.value == compress.OUTPUT_INLINE:
+            elif modearg.value == compress.OUTPUT_INLINE or modearg.value == compress.OUTPUT_PRELOAD:
                 pass
             else:
                 raise TemplateSyntaxError(
