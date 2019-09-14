@@ -1,6 +1,7 @@
 from __future__ import with_statement, unicode_literals
 import os
 import re
+import sys
 from tempfile import mkdtemp
 from shutil import rmtree, copytree
 
@@ -317,7 +318,7 @@ class CssMediaTestCase(SimpleTestCase):
         self.assertEqual(media, [l.get('media', None) for l in links])
 
     @override_settings(COMPRESS_PRECOMPILERS=(
-        ('text/foobar', 'python %s {infile} {outfile}' % os.path.join(test_dir, 'precompiler.py')),
+        ('text/foobar', '%s %s {infile} {outfile}' % (sys.executable, os.path.join(test_dir, 'precompiler.py'))),
     ), COMPRESS_ENABLED=False)
     def test_passthough_when_compress_disabled(self):
         css = """\
