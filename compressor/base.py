@@ -3,12 +3,12 @@ import os
 import codecs
 from importlib import import_module
 
+import six
 from django.core.files.base import ContentFile
-from django.utils import six
 from django.utils.safestring import mark_safe
-from django.utils.six.moves.urllib.request import url2pathname
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
+from six.moves.urllib.request import url2pathname
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
@@ -348,6 +348,13 @@ class Compressor(object):
         display.
         """
         return self.render_output(mode, {"content": content})
+
+    def output_preload(self, mode, content, forced=False, basename=None):
+        """
+        The output method that returns <link> with rel="preload" and
+        proper href attribute for given file.
+        """
+        return self.output_file(mode, content, forced, basename)
 
     def render_output(self, mode, context=None):
         """

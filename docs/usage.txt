@@ -6,7 +6,7 @@ Usage
 .. code-block:: django
 
     {% load compress %}
-    {% compress <js/css> [<file/inline> [block_name]] %}
+    {% compress <js/css> [<file/inline/preload> [block_name]] %}
     <html of inline or linked JS/CSS>
     {% endcompress %}
 
@@ -47,6 +47,21 @@ Result:
         obj = {};
         obj.value = "value";
         </script>
+
+Adding the ``preload`` parameter will generate the preload tag for the compressed resource in the template:
+
+    .. code-block:: django
+
+        {% compress js preload %}
+        <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
+        {% endcompress %}
+
+Result:
+
+    .. code-block:: django
+
+        <link rel="preload" href="/static/CACHE/js/d01466eb4fc6.js" as="script" />
+
 
 Specifying a ``block_name`` will change the output filename. It can also be
 accessed in the :ref:`post_compress signal <signals>` in the ``context`` parameter.

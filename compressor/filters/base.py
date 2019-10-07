@@ -20,8 +20,8 @@ else:
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 
+import six
 from django.utils.encoding import smart_text
-from django.utils import six
 
 from compressor.cache import cache, get_precompiler_cachekey
 

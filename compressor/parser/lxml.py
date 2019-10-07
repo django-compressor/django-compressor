@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+import six
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import six
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 
@@ -73,9 +73,4 @@ class LxmlParser(ParserBase):
         return elem.tag
 
     def elem_str(self, elem):
-        elem_as_string = smart_text(
-            self.tostring(elem, method='html', encoding=six.text_type))
-        if elem.tag == 'link':
-            # This makes testcases happy
-            return elem_as_string.replace('>', ' />')
-        return elem_as_string
+        return smart_text(self.tostring(elem, method='html', encoding=six.text_type))

@@ -9,12 +9,12 @@ from importlib import import_module
 from mock import patch
 from unittest import SkipTest
 
+import six
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.template import Template, Context
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils import six
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.conf import settings
@@ -172,7 +172,7 @@ class OfflineTestCaseMixin(object):
 
     def _render_script(self, hash):
         return (
-            '<script type="text/javascript" src="{}CACHE/js/{}.{}.js">'
+            '<script src="{}CACHE/js/{}.{}.js">'
             '</script>'.format(
                 settings.COMPRESS_URL_PLACEHOLDER, self.expected_basename, hash
             )
@@ -181,7 +181,7 @@ class OfflineTestCaseMixin(object):
     def _render_link(self, hash):
         return (
             '<link rel="stylesheet" href="{}CACHE/css/{}.{}.css" '
-            'type="text/css" />'.format(
+            'type="text/css">'.format(
                 settings.COMPRESS_URL_PLACEHOLDER, self.expected_basename, hash
             )
         )
@@ -240,7 +240,7 @@ class OfflineTestCaseMixin(object):
 
 class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'basic'
-    expected_hash = 'a432b6ddb2c4'
+    expected_hash = '822ac7501287'
 
     @patch.object(CompressCommand, 'compress')
     def test_handle_no_args(self, compress_mock):
@@ -327,7 +327,7 @@ class OfflineCompressSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
         # Only one block compressed, the second identical one was skipped.
         self.assertEqual(1, count)
         # Only 1 <script> block in returned result as well.
-        self.assertEqual([self._render_script('a432b6ddb2c4')], result)
+        self.assertEqual([self._render_script('822ac7501287')], result)
         rendered_template = self._render_template(engine)
         # But rendering the template returns both (identical) scripts.
         self.assertEqual(
@@ -342,19 +342,19 @@ class SuperMixin:
 class OfflineCompressBlockSuperTestCase(
         SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_block_super'
-    expected_hash = '68c645740177'
+    expected_hash = '817b5defb197'
 
 
 class OfflineCompressBlockSuperMultipleTestCase(
         SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_block_super_multiple'
-    expected_hash = 'f87403f4d8af'
+    expected_hash = 'd3f749e83c81'
 
 
 class OfflineCompressBlockSuperMultipleCachedLoaderTestCase(
         SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_block_super_multiple_cached'
-    expected_hash = 'ea860151aa21'
+    expected_hash = '055f88f4751f'
     additional_test_settings = {
         'TEMPLATE_LOADERS': (
             ('django.template.loaders.cached.Loader', (
@@ -373,8 +373,8 @@ class OfflineCompressBlockSuperTestCaseWithExtraContent(
         count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         self.assertEqual(2, count)
         self.assertEqual([
-            self._render_script('9717f9c7e9ff'),
-            self._render_script('68c645740177')
+            self._render_script('bfcec76e0f28'),
+            self._render_script('817b5defb197')
         ], result)
         rendered_template = self._render_template(engine)
         self.assertEqual(rendered_template, self._render_result(result, ''))
@@ -382,7 +382,7 @@ class OfflineCompressBlockSuperTestCaseWithExtraContent(
 
 class OfflineCompressConditionTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_condition'
-    expected_hash = '58517669cb7c'
+    expected_hash = 'a3275743dc69'
     additional_test_settings = {
         'COMPRESS_OFFLINE_CONTEXT': {
             'condition': 'red',
@@ -392,23 +392,23 @@ class OfflineCompressConditionTestCase(OfflineTestCaseMixin, TestCase):
 
 class OfflineCompressTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_templatetag'
-    expected_hash = '16f8880b81ab'
+    expected_hash = '2bb88185b4f5'
 
 
 class OfflineCompressStaticTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_static_templatetag'
-    expected_hash = '2607a2085687'
+    expected_hash = 'be0b1eade28b'
 
 
 class OfflineCompressTemplateTagNamedTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_templatetag_named'
     expected_basename = 'output_name'
-    expected_hash = 'a432b6ddb2c4'
+    expected_hash = '822ac7501287'
 
 
 class OfflineCompressTestCaseWithContext(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_with_context'
-    expected_hash = '045b3ad664c8'
+    expected_hash = 'c6bf81bca7ad'
     additional_test_settings = {
         'COMPRESS_OFFLINE_CONTEXT': {
             'content': 'OK!',
@@ -419,7 +419,7 @@ class OfflineCompressTestCaseWithContext(OfflineTestCaseMixin, TestCase):
 class OfflineCompressTestCaseWithContextSuper(
         SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_with_context_super'
-    expected_hash = '9a8b47adfe17'
+    expected_hash = 'dd79e1bd1527'
     additional_test_settings = {
         'COMPRESS_OFFLINE_CONTEXT': {
             'content': 'OK!',
@@ -429,7 +429,7 @@ class OfflineCompressTestCaseWithContextSuper(
 
 class OfflineCompressTestCaseWithContextList(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_with_context'
-    expected_hash = ['3b6cd13d4bde', '5aef37564182', 'c6d6c723a18b']
+    expected_hash = ['8b4a7452e1c5', '55b3123e884c', 'bfc63829cc58']
     additional_test_settings = {
         'COMPRESS_OFFLINE_CONTEXT': list(offline_context_generator())
     }
@@ -445,7 +445,7 @@ class OfflineCompressTestCaseWithContextList(OfflineTestCaseMixin, TestCase):
 class OfflineCompressTestCaseWithContextListSuper(
         SuperMixin, OfflineCompressTestCaseWithContextList):
     templates_dir = 'test_with_context_super'
-    expected_hash = ['dc68dd60aed4', 'c2e50f475853', '045b48455bee']
+    expected_hash = ['b39975a8f6ea', 'ed565a1d262f', '6ac9e4b29feb']
     additional_test_settings = {
         'COMPRESS_OFFLINE_CONTEXT': list(offline_context_generator())
     }
@@ -454,7 +454,7 @@ class OfflineCompressTestCaseWithContextListSuper(
 class OfflineCompressTestCaseWithContextGenerator(
         OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_with_context'
-    expected_hash = ['3b6cd13d4bde', '5aef37564182', 'c6d6c723a18b']
+    expected_hash = ['8b4a7452e1c5', '55b3123e884c', 'bfc63829cc58']
     additional_test_settings = {
         'COMPRESS_OFFLINE_CONTEXT': 'compressor.tests.test_offline.'
                                     'offline_context_generator'
@@ -473,7 +473,7 @@ class OfflineCompressTestCaseWithContextGenerator(
 class OfflineCompressTestCaseWithContextGeneratorSuper(
         SuperMixin, OfflineCompressTestCaseWithContextGenerator):
     templates_dir = 'test_with_context_super'
-    expected_hash = ['dc68dd60aed4', 'c2e50f475853', '045b48455bee']
+    expected_hash = ['b39975a8f6ea', 'ed565a1d262f', '6ac9e4b29feb']
     additional_test_settings = {
         'COMPRESS_OFFLINE_CONTEXT': 'compressor.tests.test_offline.'
                                     'offline_context_generator'
@@ -487,7 +487,7 @@ class OfflineCompressStaticUrlIndependenceTestCase(
     I.e. users can use the manifest with any other STATIC_URL in the future.
     """
     templates_dir = 'test_static_url_independence'
-    expected_hash = '5014de5edcbe'
+    expected_hash = 'b0bfc3754fd4'
     additional_test_settings = {
         'STATIC_URL': '/custom/static/url/',
         # We use ``COMPRESS_OFFLINE_CONTEXT`` generator to make sure that
@@ -514,7 +514,7 @@ class OfflineCompressStaticUrlIndependenceTestCase(
 class OfflineCompressTestCaseWithContextVariableInheritance(
         OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_with_context_variable_inheritance'
-    expected_hash = '0d88c897f64a'
+    expected_hash = 'b8376aad1357'
     additional_test_settings = {
         'COMPRESS_OFFLINE_CONTEXT': {
             'parent_template': 'base.html',
@@ -537,7 +537,7 @@ class OfflineCompressTestCaseWithContextVariableInheritanceSuper(
             'parent_template': 'base2.html',
         }]
     }
-    expected_hash = ['6a2f85c623c6', '04b482ba2855']
+    expected_hash = ['cee48db7cedc', 'c877c436363a']
 
 
 class OfflineCompressTestCaseWithContextGeneratorImportError(
@@ -601,8 +601,8 @@ class OfflineCompressTestCaseErrors(OfflineTestCaseMixin, TestCase):
             self.assertIn(self._render_link('7ff52cb38987'), result)
             self.assertIn(self._render_link('2db2b4d36380'), result)
 
-        self.assertIn(self._render_script('3910ce35946a'), result)
-        self.assertIn(self._render_script('244f05154671'), result)
+        self.assertIn(self._render_script('eeabdac29232'), result)
+        self.assertIn(self._render_script('9a7f06880ce3'), result)
 
 
 class OfflineCompressTestCaseWithError(OfflineTestCaseMixin, TestCase):
@@ -634,7 +634,7 @@ class OfflineCompressEmptyTag(OfflineTestCaseMixin, TestCase):
         compressor encounters such an emptystring in the manifest.
     """
     templates_dir = 'basic'
-    expected_hash = 'a432b6ddb2c4'
+    expected_hash = '822ac7501287'
 
     def _test_offline(self, engine):
         CompressCommand().handle_inner(engines=[engine], verbosity=0)
@@ -647,8 +647,8 @@ class OfflineCompressBlockSuperBaseCompressed(OfflineTestCaseMixin, TestCase):
     template_names = ['base.html', 'base2.html',
                       'test_compressor_offline.html']
     templates_dir = 'test_block_super_base_compressed'
-    expected_hash_offline = ['5a2fda9ac8e4', '5b7c5e6473f8', 'f87403f4d8af']
-    expected_hash = ['028c3fc42232', '2e9d3f5545a6', 'f87403f4d8af']
+    expected_hash_offline = ['e4e9263fa4c0', '9cecd41a505f', 'd3f749e83c81']
+    expected_hash = ['028c3fc42232', '2e9d3f5545a6', 'd3f749e83c81']
     # Block.super not supported for Jinja2 yet.
     engines = ('django',)
 
@@ -715,9 +715,9 @@ class OfflineCompressComplexTestCase(OfflineTestCaseMixin, TestCase):
         count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         self.assertEqual(3, count)
         self.assertEqual([
-            self._render_script('2c1f0f85a90d'),
-            self._render_script('8b594c4f7264'),
-            self._render_script('e0e424964c8c')
+            self._render_script('76a82cfab9ab'),
+            self._render_script('7219642b8ab4'),
+            self._render_script('567bb77b13db')
         ], result)
         rendered_template = self._render_template(engine)
         self.assertEqual(
@@ -765,20 +765,20 @@ class TestCompressCommand(OfflineTestCaseMixin, TestCase):
         call_command('compress', engines=["django"], **opts)
         manifest_django = get_offline_manifest()
         manifest_django_expected = self._build_expected_manifest(
-            {'0fed9c02607acba22316a328075a81a74e0983ae79470daa9d3707a337623dc3': '023629c58235'})
+            {'0fed9c02607acba22316a328075a81a74e0983ae79470daa9d3707a337623dc3': '0241107e9a9a'})
         self.assertEqual(manifest_django, manifest_django_expected)
 
         call_command('compress', engines=["jinja2"], **opts)
         manifest_jinja2 = get_offline_manifest()
         manifest_jinja2_expected = self._build_expected_manifest(
-            {'077408d23d4a829b8f88db2eadcf902b29d71b14f94018d900f38a3f8ed24c94': 'b6695d1aa847'})
+            {'077408d23d4a829b8f88db2eadcf902b29d71b14f94018d900f38a3f8ed24c94': '5694ca83dd14'})
         self.assertEqual(manifest_jinja2, manifest_jinja2_expected)
 
         call_command('compress', engines=["django", "jinja2"], **opts)
         manifest_both = get_offline_manifest()
         manifest_both_expected = self._build_expected_manifest(
-            {'0fed9c02607acba22316a328075a81a74e0983ae79470daa9d3707a337623dc3': '023629c58235',
-             '077408d23d4a829b8f88db2eadcf902b29d71b14f94018d900f38a3f8ed24c94': 'b6695d1aa847'})
+            {'0fed9c02607acba22316a328075a81a74e0983ae79470daa9d3707a337623dc3': '0241107e9a9a',
+             '077408d23d4a829b8f88db2eadcf902b29d71b14f94018d900f38a3f8ed24c94': '5694ca83dd14'})
         self.assertEqual(manifest_both, manifest_both_expected)
 
 
@@ -817,7 +817,7 @@ class OfflineCompressTestCaseWithLazyStringAlikeUrls(OfflineCompressTestCaseWith
             'compressor.tests.test_offline.static_url_context_generator'
         )
     }
-    expected_hash = '2607a2085687'
+    expected_hash = 'be0b1eade28b'
 
     def _test_offline(self, engine):
         count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)

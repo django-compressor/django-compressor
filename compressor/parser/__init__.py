@@ -1,6 +1,6 @@
 from importlib import import_module
 
-from django.utils import six
+import six
 from django.utils.functional import LazyObject
 
 # support legacy parser module usage
