@@ -18,11 +18,47 @@ See `this issue`_ for details.
 Usage
 -----
 
+In templates which either extend base templates or are included by other templates,
+use any of these directives to import Stylesheets and JavaScript files:
+
+
+.. code-block:: django
+
+    {% load static sekizai_tags %}
+
+    {% addtoblock "css" %}<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/css/select2.min.css" rel="stylesheet" />{% endaddtoblock %}
+    {% addtoblock "css" %}<link href="{% static 'app/css/mystyle.css' %}" rel="stylesheet" type="text/css" />{% endaddtoblock %}
+
+    {% addtoblock "js" %}<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.min.js"></script>{% endaddtoblock %}
+    {% addtoblock "js" %}<script src="{% static 'js/js/myapp.js' %}" type="text/javascript"></script>{% endaddtoblock %}
+    {% addtoblock "js" %}<script async="async" defer="defer" src="https://maps.googleapis.com/maps/api/js?key={{ config.apiKey }}&callback=initMap"></script>{% endaddtoblock %}
+
+Note that some files are loaded by the browser directly from a CDN and thus can not be compressed
+by django-compressor. Therefore the Sekizai compressor checks whether a file is compressable, and
+only if so, concatenates its payload.
+
 .. code-block:: django
 
     {% load sekizai_tags %}
-    {% render_block "<js/css>" postprocessor "compressor.contrib.sekizai.compress" %}
 
+    <html>
+      <head>
+      ...
+      {% render_block "css" postprocessor "compressor.contrib.sekizai.compress" %}
+      </head>
+
+      <body>
+      ...
+      {% render_block "js" postprocessor "compressor.contrib.sekizai.compress" %}
+      </body>
+    </html>
+
+In the above example, we render StyleSheets inside the ``<head>`` element and JavaScript files
+just before closing the ``</body>`` tag.
+
+Here, we first render some references to CSS and JavaScript files, served from external
+sources. Afterwards all local files are concatenated and optionally minified. In the last
+step all references to deferred files are rendered.
 
 .. _django-sekizai: https://github.com/ojii/django-sekizai
 .. _django-sekizai docs: https://django-sekizai.readthedocs.io/en/latest/

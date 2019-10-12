@@ -31,16 +31,18 @@ def blankdict(*args, **kwargs):
 
 @override_settings(COMPRESS_CACHEABLE_PRECOMPILERS=('text/css',))
 class PrecompilerTestCase(TestCase):
+    CHARSET = 'utf-8'
+
     def setUp(self):
         self.test_precompiler = os.path.join(test_dir, 'precompiler.py')
         self.setup_infile()
         self.cached_precompiler_args = dict(
-            content=self.content, charset=settings.FILE_CHARSET,
+            content=self.content, charset=self.CHARSET,
             filename=self.filename, mimetype='text/css')
 
     def setup_infile(self, filename='static/css/one.css'):
         self.filename = os.path.join(test_dir, filename)
-        with io.open(self.filename, encoding=settings.FILE_CHARSET) as file:
+        with io.open(self.filename, encoding=self.CHARSET) as file:
             self.content = file.read()
 
     def test_precompiler_dict_options(self):
@@ -49,14 +51,14 @@ class PrecompilerTestCase(TestCase):
         CompilerFilter.options = dict([option])
         compiler = CompilerFilter(
             content=self.content, filename=self.filename,
-            charset=settings.FILE_CHARSET, command=command)
+            charset=self.CHARSET, command=command)
         self.assertIn(option, compiler.options)
 
     def test_precompiler_infile_outfile(self):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(
             content=self.content, filename=self.filename,
-            charset=settings.FILE_CHARSET, command=command)
+            charset=self.CHARSET, command=command)
         self.assertEqual("body { color:#990; }", compiler.input())
 
     def test_precompiler_infile_with_spaces(self):
@@ -64,7 +66,7 @@ class PrecompilerTestCase(TestCase):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(
             content=self.content, filename=self.filename,
-            charset=settings.FILE_CHARSET, command=command)
+            charset=self.CHARSET, command=command)
         self.assertEqual("body { color:#424242; }", compiler.input())
 
     def test_precompiler_infile_stdout(self):
@@ -89,7 +91,7 @@ class PrecompilerTestCase(TestCase):
         command = '%s %s' % (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(
             content=self.content, filename=self.filename,
-            charset=settings.FILE_CHARSET, command=command)
+            charset=self.CHARSET, command=command)
         self.assertEqual("body { color:#990; }%s" % os.linesep, compiler.input())
 
     def test_precompiler_output_unicode(self):

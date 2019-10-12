@@ -20,7 +20,7 @@ Javascript or CSS in a Django template into cacheable static files.
 It supports compilers such as coffeescript, LESS and SASS and is
 extensible by custom processing steps.
 
-Django Compressor is compatible with Django 1.8 and newer.
+Django Compressor is compatible with Django 1.11 and newer.
 
 How it works
 ------------
@@ -69,7 +69,7 @@ The source code for Django Compressor can be found and contributed to on
 `github.com/django-compressor/django-compressor`_. There you can also file tickets.
 
 The in-development version of Django Compressor can be installed with
-``pip install http://github.com/django-compressor/django-compressor/tarball/develop``.
+``pip install git+https://github.com/django-compressor/django-compressor.git``
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/
