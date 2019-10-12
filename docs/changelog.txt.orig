@@ -1,7 +1,11 @@
 Changelog
 =========
 
+<<<<<<< HEAD
+v2.3 (2019-06-31)
+=======
 v2.3 (2019-05-31)
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
 -----------------
 
 `Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.2...2.3>`_

@@ -104,7 +104,11 @@ class CompressorTestCase(SimpleTestCase):
         self.css = """\
 <link rel="stylesheet" href="/static/css/one.css" type="text/css">
 <style type="text/css">p { border:5px solid green;}</style>
+<<<<<<< HEAD
+<link rel="stylesheet" href="/static/css/two.css" type="text/css" />"""
+=======
 <link rel="stylesheet" href="/static/css/two.css" type="text/css">"""
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
         self.css_node = CssCompressor('css', self.css)
 
         self.js = """\
@@ -247,17 +251,29 @@ class CompressorTestCase(SimpleTestCase):
 
     @override_settings(COMPRESS_OUTPUT_DIR='custom')
     def test_custom_output_dir1(self):
+<<<<<<< HEAD
+        output = '<script type="text/javascript" src="/static/custom/js/74e158ccb432.js"></script>'
+=======
         output = '<script src="/static/custom/js/8a0fed36c317.js"></script>'
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
         self.assertEqual(output, JsCompressor('js', self.js).output())
 
     @override_settings(COMPRESS_OUTPUT_DIR='')
     def test_custom_output_dir2(self):
+<<<<<<< HEAD
+        output = '<script type="text/javascript" src="/static/js/74e158ccb432.js"></script>'
+=======
         output = '<script src="/static/js/8a0fed36c317.js"></script>'
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
         self.assertEqual(output, JsCompressor('js', self.js).output())
 
     @override_settings(COMPRESS_OUTPUT_DIR='/custom/nested/')
     def test_custom_output_dir3(self):
+<<<<<<< HEAD
+        output = '<script type="text/javascript" src="/static/custom/nested/js/74e158ccb432.js"></script>'
+=======
         output = '<script src="/static/custom/nested/js/8a0fed36c317.js"></script>'
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
         self.assertEqual(output, JsCompressor('js', self.js).output())
 
     @override_settings(COMPRESS_PRECOMPILERS=(
@@ -446,7 +462,11 @@ class CompressorInDebugModeTestCase(SimpleTestCase):
             css.write(test_css_content)
         # We should generate a link with the hash of the original content, not
         # the modified one
+<<<<<<< HEAD
+        expected = '<link rel="stylesheet" href="/static/CACHE/css/%s.css" type="text/css" />' % hashed
+=======
         expected = '<link rel="stylesheet" href="/static/CACHE/css/%s.css" type="text/css">' % hashed
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
         compressor = CssCompressor('css', self.css)
         compressor.storage = DefaultStorage()
         output = compressor.output()

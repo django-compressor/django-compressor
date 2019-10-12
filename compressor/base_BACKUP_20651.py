@@ -3,7 +3,10 @@ import os
 import codecs
 from importlib import import_module
 
+<<<<<<< HEAD
+=======
 import six
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
 from django.core.files.base import ContentFile
 from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string

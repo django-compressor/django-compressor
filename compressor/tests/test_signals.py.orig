@@ -18,7 +18,11 @@ class PostCompressSignalTestCase(TestCase):
         self.css = """\
 <link rel="stylesheet" href="/static/css/one.css" type="text/css">
 <style type="text/css">p { border:5px solid green;}</style>
+<<<<<<< HEAD
+<link rel="stylesheet" href="/static/css/two.css" type="text/css" />"""
+=======
 <link rel="stylesheet" href="/static/css/two.css" type="text/css">"""
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
         self.css_node = CssCompressor('css', self.css)
 
         self.js = """\
@@ -59,7 +63,11 @@ class PostCompressSignalTestCase(TestCase):
         css = """\
 <link rel="stylesheet" href="/static/css/one.css" media="handheld" type="text/css" />
 <style type="text/css" media="print">p { border:5px solid green;}</style>
+<<<<<<< HEAD
+<link rel="stylesheet" href="/static/css/two.css" type="text/css" />"""
+=======
 <link rel="stylesheet" href="/static/css/two.css" type="text/css">"""
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
         css_node = CssCompressor('css', css)
 
         def listener(sender, **kwargs):

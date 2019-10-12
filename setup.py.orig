@@ -144,6 +144,9 @@ setup(
         'django-appconf >= 1.0',
         'rcssmin == 1.0.6',
         'rjsmin == 1.1.0',
+<<<<<<< HEAD
+=======
         'six == 1.12.0',
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
     ],
 )

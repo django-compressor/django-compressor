@@ -342,19 +342,31 @@ class SuperMixin:
 class OfflineCompressBlockSuperTestCase(
         SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_block_super'
+<<<<<<< HEAD
+    expected_hash = '68c645740177'
+=======
     expected_hash = '817b5defb197'
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
 
 
 class OfflineCompressBlockSuperMultipleTestCase(
         SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_block_super_multiple'
+<<<<<<< HEAD
+    expected_hash = 'f87403f4d8af'
+=======
     expected_hash = 'd3f749e83c81'
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
 
 
 class OfflineCompressBlockSuperMultipleCachedLoaderTestCase(
         SuperMixin, OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_block_super_multiple_cached'
+<<<<<<< HEAD
+    expected_hash = 'ea860151aa21'
+=======
     expected_hash = '055f88f4751f'
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
     additional_test_settings = {
         'TEMPLATE_LOADERS': (
             ('django.template.loaders.cached.Loader', (
@@ -403,7 +415,11 @@ class OfflineCompressStaticTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
 class OfflineCompressTemplateTagNamedTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_templatetag_named'
     expected_basename = 'output_name'
+<<<<<<< HEAD
+    expected_hash = 'a432b6ddb2c4'
+=======
     expected_hash = '822ac7501287'
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
 
 
 class OfflineCompressTestCaseWithContext(OfflineTestCaseMixin, TestCase):
@@ -537,7 +553,11 @@ class OfflineCompressTestCaseWithContextVariableInheritanceSuper(
             'parent_template': 'base2.html',
         }]
     }
+<<<<<<< HEAD
+    expected_hash = ['6a2f85c623c6', '04b482ba2855']
+=======
     expected_hash = ['cee48db7cedc', 'c877c436363a']
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
 
 
 class OfflineCompressTestCaseWithContextGeneratorImportError(
@@ -634,7 +654,11 @@ class OfflineCompressEmptyTag(OfflineTestCaseMixin, TestCase):
         compressor encounters such an emptystring in the manifest.
     """
     templates_dir = 'basic'
+<<<<<<< HEAD
+    expected_hash = 'a432b6ddb2c4'
+=======
     expected_hash = '822ac7501287'
+>>>>>>> 1b26e63e3ebce49570e57f6a5233af15278a518b
 
     def _test_offline(self, engine):
         CompressCommand().handle_inner(engines=[engine], verbosity=0)

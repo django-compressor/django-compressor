@@ -3,18 +3,20 @@ import os
 import codecs
 from importlib import import_module
 
-import six
+from django import VERSION
 from django.core.files.base import ContentFile
+from django.utils import six
 from django.utils.safestring import mark_safe
+from django.utils.six.moves.urllib.request import url2pathname
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
-from six.moves.urllib.request import url2pathname
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
 from compressor.exceptions import (CompressorError, UncompressableFileError,
         FilterDoesNotExist)
 from compressor.filters import CachedCompilerFilter
+from compressor.filters.css_default import CssAbsoluteFilter, CssRelativeFilter
 from compressor.storage import compressor_file_storage
 from compressor.signals import post_compress
 from compressor.utils import get_class, get_mod_func, staticfiles
@@ -30,37 +32,20 @@ class Compressor(object):
     depending implementations details.
     """
 
-    output_mimetypes = {}
-
-    def __init__(self, resource_kind, content=None, output_prefix=None,
+    def __init__(self, content=None, output_prefix=None,
                  context=None, filters=None, *args, **kwargs):
-        if filters is None:
-            self.filters = settings.COMPRESS_FILTERS[resource_kind]
-        else:
-            self.filters = filters
-        if output_prefix is None:
-            self.output_prefix = resource_kind
-        else:
-            self.output_prefix = output_prefix
         self.content = content or ""  # rendered contents of {% compress %} tag
+        self.output_prefix = output_prefix or "compressed"
         self.output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
         self.charset = settings.DEFAULT_CHARSET
         self.split_content = []
         self.context = context or {}
-        self.resource_kind = resource_kind
+        self.type = output_prefix or ""
+        self.filters = filters or []
         self.extra_context = {}
         self.precompiler_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
         self.finders = staticfiles.finders
         self._storage = None
-
-    def copy(self, **kwargs):
-        keywords = dict(
-            content=self.content,
-            context=self.context,
-            output_prefix=self.output_prefix,
-            filters=self.filters)
-        keywords.update(kwargs)
-        return self.__class__(self.resource_kind, **keywords)
 
     @cached_property
     def storage(self):
@@ -84,7 +69,7 @@ class Compressor(object):
                 return template
         except AttributeError:
             pass
-        return "compressor/%s_%s.html" % (self.resource_kind, mode)
+        return "compressor/%s_%s.html" % (self.type, mode)
 
     def get_basename(self, url):
         """
@@ -126,7 +111,7 @@ class Compressor(object):
         if basename:
             filename = os.path.split(basename)[1]
             parts.append(os.path.splitext(filename)[0])
-        parts.extend([get_hexdigest(content, 12), self.resource_kind])
+        parts.extend([get_hexdigest(content, 12), self.type])
         return os.path.join(self.output_dir, self.output_prefix, '.'.join(parts))
 
     def get_filename(self, basename):
@@ -230,9 +215,13 @@ class Compressor(object):
             if enabled:
                 yield self.filter(value, self.cached_filters, **options)
             elif precompiled:
-                for filter_cls in self.cached_filters:
-                    if filter_cls.run_with_compression_disabled:
-                        value = self.filter(value, [filter_cls], **options)
+                # since precompiling moves files around, it breaks url()
+                # statements in css files. therefore we run the absolute filter
+                # on precompiled css files even if compression is disabled.
+                if CssAbsoluteFilter in self.cached_filters:
+                    value = self.filter(value, [CssAbsoluteFilter], **options)
+                elif CssRelativeFilter in self.cached_filters:
+                    value = self.filter(value, [CssRelativeFilter], **options)
                 yield self.handle_output(kind, value, forced=True,
                                          basename=basename)
             else:
@@ -271,7 +260,7 @@ class Compressor(object):
 
         filter_or_command = self.precompiler_mimetypes.get(mimetype)
         if filter_or_command is None:
-            if mimetype in self.output_mimetypes:
+            if mimetype in ("text/css", "text/javascript"):
                 return False, content
             raise CompressorError("Couldn't find any precompiler in "
                                   "COMPRESS_PRECOMPILERS setting for "
@@ -282,7 +271,7 @@ class Compressor(object):
             mod = import_module(mod_name)
         except (ImportError, TypeError):
             filter = CachedCompilerFilter(
-                content=content, filter_type=self.resource_kind, filename=filename,
+                content=content, filter_type=self.type, filename=filename,
                 charset=charset, command=filter_or_command, mimetype=mimetype)
             return True, filter.input(**kwargs)
         try:
@@ -290,14 +279,14 @@ class Compressor(object):
         except AttributeError:
             raise FilterDoesNotExist('Could not find "%s".' % filter_or_command)
         filter = precompiler_class(
-            content, attrs=attrs, filter_type=self.resource_kind, charset=charset,
+            content, attrs=attrs, filter_type=self.type, charset=charset,
             filename=filename)
         return True, filter.input(**kwargs)
 
     def filter(self, content, filters, method, **kwargs):
         for filter_cls in filters:
             filter_func = getattr(
-                filter_cls(content, filter_type=self.resource_kind), method)
+                filter_cls(content, filter_type=self.type), method)
             try:
                 if callable(filter_func):
                     content = filter_func(**kwargs)
@@ -349,13 +338,6 @@ class Compressor(object):
         """
         return self.render_output(mode, {"content": content})
 
-    def output_preload(self, mode, content, forced=False, basename=None):
-        """
-        The output method that returns <link> with rel="preload" and
-        proper href attribute for given file.
-        """
-        return self.output_file(mode, content, forced, basename)
-
     def render_output(self, mode, context=None):
         """
         Renders the compressor output with the appropriate template for
@@ -369,13 +351,15 @@ class Compressor(object):
         self.context['compressed'].update(context or {})
         self.context['compressed'].update(self.extra_context)
 
-        if hasattr(self.context, 'flatten'):
+        if hasattr(self.context, 'flatten') and VERSION >= (1, 9):
             # Passing Contexts to Template.render is deprecated since Django 1.8.
+            # However, we use the fix below only for django 1.9 and above, since
+            # the flatten method is buggy in 1.8, see https://code.djangoproject.com/ticket/24765
             final_context = self.context.flatten()
         else:
             final_context = self.context
 
-        post_compress.send(sender=self.__class__, type=self.resource_kind,
+        post_compress.send(sender=self.__class__, type=self.type,
                            mode=mode, context=final_context)
         template_name = self.get_template_name(mode)
         return render_to_string(template_name, context=final_context)
