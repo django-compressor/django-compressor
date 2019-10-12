@@ -208,6 +208,13 @@ Backend settings
         A filter that uses the jsmin implementation `Slim It`_ to compress
         JavaScript code.
 
+      .. _calmjs_filter:
+
+      - ``compressor.filters.jsmin.CalmjsFilter``
+
+        A filter that uses the jsmin implementation `Calmjs`_ to compress
+        JavaScript code.
+
       - ``compressor.filters.closure.ClosureCompilerFilter``
 
         A filter that uses `Google Closure compiler`_.
@@ -258,6 +265,7 @@ Backend settings
       .. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
       .. _`yUglify compressor`: https://github.com/yui/yuglify
       .. _`Slim It`: https://github.com/rspivak/slimit
+      .. _`Calmjs`: https://github.com/calmjs/calmjs.parse
 
 .. attribute:: COMPRESS_CSS_FILTERS
 
