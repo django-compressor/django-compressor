@@ -71,6 +71,13 @@ Optional Dependencies
 
       pip install slimit
 
+- `Calmjs`_
+
+  For the :ref:`Calmjs filter <calmjs_filter>`
+  ``compressor.filters.jsmin.CalmjsFilter``::
+
+      pip install calmjs
+
 - `csscompressor`_
 
   For the :ref:`csscompressor filter <csscompressor_filter>`
@@ -89,6 +96,7 @@ Optional Dependencies
 .. _libxml2: http://xmlsoft.org/
 .. _html5lib: https://github.com/html5lib/html5lib-python
 .. _`Slim It`: https://github.com/rspivak/slimit
+.. _`Calmjs`: https://github.com/calmjs/calmjs
 .. _django-appconf: http://pypi.python.org/pypi/django-appconf/
 .. _versiontools: http://pypi.python.org/pypi/versiontools/
 .. _brotli: https://pypi.python.org/pypi/brotli

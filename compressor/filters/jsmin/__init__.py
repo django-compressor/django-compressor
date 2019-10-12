@@ -20,3 +20,11 @@ class SlimItFilter(CallbackOutputFilter):
     kwargs = {
         "mangle": True,
     }
+
+
+class CalmjsFilter(CallbackOutputFilter):
+    dependencies = ["calmjs"]
+    callback = "calmjs.parse.unparsers.es5.minify_print"
+    kwargs = {
+        "obfuscate": True,
+    }
