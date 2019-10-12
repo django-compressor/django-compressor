@@ -23,7 +23,7 @@ class SlimItFilter(CallbackOutputFilter):
 
 
 class CalmjsFilter(CallbackOutputFilter):
-    dependencies = ["calmjs"]
+    dependencies = ["calmjs.parse"]
     callback = "calmjs.parse.unparsers.es5.minify_print"
     kwargs = {
         "obfuscate": True,

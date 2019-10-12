@@ -265,7 +265,7 @@ Backend settings
       .. _`YUI compressor`: http://developer.yahoo.com/yui/compressor/
       .. _`yUglify compressor`: https://github.com/yui/yuglify
       .. _`Slim It`: https://github.com/rspivak/slimit
-      .. _`Calmjs`: https://github.com/calmjs/calmjs
+      .. _`Calmjs`: https://github.com/calmjs/calmjs.parse
 
 .. attribute:: COMPRESS_CSS_FILTERS
 
