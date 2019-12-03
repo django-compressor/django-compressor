@@ -1,6 +1,7 @@
 language: python
 install:
   - pip install tox
+  - python setup.py install_egg_info
 script:
   - tox
 matrix:
