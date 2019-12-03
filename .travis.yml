@@ -40,8 +40,6 @@ matrix:
     - python: 3.8
       env: TOXENV=py38-2.2.X
       dist: xenial
-    - python: 3.5
-      env: TOXENV=py35-3.0.X
     - python: 3.6
       env: TOXENV=py36-3.0.X
     - python: 3.7
