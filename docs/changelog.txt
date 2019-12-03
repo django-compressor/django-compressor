@@ -1,6 +1,18 @@
 Changelog
 =========
 
+v2.4 (2019-12-02)
+-----------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.3...2.4>`_
+
+- Add support for Django 3.0
+- Remove usage of deprecated `django.utils.six` (#950)
+- Add better support for JS strict mode and validation (#952)
+- Add support for rel=preload (#951)
+- Make jinja2 extension not break on OUTPUT_PRELOAD (#951)
+- Add support for Calmjs (#957)
+
 v2.3 (2019-05-31)
 -----------------
 
