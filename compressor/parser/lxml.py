@@ -28,7 +28,7 @@ class LxmlParser(ParserBase):
             # soupparser uses Beautiful Soup 3 which does not run on python 3.x
             try:
                 from lxml.html import soupparser
-            except ImportError as err:
+            except ImportError:
                 soupparser = None
             except Exception as err:
                 raise ParserError("Error while initializing parser: %s" % err)
