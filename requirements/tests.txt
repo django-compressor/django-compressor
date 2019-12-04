@@ -5,7 +5,7 @@ mock==2.0.0
 Jinja2==2.10.1
 lxml==4.2.5
 beautifulsoup4==4.6.3
-django-sekizai==0.10.0
+django-sekizai==1.0.0
 csscompressor==0.9.5
 rcssmin==1.0.6
 rjsmin==1.1.0
