@@ -108,7 +108,7 @@ class Jinja2Parser(object):
         body = getattr(node, "body", getattr(node, "nodes", []))
 
         if isinstance(node, jinja2.nodes.If):
-            return body + node.else_
+            return body + node.elif_ + node.else_
 
         return body
 
