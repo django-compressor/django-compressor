@@ -55,8 +55,8 @@ class CompressorMixin(object):
         but can be overridden to completely disable compression for
         a subclass, for instance.
         """
-        return (settings.COMPRESS_ENABLED and
-                settings.COMPRESS_OFFLINE) or forced
+        return (settings.COMPRESS_ENABLED
+                and settings.COMPRESS_OFFLINE) or forced
 
     def render_offline(self, context):
         """
@@ -97,8 +97,8 @@ class CompressorMixin(object):
             return self.render_offline(context)
 
         # Take a shortcut if we really don't have anything to do
-        if (not settings.COMPRESS_ENABLED and
-                not settings.COMPRESS_PRECOMPILERS and not forced):
+        if (not settings.COMPRESS_ENABLED
+                and not settings.COMPRESS_PRECOMPILERS and not forced):
             return self.get_original_content(context)
 
         name = name or getattr(self, 'name', None)

@@ -223,8 +223,8 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <script type="text/coffeescript"># this is a comment.</script>
             <script type="text/javascript"># this too is a comment.</script>
             {% endcompress %}"""
-        out = (script('# this is a comment.\n') + '\n' +
-               script('# this too is a comment.', scripttype="text/javascript"))
+        out = (script('# this is a comment.\n') + '\n'
+               + script('# this too is a comment.', scripttype="text/javascript"))
         self.assertEqual(out, render(template, self.context))
 
     @override_settings(COMPRESS_ENABLED=False)

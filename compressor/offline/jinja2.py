@@ -114,10 +114,10 @@ class Jinja2Parser(object):
 
     def walk_nodes(self, node, block_name=None, context=None):
         for node in self.get_nodelist(node):
-            if (isinstance(node, CallBlock) and
-              isinstance(node.call, Call) and
-              isinstance(node.call.node, ExtensionAttribute) and
-              node.call.node.identifier == self.COMPRESSOR_ID):
+            if (isinstance(node, CallBlock)
+              and isinstance(node.call, Call)
+              and isinstance(node.call.node, ExtensionAttribute)
+              and node.call.node.identifier == self.COMPRESSOR_ID):
                 node.call.node.name = '_compress_forced'
                 yield node
             else:
