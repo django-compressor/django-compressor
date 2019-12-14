@@ -19,8 +19,6 @@ else:
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
-
-import six
 from django.utils.encoding import smart_str
 
 from compressor.cache import cache, get_precompiler_cachekey
@@ -108,7 +106,7 @@ class CallbackOutputFilter(FilterBase):
 
     def output(self, **kwargs):
         ret = self._callback_func(self.content, *self.args, **self.kwargs)
-        assert isinstance(ret, six.text_type)
+        assert isinstance(ret, str)
         return ret
 
 

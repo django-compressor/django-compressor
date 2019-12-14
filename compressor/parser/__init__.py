@@ -1,6 +1,6 @@
+import html
 from importlib import import_module
 
-import six
 from django.utils.functional import LazyObject
 
 # support legacy parser module usage
@@ -14,7 +14,7 @@ from compressor.parser.html5lib import Html5LibParser  # noqa
 class AutoSelectParser(LazyObject):
     options = (
         # TODO: make lxml.html parser first again
-        (six.moves.html_parser.__name__, HtmlParser),  # fast and part of the Python stdlib
+        (html.parser.__name__, HtmlParser),  # fast and part of the Python stdlib
         ('lxml.html', LxmlParser),  # lxml, extremely fast
     )
 

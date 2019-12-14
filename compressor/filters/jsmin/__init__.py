@@ -1,5 +1,4 @@
 from __future__ import absolute_import, unicode_literals
-import six
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -51,5 +50,5 @@ class CalmjsFilter(FilterBase):
     def output(self, **kwargs):
         program = self._parser(self.content)
         minified = u''.join(part.text for part in self._unparser(program))
-        assert isinstance(minified, six.text_type)
+        assert isinstance(minified, str)
         return minified

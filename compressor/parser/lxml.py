@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import six
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
@@ -24,16 +23,12 @@ class LxmlParser(ParserBase):
         except Exception as err:
             raise ParserError("Error while initializing parser: %s" % err)
 
-        if not six.PY3:
-            # soupparser uses Beautiful Soup 3 which does not run on python 3.x
-            try:
-                from lxml.html import soupparser
-            except ImportError:
-                soupparser = None
-            except Exception as err:
-                raise ParserError("Error while initializing parser: %s" % err)
-        else:
+        try:
+            from lxml.html import soupparser
+        except ImportError:
             soupparser = None
+        except Exception as err:
+            raise ParserError("Error while initializing parser: %s" % err)
 
         self.soupparser = soupparser
         self.fromstring = fromstring
@@ -48,7 +43,7 @@ class LxmlParser(ParserBase):
         content = '<root>%s</root>' % self.content
         tree = self.fromstring(content)
         try:
-            self.tostring(tree, encoding=six.text_type)
+            self.tostring(tree, encoding=str)
         except UnicodeDecodeError:
             if self.soupparser:  # use soup parser on python 2
                 tree = self.soupparser.fromstring(content)
@@ -73,4 +68,4 @@ class LxmlParser(ParserBase):
         return elem.tag
 
     def elem_str(self, elem):
-        return smart_str(self.tostring(elem, method='html', encoding=six.text_type))
+        return smart_str(self.tostring(elem, method='html', encoding=str))
