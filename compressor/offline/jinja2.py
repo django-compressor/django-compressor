@@ -48,7 +48,11 @@ def url_for(mod, filename):
     """
     Incomplete emulation of Flask's url_for.
     """
-    from django.contrib.staticfiles.templatetags import staticfiles
+    try:
+        from django.contrib.staticfiles.templatetags import staticfiles
+    except ImportError:
+        # Django 3.0+
+        import django.templatetags.static as staticfiles
 
     if mod == "static":
         return staticfiles.static(filename)
