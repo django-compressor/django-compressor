@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import six
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 
 from compressor.exceptions import ParserError
@@ -67,10 +67,10 @@ class LxmlParser(ParserBase):
         return elem.attrib
 
     def elem_content(self, elem):
-        return smart_text(elem.text)
+        return smart_str(elem.text)
 
     def elem_name(self, elem):
         return elem.tag
 
     def elem_str(self, elem):
-        return smart_text(self.tostring(elem, method='html', encoding=six.text_type))
+        return smart_str(self.tostring(elem, method='html', encoding=six.text_type))

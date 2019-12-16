@@ -21,7 +21,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
 
 import six
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from compressor.cache import cache, get_precompiler_cachekey
 
@@ -217,7 +217,7 @@ class CompilerFilter(FilterBase):
                 self.infile.close()
             if self.outfile is not None:
                 self.outfile.close()
-        return smart_text(filtered)
+        return smart_str(filtered)
 
 
 class CachedCompilerFilter(CompilerFilter):
@@ -231,7 +231,7 @@ class CachedCompilerFilter(CompilerFilter):
             key = self.get_cache_key()
             data = cache.get(key)
             if data is not None:
-                return smart_text(data)
+                return smart_str(data)
             filtered = super(CachedCompilerFilter, self).input(**kwargs)
             cache.set(key, filtered, settings.COMPRESS_REBUILD_TIMEOUT)
             return filtered

@@ -1,7 +1,7 @@
 import sys
 
 import six
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
@@ -74,7 +74,7 @@ class DefaultHtmlParser(ParserBase, six.moves.html_parser.HTMLParser):
         return elem['attrs_dict']
 
     def elem_content(self, elem):
-        return smart_text(elem['text'])
+        return smart_str(elem['text'])
 
     def elem_str(self, elem):
         tag = {}
