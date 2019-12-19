@@ -17,6 +17,9 @@ matrix:
     - python: 3.7
       env: TOXENV=py37-1.11.X
       dist: xenial
+    - python: 3.8
+      env: TOXENV=py38-1.11.X
+      dist: xenial
     - python: 3.5
       env: TOXENV=py35-2.1.X
     - python: 3.6
@@ -24,12 +27,26 @@ matrix:
     - python: 3.7
       env: TOXENV=py37-2.1.X
       dist: xenial
+    - python: 3.8
+      env: TOXENV=py38-2.1.X
+      dist: xenial
     - python: 3.5
       env: TOXENV=py35-2.2.X
     - python: 3.6
       env: TOXENV=py36-2.2.X
     - python: 3.7
       env: TOXENV=py37-2.2.X
+      dist: xenial
+    - python: 3.8
+      env: TOXENV=py38-2.2.X
+      dist: xenial
+    - python: 3.6
+      env: TOXENV=py36-3.0.X
+    - python: 3.7
+      env: TOXENV=py37-3.0.X
+      dist: xenial
+    - python: 3.8
+      env: TOXENV=py38-3.0.X
       dist: xenial
 
 notifications:
