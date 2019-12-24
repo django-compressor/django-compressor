@@ -1,0 +1,11 @@
+{% spaceless %}
+
+{% if condition1 %}
+    {% compress js%}
+        <script type="text/javascript">alert("if condition1");</script>
+    {% endcompress %}
+{% elif condition2 %}
+    {% compress js%}
+        <script type="text/javascript">alert("elif condition2");</script>
+    {% endcompress %}
+{% endif %}{% endspaceless %}

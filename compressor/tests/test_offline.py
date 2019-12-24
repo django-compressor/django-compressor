@@ -390,6 +390,17 @@ class OfflineCompressConditionTestCase(OfflineTestCaseMixin, TestCase):
     }
 
 
+class OfflineCompressConditionElifTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_condition_elif'
+    expected_hash = ['298fa464c7d4', '733f54246c85']
+    additional_test_settings = {
+        'COMPRESS_OFFLINE_CONTEXT': [
+            {'condition1': True, 'condition2': False, },
+            {'condition1': False, 'condition2': True, },
+        ],
+    }
+
+
 class OfflineCompressTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
     templates_dir = 'test_templatetag'
     expected_hash = '16f8880b81ab'
