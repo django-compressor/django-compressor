@@ -8,10 +8,10 @@ from fnmatch import fnmatch
 from importlib import import_module
 
 import django
+import six
 from django.core.management.base import BaseCommand, CommandError
 import django.template
 from django.template import Context
-from django.utils import six
 from django.utils.encoding import smart_text
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
 from django.template import engines

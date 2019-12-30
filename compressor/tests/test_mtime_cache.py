@@ -1,14 +1,14 @@
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase
-from django.utils.six import StringIO
+from six import StringIO
 
 
 class TestMtimeCacheCommand(TestCase):
     # FIXME: add actual tests, improve the existing ones.
 
     exclusion_patterns = [
-        '*CACHE*', '*custom*', '*066cd253eada.js', '*d728fc7f9301.js', '*74e158ccb432.js', 'test.txt*'
+        '*CACHE*', '*custom*', '*066cd253eada.js', '*d728fc7f9301.js', '*8a0fed36c317.js', 'test.txt*'
     ]
 
     def default_ignore(self):

@@ -107,8 +107,8 @@ class CompressorConf(AppConf):
         if value is None:
             value = settings.STATIC_ROOT
         if value is None:
-            raise ImproperlyConfigured('COMPRESS_ROOT defaults to ' +
-                                       'STATIC_ROOT, please define either')
+            raise ImproperlyConfigured('COMPRESS_ROOT defaults to '
+                                       + 'STATIC_ROOT, please define either')
         return os.path.normcase(os.path.abspath(value))
 
     def configure_url(self, value):

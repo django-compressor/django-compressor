@@ -48,7 +48,11 @@ def url_for(mod, filename):
     """
     Incomplete emulation of Flask's url_for.
     """
-    from django.contrib.staticfiles.templatetags import staticfiles
+    try:
+        from django.contrib.staticfiles.templatetags import staticfiles
+    except ImportError:
+        # Django 3.0+
+        import django.templatetags.static as staticfiles
 
     if mod == "static":
         return staticfiles.static(filename)
@@ -114,10 +118,10 @@ class Jinja2Parser(object):
 
     def walk_nodes(self, node, block_name=None, context=None):
         for node in self.get_nodelist(node):
-            if (isinstance(node, CallBlock) and
-              isinstance(node.call, Call) and
-              isinstance(node.call.node, ExtensionAttribute) and
-              node.call.node.identifier == self.COMPRESSOR_ID):
+            if (isinstance(node, CallBlock)
+              and isinstance(node.call, Call)
+              and isinstance(node.call.node, ExtensionAttribute)
+              and node.call.node.identifier == self.COMPRESSOR_ID):
                 node.call.node.name = '_compress_forced'
                 yield node
             else:

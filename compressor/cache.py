@@ -5,9 +5,9 @@ import socket
 import time
 from importlib import import_module
 
+import six
 from django.core.cache import caches
 from django.core.files.base import ContentFile
-from django.utils import six
 from django.utils.encoding import force_text, smart_bytes
 from django.utils.functional import SimpleLazyObject
 

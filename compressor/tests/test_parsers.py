@@ -58,8 +58,8 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
             None,
             '<style type="text/css">p { border:5px solid green;}</style>',
         )
-        self.assertEqual(out1, split[1][:3] +
-                         (self.css_node.parser.elem_str(split[1][3]),))
+        self.assertEqual(out1, split[1][:3]
+                         + (self.css_node.parser.elem_str(split[1][3]),))
         out2 = (
             SOURCE_FILE,
             os.path.join(settings.COMPRESS_ROOT, 'css', 'two.css'),
@@ -133,8 +133,8 @@ class BeautifulSoupParserTests(ParserTestCase, CompressorTestCase):
             None,
             '<style type="text/css">p { border:5px solid green;}</style>',
         )
-        self.assertEqual(out1, split[1][:3] +
-                         (self.css_node.parser.elem_str(split[1][3]),))
+        self.assertEqual(out1, split[1][:3]
+                         + (self.css_node.parser.elem_str(split[1][3]),))
         out2 = (
             SOURCE_FILE,
             os.path.join(settings.COMPRESS_ROOT, 'css', 'two.css'),
@@ -147,10 +147,7 @@ class BeautifulSoupParserTests(ParserTestCase, CompressorTestCase):
 
     @override_settings(COMPRESS_ENABLED=False)
     def test_css_return_if_off(self):
-        # in addition to unspecified attribute order,
-        # bs4 output doesn't have the extra space, so we add that here
-        fixed_output = self.css_node.output().replace('"/>', '" />')
-        self.assertEqual(len(self.css), len(fixed_output))
+        self.assertEqual(len(self.css), len(self.css_node.output()))
 
 
 class HtmlParserTests(ParserTestCase, CompressorTestCase):

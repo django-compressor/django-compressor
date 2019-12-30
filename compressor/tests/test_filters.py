@@ -5,7 +5,7 @@ import os
 import sys
 import mock
 
-from django.utils import six
+import six
 from django.utils.encoding import smart_text
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -16,7 +16,7 @@ from compressor.css import CssCompressor
 from compressor.filters.base import CompilerFilter, CachedCompilerFilter
 from compressor.filters.cssmin import CSSCompressorFilter, rCSSMinFilter
 from compressor.filters.css_default import CssAbsoluteFilter, CssRelativeFilter
-from compressor.filters.jsmin import JSMinFilter
+from compressor.filters.jsmin import JSMinFilter, SlimItFilter, CalmjsFilter
 from compressor.filters.template import TemplateFilter
 from compressor.filters.closure import ClosureCompilerFilter
 from compressor.filters.yuglify import YUglifyCSSFilter, YUglifyJSFilter
@@ -200,6 +200,22 @@ class JsMinTestCase(TestCase):
  * Copyright (c) 2009-2014 Django Compressor authors
  */var foo="bar";"""
         self.assertEqual(output, JSMinFilter(content).output())
+
+
+class SlimItTestCase(TestCase):
+    def test_slimit_filter(self):
+        content = """
+        var foo = "bar";"""
+        output = """var foo="bar";"""
+        self.assertEqual(output, SlimItFilter(content).output())
+
+
+class CalmjsTestCase(TestCase):
+    def test_calmjs_filter(self):
+        content = """
+        var foo = "bar";"""
+        output = """var foo="bar";"""
+        self.assertEqual(output, CalmjsFilter(content).output())
 
 
 @override_settings(

@@ -37,4 +37,8 @@ class BeautifulSoupParser(ParserBase):
         return elem.name
 
     def elem_str(self, elem):
-        return smart_text(elem)
+        elem_as_string = smart_text(elem)
+        if elem.name == 'link':
+            # This makes testcases happy
+            elem_as_string = elem_as_string.replace('/>', '>')
+        return elem_as_string

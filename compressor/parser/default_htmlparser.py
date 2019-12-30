@@ -1,6 +1,6 @@
 import sys
 
-from django.utils import six
+import six
 from django.utils.encoding import smart_text
 
 from compressor.exceptions import ParserError
@@ -83,6 +83,6 @@ class DefaultHtmlParser(ParserBase, six.moves.html_parser.HTMLParser):
         if len(elem['attrs']):
             tag['attrs'] = ' %s' % ' '.join(['%s="%s"' % (name, value) for name, value in elem['attrs']])
         if elem['tag'] == 'link':
-            return '<%(tag)s%(attrs)s />' % tag
+            return '<%(tag)s%(attrs)s>' % tag
         else:
             return '<%(tag)s%(attrs)s>%(text)s</%(tag)s>' % tag

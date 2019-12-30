@@ -26,8 +26,8 @@ class JsCompressor(Compressor):
             else:
                 extra = ''
             # Append to the previous node if it had the same attribute
-            append_to_previous = (self.extra_nodes and
-                                  self.extra_nodes[-1][0] == extra)
+            append_to_previous = (self.extra_nodes
+                                  and self.extra_nodes[-1][0] == extra)
             if append_to_previous and settings.COMPRESS_ENABLED:
                 self.extra_nodes[-1][1].split_content.append(content)
             else:
@@ -37,8 +37,8 @@ class JsCompressor(Compressor):
         return self.split_content
 
     def output(self, *args, **kwargs):
-        if (settings.COMPRESS_ENABLED or settings.COMPRESS_PRECOMPILERS or
-                kwargs.get('forced', False)):
+        if (settings.COMPRESS_ENABLED or settings.COMPRESS_PRECOMPILERS
+                or kwargs.get('forced', False)):
             self.split_contents()
             if hasattr(self, 'extra_nodes'):
                 ret = []
@@ -61,6 +61,6 @@ class JsCompressor(Compressor):
             # error like TypeError...
             # Forcing a semicolon in between fixes it.
             if settings.COMPRESS_ENABLED or forced:
-                hunk = ";" + hunk
+                hunk += ";"
             content.append(hunk)
         return content

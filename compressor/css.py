@@ -35,8 +35,8 @@ class CssCompressor(Compressor):
         return self.split_content
 
     def output(self, *args, **kwargs):
-        if (settings.COMPRESS_ENABLED or settings.COMPRESS_PRECOMPILERS or
-                kwargs.get('forced', False)):
+        if (settings.COMPRESS_ENABLED or settings.COMPRESS_PRECOMPILERS
+                or kwargs.get('forced', False)):
             # Populate self.split_content
             self.split_contents()
             if hasattr(self, 'media_nodes'):

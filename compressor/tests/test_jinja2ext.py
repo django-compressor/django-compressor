@@ -95,7 +95,7 @@ class TestJinja2CompressorExtension(TestCase):
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = '<script type="text/javascript" src="/static/CACHE/js/output.74e158ccb432.js"></script>'
+        out = '<script src="/static/CACHE/js/output.8a0fed36c317.js"></script>'
         self.assertEqual(out, template.render(context))
 
     def test_nonascii_js_tag(self):
@@ -104,7 +104,7 @@ class TestJinja2CompressorExtension(TestCase):
         <script type="text/javascript" charset="utf-8">var test_value = "\u2014";</script>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = '<script type="text/javascript" src="/static/CACHE/js/output.a18195c6ae48.js"></script>'
+        out = '<script src="/static/CACHE/js/output.8c00f1cf1e0a.js"></script>'
         self.assertEqual(out, template.render(context))
 
     def test_nonascii_latin1_js_tag(self):
@@ -113,7 +113,7 @@ class TestJinja2CompressorExtension(TestCase):
         <script type="text/javascript">var test_value = "\u2014";</script>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = '<script type="text/javascript" src="/static/CACHE/js/output.f64debbd8878.js"></script>'
+        out = '<script src="/static/CACHE/js/output.06a98ccfd380.js"></script>'
         self.assertEqual(out, template.render(context))
 
     def test_css_inline(self):
@@ -134,7 +134,7 @@ class TestJinja2CompressorExtension(TestCase):
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = '<script type="text/javascript">;obj={};;obj.value="value";</script>'
+        out = '<script>obj={};;obj.value="value";;</script>'
         self.assertEqual(out, template.render(context))
 
     def test_nonascii_inline_css(self):
@@ -143,6 +143,6 @@ class TestJinja2CompressorExtension(TestCase):
                                             '<style type="text/css">'
                                             '/* русский текст */'
                                             '</style>{% endcompress %}')
-        out = '<link rel="stylesheet" href="/static/CACHE/css/output.c836c9caed5c.css" type="text/css" />'
+        out = '<link rel="stylesheet" href="/static/CACHE/css/output.c836c9caed5c.css" type="text/css">'
         context = {'STATIC_URL': settings.COMPRESS_URL}
         self.assertEqual(out, template.render(context))

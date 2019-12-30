@@ -137,12 +137,14 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Internet :: WWW/HTTP',
     ],
     zip_safe=False,
     install_requires=[
-        'django-appconf >= 1.0',
+        'django-appconf >= 1.0.3',
         'rcssmin == 1.0.6',
         'rjsmin == 1.1.0',
+        'six >= 1.12.0',
     ],
 )

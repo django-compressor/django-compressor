@@ -1,6 +1,6 @@
+import six
 from django import template
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import six
 
 from compressor.cache import (cache_get, cache_set, get_offline_hexdigest,
                               get_offline_manifest, get_templatetag_cachekey)
@@ -12,7 +12,8 @@ register = template.Library()
 
 OUTPUT_FILE = 'file'
 OUTPUT_INLINE = 'inline'
-OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
+OUTPUT_PRELOAD = 'preload'
+OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE, OUTPUT_PRELOAD)
 
 
 class CompressorMixin(object):
@@ -54,8 +55,8 @@ class CompressorMixin(object):
         but can be overridden to completely disable compression for
         a subclass, for instance.
         """
-        return (settings.COMPRESS_ENABLED and
-                settings.COMPRESS_OFFLINE) or forced
+        return (settings.COMPRESS_ENABLED
+                and settings.COMPRESS_OFFLINE) or forced
 
     def render_offline(self, context):
         """
@@ -96,8 +97,8 @@ class CompressorMixin(object):
             return self.render_offline(context)
 
         # Take a shortcut if we really don't have anything to do
-        if (not settings.COMPRESS_ENABLED and
-                not settings.COMPRESS_PRECOMPILERS and not forced):
+        if (not settings.COMPRESS_ENABLED
+                and not settings.COMPRESS_PRECOMPILERS and not forced):
             return self.get_original_content(context)
 
         name = name or getattr(self, 'name', None)

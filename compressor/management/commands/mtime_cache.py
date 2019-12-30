@@ -51,8 +51,8 @@ class Command(BaseCommand):
             options['ignore_patterns'] = ignore_patterns
         self.ignore_patterns = ignore_patterns
 
-        if ((options['add'] and options['clean']) or
-                (not options['add'] and not options['clean'])):
+        if ((options['add'] and options['clean'])
+                or (not options['add'] and not options['clean'])):
             raise CommandError('Please specify either "--add" or "--clean"')
 
         if not settings.COMPRESS_MTIME_DELAY:
