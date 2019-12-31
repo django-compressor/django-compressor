@@ -1,5 +1,4 @@
 import html.parser
-import sys
 
 from django.utils.encoding import smart_str
 

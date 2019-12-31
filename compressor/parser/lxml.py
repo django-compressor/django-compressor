@@ -22,14 +22,6 @@ class LxmlParser(ParserBase):
         except Exception as err:
             raise ParserError("Error while initializing parser: %s" % err)
 
-        try:
-            from lxml.html import soupparser
-        except ImportError:
-            soupparser = None
-        except Exception as err:
-            raise ParserError("Error while initializing parser: %s" % err)
-
-        self.soupparser = soupparser
         self.fromstring = fromstring
         self.tostring = tostring
         super(LxmlParser, self).__init__(content)
