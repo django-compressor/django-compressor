@@ -11,8 +11,7 @@ from compressor.parser import ParserBase
 class LxmlParser(ParserBase):
     """
     LxmlParser will use `lxml.html` parser to parse rendered contents of
-    {% compress %} tag. Under python 2 it will also try to use beautiful
-    soup parser in case of any problems with encoding.
+    {% compress %} tag.
     """
     def __init__(self, content):
         try:
@@ -42,13 +41,7 @@ class LxmlParser(ParserBase):
         """
         content = '<root>%s</root>' % self.content
         tree = self.fromstring(content)
-        try:
-            self.tostring(tree, encoding=str)
-        except UnicodeDecodeError:
-            if self.soupparser:  # use soup parser on python 2
-                tree = self.soupparser.fromstring(content)
-            else:  # raise an error on python 3
-                raise
+        self.tostring(tree, encoding=str)
         return tree
 
     def css_elems(self):

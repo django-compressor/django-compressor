@@ -7,11 +7,11 @@ from compressor.exceptions import ParserError
 from compressor.parser import ParserBase
 
 
-# Since Python 3.4, the HTMLParser constructor takes a 'convert_charrefs'
+# The HTMLParser constructor takes a 'convert_charrefs'
 # argument which raises a warning if we don't pass it.
-HTML_PARSER_ARGS = {}
-if sys.version_info[:2] >= (3, 4):
-    HTML_PARSER_ARGS['convert_charrefs'] = False
+HTML_PARSER_ARGS = {
+    'convert_charrefs': False,
+}
 
 
 class DefaultHtmlParser(ParserBase, html.parser.HTMLParser):
