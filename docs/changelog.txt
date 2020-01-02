@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.4 (2019-12-02)
+v2.4 (2019-12-31)
 -----------------
 
 `Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.3...2.4>`_
