@@ -5,7 +5,6 @@ import socket
 import time
 from importlib import import_module
 
-import six
 from django.core.cache import caches
 from django.core.files.base import ContentFile
 from django.utils.encoding import force_text, smart_bytes
@@ -58,7 +57,7 @@ def get_offline_hexdigest(render_template_string):
             # a string-alike object to e.g. add ``SCRIPT_NAME`` WSGI param
             # as a *path prefix* to the output URL.
             # See https://code.djangoproject.com/ticket/25598.
-            six.text_type(settings.STATIC_URL), ''
+            str(settings.STATIC_URL), ''
         )
     )
 

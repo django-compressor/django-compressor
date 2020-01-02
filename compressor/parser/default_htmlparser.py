@@ -1,6 +1,6 @@
+import html.parser
 import sys
 
-import six
 from django.utils.encoding import smart_str
 
 from compressor.exceptions import ParserError
@@ -14,9 +14,9 @@ if sys.version_info[:2] >= (3, 4):
     HTML_PARSER_ARGS['convert_charrefs'] = False
 
 
-class DefaultHtmlParser(ParserBase, six.moves.html_parser.HTMLParser):
+class DefaultHtmlParser(ParserBase, html.parser.HTMLParser):
     def __init__(self, content):
-        six.moves.html_parser.HTMLParser.__init__(self, **HTML_PARSER_ARGS)
+        html.parser.HTMLParser.__init__(self, **HTML_PARSER_ARGS)
         self.content = content
         self._css_elems = []
         self._js_elems = []

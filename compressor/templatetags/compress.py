@@ -1,4 +1,3 @@
-import six
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 
@@ -73,7 +72,7 @@ class CompressorMixin(object):
                 # a string-alike object to e.g. add ``SCRIPT_NAME`` WSGI param
                 # as a *path prefix* to the output URL.
                 # See https://code.djangoproject.com/ticket/25598.
-                six.text_type(settings.COMPRESS_URL)
+                str(settings.COMPRESS_URL)
             )
         else:
             raise OfflineGenerationError('You have offline compression '
@@ -117,7 +116,7 @@ class CompressorMixin(object):
             file_basename = 'output'
 
         rendered_output = compressor.output(mode, forced=forced, basename=file_basename)
-        assert isinstance(rendered_output, six.string_types)
+        assert isinstance(rendered_output, str)
         if cache_key:
             cache_set(cache_key, rendered_output)
         return rendered_output

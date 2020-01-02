@@ -5,7 +5,6 @@ import os
 import sys
 import mock
 
-import six
 from django.utils.encoding import smart_str
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -97,7 +96,7 @@ class PrecompilerTestCase(TestCase):
     def test_precompiler_output_unicode(self):
         command = '%s %s' % (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
-        self.assertEqual(type(compiler.input()), six.text_type)
+        self.assertEqual(type(compiler.input()), str)
 
     def test_precompiler_cache(self):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
@@ -475,26 +474,26 @@ class SpecializedFiltersTest(TestCase):
     """
     def test_closure_filter(self):
         filter = ClosureCompilerFilter('')
-        self.assertEqual(filter.options, (('binary', six.text_type('java -jar compiler.jar')), ('args', six.text_type(''))))
+        self.assertEqual(filter.options, (('binary', str('java -jar compiler.jar')), ('args', str(''))))
 
     def test_yuglify_filters(self):
         filter = YUglifyCSSFilter('')
         self.assertEqual(filter.command, '{binary} {args} --type=css')
-        self.assertEqual(filter.options, (('binary', six.text_type('yuglify')), ('args', six.text_type('--terminal'))))
+        self.assertEqual(filter.options, (('binary', str('yuglify')), ('args', str('--terminal'))))
 
         filter = YUglifyJSFilter('')
         self.assertEqual(filter.command, '{binary} {args} --type=js')
-        self.assertEqual(filter.options, (('binary', six.text_type('yuglify')), ('args', six.text_type('--terminal'))))
+        self.assertEqual(filter.options, (('binary', str('yuglify')), ('args', str('--terminal'))))
 
     def test_yui_filters(self):
         filter = YUICSSFilter('')
         self.assertEqual(filter.command, '{binary} {args} --type=css')
-        self.assertEqual(filter.options, (('binary', six.text_type('java -jar yuicompressor.jar')), ('args', six.text_type(''))))
+        self.assertEqual(filter.options, (('binary', str('java -jar yuicompressor.jar')), ('args', str(''))))
 
         filter = YUIJSFilter('', verbose=1)
         self.assertEqual(filter.command, '{binary} {args} --type=js --verbose')
-        self.assertEqual(filter.options, (('binary', six.text_type('java -jar yuicompressor.jar')), ('args', six.text_type('')), ('verbose', 1)))
+        self.assertEqual(filter.options, (('binary', str('java -jar yuicompressor.jar')), ('args', str('')), ('verbose', 1)))
 
     def test_clean_css_filter(self):
         filter = CleanCSSFilter('')
-        self.assertEqual(filter.options, (('binary', six.text_type('cleancss')), ('args', six.text_type(''))))
+        self.assertEqual(filter.options, (('binary', str('cleancss')), ('args', str(''))))

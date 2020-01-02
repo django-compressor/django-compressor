@@ -2,13 +2,12 @@ from __future__ import with_statement, unicode_literals
 import os
 import codecs
 from importlib import import_module
+from urllib.request import url2pathname
 
-import six
 from django.core.files.base import ContentFile
 from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
-from six.moves.urllib.request import url2pathname
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
@@ -100,7 +99,7 @@ class Compressor(object):
         # a string-alike object to e.g. add ``SCRIPT_NAME``
         # WSGI param as a *path prefix* to the output URL.
         # See https://code.djangoproject.com/ticket/25598.
-        base_url = six.text_type(base_url)
+        base_url = str(base_url)
 
         if not url.startswith(base_url):
             raise UncompressableFileError("'%s' isn't accessible via "

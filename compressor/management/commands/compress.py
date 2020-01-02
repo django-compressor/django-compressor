@@ -8,7 +8,6 @@ from fnmatch import fnmatch
 from importlib import import_module
 
 import django
-import six
 from django.core.management.base import BaseCommand, CommandError
 import django.template
 from django.template import Context
@@ -147,7 +146,7 @@ class Command(BaseCommand):
             log.write("Found templates:\n\t" + "\n\t".join(templates) + "\n")
 
         contexts = settings.COMPRESS_OFFLINE_CONTEXT
-        if isinstance(contexts, six.string_types):
+        if isinstance(contexts, str):
             try:
                 module, function = get_mod_func(contexts)
                 contexts = getattr(import_module(module), function)()
