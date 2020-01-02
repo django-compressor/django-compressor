@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # django-compressor documentation build configuration file, created by
 # sphinx-quickstart on Fri Jan 21 11:47:42 2011.
 #

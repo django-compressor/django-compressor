@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 # flake8: noqa
 import os
 import sys

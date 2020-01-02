@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import gzip
 import os
 from datetime import datetime
