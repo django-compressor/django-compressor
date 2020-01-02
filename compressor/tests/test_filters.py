@@ -6,7 +6,7 @@ import sys
 import mock
 
 import six
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -123,7 +123,7 @@ class PrecompilerTestCase(TestCase):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
         compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
         self.assertEqual("body { color:#990; }", compiler.input())
-        self.assertEqual(type(compiler.input()), type(smart_text("body { color:#990; }")))
+        self.assertEqual(type(compiler.input()), type(smart_str("body { color:#990; }")))
 
     def test_precompiler_not_cacheable(self):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
