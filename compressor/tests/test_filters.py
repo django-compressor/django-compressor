@@ -1,4 +1,3 @@
-from __future__ import with_statement, unicode_literals
 from collections import defaultdict
 import io
 import os
