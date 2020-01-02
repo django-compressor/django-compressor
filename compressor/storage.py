@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-import errno
 import gzip
 import os
 from datetime import datetime
@@ -43,17 +42,6 @@ class CompressorFileStorage(FileSystemStorage):
         if self.exists(name):
             self.delete(name)
         return name
-
-    def delete(self, name):
-        """
-        Handle deletion race condition present in Django prior to 1.4
-        https://code.djangoproject.com/ticket/16108
-        """
-        try:
-            super(CompressorFileStorage, self).delete(name)
-        except OSError as e:
-            if e.errno != errno.ENOENT:
-                raise
 
 
 compressor_file_storage = SimpleLazyObject(

@@ -1,5 +1,4 @@
 from __future__ import with_statement, unicode_literals
-import errno
 import os
 import brotli
 
@@ -63,21 +62,3 @@ class StorageTestCase(TestCase):
         context = {'STATIC_URL': settings.COMPRESS_URL}
         out = css_tag("/static/CACHE/css/output.aca9bcd16bee.css")
         self.assertEqual(out, render(template, context))
-
-    def test_race_condition_handling(self):
-        # Hold on to original os.remove
-        original_remove = os.remove
-
-        def race_remove(path):
-            "Patched os.remove to raise ENOENT (No such file or directory)"
-            original_remove(path)
-            raise OSError(errno.ENOENT, 'Fake ENOENT')
-
-        try:
-            os.remove = race_remove
-            self.default_storage.save('race.file', ContentFile('Fake ENOENT'))
-            self.default_storage.delete('race.file')
-            self.assertFalse(self.default_storage.exists('race.file'))
-        finally:
-            # Restore os.remove
-            os.remove = original_remove
