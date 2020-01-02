@@ -1,6 +1,5 @@
 from __future__ import with_statement, unicode_literals
 import os
-import codecs
 from importlib import import_module
 
 import six
