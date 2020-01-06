@@ -10,7 +10,7 @@ from unittest import SkipTest
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.template import Template, Context
+from django.template import Context, Origin, Template
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -129,9 +129,11 @@ class OfflineTestCaseMixin(object):
             self.template_path = os.path.join(
                 django_template_dir, self.template_name)
 
+            origin = Origin(name=self.template_path,  # Absolute path
+                            template_name=self.template_name)  # Loader-relative path
             with io.open(self.template_path,
                          encoding=self.CHARSET) as file_:
-                self.template = Template(file_.read())
+                self.template = Template(file_.read(), origin=origin)
 
         if 'jinja2' in self.engines:
             self.template_path_jinja2 = os.path.join(
@@ -741,6 +743,15 @@ class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
     def _test_offline(self, engine):
         count, _ = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         self.assertEqual(count, 1)
+
+
+class OfflineCompressExtendsRelativeTestCase(SuperMixin, OfflineTestCaseMixin, TestCase):
+    """
+    Test that templates extending templates using relative paths
+    (e.g. ./base.html) are evaluated correctly
+    """
+    templates_dir = 'test_extends_relative'
+    expected_hash = '817b5defb197'
 
 
 class TestCompressCommand(OfflineTestCaseMixin, TestCase):
