@@ -7,7 +7,7 @@ from importlib import import_module
 
 from django.core.cache import caches
 from django.core.files.base import ContentFile
-from django.utils.encoding import force_text, smart_bytes
+from django.utils.encoding import force_str, smart_bytes
 from django.utils.functional import SimpleLazyObject
 
 from compressor.conf import settings
@@ -25,11 +25,11 @@ def get_hexdigest(plaintext, length=None):
 
 
 def simple_cachekey(key):
-    return 'django_compressor.%s' % force_text(key)
+    return 'django_compressor.%s' % force_str(key)
 
 
 def socket_cachekey(key):
-    return 'django_compressor.%s.%s' % (socket.gethostname(), force_text(key))
+    return 'django_compressor.%s.%s' % (socket.gethostname(), force_str(key))
 
 
 def get_cachekey(*args, **kwargs):
