@@ -1,1 +1,1 @@
-<script>{{ compressed.content|safe }}</script>
+<script{% if request.csp_nonce %} nonce="_request_csp_nonce"{% endif %}>{{ compressed.content|safe }}</script>
