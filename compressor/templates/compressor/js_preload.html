@@ -1,1 +1,1 @@
-<link {% if request.csp_nonce %} nonce="_request_csp_nonce"{% endif %}rel="preload" href="{{ compressed.url }}" as="script" />
+<link {% if compress_csp_nonce %}nonce="_request_csp_nonce" {% endif %}rel="preload" href="{{ compressed.url }}" as="script" />

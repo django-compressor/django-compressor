@@ -63,7 +63,7 @@ class CompressorMixin(object):
         and return the result if given
         """
         original_content = self.get_original_content(context)
-        if context.get('request') and context.get('request').csp_nonce:
+        if settings.COMPRESS_CSP_NONCE:
             original_content = original_content.replace(str(context['request'].csp_nonce), '')
         key = get_offline_hexdigest(original_content)
         offline_manifest = get_offline_manifest()
@@ -106,6 +106,7 @@ class CompressorMixin(object):
         else:
             name = name or getattr(self, 'name', None)
             context['compressed'] = {'name': name}
+            context['compress_csp_nonce'] = settings.COMPRESS_CSP_NONCE
             compressor = self.get_compressor(context, kind)
 
             # Check cache
@@ -125,7 +126,7 @@ class CompressorMixin(object):
                 cache_set(cache_key, rendered_output)
             compressed_content = rendered_output
 
-        if context.get('request') and context.get('request').csp_nonce:
+        if settings.COMPRESS_CSP_NONCE and context.get('request'):
             compressed_content = compressed_content.replace('_request_csp_nonce', str(context['request'].csp_nonce))
         return compressed_content
 

@@ -179,6 +179,7 @@ class TemplatetagTestCase(TestCase):
         out = '<script src="/static/CACHE/js/output.ffc39dec05fd.js"></script>'
         self.assertEqual(out, render(template, self.context, SekizaiContext))
 
+    @override_settings(COMPRESS_CSP_NONCE=True)
     def test_csp_nonce_tag(self):
         context = dict(request=Namespace())
         context['request'].csp_nonce = 'abcde'
