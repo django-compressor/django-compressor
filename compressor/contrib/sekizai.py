@@ -20,7 +20,7 @@ def compress(context, data, name):
     Name is either 'js' or 'css' (the sekizai namespace)
     Basically passes the string through the {% compress 'js' %} template tag
     """
-    # separate compressable from uncompressable files
+    # separate compressible from uncompressable files
     parser = get_class(settings.COMPRESS_PARSER)(data)
     js_compressor, css_compressor = Compressor('js'), Compressor('css')
     compressable_elements, expanded_elements, deferred_elements = [], [], []
