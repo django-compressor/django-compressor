@@ -127,7 +127,7 @@ class Command(BaseCommand):
 
             for path in paths:
                 for root, dirs, files in os.walk(path, followlinks=follow_links):
-                    templates.update(os.path.join(root, name)
+                    templates.update(os.path.relpath(os.path.join(root, name), path)
                         for name in files if not name.startswith('.') and
                             any(fnmatch(name, "*%s" % glob) for glob in extensions))
         elif engine == 'jinja2':
