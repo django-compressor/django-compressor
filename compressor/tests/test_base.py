@@ -226,6 +226,11 @@ class CompressorTestCase(SimpleTestCase):
         out = '<link rel="preload" href="/static/CACHE/js/8a0fed36c317.js" as="script" />'
         self.assertEqual(out, self.js_node.output(mode="preload"))
 
+    def test_js_module_output(self):
+        # this needs to have the same hash as in the test above
+        out = '<script type="module" src="/static/CACHE/js/8a0fed36c317.js"></script>'
+        self.assertEqual(out, self.js_node.output(mode="module"))
+
     def test_js_override_url(self):
         self.js_node.context.update({'url': 'This is not a url, just a text'})
         out = '<script src="/static/CACHE/js/8a0fed36c317.js"></script>'
@@ -347,7 +352,7 @@ class CacheBackendTestCase(CompressorTestCase):
 class JsAsyncDeferTestCase(SimpleTestCase):
     def setUp(self):
         self.js = """\
-            <script src="/static/js/one.js" type="text/javascript"></script>
+            <script nomodule src="/static/js/one.js" type="text/javascript"></script>
             <script src="/static/js/two.js" type="text/javascript" async></script>
             <script src="/static/js/three.js" type="text/javascript" defer></script>
             <script type="text/javascript">obj.value = "value";</script>
@@ -361,8 +366,10 @@ class JsAsyncDeferTestCase(SimpleTestCase):
                 return 'async'
             if tag.has_attr('defer'):
                 return 'defer'
+            if tag.has_attr('nomodule'):
+                return 'nomodule'
         js_node = JsCompressor('js', self.js)
-        output = [None, 'async', 'defer', None, 'async', None]
+        output = ['nomodule', 'async', 'defer', None, 'async', None]
         scripts = make_soup(js_node.output()).find_all('script')
         attrs = [extract_attr(s) for s in scripts]
         self.assertEqual(output, attrs)

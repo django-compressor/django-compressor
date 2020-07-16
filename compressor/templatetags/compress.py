@@ -12,7 +12,8 @@ register = template.Library()
 OUTPUT_FILE = 'file'
 OUTPUT_INLINE = 'inline'
 OUTPUT_PRELOAD = 'preload'
-OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE, OUTPUT_PRELOAD)
+OUTPUT_MODULE = 'module'
+OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE, OUTPUT_PRELOAD, OUTPUT_MODULE)
 
 
 class CompressorMixin:
@@ -158,7 +159,7 @@ def compress(parser, token):
 
     Syntax::
 
-        {% compress <js/css> [<file/inline> [block_name]] %}
+        {% compress <js/css> [<file/inline/preload/module> [block_name]] %}
         <html of inline or linked JS/CSS>
         {% endcompress %}
 
@@ -183,8 +184,8 @@ def compress(parser, token):
         mode = args[2]
         if mode not in OUTPUT_MODES:
             raise template.TemplateSyntaxError(
-                "%r's second argument must be '%s' or '%s'." %
-                (args[0], OUTPUT_FILE, OUTPUT_INLINE))
+                "%r's second argument must be '%s', '%s', '%s' or '%s'." %
+                (args[0], OUTPUT_FILE, OUTPUT_INLINE, OUTPUT_PRELOAD, OUTPUT_MODULE))
     else:
         mode = OUTPUT_FILE
     if len(args) == 4:

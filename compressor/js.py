@@ -19,12 +19,19 @@ class JsCompressor(Compressor):
             else:
                 content = (SOURCE_HUNK, self.parser.elem_content(elem), None, elem)
             self.split_content.append(content)
+
+            # one or the other with these 2
             if 'async' in attribs:
                 extra = ' async'
             elif 'defer' in attribs:
                 extra = ' defer'
             else:
                 extra = ''
+
+            # optional additional valid script attribute
+            if 'nomodule' in attribs:
+                extra += ' nomodule'
+
             # Append to the previous node if it had the same attribute
             append_to_previous = (self.extra_nodes
                                   and self.extra_nodes[-1][0] == extra)
