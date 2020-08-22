@@ -32,12 +32,15 @@ class CompressorMixin(object):
         return get_class(self.compressors.get(kind),
                          exception=ImproperlyConfigured)
 
-    def get_compressor(self, context, kind):
+    def get_compressor(self, context, kind, log, verbosity):
         cls = self.compressor_cls(kind)
         return cls(
             kind,
             content=self.get_original_content(context),
-            context=context)
+            context=context,
+            log=log,
+            verbosity=verbosity
+        )
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
@@ -89,7 +92,7 @@ class CompressorMixin(object):
         cache_content = cache_get(cache_key)
         return cache_key, cache_content
 
-    def render_compressed(self, context, kind, mode, name=None, forced=False):
+    def render_compressed(self, context, kind, mode, name=None, forced=False, log=None, verbosity=0):
 
         # See if it has been rendered offline
         if self.is_offline_compression_enabled(forced) and not forced:
@@ -102,7 +105,7 @@ class CompressorMixin(object):
 
         name = name or getattr(self, 'name', None)
         context['compressed'] = {'name': name}
-        compressor = self.get_compressor(context, kind)
+        compressor = self.get_compressor(context, kind, log, verbosity)
 
         # Check cache
         cache_key = None
@@ -139,7 +142,13 @@ class CompressorNode(CompressorMixin, template.Node):
         if self.debug_mode(context):
             return self.get_original_content(context)
 
-        return self.render_compressed(context, self.kind, self.mode, forced=forced)
+        # pass logger to compressor object
+        try:
+            log, verbosity = context.template._log, context.template._log_verbosity
+        except AttributeError:
+            log, verbosity = None, 0
+
+        return self.render_compressed(context, self.kind, self.mode, forced=forced, log=log, verbosity=verbosity)
 
 
 @register.tag
