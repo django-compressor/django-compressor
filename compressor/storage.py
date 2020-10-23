@@ -57,7 +57,7 @@ class GzipCompressorFileStorage(CompressorFileStorage):
         compressed_path = '%s.gz' % orig_path
 
         with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
-            with gzip.GzipFile(fileobj=f_out) as gz_out:
+            with gzip.GzipFile(fileobj=f_out, mode='wb') as gz_out:
                 gz_out.write(f_in.read())
 
         # Ensure the file timestamps match.
