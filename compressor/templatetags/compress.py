@@ -63,6 +63,8 @@ class CompressorMixin(object):
         and return the result if given
         """
         original_content = self.get_original_content(context)
+        if settings.COMPRESS_CSP_NONCE:
+            original_content = original_content.replace(str(context['request'].csp_nonce), '')
         key = get_offline_hexdigest(original_content)
         offline_manifest = get_offline_manifest()
         if key in offline_manifest:
@@ -90,36 +92,43 @@ class CompressorMixin(object):
         return cache_key, cache_content
 
     def render_compressed(self, context, kind, mode, name=None, forced=False):
+        compressed_content = None
 
         # See if it has been rendered offline
         if self.is_offline_compression_enabled(forced) and not forced:
-            return self.render_offline(context)
+            compressed_content = self.render_offline(context)
 
         # Take a shortcut if we really don't have anything to do
-        if (not settings.COMPRESS_ENABLED
+        elif (not settings.COMPRESS_ENABLED
                 and not settings.COMPRESS_PRECOMPILERS and not forced):
-            return self.get_original_content(context)
+            compressed_content = self.get_original_content(context)
 
-        name = name or getattr(self, 'name', None)
-        context['compressed'] = {'name': name}
-        compressor = self.get_compressor(context, kind)
+        else:
+            name = name or getattr(self, 'name', None)
+            context['compressed'] = {'name': name}
+            context['compress_csp_nonce'] = settings.COMPRESS_CSP_NONCE
+            compressor = self.get_compressor(context, kind)
 
-        # Check cache
-        cache_key = None
-        if settings.COMPRESS_ENABLED and not forced:
-            cache_key, cache_content = self.render_cached(compressor, kind, mode)
-            if cache_content is not None:
-                return cache_content
+            # Check cache
+            cache_key = None
+            if settings.COMPRESS_ENABLED and not forced:
+                cache_key, cache_content = self.render_cached(compressor, kind, mode)
+                if cache_content is not None:
+                    return cache_content
 
-        file_basename = name or getattr(self, 'basename', None)
-        if file_basename is None:
-            file_basename = 'output'
+            file_basename = name or getattr(self, 'basename', None)
+            if file_basename is None:
+                file_basename = 'output'
 
-        rendered_output = compressor.output(mode, forced=forced, basename=file_basename)
-        assert isinstance(rendered_output, str)
-        if cache_key:
-            cache_set(cache_key, rendered_output)
-        return rendered_output
+            rendered_output = compressor.output(mode, forced=forced, basename=file_basename)
+            assert isinstance(rendered_output, str)
+            if cache_key:
+                cache_set(cache_key, rendered_output)
+            compressed_content = rendered_output
+
+        if settings.COMPRESS_CSP_NONCE and context.get('request'):
+            compressed_content = compressed_content.replace('_request_csp_nonce', str(context['request'].csp_nonce))
+        return compressed_content
 
 
 class CompressorNode(CompressorMixin, template.Node):

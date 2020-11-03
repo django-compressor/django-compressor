@@ -1,5 +1,6 @@
 import os
 import sys
+from argparse import Namespace
 
 from mock import Mock
 
@@ -177,6 +178,31 @@ class TemplatetagTestCase(TestCase):
         """
         out = '<script src="/static/CACHE/js/output.ffc39dec05fd.js"></script>'
         self.assertEqual(out, render(template, self.context, SekizaiContext))
+
+    @override_settings(COMPRESS_CSP_NONCE=True)
+    def test_csp_nonce_tag(self):
+        context = dict(request=Namespace())
+        context['request'].csp_nonce = 'abcde'
+
+        template = """{% load compress %}{% compress js inline %}
+        <script> var test_value = "\u2014";</script>
+        {% endcompress %}
+        {% compress js %}
+        <script type="text/javascript">obj.value = "value";</script>
+        {% endcompress %}
+        {% compress css inline %}
+        <style type="text/css">p { border:5px solid green;}</style>
+        {% endcompress %}
+        {% compress css %}
+        <style type="text/css">p { border:5px solid green;}</style>
+        {% endcompress %}
+        """
+
+        out = """<script nonce="abcde">var test_value="—";;</script>
+        <script nonce="abcde" src="/static/CACHE/js/output.ed0dff257832.js"></script>
+        <style nonce="abcde" type="text/css">p { border:5px solid green;}</style>
+        <link nonce="abcde" rel="stylesheet" href="/static/CACHE/css/output.19dab3491062.css" type="text/css">"""
+        self.assertEqual(out, render(template, context))
 
 
 class PrecompilerTemplatetagTestCase(TestCase):
