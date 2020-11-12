@@ -61,3 +61,15 @@ def compress(context, data, name):
         compressable_node.render(context=context),
         deferred_node.get_original_content(context=context),
     ])
+
+def compressjs(context, data, name):
+    """
+    Compress custom sekizai blocks with the 'js' compressor
+    """
+    return compress(context, data, 'js')
+
+def compresscss(context, data, name):
+    """
+    Compress custom sekizai blocks with the 'js' compressor
+    """
+    return compress(context, data, 'css')
