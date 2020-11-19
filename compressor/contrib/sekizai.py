@@ -22,7 +22,7 @@ def compress(context, data, name):
     Basically passes the string through the {% compress 'js' %} template tag
     Alternatively, if the block can contain a html comment structured like:
     <!-- compress_options [params] -->
-    params can be: one of ['js','css'] and one or multiple of ['file','preload','inline']
+    params can be: one of ['js','css'] and one or multiple of ['file','preload','inline','defer']
     """
     # separate compressible from uncompressable files
     options = []
@@ -72,7 +72,10 @@ def compress(context, data, name):
     if 'file' in options or len(options) == 0:
         data = ''.join(parser.elem_str(e) for e in compressable_elements)
         compressable_node = CompressorNode(nodelist=TextNode(data), kind=kind, mode='file')
-        results.append(compressable_node.render(context=context))
+        tmp_result = compressable_node.render(context=context)
+        if 'defer' in options:
+            tmp_result = re.sub("></script>$", " defer=\"defer\"></script>", tmp_result)
+        results.append(tmp_result)
 
     if 'preload' in options:
         data = ''.join(parser.elem_str(e) for e in compressable_elements)
