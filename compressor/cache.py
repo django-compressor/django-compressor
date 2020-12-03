@@ -108,7 +108,7 @@ def get_mtime(filename):
         key = get_mtime_cachekey(filename)
         mtime = cache.get(key)
         if mtime is None:
-            mtime = os.path.getmtime(filename)
+            mtime = str(os.path.getmtime(filename))
             cache.set(key, mtime, settings.COMPRESS_MTIME_DELAY)
         return mtime
     return os.path.getmtime(filename)
