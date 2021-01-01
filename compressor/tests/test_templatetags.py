@@ -1,5 +1,3 @@
-from __future__ import with_statement, unicode_literals
-
 import os
 import sys
 
@@ -223,8 +221,13 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <script type="text/coffeescript"># this is a comment.</script>
             <script type="text/javascript"># this too is a comment.</script>
             {% endcompress %}"""
+<<<<<<< HEAD
         out = (script('# this is a comment.\n') + '\n' +
                script('# this too is a comment.', scripttype="text/javascript"))
+=======
+        out = (script('# this is a comment.\n') + '\n'
+               + script('# this too is a comment.', scripttype="text/javascript"))
+>>>>>>> 60b1ef8761061086b31d0401a4e369db7610a55c
         self.assertEqual(out, render(template, self.context))
 
     @override_settings(COMPRESS_ENABLED=False)
@@ -272,8 +275,8 @@ class PrecompilerTemplatetagTestCase(TestCase):
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/two.css"></link>
         {% endcompress %}"""
 
-        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css" />',
-                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css" />'])
+        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css">',
+                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css">'])
 
         self.assertEqual(out, render(template, self.context))
 
@@ -287,9 +290,9 @@ class PrecompilerTemplatetagTestCase(TestCase):
         <link rel="stylesheet" type="text/less" href="{{ STATIC_URL }}css/url/test.css"/>
         {% endcompress %}"""
 
-        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css" />',
-                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css" />',
-                       '<link rel="stylesheet" href="/static/CACHE/css/test.222f958fb191.css" type="text/css" />'])
+        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css">',
+                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css">',
+                       '<link rel="stylesheet" href="/static/CACHE/css/test.222f958fb191.css" type="text/css">'])
         self.assertEqual(out, render(template, self.context))
 
 

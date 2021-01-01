@@ -1,4 +1,3 @@
-from __future__ import absolute_import, unicode_literals
 import io
 import logging
 import subprocess
@@ -7,10 +6,7 @@ from importlib import import_module
 from platform import system
 
 if system() != "Windows":
-    try:
-        from shlex import quote as shell_quote  # Python 3
-    except ImportError:
-        from pipes import quote as shell_quote  # Python 2
+    from shlex import quote as shell_quote
 else:
     from subprocess import list2cmdline
     def shell_quote(s):
@@ -19,9 +15,7 @@ else:
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.temp import NamedTemporaryFile
-
-import six
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from compressor.cache import cache, get_precompiler_cachekey
 
@@ -38,7 +32,7 @@ class FilterBase(object):
     A base class for filters that does nothing.
 
     Subclasses should implement `input` and/or `output` methods which must
-    return a string (unicode under python 2) or raise a NotImplementedError.
+    return a string or raise a NotImplementedError.
     """
 
     # Since precompiling moves files around, it breaks url()
@@ -72,7 +66,7 @@ class CallbackOutputFilter(FilterBase):
             callback = 'path.to.my.callback'
 
     Callback should be a function which takes a string as first argument and
-    returns a string (unicode under python 2).
+    returns a string.
     """
     callback = None
     args = []
@@ -108,7 +102,7 @@ class CallbackOutputFilter(FilterBase):
 
     def output(self, **kwargs):
         ret = self._callback_func(self.content, *self.args, **self.kwargs)
-        assert isinstance(ret, six.text_type)
+        assert isinstance(ret, str)
         return ret
 
 
@@ -217,7 +211,7 @@ class CompilerFilter(FilterBase):
                 self.infile.close()
             if self.outfile is not None:
                 self.outfile.close()
-        return smart_text(filtered)
+        return smart_str(filtered)
 
 
 class CachedCompilerFilter(CompilerFilter):
@@ -231,7 +225,7 @@ class CachedCompilerFilter(CompilerFilter):
             key = self.get_cache_key()
             data = cache.get(key)
             if data is not None:
-                return smart_text(data)
+                return smart_str(data)
             filtered = super(CachedCompilerFilter, self).input(**kwargs)
             cache.set(key, filtered, settings.COMPRESS_REBUILD_TIMEOUT)
             return filtered

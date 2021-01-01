@@ -1,4 +1,3 @@
-from __future__ import with_statement, unicode_literals
 import copy
 from contextlib import contextmanager
 
@@ -9,10 +8,9 @@ from importlib import import_module
 from mock import patch
 from unittest import SkipTest
 
-import six
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.template import Template, Context
+from django.template import Context, Origin, Template
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -35,7 +33,7 @@ def static_url_context_generator():
     yield {'STATIC_URL': settings.STATIC_URL}
 
 
-class LazyScriptNamePrefixedUrl(six.text_type):
+class LazyScriptNamePrefixedUrl(str):
     """
     Lazy URL with ``SCRIPT_NAME`` WSGI param as path prefix.
 
@@ -65,7 +63,7 @@ class LazyScriptNamePrefixedUrl(six.text_type):
         """
         Override ``.split()`` method to make it work with ``{% static %}``.
         """
-        return six.text_type(self).split(*args, **kwargs)
+        return str(self).split(*args, **kwargs)
 
 
 @contextmanager
@@ -131,9 +129,11 @@ class OfflineTestCaseMixin(object):
             self.template_path = os.path.join(
                 django_template_dir, self.template_name)
 
+            origin = Origin(name=self.template_path,  # Absolute path
+                            template_name=self.template_name)  # Loader-relative path
             with io.open(self.template_path,
                          encoding=self.CHARSET) as file_:
-                self.template = Template(file_.read())
+                self.template = Template(file_.read(), origin=origin)
 
         if 'jinja2' in self.engines:
             self.template_path_jinja2 = os.path.join(
@@ -181,14 +181,14 @@ class OfflineTestCaseMixin(object):
     def _render_link(self, hash):
         return (
             '<link rel="stylesheet" href="{}CACHE/css/{}.{}.css" '
-            'type="text/css" />'.format(
+            'type="text/css">'.format(
                 settings.COMPRESS_URL_PLACEHOLDER, self.expected_basename, hash
             )
         )
 
     def _render_result(self, result, separator='\n'):
         return (separator.join(result) + '\n').replace(
-            settings.COMPRESS_URL_PLACEHOLDER, six.text_type(settings.COMPRESS_URL)
+            settings.COMPRESS_URL_PLACEHOLDER, str(settings.COMPRESS_URL)
         )
 
     def _test_offline(self, engine):
@@ -745,6 +745,15 @@ class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual(count, 1)
 
 
+class OfflineCompressExtendsRelativeTestCase(SuperMixin, OfflineTestCaseMixin, TestCase):
+    """
+    Test that templates extending templates using relative paths
+    (e.g. ./base.html) are evaluated correctly
+    """
+    templates_dir = 'test_extends_relative'
+    expected_hash = '817b5defb197'
+
+
 class TestCompressCommand(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_compress_command"
 
@@ -828,12 +837,12 @@ class OfflineCompressTestCaseWithLazyStringAlikeUrls(OfflineCompressTestCaseWith
         for script_name in ['', '/app/prefix/', '/another/prefix/']:
             with script_prefix(script_name):
                 self.assertEqual(
-                    six.text_type(settings.STATIC_URL),
+                    str(settings.STATIC_URL),
                     script_name.rstrip('/') + '/static/'
                 )
 
                 self.assertEqual(
-                    six.text_type(settings.COMPRESS_URL),
+                    str(settings.COMPRESS_URL),
                     script_name.rstrip('/') + '/static/'
                 )
 
@@ -841,4 +850,4 @@ class OfflineCompressTestCaseWithLazyStringAlikeUrls(OfflineCompressTestCaseWith
                 actual_result = self._render_template(engine)
 
                 self.assertEqual(actual_result, expected_result)
-                self.assertIn(six.text_type(settings.COMPRESS_URL), actual_result)
+                self.assertIn(str(settings.COMPRESS_URL), actual_result)

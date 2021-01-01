@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-import errno
 import gzip
 import os
 from datetime import datetime
@@ -44,17 +42,6 @@ class CompressorFileStorage(FileSystemStorage):
             self.delete(name)
         return name
 
-    def delete(self, name):
-        """
-        Handle deletion race condition present in Django prior to 1.4
-        https://code.djangoproject.com/ticket/16108
-        """
-        try:
-            super(CompressorFileStorage, self).delete(name)
-        except OSError as e:
-            if e.errno != errno.ENOENT:
-                raise
-
 
 compressor_file_storage = SimpleLazyObject(
     lambda: get_storage_class('compressor.storage.CompressorFileStorage')())
@@ -70,7 +57,7 @@ class GzipCompressorFileStorage(CompressorFileStorage):
         compressed_path = '%s.gz' % orig_path
 
         with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
-            with gzip.GzipFile(fileobj=f_out) as gz_out:
+            with gzip.GzipFile(fileobj=f_out, mode='wb') as gz_out:
                 gz_out.write(f_in.read())
 
         # Ensure the file timestamps match.

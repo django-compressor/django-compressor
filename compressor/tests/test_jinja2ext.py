@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import with_statement, unicode_literals
-
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -143,6 +140,6 @@ class TestJinja2CompressorExtension(TestCase):
                                             '<style type="text/css">'
                                             '/* русский текст */'
                                             '</style>{% endcompress %}')
-        out = '<link rel="stylesheet" href="/static/CACHE/css/output.c836c9caed5c.css" type="text/css" />'
+        out = '<link rel="stylesheet" href="/static/CACHE/css/output.c836c9caed5c.css" type="text/css">'
         context = {'STATIC_URL': settings.COMPRESS_URL}
         self.assertEqual(out, template.render(context))

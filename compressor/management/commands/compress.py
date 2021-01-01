@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 # flake8: noqa
 import os
 import sys
@@ -8,11 +7,10 @@ from fnmatch import fnmatch
 from importlib import import_module
 
 import django
-import six
 from django.core.management.base import BaseCommand, CommandError
 import django.template
 from django.template import Context
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
 from django.template import engines
 
@@ -112,7 +110,7 @@ class Command(BaseCommand):
                         'get_template_sources', None)
                     if get_template_sources is None:
                         get_template_sources = loader.get_template_sources
-                    paths.update(smart_text(origin) for origin in get_template_sources(''))
+                    paths.update(smart_str(origin) for origin in get_template_sources(''))
                 except (ImportError, AttributeError, TypeError):
                     # Yeah, this didn't work out so well, let's move on
                     pass
@@ -129,7 +127,7 @@ class Command(BaseCommand):
 
             for path in paths:
                 for root, dirs, files in os.walk(path, followlinks=follow_links):
-                    templates.update(os.path.join(root, name)
+                    templates.update(os.path.relpath(os.path.join(root, name), path)
                         for name in files if not name.startswith('.') and
                             any(fnmatch(name, "*%s" % glob) for glob in extensions))
         elif engine == 'jinja2':
@@ -147,7 +145,7 @@ class Command(BaseCommand):
             log.write("Found templates:\n\t" + "\n\t".join(templates) + "\n")
 
         contexts = settings.COMPRESS_OFFLINE_CONTEXT
-        if isinstance(contexts, six.string_types):
+        if isinstance(contexts, str):
             try:
                 module, function = get_mod_func(contexts)
                 contexts = getattr(import_module(module), function)()
@@ -174,7 +172,7 @@ class Command(BaseCommand):
                 continue
             except TemplateSyntaxError as e:  # broken template -> ignore
                 if verbosity >= 1:
-                    log.write("Invalid template %s: %s\n" % (template_name, smart_text(e)))
+                    log.write("Invalid template %s: %s\n" % (template_name, smart_str(e)))
                 continue
             except TemplateDoesNotExist:  # non existent template -> ignore
                 if verbosity >= 1:
@@ -202,7 +200,7 @@ class Command(BaseCommand):
                     # Could be an error in some base template
                     if verbosity >= 1:
                         log.write("Error parsing template %s: %s\n" %
-                                  (template.template_name, smart_text(e)))
+                                  (template.template_name, smart_str(e)))
                     continue
 
                 if nodes:
@@ -232,7 +230,7 @@ class Command(BaseCommand):
                             result = parser.render_node(template, context, node)
                         except Exception as e:
                             raise CommandError("An error occurred during rendering %s: "
-                                               "%s" % (template.template_name, smart_text(e)))
+                                               "%s" % (template.template_name, smart_str(e)))
                         result = result.replace(
                             settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
                         )

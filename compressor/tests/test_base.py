@@ -1,6 +1,6 @@
-from __future__ import with_statement, unicode_literals
 import os
 import re
+import sys
 from tempfile import mkdtemp
 from shutil import rmtree, copytree
 
@@ -25,8 +25,8 @@ def make_soup(markup):
 
 
 def css_tag(href, **kwargs):
-    rendered_attrs = ''.join(['%s="%s" ' % (k, v) for k, v in kwargs.items()])
-    template = '<link rel="stylesheet" href="%s" type="text/css" %s/>'
+    rendered_attrs = ''.join([' %s="%s"' % (k, v) for k, v in kwargs.items()])
+    template = '<link rel="stylesheet" href="%s" type="text/css"%s>'
     return template % (href, rendered_attrs)
 
 
@@ -57,8 +57,9 @@ class PrecompilerAndAbsoluteFilterTestCase(SimpleTestCase):
 
     def setUp(self):
         self.html_orig = '<link rel="stylesheet" href="/static/css/relative_url.css" type="text/css" />'
-        self.html_link_to_precompiled_css = '<link rel="stylesheet" href="/static/CACHE/css/relative_url.e8602322bfa6.css" type="text/css" />'
-        self.html_link_to_absolutized_css = '<link rel="stylesheet" href="/static/CACHE/css/relative_url.376db5682982.css" type="text/css" />'
+        self.html_auto_close_removed = '<link rel="stylesheet" href="/static/css/relative_url.css" type="text/css">'
+        self.html_link_to_precompiled_css = '<link rel="stylesheet" href="/static/CACHE/css/relative_url.e8602322bfa6.css" type="text/css">'
+        self.html_link_to_absolutized_css = '<link rel="stylesheet" href="/static/CACHE/css/relative_url.376db5682982.css" type="text/css">'
         self.css_orig = "p { background: url('../img/python.png'); }" # content of relative_url.css
         self.css_absolutized = "p { background: url('/static/img/python.png?ccb38978f900'); }"
 
@@ -81,8 +82,8 @@ class PrecompilerAndAbsoluteFilterTestCase(SimpleTestCase):
         in the filters setting.
         While at it, ensure that everything runs as expected when compression is enabled.
         """
-        self.helper(enabled=False, use_precompiler=False, use_absolute_filter=False, expected_output=self.html_orig)
-        self.helper(enabled=False, use_precompiler=False, use_absolute_filter=True, expected_output=self.html_orig)
+        self.helper(enabled=False, use_precompiler=False, use_absolute_filter=False, expected_output=self.html_auto_close_removed)
+        self.helper(enabled=False, use_precompiler=False, use_absolute_filter=True, expected_output=self.html_auto_close_removed)
         self.helper(enabled=False, use_precompiler=True, use_absolute_filter=False, expected_output=self.html_link_to_precompiled_css)
         self.helper(enabled=False, use_precompiler=True, use_absolute_filter=True, expected_output=self.html_link_to_absolutized_css)
         self.helper(enabled=True, use_precompiler=False, use_absolute_filter=False, expected_output=self.css_orig)
@@ -100,9 +101,9 @@ class CompressorTestCase(SimpleTestCase):
 
     def setUp(self):
         self.css = """\
-<link rel="stylesheet" href="/static/css/one.css" type="text/css" />
+<link rel="stylesheet" href="/static/css/one.css" type="text/css">
 <style type="text/css">p { border:5px solid green;}</style>
-<link rel="stylesheet" href="/static/css/two.css" type="text/css" />"""
+<link rel="stylesheet" href="/static/css/two.css" type="text/css">"""
         self.css_node = CssCompressor('css', self.css)
 
         self.js = """\
@@ -133,7 +134,7 @@ class CompressorTestCase(SimpleTestCase):
             (
                 SOURCE_FILE,
                 os.path.join(settings.COMPRESS_ROOT, 'css', 'one.css'),
-                'css/one.css', '<link rel="stylesheet" href="/static/css/one.css" type="text/css" />',
+                'css/one.css', '<link rel="stylesheet" href="/static/css/one.css" type="text/css">',
             ),
             (
                 SOURCE_HUNK,
@@ -145,7 +146,7 @@ class CompressorTestCase(SimpleTestCase):
                 SOURCE_FILE,
                 os.path.join(settings.COMPRESS_ROOT, 'css', 'two.css'),
                 'css/two.css',
-                '<link rel="stylesheet" href="/static/css/two.css" type="text/css" />',
+                '<link rel="stylesheet" href="/static/css/two.css" type="text/css">',
             ),
         ]
         split = self.css_node.split_contents()
@@ -189,6 +190,10 @@ class CompressorTestCase(SimpleTestCase):
         self.assertEqual(output, self.css_node.output().strip())
 
     def test_css_preload_output(self):
+<<<<<<< HEAD
+=======
+        # this needs to have the same hash as in the test above
+>>>>>>> 60b1ef8761061086b31d0401a4e369db7610a55c
         out = '<link rel="preload" href="/static/CACHE/css/58a8c0714e59.css" as="style" />'
         self.assertEqual(out, self.css_node.output(mode="preload"))
 
@@ -220,6 +225,10 @@ class CompressorTestCase(SimpleTestCase):
         self.assertEqual(out, self.js_node.output())
 
     def test_js_preload_output(self):
+<<<<<<< HEAD
+=======
+        # this needs to have the same hash as in the test above
+>>>>>>> 60b1ef8761061086b31d0401a4e369db7610a55c
         out = '<link rel="preload" href="/static/CACHE/js/8a0fed36c317.js" as="script" />'
         self.assertEqual(out, self.js_node.output(mode="preload"))
 
@@ -314,7 +323,7 @@ class CssMediaTestCase(SimpleTestCase):
         self.assertEqual(media, [l.get('media', None) for l in links])
 
     @override_settings(COMPRESS_PRECOMPILERS=(
-        ('text/foobar', 'python %s {infile} {outfile}' % os.path.join(test_dir, 'precompiler.py')),
+        ('text/foobar', '%s %s {infile} {outfile}' % (sys.executable, os.path.join(test_dir, 'precompiler.py'))),
     ), COMPRESS_ENABLED=False)
     def test_passthough_when_compress_disabled(self):
         css = """\
@@ -442,7 +451,7 @@ class CompressorInDebugModeTestCase(SimpleTestCase):
             css.write(test_css_content)
         # We should generate a link with the hash of the original content, not
         # the modified one
-        expected = '<link rel="stylesheet" href="/static/CACHE/css/%s.css" type="text/css" />' % hashed
+        expected = '<link rel="stylesheet" href="/static/CACHE/css/%s.css" type="text/css">' % hashed
         compressor = CssCompressor('css', self.css)
         compressor.storage = DefaultStorage()
         output = compressor.output()
