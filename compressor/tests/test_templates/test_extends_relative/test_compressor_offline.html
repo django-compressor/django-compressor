@@ -1,0 +1,13 @@
+{% extends "./base.html" %}
+{% load compress %}
+
+{% block js %}{% spaceless %}
+	{% compress js %}
+		{{ block.super }}
+	    <script type="text/javascript">
+	        alert("this alert shouldn't be alone!");
+	    </script>
+	{% endcompress %}
+{% endspaceless %}{% endblock %}
+
+{% block css %}{% endblock %}

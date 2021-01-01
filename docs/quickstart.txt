@@ -99,4 +99,5 @@ Optional Dependencies
 .. _`Calmjs`: https://github.com/calmjs/calmjs.parse
 .. _django-appconf: http://pypi.python.org/pypi/django-appconf/
 .. _versiontools: http://pypi.python.org/pypi/versiontools/
+.. _csscompressor: https://pypi.org/project/csscompressor/
 .. _brotli: https://pypi.python.org/pypi/brotli
