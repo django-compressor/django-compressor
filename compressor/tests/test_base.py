@@ -190,10 +190,7 @@ class CompressorTestCase(SimpleTestCase):
         self.assertEqual(output, self.css_node.output().strip())
 
     def test_css_preload_output(self):
-<<<<<<< HEAD
-=======
         # this needs to have the same hash as in the test above
->>>>>>> 60b1ef8761061086b31d0401a4e369db7610a55c
         out = '<link rel="preload" href="/static/CACHE/css/58a8c0714e59.css" as="style" />'
         self.assertEqual(out, self.css_node.output(mode="preload"))
 
@@ -225,10 +222,7 @@ class CompressorTestCase(SimpleTestCase):
         self.assertEqual(out, self.js_node.output())
 
     def test_js_preload_output(self):
-<<<<<<< HEAD
-=======
         # this needs to have the same hash as in the test above
->>>>>>> 60b1ef8761061086b31d0401a4e369db7610a55c
         out = '<link rel="preload" href="/static/CACHE/js/8a0fed36c317.js" as="script" />'
         self.assertEqual(out, self.js_node.output(mode="preload"))
 

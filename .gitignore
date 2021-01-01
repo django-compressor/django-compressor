@@ -17,3 +17,4 @@ docs/_build/
 .coverage
 .tox
 .eggs
+.DS_Store

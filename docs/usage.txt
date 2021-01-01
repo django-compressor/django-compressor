@@ -62,7 +62,6 @@ Result:
 
         <link rel="preload" href="/static/CACHE/js/d01466eb4fc6.js" as="script" />
 
-
 Specifying a ``block_name`` will change the output filename. It can also be
 accessed in the :ref:`post_compress signal <signals>` in the ``context`` parameter.
 
