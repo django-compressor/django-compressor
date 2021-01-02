@@ -774,20 +774,20 @@ class TestCompressCommand(OfflineTestCaseMixin, TestCase):
         call_command('compress', engines=["django"], **opts)
         manifest_django = get_offline_manifest()
         manifest_django_expected = self._build_expected_manifest(
-            {'0fed9c02607acba22316a328075a81a74e0983ae79470daa9d3707a337623dc3': '0241107e9a9a'})
+            {'ea63edc7824a4c7278282662a146fbecefe841f6356604d2c5a67fe01fb5bdf1': '0241107e9a9a'})
         self.assertEqual(manifest_django, manifest_django_expected)
 
         call_command('compress', engines=["jinja2"], **opts)
         manifest_jinja2 = get_offline_manifest()
         manifest_jinja2_expected = self._build_expected_manifest(
-            {'077408d23d4a829b8f88db2eadcf902b29d71b14f94018d900f38a3f8ed24c94': '5694ca83dd14'})
+            {'5f81d961a83d86c2e96c6258b46997853f1ed04cd07938ea01c1acb8b35d4984': '5694ca83dd14'})
         self.assertEqual(manifest_jinja2, manifest_jinja2_expected)
 
         call_command('compress', engines=["django", "jinja2"], **opts)
         manifest_both = get_offline_manifest()
         manifest_both_expected = self._build_expected_manifest(
-            {'0fed9c02607acba22316a328075a81a74e0983ae79470daa9d3707a337623dc3': '0241107e9a9a',
-             '077408d23d4a829b8f88db2eadcf902b29d71b14f94018d900f38a3f8ed24c94': '5694ca83dd14'})
+            {'ea63edc7824a4c7278282662a146fbecefe841f6356604d2c5a67fe01fb5bdf1': '0241107e9a9a',
+             '5f81d961a83d86c2e96c6258b46997853f1ed04cd07938ea01c1acb8b35d4984': '5694ca83dd14'})
         self.assertEqual(manifest_both, manifest_both_expected)
 
 

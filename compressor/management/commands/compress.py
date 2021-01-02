@@ -221,7 +221,13 @@ class Command(BaseCommand):
 
                         parser.process_node(template, context, node)
                         rendered = parser.render_nodelist(template, context, node)
-                        key = get_offline_hexdigest(rendered)
+
+                        if engine == 'django':
+                            prefix = node.mode
+                        elif engine == 'jinja2':
+                            prefix = node.call.args[1].value
+
+                        key = get_offline_hexdigest(prefix + rendered)
 
                         if key in offline_manifest:
                             continue
