@@ -3,7 +3,7 @@ coverage==4.5.1
 html5lib==1.0.1
 mock==2.0.0
 Jinja2==2.10.1
-lxml==4.2.5
+lxml==4.6.2
 beautifulsoup4==4.6.3
 django-sekizai==1.0.0
 -e git://github.com/mbi/django-classy-tags.git@0ddd19876e8ee6cc3b86c94dd4411fee80eb8dbf#egg=django-classy-tags
