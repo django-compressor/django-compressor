@@ -1,6 +1,13 @@
 Changelog
 =========
 
+vX.X (2021-XX-XX)
+-----------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.4...X.X>`_
+
+- Move rcssmin to extras_require
+
 v2.4 (2019-12-31)
 -----------------
 

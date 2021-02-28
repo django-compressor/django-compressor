@@ -153,6 +153,8 @@ Backend settings
         A filter that uses Yury Selivanov's Python port of the YUI CSS compression
         algorithm csscompressor_.
 
+      .. _rcssmin_filter:
+
       - ``compressor.filters.cssmin.rCSSMinFilter``
 
         A filter that uses the cssmin implementation rCSSmin_ to compress CSS

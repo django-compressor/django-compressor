@@ -40,7 +40,7 @@ Installation
 .. _dependencies:
 
 Optional Dependencies
-------------
+---------------------
 
 - BeautifulSoup_
 
@@ -85,6 +85,15 @@ Optional Dependencies
 
       pip install csscompressor
 
+- `rCSSmin`_
+
+  For the :ref:`rcssmin filter <rcssmin_filter>`
+  ``compressor.filters.cssmin.rCSSMinFilter``::
+
+      pip install django-compressor[rcssmin]
+      or
+      pip install rcssmin
+
 - `brotli`_
 
   For brotli file compressor `compressor.storage.BrotliCompressorFileStorage`::
@@ -100,4 +109,5 @@ Optional Dependencies
 .. _django-appconf: http://pypi.python.org/pypi/django-appconf/
 .. _versiontools: http://pypi.python.org/pypi/versiontools/
 .. _csscompressor: https://pypi.org/project/csscompressor/
+.. _rCSSmin: http://opensource.perlig.de/rcssmin/
 .. _brotli: https://pypi.python.org/pypi/brotli

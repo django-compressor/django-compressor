@@ -1,10 +1,12 @@
 import ast
+import codecs
 import os
 import sys
-import codecs
-from fnmatch import fnmatchcase
 from distutils.util import convert_path
-from setuptools import setup, find_packages
+from fnmatch import fnmatchcase
+
+from setuptools import find_packages, setup
+
 
 class VersionFinder(ast.NodeVisitor):
     def __init__(self):
@@ -111,6 +113,7 @@ def find_package_data(where='.', package='',
                 out.setdefault(package, []).append(prefix + name)
     return out
 
+
 setup(
     name="django_compressor",
     version=find_version("compressor", "__init__.py"),
@@ -125,6 +128,9 @@ setup(
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
+        'Framework :: Django:: 1.11',
+        'Framework :: Django:: 2.2',
+        'Framework :: Django:: 3.0',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
@@ -139,7 +145,9 @@ setup(
     zip_safe=False,
     install_requires=[
         'django-appconf >= 1.0.3',
-        'rcssmin == 1.0.6',
         'rjsmin == 1.1.0',
     ],
+    extras_require={
+        'rcssmin': ['rcssmin == 1.0.6'],
+    },
 )
