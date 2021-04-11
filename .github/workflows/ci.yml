@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - master
+      - ci/gh-actions
   pull_request:
 
 jobs:
