@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        versions:
+          - python: 3.5
+            toxenv: py35-1.11.X
+          - python: 3.6
+            toxenv: py36-1.11.X
+          - python: 3.7
+            toxenv: py37-1.11.X
+          - python: 3.8
+            toxenv: py38-1.11.X
+          - python: 3.5
+            toxenv: py35-2.2.X
+          - python: 3.6
+            toxenv: py36-2.2.X
+          - python: 3.7
+            toxenv: py37-2.2.X
+          - python: 3.8
+            toxenv: py38-2.2.X
+          - python: 3.6
+            toxenv: py36-3.0.X
+          - python: 3.7
+            toxenv: py37-3.0.X
+          - python: 3.8
+            toxenv: py38-3.0.X
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.versions.python }}
+      - run: |
+          pip install tox
+          python setup.py install_egg_info
+      - run: tox -e ${{ matrix.versions.toxenv }}
+      - uses: codecov/codecov-action@v1.3.2
