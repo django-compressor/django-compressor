@@ -5,10 +5,7 @@ mock==2.0.0
 Jinja2==2.10.1
 lxml==4.6.2
 beautifulsoup4==4.6.3
-django-sekizai==1.0.0
--e git://github.com/mbi/django-classy-tags.git@0ddd19876e8ee6cc3b86c94dd4411fee80eb8dbf#egg=django-classy-tags
-    # django-classy-tags is a dependency of django-sekizai; use https://github.com/divio/django-classy-tags/pull/46 until
-    # the PR gets landed and django-sekizai gets updated to be compatible with django 3.0
+django-sekizai==2.0.0
 csscompressor==0.9.5
 rcssmin==1.0.6
 rjsmin==1.1.0
