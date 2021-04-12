@@ -18,11 +18,11 @@ from compressor.conf import settings
 from compressor.tests.test_base import CompressorTestCase
 
 
-class ParserTestCase(object):
+class ParserTestCase:
     def setUp(self):
         self.override_settings = self.settings(COMPRESS_PARSER=self.parser_cls)
         self.override_settings.__enter__()
-        super(ParserTestCase, self).setUp()
+        super().setUp()
 
     def tearDown(self):
         self.override_settings.__exit__(None, None, None)

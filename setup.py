@@ -1,10 +1,12 @@
 import ast
+import codecs
 import os
 import sys
-import codecs
-from fnmatch import fnmatchcase
 from distutils.util import convert_path
-from setuptools import setup, find_packages
+from fnmatch import fnmatchcase
+
+from setuptools import find_packages, setup
+
 
 class VersionFinder(ast.NodeVisitor):
     def __init__(self):
@@ -125,11 +127,15 @@ setup(
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
+        'Framework :: Django:: 1.11',
+        'Framework :: Django:: 2.2',
+        'Framework :: Django:: 3.0',
+        'Framework :: Django:: 3.1',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',

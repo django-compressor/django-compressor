@@ -22,7 +22,7 @@ SOURCE_HUNK, SOURCE_FILE = 'inline', 'file'
 METHOD_INPUT, METHOD_OUTPUT = 'input', 'output'
 
 
-class Compressor(object):
+class Compressor:
     """
     Base compressor object to be subclassed for content type
     depending implementations details.

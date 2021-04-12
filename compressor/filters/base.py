@@ -27,7 +27,7 @@ from compressor.utils import get_mod_func
 logger = logging.getLogger("compressor.filters")
 
 
-class FilterBase(object):
+class FilterBase:
     """
     A base class for filters that does nothing.
 
@@ -74,7 +74,7 @@ class CallbackOutputFilter(FilterBase):
     dependencies = []
 
     def __init__(self, *args, **kwargs):
-        super(CallbackOutputFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if self.callback is None:
             raise ImproperlyConfigured(
                 "The callback filter %s must define a 'callback' attribute." %
@@ -119,7 +119,7 @@ class CompilerFilter(FilterBase):
     )
 
     def __init__(self, content, command=None, **kwargs):
-        super(CompilerFilter, self).__init__(content, **kwargs)
+        super().__init__(content, **kwargs)
         self.cwd = None
 
         if command:
@@ -218,7 +218,7 @@ class CachedCompilerFilter(CompilerFilter):
 
     def __init__(self, mimetype, *args, **kwargs):
         self.mimetype = mimetype
-        super(CachedCompilerFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def input(self, **kwargs):
         if self.mimetype in settings.COMPRESS_CACHEABLE_PRECOMPILERS:
@@ -226,11 +226,11 @@ class CachedCompilerFilter(CompilerFilter):
             data = cache.get(key)
             if data is not None:
                 return smart_str(data)
-            filtered = super(CachedCompilerFilter, self).input(**kwargs)
+            filtered = super().input(**kwargs)
             cache.set(key, filtered, settings.COMPRESS_REBUILD_TIMEOUT)
             return filtered
         else:
-            return super(CachedCompilerFilter, self).input(**kwargs)
+            return super().input(**kwargs)
 
     def get_cache_key(self):
         return get_precompiler_cachekey(self.command, self.content)

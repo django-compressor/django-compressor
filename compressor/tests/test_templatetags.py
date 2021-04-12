@@ -1,17 +1,14 @@
 import os
 import sys
+from unittest.mock import Mock
 
-from mock import Mock
+from django.conf import settings
+from django.template import Context, Template, TemplateSyntaxError
+from django.test import override_settings, TestCase
+from sekizai.context import SekizaiContext
 
-from django.template import Template, Context, TemplateSyntaxError
-from django.test import TestCase
-from django.test.utils import override_settings
-
-from compressor.conf import settings
 from compressor.signals import post_compress
 from compressor.tests.test_base import css_tag, test_dir
-
-from sekizai.context import SekizaiContext
 
 
 def render(template_string, context_dict=None, context=None):
@@ -131,7 +128,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
 
-        class MockDebugRequest(object):
+        class MockDebugRequest:
             GET = {settings.COMPRESS_DEBUG_TOGGLE: 'true'}
 
         context = dict(self.context, request=MockDebugRequest())

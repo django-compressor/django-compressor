@@ -7,7 +7,7 @@ from compressor.parser import ParserBase
 class BeautifulSoupParser(ParserBase):
 
     def __init__(self, content):
-        super(BeautifulSoupParser, self).__init__(content)
+        super().__init__(content)
         try:
             from bs4 import BeautifulSoup
             self.soup = BeautifulSoup(self.content, "html.parser")

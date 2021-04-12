@@ -1,27 +1,22 @@
 import copy
-from contextlib import contextmanager
-
 import io
 import os
+from contextlib import contextmanager
 from importlib import import_module
-
-from mock import patch
 from unittest import SkipTest
+from unittest.mock import patch
 
-from django.core.management import call_command
-from django.core.management.base import CommandError
+from django.conf import settings
+from django.core.management import call_command, CommandError
 from django.template import Context, Origin, Template
-from django.test import TestCase
-from django.test.utils import override_settings
+from django.test import override_settings, TestCase
+from django.urls import get_script_prefix, set_script_prefix
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
-from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_storage
 from compressor.utils import get_mod_func
-
-from django.urls import get_script_prefix, set_script_prefix
 
 
 def offline_context_generator():
@@ -79,7 +74,7 @@ def script_prefix(new_prefix):
     set_script_prefix(old_prefix)
 
 
-class OfflineTestCaseMixin(object):
+class OfflineTestCaseMixin:
     CHARSET = 'utf-8'
     template_name = 'test_compressor_offline.html'
     # Change this for each test class
@@ -212,7 +207,6 @@ class OfflineTestCaseMixin(object):
         self._test_offline(engine='jinja2')
 
     def _get_jinja2_env(self):
-        import jinja2
         import jinja2.ext
         from compressor.offline.jinja2 import url_for, SpacelessExtension
         from compressor.contrib.jinja2ext import CompressorExtension
@@ -522,9 +516,7 @@ class OfflineCompressTestCaseWithContextVariableInheritance(
     }
 
     def _render_result(self, result, separator='\n'):
-        return '\n' + super(
-            OfflineCompressTestCaseWithContextVariableInheritance, self
-        )._render_result(result, separator)
+        return '\n' + super()._render_result(result, separator)
 
 
 class OfflineCompressTestCaseWithContextVariableInheritanceSuper(
@@ -653,7 +645,7 @@ class OfflineCompressBlockSuperBaseCompressed(OfflineTestCaseMixin, TestCase):
     engines = ('django',)
 
     def setUp(self):
-        super(OfflineCompressBlockSuperBaseCompressed, self).setUp()
+        super().setUp()
 
         self.template_paths = []
         self.templates = []

@@ -23,7 +23,7 @@ class CssAbsoluteFilter(FilterBase):
     run_with_compression_disabled = True
 
     def __init__(self, *args, **kwargs):
-        super(CssAbsoluteFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.root = settings.COMPRESS_ROOT
         self.url = settings.COMPRESS_URL.rstrip('/')
         self.url_path = self.url

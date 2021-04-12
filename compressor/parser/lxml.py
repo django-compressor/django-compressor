@@ -22,7 +22,7 @@ class LxmlParser(ParserBase):
 
         self.fromstring = fromstring
         self.tostring = tostring
-        super(LxmlParser, self).__init__(content)
+        super().__init__(content)
 
     @cached_property
     def tree(self):
