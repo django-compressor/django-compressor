@@ -46,4 +46,6 @@ jobs:
           pip install tox
           python setup.py install_egg_info
       - run: tox -e ${{ matrix.versions.toxenv }}
-      - uses: codecov/codecov-action@v1.3.2
+      - run: |
+          pip install codecov
+          codecov
