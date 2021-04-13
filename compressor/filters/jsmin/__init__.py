@@ -33,7 +33,7 @@ class CalmjsFilter(FilterBase):
             self._unparser = kwargs.pop('unparser')
         except KeyError:
             self._unparser = None
-        super(CalmjsFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         try:
             import calmjs.parse
         except ImportError:

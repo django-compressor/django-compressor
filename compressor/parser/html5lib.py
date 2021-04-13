@@ -9,7 +9,7 @@ from compressor.parser import ParserBase
 class Html5LibParser(ParserBase):
 
     def __init__(self, content):
-        super(Html5LibParser, self).__init__(content)
+        super().__init__(content)
         import html5lib
         self.html5lib = html5lib
 

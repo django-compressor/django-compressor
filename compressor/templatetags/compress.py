@@ -15,7 +15,7 @@ OUTPUT_PRELOAD = 'preload'
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE, OUTPUT_PRELOAD)
 
 
-class CompressorMixin(object):
+class CompressorMixin:
 
     def get_original_content(self, context):
         raise NotImplementedError

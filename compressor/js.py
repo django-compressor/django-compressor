@@ -46,7 +46,7 @@ class JsCompressor(Compressor):
                     subnode.extra_context.update({'extra': extra})
                     ret.append(subnode.output(*args, **kwargs))
                 return '\n'.join(ret)
-        return super(JsCompressor, self).output(*args, **kwargs)
+        return super().output(*args, **kwargs)
 
     def filter_input(self, forced=False):
         """

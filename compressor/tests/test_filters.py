@@ -1,25 +1,24 @@
-from collections import defaultdict
 import io
 import os
 import sys
-import mock
+from collections import defaultdict
+from unittest import mock
 
+from django.conf import settings
+from django.test import override_settings, TestCase
 from django.utils.encoding import smart_str
-from django.test import TestCase
-from django.test.utils import override_settings
 
-from compressor.cache import cache, get_hashed_mtime, get_hashed_content
-from compressor.conf import settings
+from compressor.cache import cache, get_hashed_content, get_hashed_mtime
 from compressor.css import CssCompressor
-from compressor.filters.base import CompilerFilter, CachedCompilerFilter
-from compressor.filters.cssmin import CSSCompressorFilter, rCSSMinFilter
-from compressor.filters.css_default import CssAbsoluteFilter, CssRelativeFilter
-from compressor.filters.jsmin import JSMinFilter, SlimItFilter, CalmjsFilter
-from compressor.filters.template import TemplateFilter
+from compressor.filters import CachedCompilerFilter, CompilerFilter
+from compressor.filters.cleancss import CleanCSSFilter
 from compressor.filters.closure import ClosureCompilerFilter
+from compressor.filters.css_default import CssAbsoluteFilter, CssRelativeFilter
+from compressor.filters.cssmin import CSSCompressorFilter, rCSSMinFilter
+from compressor.filters.jsmin import CalmjsFilter, rJSMinFilter, SlimItFilter
+from compressor.filters.template import TemplateFilter
 from compressor.filters.yuglify import YUglifyCSSFilter, YUglifyJSFilter
 from compressor.filters.yui import YUICSSFilter, YUIJSFilter
-from compressor.filters.cleancss import CleanCSSFilter
 from compressor.tests.test_base import test_dir
 
 
@@ -197,7 +196,7 @@ class JsMinTestCase(TestCase):
  * django-compressor
  * Copyright (c) 2009-2014 Django Compressor authors
  */var foo="bar";"""
-        self.assertEqual(output, JSMinFilter(content).output())
+        self.assertEqual(output, rJSMinFilter(content).output())
 
 
 class SlimItTestCase(TestCase):

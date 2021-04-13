@@ -59,7 +59,7 @@ def url_for(mod, filename):
     return ""
 
 
-class Jinja2Parser(object):
+class Jinja2Parser:
     COMPRESSOR_ID = 'compressor.contrib.jinja2ext.CompressorExtension'
 
     def __init__(self, charset, env):

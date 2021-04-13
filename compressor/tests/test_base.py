@@ -30,7 +30,7 @@ def css_tag(href, **kwargs):
     return template % (href, rendered_attrs)
 
 
-class TestPrecompiler(object):
+class TestPrecompiler:
     """A filter whose output is always the string 'OUTPUT' """
     def __init__(self, content, attrs, filter_type=None, filename=None,
                  charset=None):
@@ -40,7 +40,7 @@ class TestPrecompiler(object):
         return 'OUTPUT'
 
 
-class PassthroughPrecompiler(object):
+class PassthroughPrecompiler:
     """A filter whose outputs the input unmodified """
     def __init__(self, content, attrs, filter_type=None, filename=None,
                  charset=None):

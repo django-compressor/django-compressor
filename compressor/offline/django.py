@@ -87,7 +87,7 @@ def expand_blocknode(node, block_stack, block_context):
     return expanded_nodelist
 
 
-class DjangoParser(object):
+class DjangoParser:
     def __init__(self, charset):
         self.charset = charset
 
