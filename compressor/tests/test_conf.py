@@ -5,8 +5,11 @@ from compressor.conf import settings
 from compressor.conf import CompressorConf
 
 
-default_css_filters = ['compressor.filters.css_default.CssAbsoluteFilter']
-default_js_filters = ['compressor.filters.jsmin.JSMinFilter']
+default_css_filters = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.rCSSMinFilter'
+]
+default_js_filters = ['compressor.filters.jsmin.rJSMinFilter']
 
 
 def create_conf(**attrs):

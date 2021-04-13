@@ -12,7 +12,7 @@ from django.test.utils import override_settings
 
 from compressor import cache as cachemod
 from compressor.base import SOURCE_FILE, SOURCE_HUNK
-from compressor.cache import get_cachekey, get_precompiler_cachekey, get_hexdigest
+from compressor.cache import get_cachekey, get_precompiler_cachekey
 from compressor.conf import settings
 from compressor.css import CssCompressor
 from compressor.exceptions import FilterDoesNotExist, FilterError
@@ -186,12 +186,12 @@ class CompressorTestCase(SimpleTestCase):
             r"cachekey is returning something that doesn't look like r'\w{12}'")
 
     def test_css_return_if_on(self):
-        output = css_tag('/static/CACHE/css/58a8c0714e59.css')
+        output = css_tag('/static/CACHE/css/600674ea1d3d.css')
         self.assertEqual(output, self.css_node.output().strip())
 
     def test_css_preload_output(self):
         # this needs to have the same hash as in the test above
-        out = '<link rel="preload" href="/static/CACHE/css/58a8c0714e59.css" as="style" />'
+        out = '<link rel="preload" href="/static/CACHE/css/600674ea1d3d.css" as="style" />'
         self.assertEqual(out, self.css_node.output(mode="preload"))
 
     def test_js_split(self):
@@ -233,7 +233,7 @@ class CompressorTestCase(SimpleTestCase):
 
     def test_css_override_url(self):
         self.css_node.context.update({'url': 'This is not a url, just a text'})
-        output = css_tag('/static/CACHE/css/58a8c0714e59.css')
+        output = css_tag('/static/CACHE/css/600674ea1d3d.css')
         self.assertEqual(output, self.css_node.output().strip())
 
     @override_settings(COMPRESS_PRECOMPILERS=(), COMPRESS_ENABLED=False)
@@ -291,7 +291,7 @@ class CompressorTestCase(SimpleTestCase):
         css = '<style type="text/django">p { border:10px solid {% if 1 %}green{% else %}red{% endif %};}</style>'
         css_node = CssCompressor('css', css)
         output = make_soup(css_node.output('inline'))
-        self.assertEqual(output.text, 'p { border:10px solid green;}')
+        self.assertEqual(output.text, 'p{border:10px solid green}')
 
 
 class CssMediaTestCase(SimpleTestCase):
@@ -410,6 +410,7 @@ class CompressorInDebugModeTestCase(SimpleTestCase):
 
     def setUp(self):
         self.css = '<link rel="stylesheet" href="/static/css/one.css" type="text/css" />'
+        self.expected_css_hash = '5c6a60375256'
         self.tmpdir = mkdtemp()
         new_static_root = os.path.join(self.tmpdir, "static")
         copytree(settings.STATIC_ROOT, new_static_root)
@@ -432,25 +433,27 @@ class CompressorInDebugModeTestCase(SimpleTestCase):
     def test_filename_in_debug_mode(self):
         # In debug mode, compressor should look for files using staticfiles
         # finders only, and not look into the global static directory, where
-        # files can be outdated
-        css_filename = os.path.join(settings.COMPRESS_ROOT, "css", "one.css")
-        # Store the hash of the original file's content
-        with open(css_filename) as f:
-            css_content = f.read()
-        hashed = get_hexdigest(css_content, 12)
-        # Now modify the file in the STATIC_ROOT
+        # files can be outdated. So compressor's output shouldn't change from
+        # the one pre-generated if we modify the file in STATIC_ROOT.
+        def compare():
+            expected = '<link rel="stylesheet" href="/static/CACHE/css/%s.css" type="text/css">' % self.expected_css_hash
+            compressor = CssCompressor('css', self.css)
+            compressor.storage = DefaultStorage()
+            output = compressor.output()
+            self.assertEqual(expected, output)
+
+        compare()
+
+        filename = os.path.join(settings.COMPRESS_ROOT, "css", "one.css")
         test_css_content = "p { font-family: 'test' }"
-        with open(css_filename, "a") as css:
+        with open(filename, "a") as css:
             css.write("\n")
             css.write(test_css_content)
-        # We should generate a link with the hash of the original content, not
-        # the modified one
-        expected = '<link rel="stylesheet" href="/static/CACHE/css/%s.css" type="text/css">' % hashed
-        compressor = CssCompressor('css', self.css)
-        compressor.storage = DefaultStorage()
-        output = compressor.output()
-        self.assertEqual(expected, output)
-        with open(os.path.join(settings.COMPRESS_ROOT, "CACHE", "css",
-                               "%s.css" % hashed), "r") as f:
+        compare()
+
+        result_filename = os.path.join(
+            settings.COMPRESS_ROOT, "CACHE", "css",
+            "%s.css" % self.expected_css_hash)
+        with open(result_filename, "r") as f:
             result = f.read()
         self.assertTrue(test_css_content not in result)

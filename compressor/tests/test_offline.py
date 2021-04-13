@@ -590,8 +590,8 @@ class OfflineCompressTestCaseErrors(OfflineTestCaseMixin, TestCase):
             # 'compress' nodes are processed correctly.
             self.assertEqual(4, count)
             self.assertEqual(engine, 'jinja2')
-            self.assertIn(self._render_link('7ff52cb38987'), result)
-            self.assertIn(self._render_link('2db2b4d36380'), result)
+            self.assertIn(self._render_link('187e2ce75808'), result)
+            self.assertIn(self._render_link('fffafcdf428e'), result)
 
         self.assertIn(self._render_script('eeabdac29232'), result)
         self.assertIn(self._render_script('9a7f06880ce3'), result)
