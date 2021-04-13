@@ -40,7 +40,7 @@ class TemplatetagTestCase(TestCase):
 <style type="text/css">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
 {% endcompress %}"""
-        out = css_tag("/static/CACHE/css/output.58a8c0714e59.css")
+        out = css_tag("/static/CACHE/css/output.600674ea1d3d.css")
         self.assertEqual(out, render(template, self.context))
 
     def test_css_tag_with_block(self):
@@ -49,7 +49,7 @@ class TemplatetagTestCase(TestCase):
 <style type="text/css">p { border:5px solid blue;}</style>
 <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
 {% endcompress %}"""
-        out = css_tag("/static/CACHE/css/block_name.393dbcddb48e.css")
+        out = css_tag("/static/CACHE/css/block_name.a1e074d0c4ac.css")
         self.assertEqual(out, render(template, self.context))
 
     def test_missing_rel_leaves_empty_result(self):
@@ -66,7 +66,7 @@ class TemplatetagTestCase(TestCase):
 <style type="text/css">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
 {% endcompress %}"""
-        out = css_tag("/static/CACHE/css/output.58a8c0714e59.css")
+        out = css_tag("/static/CACHE/css/output.600674ea1d3d.css")
         self.assertEqual(out, render(template, self.context))
 
     def test_uppercase_rel(self):
@@ -75,7 +75,7 @@ class TemplatetagTestCase(TestCase):
 <style type="text/css">p { border:5px solid green;}</style>
 <link rel="StyleSheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
 {% endcompress %}"""
-        out = css_tag("/static/CACHE/css/output.58a8c0714e59.css")
+        out = css_tag("/static/CACHE/css/output.600674ea1d3d.css")
         self.assertEqual(out, render(template, self.context))
 
     def test_nonascii_css_tag(self):
@@ -84,7 +84,7 @@ class TemplatetagTestCase(TestCase):
         <style type="text/css">p { border:5px solid green;}</style>
         {% endcompress %}
         """
-        out = css_tag("/static/CACHE/css/output.4263023f49d6.css")
+        out = css_tag("/static/CACHE/css/output.d5444a1ab4a3.css")
         self.assertEqual(out, render(template, self.context))
 
     def test_js_tag(self):
@@ -145,11 +145,10 @@ class TemplatetagTestCase(TestCase):
         <style type="text/css">p { border:5px solid green;}</style>
         <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
         {% endcompress %}"""
-
         out_js = '<script>obj={};;obj.value="value";;</script>'
-        out_css = '\n'.join(('<style type="text/css">body { background:#990; }',
-                             'p { border:5px solid green;}',
-                             'body { color:#fff; }</style>'))
+        out_css = ('<style type="text/css">body{background:#990}'
+                   'p{border:5px solid green}'
+                   'body{color:#fff}</style>')
         self.assertEqual(out_js + out_css, render(template, self.context))
 
     def test_named_compress_tag(self):

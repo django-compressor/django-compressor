@@ -6,9 +6,13 @@ from django.template.utils import InvalidTemplateEngineError
 from appconf import AppConf
 
 
-default_filters = dict(
-    css=['compressor.filters.css_default.CssAbsoluteFilter'],
-    js=['compressor.filters.jsmin.JSMinFilter'])
+default_filters = {
+    'css': [
+        'compressor.filters.css_default.CssAbsoluteFilter',
+        'compressor.filters.cssmin.rCSSMinFilter'
+    ],
+    'js': ['compressor.filters.jsmin.rJSMinFilter']
+}
 
 
 class CompressorConf(AppConf):
