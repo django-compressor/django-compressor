@@ -11,9 +11,6 @@ Django Compressor
     :alt: Build Status
     :target: https://github.com/django-compressor/django-compressor/actions?query=workflow%3ACI
 
-.. image:: https://caniusepython3.com/project/django_compressor.svg
-    :target: https://caniusepython3.com/project/django_compressor
-
 Django Compressor processes, combines and minifies linked and inline
 Javascript or CSS in a Django template into cacheable static files.
 
