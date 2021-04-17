@@ -1,4 +1,5 @@
 import os
+import warnings
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.template.utils import InvalidTemplateEngineError
@@ -151,7 +152,11 @@ class CompressorConf(AppConf):
             setting_name = '%s_FILTERS' % kind.upper()
             filters = data.pop(setting_name)
             if filters is not None:
-                # filters for this kind are set using <kind>_FILTERS
+                warnings.warn(
+                    "COMPRESS_{setting_name} setting is deprecated and will "
+                    "be removed in django-compressor 3.0. "
+                    "Use COMPRESS_FILTERS instead."
+                    .format(setting_name=setting_name), DeprecationWarning)
                 if kind in data['FILTERS']:
                     raise ImproperlyConfigured(
                         "The setting {kind_setting} "
