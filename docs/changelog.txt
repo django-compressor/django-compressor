@@ -1,6 +1,19 @@
 Changelog
 =========
 
+v3.0 (2021-??-??)
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.4.1...3.0>`_
+
+- Officially support for Python 3.9, Django 3.1 and 3.2
+- Drop support for Django 1.11 and 2.1
+- Drop support for Python 2.x and 3.4
+- Require django-sekizai 2.0 for django-sekizai extension
+- Correctly handle relative paths in "extends" tags (#979)
+- Enable rCSSMinFilter by default (#888)
+- Fix various deprecation warnings
+- Add ability to pass a logger to various classes & methods
+
 v2.4.1 (2021-04-17)
 -----------------
 
