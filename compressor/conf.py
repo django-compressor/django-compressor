@@ -153,9 +153,10 @@ class CompressorConf(AppConf):
             filters = data.pop(setting_name)
             if filters is not None:
                 warnings.warn(
-                    f"COMPRESS_{setting_name} setting is deprecated and will "
+                    "COMPRESS_{setting_name} setting is deprecated and will "
                     "be removed in django-compressor 3.0. "
-                    "Use COMPRESS_FILTERS instead.", DeprecationWarning)
+                    "Use COMPRESS_FILTERS instead."
+                    .format(setting_name=setting_name), DeprecationWarning)
                 if kind in data['FILTERS']:
                     raise ImproperlyConfigured(
                         "The setting {kind_setting} "
