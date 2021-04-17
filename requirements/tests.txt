@@ -3,7 +3,7 @@ coverage==5.5
 html5lib==1.0.1
 mock==2.0.0
 Jinja2==2.11.3
-lxml==4.6.2
+lxml==4.6.3
 beautifulsoup4==4.6.3
 django-sekizai==2.0.0
 csscompressor==0.9.5
