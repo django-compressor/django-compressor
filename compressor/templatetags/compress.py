@@ -60,13 +60,13 @@ class CompressorMixin:
         return (settings.COMPRESS_ENABLED
                 and settings.COMPRESS_OFFLINE) or forced
 
-    def render_offline(self, context):
+    def render_offline(self, context, mode):
         """
         If enabled and in offline mode, and not forced check the offline cache
         and return the result if given
         """
         original_content = self.get_original_content(context)
-        key = get_offline_hexdigest(original_content)
+        key = get_offline_hexdigest(mode + original_content)
         offline_manifest = get_offline_manifest()
         if key in offline_manifest:
             return offline_manifest[key].replace(
@@ -96,7 +96,7 @@ class CompressorMixin:
 
         # See if it has been rendered offline
         if self.is_offline_compression_enabled(forced) and not forced:
-            return self.render_offline(context)
+            return self.render_offline(context, mode)
 
         # Take a shortcut if we really don't have anything to do
         if (not settings.COMPRESS_ENABLED
