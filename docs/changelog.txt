@@ -19,7 +19,7 @@ v2.4.1 (2021-04-17)
 
 `Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.4...2.4.1>`_
 
-- Raise proper ``DeprecationWarning`` for ``COMPRESS_FILTERS`` and ``COMPRESS_CSS_FILTERS``
+- Raise proper ``DeprecationWarning`` for ``COMPRESS_JS_FILTERS`` and ``COMPRESS_CSS_FILTERS``
 
 
 v2.4 (2019-12-31)
