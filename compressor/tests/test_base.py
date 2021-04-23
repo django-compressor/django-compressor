@@ -266,7 +266,7 @@ class CompressorTestCase(SimpleTestCase):
         css = '<style type="text/foobar">p { border:10px solid red;}</style>'
         css_node = CssCompressor('css', css)
         output = make_soup(css_node.output('inline'))
-        self.assertEqual(output.text, 'OUTPUT')
+        self.assertEqual(output.style.contents[0], 'OUTPUT')
 
     @override_settings(COMPRESS_PRECOMPILERS=(
         ('text/foobar', 'compressor.tests.test_base.NonexistentFilter'),
@@ -291,7 +291,7 @@ class CompressorTestCase(SimpleTestCase):
         css = '<style type="text/django">p { border:10px solid {% if 1 %}green{% else %}red{% endif %};}</style>'
         css_node = CssCompressor('css', css)
         output = make_soup(css_node.output('inline'))
-        self.assertEqual(output.text, 'p{border:10px solid green}')
+        self.assertEqual(output.style.contents[0], 'p{border:10px solid green}')
 
 
 class CssMediaTestCase(SimpleTestCase):
