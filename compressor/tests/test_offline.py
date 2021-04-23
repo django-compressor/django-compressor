@@ -238,7 +238,7 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
 
     @patch.object(CompressCommand, 'compress')
     def test_handle_no_args(self, compress_mock):
-        compress_mock.return_value = {}, 1, []
+        compress_mock.return_value = {}, {}, 1, []
         CompressCommand().handle()
         self.assertEqual(compress_mock.call_count, 1)
 
@@ -258,7 +258,7 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
 
     @patch.object(CompressCommand, 'compress')
     def test_handle_compress_offline_disabled_force(self, compress_mock):
-        compress_mock.return_value = {}, 1, []
+        compress_mock.return_value = {}, {}, 1, []
         with self.settings(COMPRESS_OFFLINE=False):
             CompressCommand().handle(force=True)
         self.assertEqual(compress_mock.call_count, 1)

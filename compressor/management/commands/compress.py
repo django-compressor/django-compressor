@@ -1,6 +1,7 @@
 # flake8: noqa
 import os
 import sys
+import json
 
 from collections import OrderedDict, defaultdict
 from fnmatch import fnmatch
@@ -188,6 +189,7 @@ class Command(BaseCommand):
         nodes_count = 0
         block_count = 0
         offline_manifest = OrderedDict()
+        rendered_map = OrderedDict()
         results = []
         for context_dict in contexts:
             compressor_nodes = OrderedDict()
@@ -235,6 +237,7 @@ class Command(BaseCommand):
                             settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
                         )
                         offline_manifest[key] = result
+                        rendered_map[key] = {'rendered': rendered, 'template_name': template.template_name}
                         context.pop()
                         results.append(result)
                         block_count += 1
@@ -248,7 +251,7 @@ class Command(BaseCommand):
         if verbosity >= 1:
             log.write("done\nCompressed %d block(s) from %d template(s) for %d context(s).\n" %
                       (block_count, nodes_count, contexts_count))
-        return offline_manifest, block_count, results
+        return offline_manifest, rendered_map, block_count, results
 
     def handle_extensions(self, extensions=('html',)):
         """
@@ -292,14 +295,23 @@ class Command(BaseCommand):
         engines = [e.strip() for e in options.get("engines", [])] or ["django"]
 
         final_offline_manifest = {}
+        final_rendered_map = {}
         final_block_count = 0
         final_results = []
         for engine in engines:
-            offline_manifest, block_count, results = self.compress(engine, extensions, verbosity, follow_links, log)
+            offline_manifest, rendered_map, block_count, results = self.compress(engine, extensions, verbosity, follow_links, log)
             final_results.extend(results)
             final_block_count += block_count
             final_offline_manifest.update(offline_manifest)
+            final_rendered_map.update(rendered_map)
         write_offline_manifest(final_offline_manifest)
+        if verbosity >= 2:
+            log.write("Rendered strings used to create manifest keys:\n\n")
+            for key in final_rendered_map:
+                log.write("-" * 20)
+                log.write("key: %s" % (key, ))
+                log.write("template name: %s" % (final_rendered_map[key]['template_name'], ))
+                log.write("rendered string: %s" % (final_rendered_map[key]['rendered'], ))
         return final_block_count, final_results
 
 Command.requires_system_checks = False
