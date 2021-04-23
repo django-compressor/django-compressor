@@ -17,8 +17,6 @@ Javascript or CSS in a Django template into cacheable static files.
 It supports compilers such as coffeescript, LESS and SASS and is
 extensible by custom processing steps.
 
-Django Compressor is compatible with Django 1.11 and newer.
-
 How it works
 ------------
 In your templates, all HTML code between the tags ``{% compress js/css %}`` and
