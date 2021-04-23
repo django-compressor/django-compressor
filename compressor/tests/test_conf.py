@@ -30,12 +30,6 @@ class ConfTestCase(SimpleTestCase):
         self.assertEqual(settings.COMPRESS_FILTERS['css'], default_css_filters)
         self.assertEqual(settings.COMPRESS_FILTERS['js'], default_js_filters)
 
-    @override_settings(COMPRESS_FILTERS=dict())
-    def test_filters_by_default(self):
-        conf = create_conf()
-        self.assertEqual(conf.FILTERS['css'], default_css_filters)
-        self.assertEqual(conf.FILTERS['js'], default_js_filters)
-
     @override_settings(COMPRESS_FILTERS=dict(css=['ham'], js=['spam']))
     def test_filters_by_main_setting(self):
         conf = create_conf()
