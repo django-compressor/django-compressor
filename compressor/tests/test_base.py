@@ -266,7 +266,7 @@ class CompressorTestCase(SimpleTestCase):
         css = '<style type="text/foobar">p { border:10px solid red;}</style>'
         css_node = CssCompressor('css', css)
         output = make_soup(css_node.output('inline'))
-        self.assertEqual(output.text, 'OUTPUT')
+        self.assertEqual(output.style.contents[0], 'OUTPUT')
 
     @override_settings(COMPRESS_PRECOMPILERS=(
         ('text/foobar', 'compressor.tests.test_base.NonexistentFilter'),
@@ -291,7 +291,7 @@ class CompressorTestCase(SimpleTestCase):
         css = '<style type="text/django">p { border:10px solid {% if 1 %}green{% else %}red{% endif %};}</style>'
         css_node = CssCompressor('css', css)
         output = make_soup(css_node.output('inline'))
-        self.assertEqual(output.text, 'p{border:10px solid green}')
+        self.assertEqual(output.style.contents[0], 'p{border:10px solid green}')
 
 
 class CssMediaTestCase(SimpleTestCase):
@@ -307,14 +307,14 @@ class CssMediaTestCase(SimpleTestCase):
         links = make_soup(css_node.output()).find_all('link')
         media = ['screen', 'print', 'all', None]
         self.assertEqual(len(links), 4)
-        self.assertEqual(media, [l.get('media', None) for l in links])
+        self.assertEqual(media, [link.get('media', None) for link in links])
 
     def test_avoid_reordering_css(self):
         css = self.css + '<style type="text/css" media="print">p { border:10px solid red;}</style>'
         css_node = CssCompressor('css', css)
         media = ['screen', 'print', 'all', None, 'print']
         links = make_soup(css_node.output()).find_all('link')
-        self.assertEqual(media, [l.get('media', None) for l in links])
+        self.assertEqual(media, [link.get('media', None) for link in links])
 
     @override_settings(COMPRESS_PRECOMPILERS=(
         ('text/foobar', '%s %s {infile} {outfile}' % (sys.executable, os.path.join(test_dir, 'precompiler.py'))),
@@ -327,9 +327,9 @@ class CssMediaTestCase(SimpleTestCase):
         css_node = CssCompressor('css', css)
         output = make_soup(css_node.output()).find_all(['link', 'style'])
         self.assertEqual(['/static/css/one.css', '/static/css/two.css', None],
-                         [l.get('href', None) for l in output])
+                         [link.get('href', None) for link in output])
         self.assertEqual(['screen', 'screen', 'screen'],
-                         [l.get('media', None) for l in output])
+                         [link.get('media', None) for link in output])
 
 
 @override_settings(COMPRESS_VERBOSE=True)
