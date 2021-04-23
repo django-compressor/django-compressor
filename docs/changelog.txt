@@ -10,10 +10,11 @@ v3.0 (2021-??-??)
 - Drop support for Python 2.x and 3.4
 - Require django-sekizai 2.0 for django-sekizai extension
 - Make template compression in compress command threaded to improve performance
-- Correctly handle relative paths in "extends" tags (#979)
-- Enable rCSSMinFilter by default (#888)
+- Correctly handle relative paths in ``extends`` tags (#979)
+- Enable ``rCSSMinFilter`` by default (#888)
 - Fix various deprecation warnings
 - Add ability to pass a logger to various classes & methods
+- Removed deprecated ``COMPRESS_JS_FILTERS`` and ``COMPRESS_CSS_FILTERS`` settings
 
 v2.4.1 (2021-04-17)
 -----------------

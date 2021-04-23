@@ -1,19 +1,9 @@
 import os
-import warnings
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.template.utils import InvalidTemplateEngineError
 
 from appconf import AppConf
-
-
-default_filters = {
-    'css': [
-        'compressor.filters.css_default.CssAbsoluteFilter',
-        'compressor.filters.cssmin.rCSSMinFilter'
-    ],
-    'js': ['compressor.filters.jsmin.rJSMinFilter']
-}
 
 
 class CompressorConf(AppConf):
@@ -36,10 +26,13 @@ class CompressorConf(AppConf):
     URL = None
     ROOT = None
 
-    # Filters are resolved in configure()
-    FILTERS = {}
-    CSS_FILTERS = None
-    JS_FILTERS = None
+    FILTERS = {
+        'css': [
+            'compressor.filters.css_default.CssAbsoluteFilter',
+            'compressor.filters.cssmin.rCSSMinFilter'
+        ],
+        'js': ['compressor.filters.jsmin.rJSMinFilter']
+    }
 
     CSS_HASHING_METHOD = 'mtime'
 
@@ -145,31 +138,3 @@ class CompressorConf(AppConf):
                                        "must be a list or tuple. Check for "
                                        "missing commas.")
         return value
-
-    def configure(self):
-        data = self.configured_data
-        for kind in {'css', 'js'}:
-            setting_name = '%s_FILTERS' % kind.upper()
-            filters = data.pop(setting_name)
-            if filters is not None:
-                warnings.warn(
-                    "COMPRESS_{setting_name} setting is deprecated and will "
-                    "be removed in django-compressor 3.0. "
-                    "Use COMPRESS_FILTERS instead."
-                    .format(setting_name=setting_name), DeprecationWarning)
-                if kind in data['FILTERS']:
-                    raise ImproperlyConfigured(
-                        "The setting {kind_setting} "
-                        "conflicts with {main_setting}['{kind}']. "
-                        "Remove either setting and update the other to "
-                        "the correct list of filters for {kind} resources"
-                        ", we recommend you keep the latter."
-                        .format(
-                            kind_setting=self._meta.prefixed_name(setting_name),
-                            main_setting=self._meta.prefixed_name('FILTERS'),
-                            kind=kind))
-                data['FILTERS'][kind] = filters
-            elif kind not in data['FILTERS']:
-                # filters are not defined
-                data['FILTERS'][kind] = default_filters[kind]
-        return data
