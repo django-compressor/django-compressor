@@ -1,6 +1,5 @@
 from django.test import SimpleTestCase
 from django.test.utils import override_settings
-from django.core.exceptions import ImproperlyConfigured
 from compressor.conf import settings
 from compressor.conf import CompressorConf
 
