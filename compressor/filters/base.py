@@ -117,10 +117,10 @@ class CompilerFilter(FilterBase):
         settings.FILE_CHARSET if settings.is_overridden('FILE_CHARSET') else
         'utf-8'
     )
+    cwd = None
 
     def __init__(self, content, command=None, **kwargs):
         super().__init__(content, **kwargs)
-        self.cwd = None
 
         if command:
             self.command = command
