@@ -79,6 +79,25 @@ Result:
 
         <script type="text/javascript" src="/static/CACHE/js/base.3f33b9146e12.js" charset="utf-8"></script>
 
+Javascript ``async`` and ``defer`` are supported:
+
+    .. code-block:: django
+
+        {% compress js %}
+        <script src="/static/js/one.js" async></script>
+        {% endcompress %}
+        {% compress js %}
+        <script src="/static/js/one.js" defer></script>
+        {% endcompress %}
+
+Result:
+
+    .. code-block:: django
+
+        <script async src="/static/CACHE/js/output.ccbb802fbf33.js"></script>
+        <script defer src="/static/CACHE/js/output.5bd495b0eb05.js"></script>
+
+
 .. note::
 
     Remember that django-compressor will try to :ref:`group outputs by media <css_notes>`.
