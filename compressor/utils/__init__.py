@@ -1,6 +1,5 @@
-import os
-
 from compressor.exceptions import FilterError
+from django.urls import get_mod_func
 
 
 def get_class(class_string, exception=FilterError):
@@ -19,24 +18,3 @@ def get_class(class_string, exception=FilterError):
             raise exception('Failed to import %s. ImportError is: %s' % (class_string, e))
 
         raise exception("Invalid class path '%s'" % class_string)
-
-
-def get_mod_func(callback):
-    """
-    Converts 'django.views.news.stories.story_detail' to
-    ('django.views.news.stories', 'story_detail')
-    """
-    try:
-        dot = callback.rindex('.')
-    except ValueError:
-        return callback, ''
-    return callback[:dot], callback[dot + 1:]
-
-
-def get_pathext(default_pathext=None):
-    """
-    Returns the path extensions from environment or a default
-    """
-    if default_pathext is None:
-        default_pathext = os.pathsep.join(['.COM', '.EXE', '.BAT', '.CMD'])
-    return os.environ.get('PATHEXT', default_pathext)
