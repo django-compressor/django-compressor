@@ -48,7 +48,7 @@ html5lib_ based parser, as well as an abstract base class that makes it easy to
 write a custom parser.
 
 Django Compressor also comes with built-in support for
-`YUI CSS and JS`_ compressor, `yUglify CSS and JS`_ compressor, the Google's
+`YUI CSS and JS`_ compressor, `yUglify CSS and JS`_ compressor, Google's
 `Closure Compiler`_, a Python port of Douglas Crockford's JSmin_, a Python port
 of the YUI CSS Compressor csscompressor_ and a filter to convert (some) images into
 `data URIs`_.
