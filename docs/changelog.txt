@@ -15,6 +15,7 @@ v3.0 (2021-??-??)
 - Fix various deprecation warnings
 - Add ability to pass a logger to various classes & methods
 - Removed deprecated ``COMPRESS_JS_FILTERS`` and ``COMPRESS_CSS_FILTERS`` settings
+- In class CompilerFilter set cwd as an attribute so that it's easier to override in child classes.
 
 v2.4.1 (2021-04-17)
 -----------------
