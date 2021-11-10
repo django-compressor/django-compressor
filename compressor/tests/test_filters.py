@@ -97,6 +97,9 @@ class PrecompilerTestCase(TestCase):
         self.assertEqual(type(compiler.input()), str)
 
     def test_precompiler_cache(self):
+        # The cache may already have data in it depending on the order the tests are
+        # run, so start by clearing it:
+        cache.clear()
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
         compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
         self.assertEqual("body { color:#990; }", compiler.input())
