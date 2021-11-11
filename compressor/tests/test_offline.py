@@ -60,6 +60,18 @@ class LazyScriptNamePrefixedUrl(str):
         """
         return str(self).split(*args, **kwargs)
 
+    def replace(self, *args, **kwargs):
+        """ Override ``.replace()`` to make it work with ``{% static %}``.
+
+        In ``django.core.files.storage``, ``FileSystemStorage.url()`` passes
+        this object to ``urllib.parse.urljoin``.
+
+        In ``urrlib.parse``, the function that calls ``replace()`` is
+        ``_remove_unsafe_bytes_from_url()``.
+
+        """
+        return str(self).replace(*args, **kwargs)
+
 
 @contextmanager
 def script_prefix(new_prefix):
