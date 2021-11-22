@@ -13,8 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         versions:
-          - python: 3.5
-            toxenv: py35-2.2.X
           - python: 3.6
             toxenv: py36-2.2.X
           - python: 3.7
