@@ -2,6 +2,7 @@
 import os
 import sys
 import concurrent.futures
+from threading import Lock
 
 from collections import OrderedDict, defaultdict
 from fnmatch import fnmatch
@@ -21,6 +22,7 @@ from compressor.exceptions import (OfflineGenerationError, TemplateSyntaxError,
                                    TemplateDoesNotExist)
 from compressor.utils import get_mod_func
 
+offline_manifest_lock = Lock()
 
 class Command(BaseCommand):
     help = "Compress content outside of the request/response cycle"
@@ -244,14 +246,22 @@ class Command(BaseCommand):
                 rendered = parser.render_nodelist(template, context, node)
                 key = get_offline_hexdigest(rendered)
 
-                if key in offline_manifest:
-                    continue
+                # Atomically check if the key exists in offline manifest.
+                # If it doesn't, set a placeholder key (None). This is to prevent
+                # concurrent _compress_template instances from rendering the
+                # same node, and then writing to the same file.
+                with offline_manifest_lock:
+                    if key in offline_manifest:
+                        continue
+
+                    offline_manifest[key] = None
 
                 try:
                     result = parser.render_node(template, context, node)
                 except Exception as e:
                     errors.append(CommandError("An error occurred during rendering %s: "
                                         "%s" % (template.template_name, smart_str(e))))
+                    del offline_manifest[key]
                     return
                 result = result.replace(
                     settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
