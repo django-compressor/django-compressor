@@ -1,29 +1,22 @@
-from __future__ import with_statement, unicode_literals
 import copy
-from contextlib import contextmanager
-
 import io
 import os
+from contextlib import contextmanager
 from importlib import import_module
-
-from mock import patch
 from unittest import SkipTest
+from unittest.mock import patch
 
-import six
-from django.core.management import call_command
-from django.core.management.base import CommandError
-from django.template import Template, Context
-from django.test import TestCase
-from django.test.utils import override_settings
+from django.conf import settings
+from django.core.management import call_command, CommandError
+from django.template import Context, Origin, Template
+from django.test import override_settings, TestCase
+from django.urls import get_script_prefix, set_script_prefix
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
-from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_storage
 from compressor.utils import get_mod_func
-
-from django.urls import get_script_prefix, set_script_prefix
 
 
 def offline_context_generator():
@@ -35,7 +28,7 @@ def static_url_context_generator():
     yield {'STATIC_URL': settings.STATIC_URL}
 
 
-class LazyScriptNamePrefixedUrl(six.text_type):
+class LazyScriptNamePrefixedUrl(str):
     """
     Lazy URL with ``SCRIPT_NAME`` WSGI param as path prefix.
 
@@ -65,7 +58,19 @@ class LazyScriptNamePrefixedUrl(six.text_type):
         """
         Override ``.split()`` method to make it work with ``{% static %}``.
         """
-        return six.text_type(self).split(*args, **kwargs)
+        return str(self).split(*args, **kwargs)
+
+    def replace(self, *args, **kwargs):
+        """ Override ``.replace()`` to make it work with ``{% static %}``.
+
+        In ``django.core.files.storage``, ``FileSystemStorage.url()`` passes
+        this object to ``urllib.parse.urljoin``.
+
+        In ``urrlib.parse``, the function that calls ``replace()`` is
+        ``_remove_unsafe_bytes_from_url()``.
+
+        """
+        return str(self).replace(*args, **kwargs)
 
 
 @contextmanager
@@ -81,7 +86,7 @@ def script_prefix(new_prefix):
     set_script_prefix(old_prefix)
 
 
-class OfflineTestCaseMixin(object):
+class OfflineTestCaseMixin:
     CHARSET = 'utf-8'
     template_name = 'test_compressor_offline.html'
     # Change this for each test class
@@ -131,9 +136,11 @@ class OfflineTestCaseMixin(object):
             self.template_path = os.path.join(
                 django_template_dir, self.template_name)
 
+            origin = Origin(name=self.template_path,  # Absolute path
+                            template_name=self.template_name)  # Loader-relative path
             with io.open(self.template_path,
                          encoding=self.CHARSET) as file_:
-                self.template = Template(file_.read())
+                self.template = Template(file_.read(), origin=origin)
 
         if 'jinja2' in self.engines:
             self.template_path_jinja2 = os.path.join(
@@ -188,7 +195,7 @@ class OfflineTestCaseMixin(object):
 
     def _render_result(self, result, separator='\n'):
         return (separator.join(result) + '\n').replace(
-            settings.COMPRESS_URL_PLACEHOLDER, six.text_type(settings.COMPRESS_URL)
+            settings.COMPRESS_URL_PLACEHOLDER, str(settings.COMPRESS_URL)
         )
 
     def _test_offline(self, engine):
@@ -212,7 +219,6 @@ class OfflineTestCaseMixin(object):
         self._test_offline(engine='jinja2')
 
     def _get_jinja2_env(self):
-        import jinja2
         import jinja2.ext
         from compressor.offline.jinja2 import url_for, SpacelessExtension
         from compressor.contrib.jinja2ext import CompressorExtension
@@ -522,9 +528,7 @@ class OfflineCompressTestCaseWithContextVariableInheritance(
     }
 
     def _render_result(self, result, separator='\n'):
-        return '\n' + super(
-            OfflineCompressTestCaseWithContextVariableInheritance, self
-        )._render_result(result, separator)
+        return '\n' + super()._render_result(result, separator)
 
 
 class OfflineCompressTestCaseWithContextVariableInheritanceSuper(
@@ -598,8 +602,8 @@ class OfflineCompressTestCaseErrors(OfflineTestCaseMixin, TestCase):
             # 'compress' nodes are processed correctly.
             self.assertEqual(4, count)
             self.assertEqual(engine, 'jinja2')
-            self.assertIn(self._render_link('7ff52cb38987'), result)
-            self.assertIn(self._render_link('2db2b4d36380'), result)
+            self.assertIn(self._render_link('187e2ce75808'), result)
+            self.assertIn(self._render_link('fffafcdf428e'), result)
 
         self.assertIn(self._render_script('eeabdac29232'), result)
         self.assertIn(self._render_script('9a7f06880ce3'), result)
@@ -653,7 +657,7 @@ class OfflineCompressBlockSuperBaseCompressed(OfflineTestCaseMixin, TestCase):
     engines = ('django',)
 
     def setUp(self):
-        super(OfflineCompressBlockSuperBaseCompressed, self).setUp()
+        super().setUp()
 
         self.template_paths = []
         self.templates = []
@@ -745,6 +749,15 @@ class OfflineCompressExtendsRecursionTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual(count, 1)
 
 
+class OfflineCompressExtendsRelativeTestCase(SuperMixin, OfflineTestCaseMixin, TestCase):
+    """
+    Test that templates extending templates using relative paths
+    (e.g. ./base.html) are evaluated correctly
+    """
+    templates_dir = 'test_extends_relative'
+    expected_hash = '817b5defb197'
+
+
 class TestCompressCommand(OfflineTestCaseMixin, TestCase):
     templates_dir = "test_compress_command"
 
@@ -828,12 +841,12 @@ class OfflineCompressTestCaseWithLazyStringAlikeUrls(OfflineCompressTestCaseWith
         for script_name in ['', '/app/prefix/', '/another/prefix/']:
             with script_prefix(script_name):
                 self.assertEqual(
-                    six.text_type(settings.STATIC_URL),
+                    str(settings.STATIC_URL),
                     script_name.rstrip('/') + '/static/'
                 )
 
                 self.assertEqual(
-                    six.text_type(settings.COMPRESS_URL),
+                    str(settings.COMPRESS_URL),
                     script_name.rstrip('/') + '/static/'
                 )
 
@@ -841,4 +854,4 @@ class OfflineCompressTestCaseWithLazyStringAlikeUrls(OfflineCompressTestCaseWith
                 actual_result = self._render_template(engine)
 
                 self.assertEqual(actual_result, expected_result)
-                self.assertIn(six.text_type(settings.COMPRESS_URL), actual_result)
+                self.assertIn(str(settings.COMPRESS_URL), actual_result)

@@ -267,20 +267,6 @@ Backend settings
       .. _`Slim It`: https://github.com/rspivak/slimit
       .. _`Calmjs`: https://github.com/calmjs/calmjs.parse
 
-.. attribute:: COMPRESS_CSS_FILTERS
-
-    Backwards-compatible alias for the ``'css'`` key of
-    :attr:`~django.conf.settings.COMPRESS_FILTERS`.
-    If you haven't defined that key you can still continue
-    using this setting, although we encourage you to convert it to the new form.
-
-.. attribute:: COMPRESS_JS_FILTERS
-
-    Backwards-compatible alias for the ``'js'`` key of
-    :attr:`~django.conf.settings.COMPRESS_FILTERS`.
-    If you haven't defined that key you can still continue
-    using this setting, although we encourage you to convert it to the new form.
-
 .. attribute:: COMPRESS_PRECOMPILERS
 
     :Default: ``()``

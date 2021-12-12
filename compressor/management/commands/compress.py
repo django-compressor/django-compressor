@@ -1,18 +1,18 @@
-from __future__ import unicode_literals
 # flake8: noqa
 import os
 import sys
+import concurrent.futures
+from threading import Lock
 
 from collections import OrderedDict, defaultdict
 from fnmatch import fnmatch
 from importlib import import_module
 
 import django
-import six
 from django.core.management.base import BaseCommand, CommandError
 import django.template
 from django.template import Context
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
 from django.template import engines
 
@@ -22,6 +22,7 @@ from compressor.exceptions import (OfflineGenerationError, TemplateSyntaxError,
                                    TemplateDoesNotExist)
 from compressor.utils import get_mod_func
 
+offline_manifest_lock = Lock()
 
 class Command(BaseCommand):
     help = "Compress content outside of the request/response cycle"
@@ -112,7 +113,7 @@ class Command(BaseCommand):
                         'get_template_sources', None)
                     if get_template_sources is None:
                         get_template_sources = loader.get_template_sources
-                    paths.update(smart_text(origin) for origin in get_template_sources(''))
+                    paths.update(smart_str(origin) for origin in get_template_sources(''))
                 except (ImportError, AttributeError, TypeError):
                     # Yeah, this didn't work out so well, let's move on
                     pass
@@ -129,7 +130,7 @@ class Command(BaseCommand):
 
             for path in paths:
                 for root, dirs, files in os.walk(path, followlinks=follow_links):
-                    templates.update(os.path.join(root, name)
+                    templates.update(os.path.relpath(os.path.join(root, name), path)
                         for name in files if not name.startswith('.') and
                             any(fnmatch(name, "*%s" % glob) for glob in extensions))
         elif engine == 'jinja2':
@@ -147,7 +148,7 @@ class Command(BaseCommand):
             log.write("Found templates:\n\t" + "\n\t".join(templates) + "\n")
 
         contexts = settings.COMPRESS_OFFLINE_CONTEXT
-        if isinstance(contexts, six.string_types):
+        if isinstance(contexts, str):
             try:
                 module, function = get_mod_func(contexts)
                 contexts = getattr(import_module(module), function)()
@@ -174,7 +175,7 @@ class Command(BaseCommand):
                 continue
             except TemplateSyntaxError as e:  # broken template -> ignore
                 if verbosity >= 1:
-                    log.write("Invalid template %s: %s\n" % (template_name, smart_text(e)))
+                    log.write("Invalid template %s: %s\n" % (template_name, smart_str(e)))
                 continue
             except TemplateDoesNotExist:  # non existent template -> ignore
                 if verbosity >= 1:
@@ -186,11 +187,10 @@ class Command(BaseCommand):
                               "template %s\n" % template_name)
                 continue
 
-        contexts_count = 0
         nodes_count = 0
-        block_count = 0
         offline_manifest = OrderedDict()
-        results = []
+        errors = []
+
         for context_dict in contexts:
             compressor_nodes = OrderedDict()
             for template in fine_templates:
@@ -202,7 +202,7 @@ class Command(BaseCommand):
                     # Could be an error in some base template
                     if verbosity >= 1:
                         log.write("Error parsing template %s: %s\n" %
-                                  (template.template_name, smart_text(e)))
+                                  (template.template_name, smart_str(e)))
                     continue
 
                 if nodes:
@@ -211,37 +211,19 @@ class Command(BaseCommand):
                         nodes_count += 1
                         template_nodes.setdefault(node, []).append(context)
 
+            pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
             for template, nodes in compressor_nodes.items():
                 template._log = log
                 template._log_verbosity = verbosity
 
-                for node, node_contexts in nodes.items():
-                    for context in node_contexts:
-                        context.push()
-                        if not parser.process_template(template, context):
-                            continue
+                pool.submit(self._compress_template, offline_manifest, nodes, parser, template, errors)
 
-                        parser.process_node(template, context, node)
-                        rendered = parser.render_nodelist(template, context, node)
-                        key = get_offline_hexdigest(rendered)
+            pool.shutdown(wait=True)
 
-                        if key in offline_manifest:
-                            continue
-
-                        try:
-                            result = parser.render_node(template, context, node)
-                        except Exception as e:
-                            raise CommandError("An error occurred during rendering %s: "
-                                               "%s" % (template.template_name, smart_text(e)))
-                        result = result.replace(
-                            settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
-                        )
-                        offline_manifest[key] = result
-                        context.pop()
-                        results.append(result)
-                        block_count += 1
-
-        if not nodes_count:
+        # If errors exist, raise the first one in the list
+        if errors:
+            raise errors[0]
+        elif not nodes_count:
             raise OfflineGenerationError(
                 "No 'compress' template tags found in templates."
                 "Try running compress command with --follow-links and/or"
@@ -249,8 +231,43 @@ class Command(BaseCommand):
 
         if verbosity >= 1:
             log.write("done\nCompressed %d block(s) from %d template(s) for %d context(s).\n" %
-                      (block_count, nodes_count, contexts_count))
-        return offline_manifest, block_count, results
+                      (len(offline_manifest), nodes_count, len(contexts)))
+        return offline_manifest, len(offline_manifest), offline_manifest.values()
+
+    @staticmethod
+    def _compress_template(offline_manifest, nodes, parser, template, errors):
+        for node, node_contexts in nodes.items():
+            for context in node_contexts:
+                context.push()
+                if not parser.process_template(template, context):
+                    continue
+
+                parser.process_node(template, context, node)
+                rendered = parser.render_nodelist(template, context, node)
+                key = get_offline_hexdigest(rendered)
+
+                # Atomically check if the key exists in offline manifest.
+                # If it doesn't, set a placeholder key (None). This is to prevent
+                # concurrent _compress_template instances from rendering the
+                # same node, and then writing to the same file.
+                with offline_manifest_lock:
+                    if key in offline_manifest:
+                        continue
+
+                    offline_manifest[key] = None
+
+                try:
+                    result = parser.render_node(template, context, node)
+                except Exception as e:
+                    errors.append(CommandError("An error occurred during rendering %s: "
+                                        "%s" % (template.template_name, smart_str(e))))
+                    del offline_manifest[key]
+                    return
+                result = result.replace(
+                    settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
+                )
+                offline_manifest[key] = result
+                context.pop()
 
     def handle_extensions(self, extensions=('html',)):
         """

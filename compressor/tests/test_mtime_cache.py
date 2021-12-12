@@ -1,7 +1,8 @@
+import io
+
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase
-from six import StringIO
 
 
 class TestMtimeCacheCommand(TestCase):
@@ -19,7 +20,7 @@ class TestMtimeCacheCommand(TestCase):
             call_command('mtime_cache')
 
     def test_handle_add(self):
-        out = StringIO()
+        out = io.StringIO()
         with self.settings(CACHES={}):
             call_command(
                 'mtime_cache', '--add', *self.default_ignore(), stdout=out)
@@ -28,7 +29,7 @@ class TestMtimeCacheCommand(TestCase):
         self.assertIn('Added mtimes of 20 files to cache.', output)
 
     def test_handle_clean(self):
-        out = StringIO()
+        out = io.StringIO()
         with self.settings(CACHES={}):
             call_command(
                 'mtime_cache', '--clean', *self.default_ignore(), stdout=out)

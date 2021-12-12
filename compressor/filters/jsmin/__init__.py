@@ -1,6 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-import six
-
 from django.core.exceptions import ImproperlyConfigured
 
 from compressor.filters import FilterBase, CallbackOutputFilter
@@ -36,7 +33,7 @@ class CalmjsFilter(FilterBase):
             self._unparser = kwargs.pop('unparser')
         except KeyError:
             self._unparser = None
-        super(CalmjsFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         try:
             import calmjs.parse
         except ImportError:
@@ -51,5 +48,5 @@ class CalmjsFilter(FilterBase):
     def output(self, **kwargs):
         program = self._parser(self.content)
         minified = u''.join(part.text for part in self._unparser(program))
-        assert isinstance(minified, six.text_type)
+        assert isinstance(minified, str)
         return minified

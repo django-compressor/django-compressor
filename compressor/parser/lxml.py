@@ -1,8 +1,5 @@
-from __future__ import absolute_import, unicode_literals
-
-import six
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 
 from compressor.exceptions import ParserError
@@ -12,8 +9,7 @@ from compressor.parser import ParserBase
 class LxmlParser(ParserBase):
     """
     LxmlParser will use `lxml.html` parser to parse rendered contents of
-    {% compress %} tag. Under python 2 it will also try to use beautiful
-    soup parser in case of any problems with encoding.
+    {% compress %} tag.
     """
     def __init__(self, content):
         try:
@@ -24,21 +20,9 @@ class LxmlParser(ParserBase):
         except Exception as err:
             raise ParserError("Error while initializing parser: %s" % err)
 
-        if not six.PY3:
-            # soupparser uses Beautiful Soup 3 which does not run on python 3.x
-            try:
-                from lxml.html import soupparser
-            except ImportError:
-                soupparser = None
-            except Exception as err:
-                raise ParserError("Error while initializing parser: %s" % err)
-        else:
-            soupparser = None
-
-        self.soupparser = soupparser
         self.fromstring = fromstring
         self.tostring = tostring
-        super(LxmlParser, self).__init__(content)
+        super().__init__(content)
 
     @cached_property
     def tree(self):
@@ -47,13 +31,7 @@ class LxmlParser(ParserBase):
         """
         content = '<root>%s</root>' % self.content
         tree = self.fromstring(content)
-        try:
-            self.tostring(tree, encoding=six.text_type)
-        except UnicodeDecodeError:
-            if self.soupparser:  # use soup parser on python 2
-                tree = self.soupparser.fromstring(content)
-            else:  # raise an error on python 3
-                raise
+        self.tostring(tree, encoding=str)
         return tree
 
     def css_elems(self):
@@ -67,10 +45,10 @@ class LxmlParser(ParserBase):
         return elem.attrib
 
     def elem_content(self, elem):
-        return smart_text(elem.text)
+        return smart_str(elem.text)
 
     def elem_name(self, elem):
         return elem.tag
 
     def elem_str(self, elem):
-        return smart_text(self.tostring(elem, method='html', encoding=six.text_type))
+        return smart_str(self.tostring(elem, method='html', encoding=str))

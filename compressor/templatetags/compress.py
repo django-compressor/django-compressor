@@ -1,4 +1,3 @@
-import six
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 
@@ -16,7 +15,7 @@ OUTPUT_PRELOAD = 'preload'
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE, OUTPUT_PRELOAD)
 
 
-class CompressorMixin(object):
+class CompressorMixin:
 
     def get_original_content(self, context):
         raise NotImplementedError
@@ -33,12 +32,15 @@ class CompressorMixin(object):
         return get_class(self.compressors.get(kind),
                          exception=ImproperlyConfigured)
 
-    def get_compressor(self, context, kind):
+    def get_compressor(self, context, kind, log, verbosity):
         cls = self.compressor_cls(kind)
         return cls(
             kind,
             content=self.get_original_content(context),
-            context=context)
+            context=context,
+            log=log,
+            verbosity=verbosity
+        )
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
@@ -73,7 +75,7 @@ class CompressorMixin(object):
                 # a string-alike object to e.g. add ``SCRIPT_NAME`` WSGI param
                 # as a *path prefix* to the output URL.
                 # See https://code.djangoproject.com/ticket/25598.
-                six.text_type(settings.COMPRESS_URL)
+                str(settings.COMPRESS_URL)
             )
         else:
             raise OfflineGenerationError('You have offline compression '
@@ -90,7 +92,7 @@ class CompressorMixin(object):
         cache_content = cache_get(cache_key)
         return cache_key, cache_content
 
-    def render_compressed(self, context, kind, mode, name=None, forced=False):
+    def render_compressed(self, context, kind, mode, name=None, forced=False, log=None, verbosity=0):
 
         # See if it has been rendered offline
         if self.is_offline_compression_enabled(forced) and not forced:
@@ -103,7 +105,7 @@ class CompressorMixin(object):
 
         name = name or getattr(self, 'name', None)
         context['compressed'] = {'name': name}
-        compressor = self.get_compressor(context, kind)
+        compressor = self.get_compressor(context, kind, log, verbosity)
 
         # Check cache
         cache_key = None
@@ -117,7 +119,7 @@ class CompressorMixin(object):
             file_basename = 'output'
 
         rendered_output = compressor.output(mode, forced=forced, basename=file_basename)
-        assert isinstance(rendered_output, six.string_types)
+        assert isinstance(rendered_output, str)
         if cache_key:
             cache_set(cache_key, rendered_output)
         return rendered_output
@@ -140,7 +142,13 @@ class CompressorNode(CompressorMixin, template.Node):
         if self.debug_mode(context):
             return self.get_original_content(context)
 
-        return self.render_compressed(context, self.kind, self.mode, forced=forced)
+        # pass logger to compressor object
+        try:
+            log, verbosity = context.template._log, context.template._log_verbosity
+        except AttributeError:
+            log, verbosity = None, 0
+
+        return self.render_compressed(context, self.kind, self.mode, forced=forced, log=log, verbosity=verbosity)
 
 
 @register.tag

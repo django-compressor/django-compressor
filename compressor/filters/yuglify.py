@@ -6,7 +6,7 @@ class YUglifyFilter(CompilerFilter):
     command = "{binary} {args}"
 
     def __init__(self, *args, **kwargs):
-        super(YUglifyFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.command += ' --type=%s' % self.type
 
 

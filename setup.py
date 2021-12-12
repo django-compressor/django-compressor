@@ -1,11 +1,12 @@
-from __future__ import print_function
 import ast
+import codecs
 import os
 import sys
-import codecs
-from fnmatch import fnmatchcase
 from distutils.util import convert_path
-from setuptools import setup, find_packages
+from fnmatch import fnmatchcase
+
+from setuptools import find_packages, setup
+
 
 class VersionFinder(ast.NodeVisitor):
     def __init__(self):
@@ -126,25 +127,26 @@ setup(
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
+        'Framework :: Django:: 2.2',
+        'Framework :: Django:: 3.0',
+        'Framework :: Django:: 3.1',
+        'Framework :: Django:: 3.2',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Topic :: Internet :: WWW/HTTP',
     ],
     zip_safe=False,
     install_requires=[
         'django-appconf >= 1.0.3',
-        'rcssmin == 1.0.6',
-        'rjsmin == 1.1.0',
-        'six >= 1.12.0',
+        'rcssmin == 1.1.0',
+        'rjsmin == 1.2.0',
     ],
 )

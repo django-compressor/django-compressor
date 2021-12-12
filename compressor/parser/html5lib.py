@@ -1,6 +1,5 @@
-from __future__ import absolute_import
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 
 from compressor.exceptions import ParserError
@@ -10,7 +9,7 @@ from compressor.parser import ParserBase
 class Html5LibParser(ParserBase):
 
     def __init__(self, content):
-        super(Html5LibParser, self).__init__(content)
+        super().__init__(content)
         import html5lib
         self.html5lib = html5lib
 
@@ -45,7 +44,7 @@ class Html5LibParser(ParserBase):
         return elem.attrib
 
     def elem_content(self, elem):
-        return smart_text(elem.text)
+        return smart_str(elem.text)
 
     def elem_name(self, elem):
         if '}' in elem.tag:
@@ -56,4 +55,4 @@ class Html5LibParser(ParserBase):
         # This method serializes HTML in a way that does not pass all tests.
         # However, this method is only called in tests anyway, so it doesn't
         # really matter.
-        return smart_text(self._serialize(elem))
+        return smart_str(self._serialize(elem))

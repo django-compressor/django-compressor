@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import with_statement, unicode_literals
-
 from django.template import Template
 from django.test import TestCase
 from sekizai.context import SekizaiContext
@@ -39,4 +36,4 @@ class TestSekizaiCompressorExtension(TestCase):
         html = template.render(context).strip()
         self.assertEqual(html,
 '''<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/css/select2.min.css" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="/static/CACHE/css/output.20f9b535162f.css" type="text/css">''')
+<link rel="stylesheet" href="/static/CACHE/css/output.44f040b05f91.css" type="text/css">''')

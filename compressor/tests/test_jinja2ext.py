@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import with_statement, unicode_literals
-
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -77,7 +74,7 @@ class TestJinja2CompressorExtension(TestCase):
         <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css" charset="utf-8">
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = css_tag("/static/CACHE/css/output.58a8c0714e59.css")
+        out = css_tag("/static/CACHE/css/output.600674ea1d3d.css")
         self.assertEqual(out, template.render(context))
 
     def test_nonascii_css_tag(self):
@@ -86,7 +83,7 @@ class TestJinja2CompressorExtension(TestCase):
         <style type="text/css">p { border:5px solid green;}</style>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = css_tag("/static/CACHE/css/output.4263023f49d6.css")
+        out = css_tag("/static/CACHE/css/output.d5444a1ab4a3.css")
         self.assertEqual(out, template.render(context))
 
     def test_js_tag(self):
@@ -122,10 +119,10 @@ class TestJinja2CompressorExtension(TestCase):
         <style type="text/css">p { border:5px solid green;}</style>
         {% endcompress %}""")
         context = {'STATIC_URL': settings.COMPRESS_URL}
-        out = '\n'.join([
-            '<style type="text/css">body { background:#990; }',
-            'p { border:5px solid green;}</style>',
-        ])
+        out = (
+            '<style type="text/css">body{background:#990}'
+            'p{border:5px solid green}</style>'
+        )
         self.assertEqual(out, template.render(context))
 
     def test_js_inline(self):
@@ -143,6 +140,6 @@ class TestJinja2CompressorExtension(TestCase):
                                             '<style type="text/css">'
                                             '/* русский текст */'
                                             '</style>{% endcompress %}')
-        out = '<link rel="stylesheet" href="/static/CACHE/css/output.c836c9caed5c.css" type="text/css">'
+        out = '<link rel="stylesheet" href="/static/CACHE/css/output.e3b0c44298fc.css" type="text/css">'
         context = {'STATIC_URL': settings.COMPRESS_URL}
         self.assertEqual(out, template.render(context))

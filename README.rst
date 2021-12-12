@@ -7,20 +7,15 @@ Django Compressor
 .. image:: https://img.shields.io/pypi/v/django_compressor.svg
         :target: https://pypi.python.org/pypi/django_compressor
 
-.. image:: https://secure.travis-ci.org/django-compressor/django-compressor.svg?branch=develop
+.. image:: https://img.shields.io/github/workflow/status/django-compressor/django-compressor/CI?label=CI&logo=github&branch=develop
     :alt: Build Status
-    :target: http://travis-ci.org/django-compressor/django-compressor
-
-.. image:: https://caniusepython3.com/project/django_compressor.svg
-    :target: https://caniusepython3.com/project/django_compressor
+    :target: https://github.com/django-compressor/django-compressor/actions?query=workflow%3ACI
 
 Django Compressor processes, combines and minifies linked and inline
 Javascript or CSS in a Django template into cacheable static files.
 
 It supports compilers such as coffeescript, LESS and SASS and is
 extensible by custom processing steps.
-
-Django Compressor is compatible with Django 1.11 and newer.
 
 How it works
 ------------
@@ -53,7 +48,7 @@ html5lib_ based parser, as well as an abstract base class that makes it easy to
 write a custom parser.
 
 Django Compressor also comes with built-in support for
-`YUI CSS and JS`_ compressor, `yUglify CSS and JS`_ compressor, the Google's
+`YUI CSS and JS`_ compressor, `yUglify CSS and JS`_ compressor, Google's
 `Closure Compiler`_, a Python port of Douglas Crockford's JSmin_, a Python port
 of the YUI CSS Compressor csscompressor_ and a filter to convert (some) images into
 `data URIs`_.

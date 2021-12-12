@@ -1,7 +1,32 @@
 Changelog
 =========
 
-v2.4 (2019-12-02)
+v3.0 (2021-??-??)
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.4.1...3.0>`_
+
+- Officially support for Python 3.9 and 3.10 as well as Django 3.1, 3.2 and 4.0
+- Drop support for Django 1.11 and 2.1
+- Drop support for Python 2.x and 3.4
+- Fix compatibility with Jinja 3.x
+- Require django-sekizai 2.0 for django-sekizai extension
+- Make template compression in compress command threaded to improve performance
+- Correctly handle relative paths in ``extends`` tags (#979)
+- Enable ``rCSSMinFilter`` by default (#888)
+- Fix various deprecation warnings
+- Add ability to pass a logger to various classes & methods
+- Removed deprecated ``COMPRESS_JS_FILTERS`` and ``COMPRESS_CSS_FILTERS`` settings
+- Fix offline compression race condition, which could result in incomplete manifest
+
+v2.4.1 (2021-04-17)
+-----------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.4...2.4.1>`_
+
+- Raise proper ``DeprecationWarning`` for ``COMPRESS_JS_FILTERS`` and ``COMPRESS_CSS_FILTERS``
+
+
+v2.4 (2019-12-31)
 -----------------
 
 `Full Changelog <https://github.com/django-compressor/django-compressor/compare/2.3...2.4>`_

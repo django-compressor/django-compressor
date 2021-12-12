@@ -1,27 +1,24 @@
-from __future__ import with_statement, unicode_literals
-from collections import defaultdict
 import io
 import os
 import sys
-import mock
+from collections import defaultdict
+from unittest import mock
 
-import six
-from django.utils.encoding import smart_text
-from django.test import TestCase
-from django.test.utils import override_settings
+from django.conf import settings
+from django.test import override_settings, TestCase
+from django.utils.encoding import smart_str
 
-from compressor.cache import cache, get_hashed_mtime, get_hashed_content
-from compressor.conf import settings
+from compressor.cache import cache, get_hashed_content, get_hashed_mtime
 from compressor.css import CssCompressor
-from compressor.filters.base import CompilerFilter, CachedCompilerFilter
-from compressor.filters.cssmin import CSSCompressorFilter, rCSSMinFilter
-from compressor.filters.css_default import CssAbsoluteFilter, CssRelativeFilter
-from compressor.filters.jsmin import JSMinFilter, SlimItFilter, CalmjsFilter
-from compressor.filters.template import TemplateFilter
+from compressor.filters import CachedCompilerFilter, CompilerFilter
+from compressor.filters.cleancss import CleanCSSFilter
 from compressor.filters.closure import ClosureCompilerFilter
+from compressor.filters.css_default import CssAbsoluteFilter, CssRelativeFilter
+from compressor.filters.cssmin import CSSCompressorFilter, rCSSMinFilter
+from compressor.filters.jsmin import CalmjsFilter, rJSMinFilter, SlimItFilter
+from compressor.filters.template import TemplateFilter
 from compressor.filters.yuglify import YUglifyCSSFilter, YUglifyJSFilter
 from compressor.filters.yui import YUICSSFilter, YUIJSFilter
-from compressor.filters.cleancss import CleanCSSFilter
 from compressor.tests.test_base import test_dir
 
 
@@ -97,9 +94,12 @@ class PrecompilerTestCase(TestCase):
     def test_precompiler_output_unicode(self):
         command = '%s %s' % (sys.executable, self.test_precompiler)
         compiler = CompilerFilter(content=self.content, filename=self.filename, command=command)
-        self.assertEqual(type(compiler.input()), six.text_type)
+        self.assertEqual(type(compiler.input()), str)
 
     def test_precompiler_cache(self):
+        # The cache may already have data in it depending on the order the tests are
+        # run, so start by clearing it:
+        cache.clear()
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
         compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
         self.assertEqual("body { color:#990; }", compiler.input())
@@ -123,7 +123,7 @@ class PrecompilerTestCase(TestCase):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
         compiler = CachedCompilerFilter(command=command, **self.cached_precompiler_args)
         self.assertEqual("body { color:#990; }", compiler.input())
-        self.assertEqual(type(compiler.input()), type(smart_text("body { color:#990; }")))
+        self.assertEqual(type(compiler.input()), type(smart_str("body { color:#990; }")))
 
     def test_precompiler_not_cacheable(self):
         command = '%s %s -f {infile} -o {outfile}' % (sys.executable, self.test_precompiler)
@@ -199,7 +199,7 @@ class JsMinTestCase(TestCase):
  * django-compressor
  * Copyright (c) 2009-2014 Django Compressor authors
  */var foo="bar";"""
-        self.assertEqual(output, JSMinFilter(content).output())
+        self.assertEqual(output, rJSMinFilter(content).output())
 
 
 class SlimItTestCase(TestCase):
@@ -475,26 +475,26 @@ class SpecializedFiltersTest(TestCase):
     """
     def test_closure_filter(self):
         filter = ClosureCompilerFilter('')
-        self.assertEqual(filter.options, (('binary', six.text_type('java -jar compiler.jar')), ('args', six.text_type(''))))
+        self.assertEqual(filter.options, (('binary', str('java -jar compiler.jar')), ('args', str(''))))
 
     def test_yuglify_filters(self):
         filter = YUglifyCSSFilter('')
         self.assertEqual(filter.command, '{binary} {args} --type=css')
-        self.assertEqual(filter.options, (('binary', six.text_type('yuglify')), ('args', six.text_type('--terminal'))))
+        self.assertEqual(filter.options, (('binary', str('yuglify')), ('args', str('--terminal'))))
 
         filter = YUglifyJSFilter('')
         self.assertEqual(filter.command, '{binary} {args} --type=js')
-        self.assertEqual(filter.options, (('binary', six.text_type('yuglify')), ('args', six.text_type('--terminal'))))
+        self.assertEqual(filter.options, (('binary', str('yuglify')), ('args', str('--terminal'))))
 
     def test_yui_filters(self):
         filter = YUICSSFilter('')
         self.assertEqual(filter.command, '{binary} {args} --type=css')
-        self.assertEqual(filter.options, (('binary', six.text_type('java -jar yuicompressor.jar')), ('args', six.text_type(''))))
+        self.assertEqual(filter.options, (('binary', str('java -jar yuicompressor.jar')), ('args', str(''))))
 
         filter = YUIJSFilter('', verbose=1)
         self.assertEqual(filter.command, '{binary} {args} --type=js --verbose')
-        self.assertEqual(filter.options, (('binary', six.text_type('java -jar yuicompressor.jar')), ('args', six.text_type('')), ('verbose', 1)))
+        self.assertEqual(filter.options, (('binary', str('java -jar yuicompressor.jar')), ('args', str('')), ('verbose', 1)))
 
     def test_clean_css_filter(self):
         filter = CleanCSSFilter('')
-        self.assertEqual(filter.options, (('binary', six.text_type('cleancss')), ('args', six.text_type(''))))
+        self.assertEqual(filter.options, (('binary', str('cleancss')), ('args', str(''))))

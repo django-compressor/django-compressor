@@ -5,10 +5,9 @@ import socket
 import time
 from importlib import import_module
 
-import six
 from django.core.cache import caches
 from django.core.files.base import ContentFile
-from django.utils.encoding import force_text, smart_bytes
+from django.utils.encoding import force_str, smart_bytes
 from django.utils.functional import SimpleLazyObject
 
 from compressor.conf import settings
@@ -26,11 +25,11 @@ def get_hexdigest(plaintext, length=None):
 
 
 def simple_cachekey(key):
-    return 'django_compressor.%s' % force_text(key)
+    return 'django_compressor.%s' % force_str(key)
 
 
 def socket_cachekey(key):
-    return 'django_compressor.%s.%s' % (socket.gethostname(), force_text(key))
+    return 'django_compressor.%s.%s' % (socket.gethostname(), force_str(key))
 
 
 def get_cachekey(*args, **kwargs):
@@ -58,7 +57,7 @@ def get_offline_hexdigest(render_template_string):
             # a string-alike object to e.g. add ``SCRIPT_NAME`` WSGI param
             # as a *path prefix* to the output URL.
             # See https://code.djangoproject.com/ticket/25598.
-            six.text_type(settings.STATIC_URL), ''
+            str(settings.STATIC_URL), ''
         )
     )
 

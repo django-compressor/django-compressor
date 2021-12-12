@@ -1,17 +1,13 @@
-flake8==3.7.9
-coverage==4.5.1
-html5lib==1.0.1
-mock==2.0.0
-Jinja2==2.10.1
-lxml==4.2.5
-beautifulsoup4==4.6.3
-django-sekizai==1.0.0
--e git://github.com/mbi/django-classy-tags.git@0ddd19876e8ee6cc3b86c94dd4411fee80eb8dbf#egg=django-classy-tags
-    # django-classy-tags is a dependency of django-sekizai; use https://github.com/divio/django-classy-tags/pull/46 until
-    # the PR gets landed and django-sekizai gets updated to be compatible with django 3.0
+Jinja2==3.0.3
+beautifulsoup4==4.9.3
+brotli==1.0.9
+calmjs==3.4.2
+coverage==5.5
 csscompressor==0.9.5
-rcssmin==1.0.6
-rjsmin==1.1.0
+django-sekizai==2.0.0
+flake8==3.9.1
+html5lib==1.1
+lxml==4.6.3
+rcssmin==1.1.0
+rjsmin==1.2.0
 slimit==0.8.1
-calmjs==3.4.1
-brotli==1.0.6

@@ -1,14 +1,12 @@
-from __future__ import with_statement, unicode_literals
 import os
 import codecs
 from importlib import import_module
+from urllib.request import url2pathname
 
-import six
 from django.core.files.base import ContentFile
 from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
-from six.moves.urllib.request import url2pathname
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
@@ -24,7 +22,7 @@ SOURCE_HUNK, SOURCE_FILE = 'inline', 'file'
 METHOD_INPUT, METHOD_OUTPUT = 'input', 'output'
 
 
-class Compressor(object):
+class Compressor:
     """
     Base compressor object to be subclassed for content type
     depending implementations details.
@@ -33,7 +31,7 @@ class Compressor(object):
     output_mimetypes = {}
 
     def __init__(self, resource_kind, content=None, output_prefix=None,
-                 context=None, filters=None, *args, **kwargs):
+                 context=None, filters=None, log=None, verbosity=1, *args, **kwargs):
         if filters is None:
             self.filters = settings.COMPRESS_FILTERS[resource_kind]
         else:
@@ -52,6 +50,8 @@ class Compressor(object):
         self.precompiler_mimetypes = dict(settings.COMPRESS_PRECOMPILERS)
         self.finders = staticfiles.finders
         self._storage = None
+        self.log = log
+        self.verbosity = verbosity
 
     def copy(self, **kwargs):
         keywords = dict(
@@ -100,7 +100,7 @@ class Compressor(object):
         # a string-alike object to e.g. add ``SCRIPT_NAME``
         # WSGI param as a *path prefix* to the output URL.
         # See https://code.djangoproject.com/ticket/25598.
-        base_url = six.text_type(base_url)
+        base_url = str(base_url)
 
         if not url.startswith(base_url):
             raise UncompressableFileError("'%s' isn't accessible via "
@@ -143,15 +143,24 @@ class Compressor(object):
             try:
                 # call path first so remote storages don't make it to exists,
                 # which would cause network I/O
+                if self.log and self.verbosity >= 2:
+                    self.log.write('Looking for \'{}\' in storage\n'.format(basename))
                 filename = self.storage.path(basename)
                 if not self.storage.exists(basename):
                     filename = None
             except NotImplementedError:
                 # remote storages don't implement path, access the file locally
+                if self.log and self.verbosity >= 2:
+                    self.log.write('Remote storages don\'t implement path, looking for the file locally\n')
                 if compressor_file_storage.exists(basename):
                     filename = compressor_file_storage.path(basename)
         # secondly try to find it with staticfiles
         if not filename and self.finders:
+            if self.log and self.verbosity >= 2:
+                if not settings.DEBUG:
+                    self.log.write('\'{}\' was not found in storage, using static finders\n'.format(basename))
+                else:
+                    self.log.write('Using static finders for \'{}\'\n'.format(basename))
             filename = self.finders.find(url2pathname(basename))
         if filename:
             return filename

@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 from copy import copy
 
 from django import template
@@ -88,7 +87,7 @@ def expand_blocknode(node, block_stack, block_context):
     return expanded_nodelist
 
 
-class DjangoParser(object):
+class DjangoParser:
     def __init__(self, charset):
         self.charset = charset
 

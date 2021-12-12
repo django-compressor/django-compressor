@@ -1,6 +1,5 @@
-from __future__ import absolute_import
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from compressor.parser import ParserBase
 
@@ -8,7 +7,7 @@ from compressor.parser import ParserBase
 class BeautifulSoupParser(ParserBase):
 
     def __init__(self, content):
-        super(BeautifulSoupParser, self).__init__(content)
+        super().__init__(content)
         try:
             from bs4 import BeautifulSoup
             self.soup = BeautifulSoup(self.content, "html.parser")
@@ -37,7 +36,7 @@ class BeautifulSoupParser(ParserBase):
         return elem.name
 
     def elem_str(self, elem):
-        elem_as_string = smart_text(elem)
+        elem_as_string = smart_str(elem)
         if elem.name == 'link':
             # This makes testcases happy
             elem_as_string = elem_as_string.replace('/>', '>')

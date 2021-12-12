@@ -9,11 +9,7 @@ tidy, everybody has to follow a few rules (nothing major, I promise :) )
 Community
 ---------
 
-People interested in developing for the Django Compressor should:
-
-#. Head over to #django-compressor on the `freenode`_ IRC network for help and to
-   discuss the development.
-#. Open an issue on GitHub explaining your ideas.
+People interested in developing for the Django Compressor should open an issue on GitHub explaining your ideas.
 
 
 In a nutshell
@@ -36,8 +32,8 @@ Getting the source code
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 If you're interested in developing a new feature for Compressor, it is
-recommended that you first discuss it on IRC not to do any work that will
-not get merged in anyway.
+recommended that you first discuss it in an issue in order not to do any
+work that wouldn't get merged anyway.
 
 - Code will be reviewed and tested by at least one core developer, preferably
   by several. Other community members are welcome to give feedback.
@@ -100,17 +96,14 @@ Generally tests should be:
 
 In a similar way to code, pull requests will be reviewed before pulling
 (obviously), and we encourage discussion via code review (everybody learns
-something this way) or IRC discussions.
+something this way).
 
 Running the tests
 ^^^^^^^^^^^^^^^^^
 
 To run the tests simply fork django_compressor, make the changes and open
-a pull request. The Travis_ bot will automatically run the tests of your
-branch/fork (see the `pull request announcment`_ for more info) and add a
-comment about the test results to the pull requests. Alternatively you
-can also login at Travis and enable your fork to run there, too. See the
-`Travis documentation`_ to read about how to do that.
+a pull request. The Github actions will automatically run the tests of your
+branch/fork and add a status about the test results to the pull requests.
 
 Alternatively, create a virtualenv and activate it, then install the
 requirements **in the virtualenv**::
@@ -160,15 +153,10 @@ double cookie points. Seriously. You rock.
   `django CMS`_ project. Many thanks for allowing us to steal it!
 
 .. _Fork: http://github.com/django-compressor/django-compressor
-.. _Travis: http://travis-ci.org/
-.. _`pull request announcment`: http://about.travis-ci.org/blog/announcing-pull-request-support/
-.. _`Travis documentation`: http://about.travis-ci.org/docs/
 .. _Sphinx: http://sphinx.pocoo.org/
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
 .. _github : http://www.github.com
 .. _github help : http://help.github.com
-.. _freenode : http://freenode.net/
-.. _@jezdez : https://twitter.com/jezdez
 .. _pull request : http://help.github.com/send-pull-requests/
 .. _git : http://git-scm.com/
 .. _restructuredText: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
