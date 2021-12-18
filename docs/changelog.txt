@@ -1,6 +1,14 @@
 Changelog
 =========
 
+v3.1 (2021-12-18)
+-----------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/3.0...3.1>`_
+
+- Fix error with verbose offline compression when COMPRESS_OFFLINE_CONTEXT is a generator
+
+
 v3.0 (2021-12-12)
 -----------------
 
