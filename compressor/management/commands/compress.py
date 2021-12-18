@@ -187,6 +187,7 @@ class Command(BaseCommand):
                               "template %s\n" % template_name)
                 continue
 
+        contexts_count = 0
         nodes_count = 0
         offline_manifest = OrderedDict()
         errors = []
@@ -219,6 +220,7 @@ class Command(BaseCommand):
                 pool.submit(self._compress_template, offline_manifest, nodes, parser, template, errors)
 
             pool.shutdown(wait=True)
+            contexts_count += 1
 
         # If errors exist, raise the first one in the list
         if errors:
@@ -231,7 +233,7 @@ class Command(BaseCommand):
 
         if verbosity >= 1:
             log.write("done\nCompressed %d block(s) from %d template(s) for %d context(s).\n" %
-                      (len(offline_manifest), nodes_count, len(contexts)))
+                      (len(offline_manifest), nodes_count, contexts_count))
         return offline_manifest, len(offline_manifest), offline_manifest.values()
 
     @staticmethod
