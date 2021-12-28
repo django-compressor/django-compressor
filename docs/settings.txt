@@ -69,7 +69,7 @@ Backend settings
 
 .. attribute:: COMPRESS_FILTERS
 
-    :default: ``{'css': ['compressor.filters.css_default.CssAbsoluteFilter'], 'js': ['compressor.filters.jsmin.JSMinFilter']}``
+    :default: ``{'css': ['compressor.filters.css_default.CssAbsoluteFilter', 'compressor.filters.cssmin.rCSSMinFilter'], 'js': ['compressor.filters.jsmin.rJSMinFilter']}``
 
     A mapping of resource kinds to the list of filters to apply.
     The key is used to refer to this resource type in templates
@@ -83,7 +83,7 @@ Backend settings
 
       .. _compress_css_filters:
 
-      :default: ``['compressor.filters.css_default.CssAbsoluteFilter']``
+      :default: ``['compressor.filters.css_default.CssAbsoluteFilter', 'compressor.filters.cssmin.rCSSMinFilter']``
 
       A list of filters that will be applied to CSS.
 
@@ -190,13 +190,13 @@ Backend settings
 
       .. _compress_js_filters:
 
-      :Default: ``['compressor.filters.jsmin.JSMinFilter']``
+      :Default: ``['compressor.filters.jsmin.rJSMinFilter']``
 
       A list of filters that will be applied to javascript.
 
       Possible options are:
 
-      - ``compressor.filters.jsmin.JSMinFilter``
+      - ``compressor.filters.jsmin.rJSMinFilter``
 
         A filter that uses the jsmin implementation rJSmin_ to compress
         JavaScript code (installed by default).
