@@ -133,8 +133,8 @@ class CompressorConf(AppConf):
         return value
 
     def configure_precompilers(self, value):
-        if not isinstance(value, (list, tuple)):
+        if not isinstance(value, (list, tuple)) or any([len(item) != 2 for item in value]):
             raise ImproperlyConfigured("The COMPRESS_PRECOMPILERS setting "
-                                       "must be a list or tuple. Check for "
+                                       "must be a list or tuple of two-tuples. Check for "
                                        "missing commas.")
         return value
