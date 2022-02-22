@@ -1,6 +1,7 @@
 import os
 import codecs
 from importlib import import_module
+from threading import Lock
 from urllib.request import url2pathname
 
 from django.core.files.base import ContentFile
@@ -29,6 +30,8 @@ class Compressor:
     """
 
     output_mimetypes = {}
+    seen_filepaths = set()
+    seen_filepaths_lock = Lock()
 
     def __init__(self, resource_kind, content=None, output_prefix=None,
                  context=None, filters=None, log=None, verbosity=1, *args, **kwargs):
@@ -346,8 +349,22 @@ class Compressor:
         the appropriate template with the file's URL.
         """
         new_filepath = self.get_filepath(content, basename=basename)
-        if not self.storage.exists(new_filepath) or forced:
+        if forced:
+            # forced=True means this is offline generation (manage.py compress).
+            # We should overwrite all existing files.
+            # But, to avoid overwriting a file more than once in a single run,
+            # keep track of already handled filepaths in `seen_filepaths` class
+            # variable. If a filepath is already there, *don't* call
+            # self.storage.save() for it.
+            with self.seen_filepaths_lock:
+                skip_save = new_filepath in self.seen_filepaths
+                self.seen_filepaths.add(new_filepath)
+        else:
+            skip_save = self.storage.exists(new_filepath)
+
+        if not skip_save:
             self.storage.save(new_filepath, ContentFile(content.encode(self.charset)))
+
         url = mark_safe(self.storage.url(new_filepath))
         return self.render_output(mode, {"url": url})
 

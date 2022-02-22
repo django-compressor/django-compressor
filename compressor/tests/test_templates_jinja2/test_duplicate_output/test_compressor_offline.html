@@ -1,0 +1,9 @@
+{% compress js %}
+    <script type="text/javascript" src="{{ url_for('static', filename="js/one.js") }}"></script>
+{% endcompress %}
+
+{% compress js %}
+    <script
+        type="text/javascript"
+        src="{{ url_for('static', filename="js/one.js") }}"></script>
+{% endcompress %}

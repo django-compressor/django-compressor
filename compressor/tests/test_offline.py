@@ -12,6 +12,7 @@ from django.template import Context, Origin, Template
 from django.test import override_settings, TestCase
 from django.urls import get_script_prefix, set_script_prefix
 
+from compressor.base import Compressor
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
@@ -150,6 +151,9 @@ class OfflineTestCaseMixin:
             with io.open(self.template_path_jinja2,
                          encoding=self.CHARSET) as file_:
                 self.template_jinja2 = jinja2_env.from_string(file_.read())
+
+        # Reset compressor.base.Compressor.seen_filepaths instance variable
+        Compressor.seen_filepaths.clear()
 
     def tearDown(self):
         self.override_settings.__exit__(None, None, None)
@@ -360,6 +364,23 @@ class OfflineCompressSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
         # But rendering the template returns both (identical) scripts.
         self.assertEqual(
             rendered_template, self._render_result(result * 2, ''))
+
+
+class OfflineCompressDuplicateOutputTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_duplicate_output'
+
+    def _test_offline(self, engine, verbosity=0):
+        target = "compressor.storage.default_storage.save"
+        with patch(target, wraps=default_storage.save) as mock_save:
+            count, result = CompressCommand().handle_inner(
+                engines=[engine], verbosity=verbosity)
+
+            # The template has two {% compress %} tags with different contents,
+            # but they both render the same output.
+            # There should have been two storage.save() calls:
+            # - a single js file,
+            # - and the offline manifest
+            self.assertEqual(mock_save.call_count, 2)
 
 
 class SuperMixin:
