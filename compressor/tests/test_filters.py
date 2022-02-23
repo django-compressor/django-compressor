@@ -2,7 +2,7 @@ import io
 import os
 import sys
 from collections import defaultdict
-from unittest import mock
+from unittest import mock, skipIf
 
 from django.conf import settings
 from django.test import override_settings, TestCase
@@ -202,6 +202,7 @@ class JsMinTestCase(TestCase):
         self.assertEqual(output, rJSMinFilter(content).output())
 
 
+@skipIf(sys.version_info >= (3, 7), reason="Unsupported in Python 3.7+")
 class SlimItTestCase(TestCase):
     def test_slimit_filter(self):
         content = """
