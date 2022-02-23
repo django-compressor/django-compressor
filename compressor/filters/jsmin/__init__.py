@@ -28,6 +28,7 @@ class SlimItFilter(CallbackOutputFilter):
             "django-compressor 3.3.",
             DeprecationWarning,
         )
+        super().__init__(*args, **kwargs)
 
 
 class CalmjsFilter(FilterBase):
