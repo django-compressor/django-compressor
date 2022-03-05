@@ -2,6 +2,7 @@ import gzip
 import os
 from datetime import datetime
 import time
+from threading import Lock
 
 from django.core.files.storage import FileSystemStorage, get_storage_class
 from django.utils.functional import LazyObject, SimpleLazyObject
@@ -104,6 +105,27 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
 class DefaultStorage(LazyObject):
     def _setup(self):
         self._wrapped = get_storage_class(settings.COMPRESS_STORAGE)()
+
+
+class NoDuplicatesStorageProxy():
+    def __init__(self):
+        self.storage = DefaultStorage()
+        self.seen_filenames = set()
+        self.seen_filenames_lock = Lock()
+
+    def __getattr__(self, *args, **kwargs):
+        return getattr(self.storage, *args, **kwargs)
+
+    def save(self, filename, content):
+        # Guard self.seen_filenames access with a lock, because
+        # the `compress` management can call save() concurrently
+        # from multiple threads
+        with self.seen_filenames_lock:
+            if filename in self.seen_filenames:
+                # Have already saved this file, no-op
+                return
+            self.seen_filenames.add(filename)
+        self.storage.save(filename, content)
 
 
 default_storage = DefaultStorage()

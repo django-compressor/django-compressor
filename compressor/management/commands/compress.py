@@ -16,6 +16,8 @@ from django.utils.encoding import smart_str
 from django.template.loader import get_template  # noqa Leave this in to preload template locations
 from django.template import engines
 
+
+from compressor import storage
 from compressor.cache import get_offline_hexdigest, write_offline_manifest, get_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import (OfflineGenerationError, TemplateSyntaxError,
@@ -191,6 +193,9 @@ class Command(BaseCommand):
         nodes_count = 0
         offline_manifest = OrderedDict()
         errors = []
+        # Replace compressor.storage.default_storage with a proxy object
+        # which will filter out duplicate save() calls
+        storage.default_storage = storage.NoDuplicatesStorageProxy()
 
         for context_dict in contexts:
             compressor_nodes = OrderedDict()

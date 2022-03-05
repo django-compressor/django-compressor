@@ -362,6 +362,23 @@ class OfflineCompressSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
             rendered_template, self._render_result(result * 2, ''))
 
 
+class OfflineCompressDuplicateOutputTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = 'test_duplicate_output'
+
+    def _test_offline(self, engine, verbosity=0):
+        from compressor.storage import CompressorFileStorage
+        with patch.object(CompressorFileStorage, "save") as mock_save:
+            count, result = CompressCommand().handle_inner(
+                engines=[engine], verbosity=verbosity)
+
+            # The template has two {% compress %} tags with different contents,
+            # but they both render the same output.
+            # There should have been two storage.save() calls:
+            # - a single js file,
+            # - and the offline manifest
+            self.assertEqual(mock_save.call_count, 2)
+
+
 class SuperMixin:
     # Block.super not supported for Jinja2 yet.
     engines = ('django',)

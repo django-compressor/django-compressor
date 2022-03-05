@@ -1,0 +1,11 @@
+{% load compress static %}
+
+{% compress js %}
+    <script type="text/javascript" src="{% static "js/one.js" %}"></script>
+{% endcompress %}
+
+{% compress js %}
+    <script
+        type="text/javascript"
+        src="{% static "js/one.js" %}"></script>
+{% endcompress %}
