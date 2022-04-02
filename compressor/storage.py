@@ -33,13 +33,16 @@ class CompressorFileStorage(FileSystemStorage):
     def modified_time(self, name):
         return datetime.fromtimestamp(os.path.getmtime(self.path(name)))
 
-    def get_available_name(self, name, max_length=None):
-        """
-        Deletes the given file if it exists.
-        """
-        if self.exists(name):
-            self.delete(name)
-        return name
+    def save(self, filename, content):
+        temp_filename = super().save(filename, content)
+        # If a file already exists  in the target location, FileSystemStorage
+        # will generate an unique filename and save content there instead.
+        # When that happens, we move the file to the intended location using
+        # os.replace() (which is an atomic operation):
+        if temp_filename != filename:
+            os.replace(self.path(temp_filename), self.path(filename))
+
+        return filename
 
 
 compressor_file_storage = SimpleLazyObject(
