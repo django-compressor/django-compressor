@@ -117,6 +117,9 @@ setup(
     name="django_compressor",
     version=find_version("compressor", "__init__.py"),
     url='https://django-compressor.readthedocs.io/en/latest/',
+    project_urls={
+        'Source': 'https://github.com/django-compressor/django-compressor',
+    },
     license='MIT',
     description="Compresses linked and inline JavaScript or CSS into single cached files.",
     long_description=read('README.rst'),
