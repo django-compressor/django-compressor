@@ -61,3 +61,9 @@ class StorageTestCase(TestCase):
         context = {'STATIC_URL': settings.COMPRESS_URL}
         out = css_tag("/static/CACHE/css/output.e701f86c6430.css")
         self.assertEqual(out, render(template, context))
+
+    def test_duplicate_save_overwrites_same_file(self):
+        filename1 = self.default_storage.save('test.txt', ContentFile('yeah yeah'))
+        filename2 = self.default_storage.save('test.txt', ContentFile('yeah yeah'))
+        self.assertEqual(filename1, filename2)
+        self.assertNotIn("_", filename2)
