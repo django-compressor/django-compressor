@@ -201,13 +201,6 @@ Backend settings
         A filter that uses the jsmin implementation rJSmin_ to compress
         JavaScript code (installed by default).
 
-      .. _slimit_filter:
-
-      - ``compressor.filters.jsmin.SlimItFilter``
-
-        A filter that uses the jsmin implementation `Slim It`_ to compress
-        JavaScript code.
-
       .. _calmjs_filter:
 
       - ``compressor.filters.jsmin.CalmjsFilter``

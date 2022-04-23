@@ -64,13 +64,6 @@ Optional Dependencies
 
       pip install html5lib
 
-- `Slim It`_
-
-  For the :ref:`Slim It filter <slimit_filter>`
-  ``compressor.filters.jsmin.SlimItFilter``::
-
-      pip install slimit
-
 - `Calmjs`_
 
   For the :ref:`Calmjs filter <calmjs_filter>`

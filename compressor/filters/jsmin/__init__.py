@@ -1,3 +1,5 @@
+import warnings
+
 from django.core.exceptions import ImproperlyConfigured
 
 from compressor.filters import FilterBase, CallbackOutputFilter
@@ -6,9 +8,7 @@ from compressor.filters import FilterBase, CallbackOutputFilter
 class rJSMinFilter(CallbackOutputFilter):
     callback = "rjsmin.jsmin"
     dependencies = ["rjsmin"]
-    kwargs = {
-        "keep_bang_comments": True
-    }
+    kwargs = {"keep_bang_comments": True}
 
 
 # This is for backwards compatibility
@@ -21,6 +21,14 @@ class SlimItFilter(CallbackOutputFilter):
     kwargs = {
         "mangle": True,
     }
+
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "SlimItFilter is broken in Python 3.6+ and will be removed in "
+            "django-compressor 3.3.",
+            DeprecationWarning,
+        )
+        super().__init__(*args, **kwargs)
 
 
 class CalmjsFilter(FilterBase):
@@ -39,7 +47,8 @@ class CalmjsFilter(FilterBase):
         except ImportError:
             raise ImproperlyConfigured(
                 "The module calmjs.parse couldn't be imported. "
-                "Make sure it is correctly installed.")
+                "Make sure it is correctly installed."
+            )
         if self._parser is None:
             self._parser = calmjs.parse.es5
         if self._unparser is None:

@@ -1,6 +1,16 @@
 Changelog
 =========
 
+v4.0 (2022-03-23)
+-----------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/3.1...4.0>`_
+
+- Fix intermittent No such file or directory errors by changing strategy to
+  deal with duplicate filenames in CompressorFileStorage
+- Deprecate SlimItFilter, stop testing it with Python 3.7 or higher
+
+
 v3.1 (2021-12-18)
 -----------------
 
