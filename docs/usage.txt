@@ -131,7 +131,7 @@ exception. If DEBUG is ``False`` these files will be silently stripped.
     Django's `caching documentation`_).
 
 .. _memcached: http://memcached.org/
-.. _caching documentation: https://docs.djangoproject.com/en/2.1/topics/cache/#memcached
+.. _caching documentation: https://docs.djangoproject.com/en/stable/topics/cache/#memcached
 
 
 .. _offline_compression:
@@ -180,7 +180,7 @@ in a file called ``manifest.json`` using the :attr:`configured storage
 <django.conf.settings.COMPRESS_STORAGE>` to be able to be transferred from your development
 computer to the server easily.
 
-.. _TEMPLATE_LOADERS: http://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
+.. _TEMPLATE_LOADERS: http://docs.djangoproject.com/en/stable/ref/settings/#template-loaders
 
 .. _signals:
 
