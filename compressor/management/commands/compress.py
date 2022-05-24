@@ -27,6 +27,11 @@ offline_manifest_lock = Lock()
 class Command(BaseCommand):
     help = "Compress content outside of the request/response cycle"
 
+    if django.VERSION >= (3, 2):
+        requires_system_checks = []
+    else:
+        requires_system_checks = False
+
     def add_arguments(self, parser):
         parser.add_argument('--extension', '-e', action='append', dest='extensions',
                             help='The file extension(s) to examine (default: ".html", '
@@ -322,5 +327,3 @@ class Command(BaseCommand):
             final_offline_manifest.update(offline_manifest)
         write_offline_manifest(final_offline_manifest)
         return final_block_count, final_results
-
-Command.requires_system_checks = False
