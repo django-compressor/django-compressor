@@ -11,7 +11,7 @@ from django.utils.encoding import force_str, smart_bytes
 from django.utils.functional import SimpleLazyObject
 
 from compressor.conf import settings
-from compressor.storage import default_storage
+from compressor.storage import default_offline_manifest_storage
 from compressor.utils import get_mod_func
 
 _cachekey_func = None
@@ -66,20 +66,15 @@ def get_offline_cachekey(source):
     return get_cachekey("offline.%s" % get_offline_hexdigest(source))
 
 
-def get_offline_manifest_filename():
-    output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
-    return os.path.join(output_dir, settings.COMPRESS_OFFLINE_MANIFEST)
-
-
 _offline_manifest = None
 
 
 def get_offline_manifest():
     global _offline_manifest
     if _offline_manifest is None:
-        filename = get_offline_manifest_filename()
-        if default_storage.exists(filename):
-            with default_storage.open(filename) as fp:
+        filename = settings.COMPRESS_OFFLINE_MANIFEST
+        if default_offline_manifest_storage.exists(filename):
+            with default_offline_manifest_storage.open(filename) as fp:
                 _offline_manifest = json.loads(fp.read().decode('utf8'))
         else:
             _offline_manifest = {}
@@ -92,9 +87,8 @@ def flush_offline_manifest():
 
 
 def write_offline_manifest(manifest):
-    filename = get_offline_manifest_filename()
     content = json.dumps(manifest, indent=2).encode('utf8')
-    default_storage.save(filename, ContentFile(content))
+    default_offline_manifest_storage.save(settings.COMPRESS_OFFLINE_MANIFEST, ContentFile(content))
     flush_offline_manifest()
 
 

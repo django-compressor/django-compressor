@@ -110,3 +110,20 @@ class DefaultStorage(LazyObject):
 
 
 default_storage = DefaultStorage()
+
+
+class OfflineManifestFileStorage(CompressorFileStorage):
+    def __init__(self, location=None, base_url=None, *args, **kwargs):
+        if location is None:
+            location = os.path.join(settings.COMPRESS_ROOT, settings.COMPRESS_OUTPUT_DIR)
+        if base_url is None:
+            base_url = os.path.join(settings.COMPRESS_URL, settings.COMPRESS_OUTPUT_DIR)
+        super().__init__(location, base_url, *args, **kwargs)
+
+
+class DefaultOfflineManifestStorage(LazyObject):
+    def _setup(self):
+        self._wrapped = get_storage_class(settings.COMPRESS_OFFLINE_MANIFEST_STORAGE)()
+
+
+default_offline_manifest_storage = DefaultOfflineManifestStorage()

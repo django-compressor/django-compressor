@@ -541,3 +541,14 @@ Offline settings
 
     The name of the file to be used for saving the names of the files
     compressed offline.
+
+.. attribute:: COMPRESS_OFFLINE_MANIFEST_STORAGE
+
+    :Default: ``compressor.storage.OfflineManifestFileStorage``
+
+    The dotted path to a Django Storage backend to be used to save the
+    offline manifest.
+
+    By default, the file configured with
+    :attr:`~django.conf.settings.COMPRESS_OFFLINE_MANIFEST` will be stored
+    into :attr:`~django.conf.settings.COMPRESS_OUTPUT_DIR`.

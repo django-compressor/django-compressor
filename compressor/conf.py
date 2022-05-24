@@ -75,6 +75,7 @@ class CompressorConf(AppConf):
     OFFLINE_CONTEXT = {}
     # The name of the manifest file (e.g. filename.ext)
     OFFLINE_MANIFEST = 'manifest.json'
+    OFFLINE_MANIFEST_STORAGE = 'compressor.storage.OfflineManifestFileStorage'
     # The Context to be used when TemplateFilter is used
     TEMPLATE_FILTER_CONTEXT = {}
     # Placeholder to be used instead of settings.COMPRESS_URL during offline compression.
