@@ -2,6 +2,7 @@ import gzip
 import os
 from datetime import datetime
 import time
+from urllib.parse import urljoin
 
 from django.core.files.storage import FileSystemStorage, get_storage_class
 from django.utils.functional import LazyObject, SimpleLazyObject
@@ -117,7 +118,7 @@ class OfflineManifestFileStorage(CompressorFileStorage):
         if location is None:
             location = os.path.join(settings.COMPRESS_ROOT, settings.COMPRESS_OUTPUT_DIR)
         if base_url is None:
-            base_url = os.path.join(settings.COMPRESS_URL, settings.COMPRESS_OUTPUT_DIR)
+            base_url = urljoin(settings.COMPRESS_URL, settings.COMPRESS_OUTPUT_DIR)
         super().__init__(location, base_url, *args, **kwargs)
 
 
