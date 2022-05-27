@@ -15,7 +15,7 @@ from django.urls import get_script_prefix, set_script_prefix
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
-from compressor.storage import default_storage
+from compressor.storage import default_offline_manifest_storage
 from compressor.utils import get_mod_func
 
 
@@ -154,9 +154,9 @@ class OfflineTestCaseMixin:
     def tearDown(self):
         self.override_settings.__exit__(None, None, None)
 
-        manifest_path = os.path.join('CACHE', 'manifest.json')
-        if default_storage.exists(manifest_path):
-            default_storage.delete(manifest_path)
+        manifest_filename = 'manifest.json'
+        if default_offline_manifest_storage.exists(manifest_filename):
+            default_offline_manifest_storage.delete(manifest_filename)
 
     def _prepare_contexts(self, engine):
         contexts = settings.COMPRESS_OFFLINE_CONTEXT
@@ -311,9 +311,9 @@ class OfflineCompressBasicTestCase(OfflineTestCaseMixin, TestCase):
     def _test_deleting_manifest_does_not_affect_rendering(self, engine):
         count, result = CompressCommand().handle_inner(engines=[engine], verbosity=0)
         get_offline_manifest()
-        manifest_path = os.path.join('CACHE', 'manifest.json')
-        if default_storage.exists(manifest_path):
-            default_storage.delete(manifest_path)
+        manifest_filename = 'manifest.json'
+        if default_offline_manifest_storage.exists(manifest_filename):
+            default_offline_manifest_storage.delete(manifest_filename)
         self.assertEqual(1, count)
         self.assertEqual([self._render_script(self.expected_hash)], result)
         rendered_template = self._render_template(engine)

@@ -67,3 +67,9 @@ class StorageTestCase(TestCase):
         filename2 = self.default_storage.save('test.txt', ContentFile('yeah yeah'))
         self.assertEqual(filename1, filename2)
         self.assertNotIn("_", filename2)
+
+    def test_offline_manifest_storage(self):
+        storage.default_offline_manifest_storage.save('test.txt', ContentFile('yeah yeah'))
+        self.assertTrue(os.path.exists(os.path.join(settings.COMPRESS_ROOT, 'CACHE', 'test.txt')))
+        # Check that the file is stored at the same default location as before the new manifest storage.
+        self.assertTrue(self.default_storage.exists(os.path.join('CACHE', 'test.txt')))

@@ -1,6 +1,16 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+- New setting ``COMPRESS_OFFLINE_MANIFEST_STORAGE`` to customize the offline manifest's file storage (#1112)
+
+  With this change the function ``compressor.cache.get_offline_manifest_filename()`` has been removed.
+  You can now use the new file storage ``compressor.storage.default_offline_manifest_storage`` to access the
+  location of the manifest.
+
+
 v4.0 (2022-03-23)
 -----------------
 
