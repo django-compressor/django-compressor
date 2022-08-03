@@ -4,6 +4,11 @@ Changelog
 Unreleased
 ----------
 
+v4.1 (2022-08-03)
+-----------------
+
+- Add Django 4.1 compatibility
+
 - New setting ``COMPRESS_OFFLINE_MANIFEST_STORAGE`` to customize the offline manifest's file storage (#1112)
 
   With this change the function ``compressor.cache.get_offline_manifest_filename()`` has been removed.
