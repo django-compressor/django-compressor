@@ -7,6 +7,8 @@ Unreleased
 v4.1 (2022-08-03)
 -----------------
 
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/4.0...4.1>`_
+
 - Add Django 4.1 compatibility
 
 - New setting ``COMPRESS_OFFLINE_MANIFEST_STORAGE`` to customize the offline manifest's file storage (#1112)
