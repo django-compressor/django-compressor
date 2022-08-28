@@ -365,6 +365,12 @@ class Compressor:
         """
         return self.output_file(mode, content, forced, basename)
 
+    def output_module(self, mode, content, forced=False, basename=None):
+        """
+        The output method that returns <script> with type="module"
+        """
+        return self.output_file(mode, content, forced, basename)
+
     def render_output(self, mode, context=None):
         """
         Renders the compressor output with the appropriate template for

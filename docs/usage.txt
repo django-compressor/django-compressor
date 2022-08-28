@@ -6,7 +6,7 @@ Usage
 .. code-block:: django
 
     {% load compress %}
-    {% compress <js/css> [<file/inline/preload> [block_name]] %}
+    {% compress <js/css> [<file/inline/preload/nomodule> [block_name]] %}
     <html of inline or linked JS/CSS>
     {% endcompress %}
 
@@ -61,6 +61,33 @@ Result:
     .. code-block:: django
 
         <link rel="preload" href="/static/CACHE/js/d01466eb4fc6.js" as="script" />
+
+
+
+ES5 nomodule & ES6 type="module"
+
+Adding the ``nomodule`` attribute will generate be passed attribute to the script tag for the compressed resource in the template.
+Adding the ``module`` parameter will generate the script tag with type="module" for the compressed resource in the template:
+
+    .. code-block:: django
+
+    {% compress js %}
+        <!-- ES5 must be in separate compress (split types) -->
+        <script nomodule async src="static/js/es5.js"></script>
+    {% endcompress %}
+
+    {% compress js module %}
+        <!-- ES6 and above JS -->
+        <script async src="static/js/es6.js"></script>
+    {% endcompress %} 
+
+Result:
+
+    .. code-block:: django
+
+        <script nomodule async src="/static/CACHE/js/d01466eb4fc6.js"></script>
+	<script type="module" async src="/static/CACHE/js/d0246230b4fc6.js"></script>
+
 
 
 Specifying a ``block_name`` will change the output filename. It can also be
