@@ -4,6 +4,11 @@ Changelog
 Unreleased
 ----------
 
+- Update the `CachedS3Boto3Storage` example storage subclass in "Remote Storages"
+  to work properly after the v4.0 change to how duplicate file names are handled
+  by `CompressorFileStorage`
+  
+
 v4.1 (2022-08-03)
 -----------------
 
@@ -25,6 +30,12 @@ v4.0 (2022-03-23)
 
 - Fix intermittent No such file or directory errors by changing strategy to
   deal with duplicate filenames in CompressorFileStorage
+  
+  Note: if your project has a custom storage backend following the example of 
+  `CachedS3Boto3Storage` from the "Remote Storages" documentation, it will need
+  to be updated to call `save` instead of `_save` to work properly after this
+  change to `CompressorFileStorage`.
+  
 - Deprecate SlimItFilter, stop testing it with Python 3.7 or higher
 
 
