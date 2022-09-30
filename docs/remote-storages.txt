@@ -66,7 +66,7 @@ apps can be integrated.
                 "compressor.storage.CompressorFileStorage")()
 
         def save(self, name, content):
-            self.local_storage._save(name, content)
+            self.local_storage.save(name, content)
             super().save(name, self.local_storage._open(name))
             return name
 
