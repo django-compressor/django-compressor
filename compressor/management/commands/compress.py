@@ -50,6 +50,9 @@ class Command(BaseCommand):
                                  "supported. It may be a specified more than once for "
                                  "multiple engines. If not specified, django engine is used.",
                             dest="engines")
+        parser.add_argument('--exclude', '-x', default=[], action="append", dest='exclusions',
+                            help="Add excluded files using a glob patter. It can be used "
+                                 "multiple times to add more exclusions." )
 
     def get_loaders(self):
         template_source_loaders = []
@@ -94,7 +97,7 @@ class Command(BaseCommand):
 
         return parser
 
-    def compress(self, engine, extensions, verbosity, follow_links, log):
+    def compress(self, engine, exclusions, extensions, verbosity, follow_links, log):
         """
         Searches templates containing 'compress' nodes and compresses them
         "offline" -- outside of the request/response cycle.
@@ -144,6 +147,12 @@ class Command(BaseCommand):
                 templates |= set([env.loader.get_source(env, template)[1] for template in
                             env.list_templates(filter_func=lambda _path:
                             os.path.splitext(_path)[-1] in extensions)])
+
+        excluded_templates = [t for t in templates if any([fnmatch(t,excl) for excl in exclusions])]
+        if excluded_templates:
+            if verbosity >=2:
+                log.write("Excluded templates:\n\t" + "\n\t".join(excluded_templates) + "\n")
+            templates = [t for t in templates if t not in excluded_templates]
 
         if not templates:
             raise OfflineGenerationError("No templates found. Make sure your "
@@ -316,12 +325,13 @@ class Command(BaseCommand):
         follow_links = options.get("follow_links", False)
         extensions = self.handle_extensions(options.get("extensions") or ["html"])
         engines = [e.strip() for e in options.get("engines", [])] or ["django"]
+        exclusions = [e.strip() for e in options.get("exclusions", [])] or []
 
         final_offline_manifest = {}
         final_block_count = 0
         final_results = []
         for engine in engines:
-            offline_manifest, block_count, results = self.compress(engine, extensions, verbosity, follow_links, log)
+            offline_manifest, block_count, results = self.compress(engine, exclusions, extensions, verbosity, follow_links, log)
             final_results.extend(results)
             final_block_count += block_count
             final_offline_manifest.update(offline_manifest)
