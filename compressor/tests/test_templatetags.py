@@ -259,7 +259,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
 
     @override_settings(COMPRESS_ENABLED=False)
     def test_css_multiple_files_disabled_compression(self):
-        assert(settings.COMPRESS_PRECOMPILERS)
+        assert settings.COMPRESS_PRECOMPILERS
         template = """
         {% load compress %}{% compress css %}
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/one.css"></link>
@@ -273,7 +273,7 @@ class PrecompilerTemplatetagTestCase(TestCase):
 
     @override_settings(COMPRESS_ENABLED=False)
     def test_css_multiple_files_mixed_precompile_disabled_compression(self):
-        assert(settings.COMPRESS_PRECOMPILERS)
+        assert settings.COMPRESS_PRECOMPILERS
         template = """
         {% load compress %}{% compress css %}
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/one.css"/>
