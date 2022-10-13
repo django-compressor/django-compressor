@@ -4,6 +4,7 @@ Changelog
 Unreleased
 ----------
 
+- Drop Python 3.6 support
 - Update the `CachedS3Boto3Storage` example storage subclass in "Remote Storages"
   to work properly after the v4.0 change to how duplicate file names are handled
   by `CompressorFileStorage`
