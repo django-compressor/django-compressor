@@ -248,7 +248,6 @@ class OfflineTestCaseMixin:
         extensions = [
             CompressorExtension,
             SpacelessExtension,
-            jinja2.ext.with_,
             jinja2.ext.do,
         ]
         loader = self._get_jinja2_loader()
