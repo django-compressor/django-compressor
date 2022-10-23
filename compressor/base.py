@@ -1,5 +1,4 @@
 import os
-import codecs
 from importlib import import_module
 from urllib.request import url2pathname
 
@@ -13,7 +12,7 @@ from compressor.conf import settings
 from compressor.exceptions import (CompressorError, UncompressableFileError,
         FilterDoesNotExist)
 from compressor.filters import CachedCompilerFilter
-from compressor.storage import compressor_file_storage
+from compressor.storage import compressor_file_storage, default_storage
 from compressor.signals import post_compress
 from compressor.utils import get_class, get_mod_func, staticfiles
 
@@ -177,9 +176,9 @@ class Compressor:
         if charset == 'utf-8':
             # Removes BOM
             charset = 'utf-8-sig'
-        with codecs.open(filename, 'r', charset) as fd:
+        with default_storage.open(filename) as fd:
             try:
-                return fd.read()
+                return fd.read().decode(charset)
             except IOError as e:
                 raise UncompressableFileError("IOError while processing "
                                               "'%s': %s" % (filename, e))
