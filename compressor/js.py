@@ -4,7 +4,7 @@ from compressor.base import Compressor, SOURCE_HUNK, SOURCE_FILE
 
 class JsCompressor(Compressor):
 
-    output_mimetypes = {'text/javascript'}
+    output_mimetypes = {"text/javascript"}
 
     def split_contents(self):
         if self.split_content:
@@ -12,22 +12,21 @@ class JsCompressor(Compressor):
         self.extra_nodes = []
         for elem in self.parser.js_elems():
             attribs = self.parser.elem_attribs(elem)
-            if 'src' in attribs:
-                basename = self.get_basename(attribs['src'])
+            if "src" in attribs:
+                basename = self.get_basename(attribs["src"])
                 filename = self.get_filename(basename)
                 content = (SOURCE_FILE, filename, basename, elem)
             else:
                 content = (SOURCE_HUNK, self.parser.elem_content(elem), None, elem)
             self.split_content.append(content)
-            if 'async' in attribs:
-                extra = ' async'
-            elif 'defer' in attribs:
-                extra = ' defer'
+            if "async" in attribs:
+                extra = " async"
+            elif "defer" in attribs:
+                extra = " defer"
             else:
-                extra = ''
+                extra = ""
             # Append to the previous node if it had the same attribute
-            append_to_previous = (self.extra_nodes
-                                  and self.extra_nodes[-1][0] == extra)
+            append_to_previous = self.extra_nodes and self.extra_nodes[-1][0] == extra
             if append_to_previous and settings.COMPRESS_ENABLED:
                 self.extra_nodes[-1][1].split_content.append(content)
             else:
@@ -37,15 +36,18 @@ class JsCompressor(Compressor):
         return self.split_content
 
     def output(self, *args, **kwargs):
-        if (settings.COMPRESS_ENABLED or settings.COMPRESS_PRECOMPILERS
-                or kwargs.get('forced', False)):
+        if (
+            settings.COMPRESS_ENABLED
+            or settings.COMPRESS_PRECOMPILERS
+            or kwargs.get("forced", False)
+        ):
             self.split_contents()
-            if hasattr(self, 'extra_nodes'):
+            if hasattr(self, "extra_nodes"):
                 ret = []
                 for extra, subnode in self.extra_nodes:
-                    subnode.extra_context.update({'extra': extra})
+                    subnode.extra_context.update({"extra": extra})
                     ret.append(subnode.output(*args, **kwargs))
-                return '\n'.join(ret)
+                return "\n".join(ret)
         return super().output(*args, **kwargs)
 
     def filter_input(self, forced=False):

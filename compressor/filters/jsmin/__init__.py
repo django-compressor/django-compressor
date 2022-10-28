@@ -34,11 +34,11 @@ class SlimItFilter(CallbackOutputFilter):
 class CalmjsFilter(FilterBase):
     def __init__(self, *args, **kwargs):
         try:
-            self._parser = kwargs.pop('parser')
+            self._parser = kwargs.pop("parser")
         except KeyError:
             self._parser = None
         try:
-            self._unparser = kwargs.pop('unparser')
+            self._unparser = kwargs.pop("unparser")
         except KeyError:
             self._unparser = None
         super().__init__(*args, **kwargs)
@@ -56,6 +56,6 @@ class CalmjsFilter(FilterBase):
 
     def output(self, **kwargs):
         program = self._parser(self.content)
-        minified = u''.join(part.text for part in self._unparser(program))
+        minified = "".join(part.text for part in self._unparser(program))
         assert isinstance(minified, str)
         return minified

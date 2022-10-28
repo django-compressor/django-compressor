@@ -18,6 +18,7 @@ class CompressorFileStorage(FileSystemStorage):
     ``COMPRESS_URL``.
 
     """
+
     def __init__(self, location=None, base_url=None, *args, **kwargs):
         if location is None:
             location = settings.COMPRESS_ROOT
@@ -47,20 +48,22 @@ class CompressorFileStorage(FileSystemStorage):
 
 
 compressor_file_storage = SimpleLazyObject(
-    lambda: get_storage_class('compressor.storage.CompressorFileStorage')())
+    lambda: get_storage_class("compressor.storage.CompressorFileStorage")()
+)
 
 
 class GzipCompressorFileStorage(CompressorFileStorage):
     """
     File system storage that stores gzipped files in addition to the usual files.
     """
+
     def save(self, filename, content):
         filename = super().save(filename, content)
         orig_path = self.path(filename)
-        compressed_path = '%s.gz' % orig_path
+        compressed_path = "%s.gz" % orig_path
 
-        with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
-            with gzip.GzipFile(fileobj=f_out, mode='wb') as gz_out:
+        with open(orig_path, "rb") as f_in, open(compressed_path, "wb") as f_out:
+            with gzip.GzipFile(fileobj=f_out, mode="wb") as gz_out:
                 gz_out.write(f_in.read())
 
         # Ensure the file timestamps match.
@@ -78,17 +81,19 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
     """
     File system storage that stores brotli files in addition to the usual files.
     """
+
     chunk_size = 1024
 
     def save(self, filename, content):
         filename = super().save(filename, content)
         orig_path = self.path(filename)
-        compressed_path = '%s.br' % orig_path
+        compressed_path = "%s.br" % orig_path
 
         import brotli
+
         br_compressor = brotli.Compressor()
-        with open(orig_path, 'rb') as f_in, open(compressed_path, 'wb') as f_out:
-            for f_in_data in iter(lambda: f_in.read(self.chunk_size), b''):
+        with open(orig_path, "rb") as f_in, open(compressed_path, "wb") as f_out:
+            for f_in_data in iter(lambda: f_in.read(self.chunk_size), b""):
                 compressed_data = br_compressor.process(f_in_data)
                 if not compressed_data:
                     compressed_data = br_compressor.flush()
@@ -116,7 +121,9 @@ default_storage = DefaultStorage()
 class OfflineManifestFileStorage(CompressorFileStorage):
     def __init__(self, location=None, base_url=None, *args, **kwargs):
         if location is None:
-            location = os.path.join(settings.COMPRESS_ROOT, settings.COMPRESS_OUTPUT_DIR)
+            location = os.path.join(
+                settings.COMPRESS_ROOT, settings.COMPRESS_OUTPUT_DIR
+            )
         if base_url is None:
             base_url = urljoin(settings.COMPRESS_URL, settings.COMPRESS_OUTPUT_DIR)
         super().__init__(location, base_url, *args, **kwargs)

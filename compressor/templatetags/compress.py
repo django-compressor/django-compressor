@@ -1,22 +1,26 @@
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 
-from compressor.cache import (cache_get, cache_set, get_offline_hexdigest,
-                              get_offline_manifest, get_templatetag_cachekey)
+from compressor.cache import (
+    cache_get,
+    cache_set,
+    get_offline_hexdigest,
+    get_offline_manifest,
+    get_templatetag_cachekey,
+)
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.utils import get_class
 
 register = template.Library()
 
-OUTPUT_FILE = 'file'
-OUTPUT_INLINE = 'inline'
-OUTPUT_PRELOAD = 'preload'
+OUTPUT_FILE = "file"
+OUTPUT_INLINE = "inline"
+OUTPUT_PRELOAD = "preload"
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE, OUTPUT_PRELOAD)
 
 
 class CompressorMixin:
-
     def get_original_content(self, context):
         raise NotImplementedError
 
@@ -28,9 +32,9 @@ class CompressorMixin:
         if kind not in self.compressors.keys():
             raise template.TemplateSyntaxError(
                 "The compress tag's argument must be one of: %s."
-                % ', '.join(map(repr, self.compressors.keys())))
-        return get_class(self.compressors.get(kind),
-                         exception=ImproperlyConfigured)
+                % ", ".join(map(repr, self.compressors.keys()))
+            )
+        return get_class(self.compressors.get(kind), exception=ImproperlyConfigured)
 
     def get_compressor(self, context, kind, log, verbosity):
         cls = self.compressor_cls(kind)
@@ -39,13 +43,13 @@ class CompressorMixin:
             content=self.get_original_content(context),
             context=context,
             log=log,
-            verbosity=verbosity
+            verbosity=verbosity,
         )
 
     def debug_mode(self, context):
         if settings.COMPRESS_DEBUG_TOGGLE:
             # Only check for the debug parameter if a RequestContext was used
-            request = context.get('request', None)
+            request = context.get("request", None)
             if request is not None:
                 return settings.COMPRESS_DEBUG_TOGGLE in request.GET
 
@@ -57,8 +61,7 @@ class CompressorMixin:
         but can be overridden to completely disable compression for
         a subclass, for instance.
         """
-        return (settings.COMPRESS_ENABLED
-                and settings.COMPRESS_OFFLINE) or forced
+        return (settings.COMPRESS_ENABLED and settings.COMPRESS_OFFLINE) or forced
 
     def render_offline(self, context):
         """
@@ -75,13 +78,15 @@ class CompressorMixin:
                 # a string-alike object to e.g. add ``SCRIPT_NAME`` WSGI param
                 # as a *path prefix* to the output URL.
                 # See https://code.djangoproject.com/ticket/25598.
-                str(settings.COMPRESS_URL)
+                str(settings.COMPRESS_URL),
             )
         else:
-            raise OfflineGenerationError('You have offline compression '
+            raise OfflineGenerationError(
+                "You have offline compression "
                 'enabled but key "%s" is missing from offline manifest. '
                 'You may need to run "python manage.py compress". Here '
-                'is the original content:\n\n%s' % (key, original_content))
+                "is the original content:\n\n%s" % (key, original_content)
+            )
 
     def render_cached(self, compressor, kind, mode):
         """
@@ -92,19 +97,24 @@ class CompressorMixin:
         cache_content = cache_get(cache_key)
         return cache_key, cache_content
 
-    def render_compressed(self, context, kind, mode, name=None, forced=False, log=None, verbosity=0):
+    def render_compressed(
+        self, context, kind, mode, name=None, forced=False, log=None, verbosity=0
+    ):
 
         # See if it has been rendered offline
         if self.is_offline_compression_enabled(forced) and not forced:
             return self.render_offline(context)
 
         # Take a shortcut if we really don't have anything to do
-        if (not settings.COMPRESS_ENABLED
-                and not settings.COMPRESS_PRECOMPILERS and not forced):
+        if (
+            not settings.COMPRESS_ENABLED
+            and not settings.COMPRESS_PRECOMPILERS
+            and not forced
+        ):
             return self.get_original_content(context)
 
-        name = name or getattr(self, 'name', None)
-        context['compressed'] = {'name': name}
+        name = name or getattr(self, "name", None)
+        context["compressed"] = {"name": name}
         compressor = self.get_compressor(context, kind, log, verbosity)
 
         # Check cache
@@ -114,9 +124,9 @@ class CompressorMixin:
             if cache_content is not None:
                 return cache_content
 
-        file_basename = name or getattr(self, 'basename', None)
+        file_basename = name or getattr(self, "basename", None)
         if file_basename is None:
-            file_basename = 'output'
+            file_basename = "output"
 
         rendered_output = compressor.output(mode, forced=forced, basename=file_basename)
         assert isinstance(rendered_output, str)
@@ -126,7 +136,6 @@ class CompressorMixin:
 
 
 class CompressorNode(CompressorMixin, template.Node):
-
     def __init__(self, nodelist, kind=None, mode=OUTPUT_FILE, name=None):
         self.nodelist = nodelist
         self.kind = kind
@@ -148,7 +157,9 @@ class CompressorNode(CompressorMixin, template.Node):
         except AttributeError:
             log, verbosity = None, 0
 
-        return self.render_compressed(context, self.kind, self.mode, forced=forced, log=log, verbosity=verbosity)
+        return self.render_compressed(
+            context, self.kind, self.mode, forced=forced, log=log, verbosity=verbosity
+        )
 
 
 @register.tag
@@ -168,14 +179,15 @@ def compress(parser, token):
 
     """
 
-    nodelist = parser.parse(('endcompress',))
+    nodelist = parser.parse(("endcompress",))
     parser.delete_first_token()
 
     args = token.split_contents()
 
     if not len(args) in (2, 3, 4):
         raise template.TemplateSyntaxError(
-            "%r tag requires either one, two or three arguments." % args[0])
+            "%r tag requires either one, two or three arguments." % args[0]
+        )
 
     kind = args[1]
 
@@ -183,8 +195,9 @@ def compress(parser, token):
         mode = args[2]
         if mode not in OUTPUT_MODES:
             raise template.TemplateSyntaxError(
-                "%r's second argument must be '%s' or '%s'." %
-                (args[0], OUTPUT_FILE, OUTPUT_INLINE))
+                "%r's second argument must be '%s' or '%s'."
+                % (args[0], OUTPUT_FILE, OUTPUT_INLINE)
+            )
     else:
         mode = OUTPUT_FILE
     if len(args) == 4:

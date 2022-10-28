@@ -10,7 +10,7 @@ from compressor.exceptions import TemplateSyntaxError, TemplateDoesNotExist
 
 
 def flatten_context(context):
-    if hasattr(context, 'dicts'):
+    if hasattr(context, "dicts"):
         context_dict = {}
 
         for d in context.dicts:
@@ -28,14 +28,15 @@ class SpacelessExtension(Extension):
     See: https://github.com/django/django/blob/master/django/template/defaulttags.py
     """
 
-    tags = set(['spaceless'])
+    tags = set(["spaceless"])
 
     def parse(self, parser):
         lineno = next(parser.stream).lineno
-        body = parser.parse_statements(['name:endspaceless'], drop_needle=True)
+        body = parser.parse_statements(["name:endspaceless"], drop_needle=True)
 
-        return nodes.CallBlock(self.call_method('_spaceless', []),
-                               [], [], body).set_lineno(lineno)
+        return nodes.CallBlock(
+            self.call_method("_spaceless", []), [], [], body
+        ).set_lineno(lineno)
 
     def _spaceless(self, caller):
         from django.utils.html import strip_spaces_between_tags
@@ -60,14 +61,14 @@ def url_for(mod, filename):
 
 
 class Jinja2Parser:
-    COMPRESSOR_ID = 'compressor.contrib.jinja2ext.CompressorExtension'
+    COMPRESSOR_ID = "compressor.contrib.jinja2ext.CompressorExtension"
 
     def __init__(self, charset, env):
         self.charset = charset
         self.env = env
 
     def parse(self, template_name):
-        with io.open(template_name, mode='rb') as file:
+        with io.open(template_name, mode="rb") as file:
             try:
                 template = self.env.parse(file.read().decode(self.charset))
             except jinja2.TemplateSyntaxError as e:
@@ -117,11 +118,13 @@ class Jinja2Parser:
 
     def walk_nodes(self, node, block_name=None, context=None):
         for node in self.get_nodelist(node):
-            if (isinstance(node, CallBlock)
-              and isinstance(node.call, Call)
-              and isinstance(node.call.node, ExtensionAttribute)
-              and node.call.node.identifier == self.COMPRESSOR_ID):
-                node.call.node.name = '_compress_forced'
+            if (
+                isinstance(node, CallBlock)
+                and isinstance(node.call, Call)
+                and isinstance(node.call.node, ExtensionAttribute)
+                and node.call.node.identifier == self.COMPRESSOR_ID
+            ):
+                node.call.node.name = "_compress_forced"
                 yield node
             else:
                 for node in self.walk_nodes(node, block_name=block_name):

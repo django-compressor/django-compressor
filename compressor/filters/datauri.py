@@ -17,6 +17,7 @@ class DataUriFilter(FilterBase):
 
     Don't use this class directly. Use a subclass.
     """
+
     def input(self, filename=None, **kwargs):
         if not filename or not filename.startswith(settings.COMPRESS_ROOT):
             return self.content
@@ -31,18 +32,19 @@ class DataUriFilter(FilterBase):
             url = url.split("?")[0]
         if "#" in url:
             url = url.split("#")[0]
-        return os.path.join(
-            settings.COMPRESS_ROOT, url[len(settings.COMPRESS_URL):])
+        return os.path.join(settings.COMPRESS_ROOT, url[len(settings.COMPRESS_URL) :])
 
     def data_uri_converter(self, matchobj):
-        url = matchobj.group(1).strip(' \'"')
-        if not url.startswith('data:') and not url.startswith('//'):
+        url = matchobj.group(1).strip(" '\"")
+        if not url.startswith("data:") and not url.startswith("//"):
             path = self.get_file_path(url)
             if os.stat(path).st_size <= settings.COMPRESS_DATA_URI_MAX_SIZE:
-                with open(path, 'rb') as file:
-                    data = b64encode(file.read()).decode('ascii')
+                with open(path, "rb") as file:
+                    data = b64encode(file.read()).decode("ascii")
                 return 'url("data:%s;base64,%s")' % (
-                    mimetypes.guess_type(path)[0], data)
+                    mimetypes.guess_type(path)[0],
+                    data,
+                )
         return 'url("%s")' % url
 
 
@@ -51,6 +53,5 @@ class CssDataUriFilter(DataUriFilter):
 
     See DataUriFilter.
     """
-    url_patterns = (
-        re.compile(r'url\(([^\)]+)\)'),
-    )
+
+    url_patterns = (re.compile(r"url\(([^\)]+)\)"),)

@@ -5,7 +5,6 @@ from compressor.storage import CompressorFileStorage
 
 
 class FinderTestCase(TestCase):
-
     def test_has_correct_storage(self):
         finder = CompressorFinder()
         self.assertTrue(type(finder.storage) is CompressorFileStorage)
