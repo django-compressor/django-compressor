@@ -9,6 +9,7 @@ class CompressorFinder(staticfiles.finders.BaseStorageFinder):
     with staticfiles development file server or during
     deployment.
     """
+
     storage = CompressorFileStorage
 
     def list(self, ignore_patterns):

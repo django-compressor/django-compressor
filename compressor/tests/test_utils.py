@@ -12,29 +12,30 @@ from imp import reload
 
 
 def get_apps_without_staticfiles(apps):
-    return [x for x in apps if x != 'django.contrib.staticfiles']
+    return [x for x in apps if x != "django.contrib.staticfiles"]
 
 
 def get_apps_with_staticfiles_using_appconfig(apps):
     return get_apps_without_staticfiles(apps) + [
-        'django.contrib.staticfiles.apps.StaticFilesConfig',
+        "django.contrib.staticfiles.apps.StaticFilesConfig",
     ]
 
 
 class StaticFilesTestCase(TestCase):
-
     def test_has_finders_from_staticfiles(self):
-        self.assertTrue(compressor.utils.staticfiles.finders is
-                        django.contrib.staticfiles.finders)
+        self.assertTrue(
+            compressor.utils.staticfiles.finders is django.contrib.staticfiles.finders
+        )
 
     def test_has_finders_from_staticfiles_if_configured_per_appconfig(self):
-        apps = get_apps_with_staticfiles_using_appconfig(
-            settings.INSTALLED_APPS)
+        apps = get_apps_with_staticfiles_using_appconfig(settings.INSTALLED_APPS)
         try:
             with override_settings(INSTALLED_APPS=apps):
                 reload(compressor.utils.staticfiles)
-                self.assertTrue(compressor.utils.staticfiles.finders is
-                                django.contrib.staticfiles.finders)
+                self.assertTrue(
+                    compressor.utils.staticfiles.finders
+                    is django.contrib.staticfiles.finders
+                )
         finally:
             reload(compressor.utils.staticfiles)
 
@@ -49,10 +50,13 @@ class StaticFilesTestCase(TestCase):
 
 
 class TestGetClass(TestCase):
-
     def test_get_class_import_exception(self):
         with self.assertRaises(FilterError) as context:
-            get_class('common.uglify.JsUglifySourcemapCompressor')
+            get_class("common.uglify.JsUglifySourcemapCompressor")
 
-        self.assertTrue(('Failed to import common.uglify.JsUglifySourcemapCompressor. '
-                         'ImportError is: No module named' in str(context.exception)))
+        self.assertTrue(
+            (
+                "Failed to import common.uglify.JsUglifySourcemapCompressor. "
+                "ImportError is: No module named" in str(context.exception)
+            )
+        )

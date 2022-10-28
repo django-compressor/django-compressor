@@ -28,14 +28,14 @@ class ParserTestCase:
         self.override_settings.__exit__(None, None, None)
 
 
-@unittest.skipIf(lxml is None, 'lxml not found')
+@unittest.skipIf(lxml is None, "lxml not found")
 class LxmlParserTests(ParserTestCase, CompressorTestCase):
-    parser_cls = 'compressor.parser.LxmlParser'
+    parser_cls = "compressor.parser.LxmlParser"
 
 
-@unittest.skipIf(html5lib is None, 'html5lib not found')
+@unittest.skipIf(html5lib is None, "html5lib not found")
 class Html5LibParserTests(ParserTestCase, CompressorTestCase):
-    parser_cls = 'compressor.parser.Html5LibParser'
+    parser_cls = "compressor.parser.Html5LibParser"
     # Special test variants required since xml.etree holds attributes
     # as a plain dictionary, e.g. key order is unpredictable.
 
@@ -43,57 +43,54 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
         split = self.css_node.split_contents()
         out0 = (
             SOURCE_FILE,
-            os.path.join(settings.COMPRESS_ROOT, 'css', 'one.css'),
-            'css/one.css',
-            '{http://www.w3.org/1999/xhtml}link',
-            {'rel': 'stylesheet', 'href': '/static/css/one.css',
-             'type': 'text/css'},
+            os.path.join(settings.COMPRESS_ROOT, "css", "one.css"),
+            "css/one.css",
+            "{http://www.w3.org/1999/xhtml}link",
+            {"rel": "stylesheet", "href": "/static/css/one.css", "type": "text/css"},
         )
-        self.assertEqual(out0, split[0][:3] + (split[0][3].tag,
-                                               split[0][3].attrib))
+        self.assertEqual(out0, split[0][:3] + (split[0][3].tag, split[0][3].attrib))
         out1 = (
             SOURCE_HUNK,
-            'p { border:5px solid green;}',
+            "p { border:5px solid green;}",
             None,
             '<style type="text/css">p { border:5px solid green;}</style>',
         )
-        self.assertEqual(out1, split[1][:3]
-                         + (self.css_node.parser.elem_str(split[1][3]),))
+        self.assertEqual(
+            out1, split[1][:3] + (self.css_node.parser.elem_str(split[1][3]),)
+        )
         out2 = (
             SOURCE_FILE,
-            os.path.join(settings.COMPRESS_ROOT, 'css', 'two.css'),
-            'css/two.css',
-            '{http://www.w3.org/1999/xhtml}link',
-            {'rel': 'stylesheet', 'href': '/static/css/two.css',
-             'type': 'text/css'},
+            os.path.join(settings.COMPRESS_ROOT, "css", "two.css"),
+            "css/two.css",
+            "{http://www.w3.org/1999/xhtml}link",
+            {"rel": "stylesheet", "href": "/static/css/two.css", "type": "text/css"},
         )
-        self.assertEqual(out2, split[2][:3] + (split[2][3].tag,
-                                               split[2][3].attrib))
+        self.assertEqual(out2, split[2][:3] + (split[2][3].tag, split[2][3].attrib))
 
     def test_js_split(self):
         split = self.js_node.split_contents()
         out0 = (
             SOURCE_FILE,
-            os.path.join(settings.COMPRESS_ROOT, 'js', 'one.js'),
-            'js/one.js',
-            '{http://www.w3.org/1999/xhtml}script',
-            {'src': '/static/js/one.js', 'type': 'text/javascript'},
+            os.path.join(settings.COMPRESS_ROOT, "js", "one.js"),
+            "js/one.js",
+            "{http://www.w3.org/1999/xhtml}script",
+            {"src": "/static/js/one.js", "type": "text/javascript"},
             None,
         )
-        self.assertEqual(out0, split[0][:3] + (split[0][3].tag,
-                                               split[0][3].attrib,
-                                               split[0][3].text))
+        self.assertEqual(
+            out0, split[0][:3] + (split[0][3].tag, split[0][3].attrib, split[0][3].text)
+        )
         out1 = (
             SOURCE_HUNK,
             'obj.value = "value";',
             None,
-            '{http://www.w3.org/1999/xhtml}script',
-            {'type': 'text/javascript'},
+            "{http://www.w3.org/1999/xhtml}script",
+            {"type": "text/javascript"},
             'obj.value = "value";',
         )
-        self.assertEqual(out1, split[1][:3] + (split[1][3].tag,
-                                               split[1][3].attrib,
-                                               split[1][3].text))
+        self.assertEqual(
+            out1, split[1][:3] + (split[1][3].tag, split[1][3].attrib, split[1][3].text)
+        )
 
     @override_settings(COMPRESS_ENABLED=False)
     def test_css_return_if_off(self):
@@ -111,7 +108,7 @@ class Html5LibParserTests(ParserTestCase, CompressorTestCase):
 
 
 class BeautifulSoupParserTests(ParserTestCase, CompressorTestCase):
-    parser_cls = 'compressor.parser.BeautifulSoupParser'
+    parser_cls = "compressor.parser.BeautifulSoupParser"
     # just like in the Html5LibParserTests, provide special tests because
     # in bs4 attributes are held in dictionaries
 
@@ -119,30 +116,29 @@ class BeautifulSoupParserTests(ParserTestCase, CompressorTestCase):
         split = self.css_node.split_contents()
         out0 = (
             SOURCE_FILE,
-            os.path.join(settings.COMPRESS_ROOT, 'css', 'one.css'),
-            'css/one.css',
+            os.path.join(settings.COMPRESS_ROOT, "css", "one.css"),
+            "css/one.css",
             None,
             None,
         )
-        self.assertEqual(out0, split[0][:3] + (split[0][3].tag,
-                                               split[0][3].attrib))
+        self.assertEqual(out0, split[0][:3] + (split[0][3].tag, split[0][3].attrib))
         out1 = (
             SOURCE_HUNK,
-            'p { border:5px solid green;}',
+            "p { border:5px solid green;}",
             None,
             '<style type="text/css">p { border:5px solid green;}</style>',
         )
-        self.assertEqual(out1, split[1][:3]
-                         + (self.css_node.parser.elem_str(split[1][3]),))
+        self.assertEqual(
+            out1, split[1][:3] + (self.css_node.parser.elem_str(split[1][3]),)
+        )
         out2 = (
             SOURCE_FILE,
-            os.path.join(settings.COMPRESS_ROOT, 'css', 'two.css'),
-            'css/two.css',
+            os.path.join(settings.COMPRESS_ROOT, "css", "two.css"),
+            "css/two.css",
             None,
             None,
         )
-        self.assertEqual(out2, split[2][:3] + (split[2][3].tag,
-                                               split[2][3].attrib))
+        self.assertEqual(out2, split[2][:3] + (split[2][3].tag, split[2][3].attrib))
 
     @override_settings(COMPRESS_ENABLED=False)
     def test_css_return_if_off(self):
@@ -150,4 +146,4 @@ class BeautifulSoupParserTests(ParserTestCase, CompressorTestCase):
 
 
 class HtmlParserTests(ParserTestCase, CompressorTestCase):
-    parser_cls = 'compressor.parser.HtmlParser'
+    parser_cls = "compressor.parser.HtmlParser"

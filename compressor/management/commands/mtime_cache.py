@@ -12,27 +12,38 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '-i', '--ignore', action='append', default=[],
-            dest='ignore_patterns', metavar='PATTERN',
+            "-i",
+            "--ignore",
+            action="append",
+            default=[],
+            dest="ignore_patterns",
+            metavar="PATTERN",
             help="Ignore files or directories matching this glob-style "
-                 "pattern. Use multiple times to ignore more."),
+            "pattern. Use multiple times to ignore more.",
+        ),
         parser.add_argument(
-            '--no-default-ignore', action='store_false',
-            dest='use_default_ignore_patterns', default=True,
+            "--no-default-ignore",
+            action="store_false",
+            dest="use_default_ignore_patterns",
+            default=True,
             help="Don't ignore the common private glob-style patterns 'CVS', "
-                 "'.*' and '*~'."),
+            "'.*' and '*~'.",
+        ),
         parser.add_argument(
-            '--follow-links', dest='follow_links', action='store_true',
+            "--follow-links",
+            dest="follow_links",
+            action="store_true",
             help="Follow symlinks when traversing the COMPRESS_ROOT "
-                 "(which defaults to STATIC_ROOT). Be aware that using this "
-                 "can lead to infinite recursion if a link points to a parent "
-                 "directory of itself."),
+            "(which defaults to STATIC_ROOT). Be aware that using this "
+            "can lead to infinite recursion if a link points to a parent "
+            "directory of itself.",
+        ),
         parser.add_argument(
-            '-c', '--clean', dest='clean', action='store_true',
-            help="Remove all items"),
+            "-c", "--clean", dest="clean", action="store_true", help="Remove all items"
+        ),
         parser.add_argument(
-            '-a', '--add', dest='add', action='store_true',
-            help="Add all items"),
+            "-a", "--add", dest="add", action="store_true", help="Add all items"
+        ),
 
     def is_ignored(self, path):
         """
@@ -45,47 +56,50 @@ class Command(BaseCommand):
         return False
 
     def handle(self, **options):
-        ignore_patterns = options['ignore_patterns']
-        if options['use_default_ignore_patterns']:
-            ignore_patterns += ['CVS', '.*', '*~']
-            options['ignore_patterns'] = ignore_patterns
+        ignore_patterns = options["ignore_patterns"]
+        if options["use_default_ignore_patterns"]:
+            ignore_patterns += ["CVS", ".*", "*~"]
+            options["ignore_patterns"] = ignore_patterns
         self.ignore_patterns = ignore_patterns
 
-        if ((options['add'] and options['clean'])
-                or (not options['add'] and not options['clean'])):
+        if (options["add"] and options["clean"]) or (
+            not options["add"] and not options["clean"]
+        ):
             raise CommandError('Please specify either "--add" or "--clean"')
 
         if not settings.COMPRESS_MTIME_DELAY:
             raise CommandError(
-                'mtime caching is currently disabled. Please '
-                'set the COMPRESS_MTIME_DELAY setting to a number of seconds.')
+                "mtime caching is currently disabled. Please "
+                "set the COMPRESS_MTIME_DELAY setting to a number of seconds."
+            )
 
         files_to_add = set()
         keys_to_delete = set()
 
-        for root, dirs, files in os.walk(settings.COMPRESS_ROOT,
-                                         followlinks=options['follow_links']):
+        for root, dirs, files in os.walk(
+            settings.COMPRESS_ROOT, followlinks=options["follow_links"]
+        ):
             for dir_ in dirs:
                 if self.is_ignored(dir_):
                     dirs.remove(dir_)
             for filename in files:
                 common = "".join(root.split(settings.COMPRESS_ROOT))
                 if common.startswith(os.sep):
-                    common = common[len(os.sep):]
+                    common = common[len(os.sep) :]
                 if self.is_ignored(os.path.join(common, filename)):
                     continue
                 filename = os.path.join(root, filename)
                 keys_to_delete.add(get_mtime_cachekey(filename))
-                if options['add']:
+                if options["add"]:
                     files_to_add.add(filename)
 
         if keys_to_delete:
             cache.delete_many(list(keys_to_delete))
-            self.stdout.write("Deleted mtimes of %d files from the cache."
-                              % len(keys_to_delete))
+            self.stdout.write(
+                "Deleted mtimes of %d files from the cache." % len(keys_to_delete)
+            )
 
         if files_to_add:
             for filename in files_to_add:
                 get_mtime(filename)
-            self.stdout.write("Added mtimes of %d files to cache."
-                              % len(files_to_add))
+            self.stdout.write("Added mtimes of %d files to cache." % len(files_to_add))

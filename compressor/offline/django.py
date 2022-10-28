@@ -5,7 +5,12 @@ from django.template import Context
 from django.template.base import Node, VariableNode, TextNode, NodeList
 from django.template.defaulttags import IfNode
 from django.template.loader import get_template
-from django.template.loader_tags import BLOCK_CONTEXT_KEY, ExtendsNode, BlockNode, BlockContext
+from django.template.loader_tags import (
+    BLOCK_CONTEXT_KEY,
+    ExtendsNode,
+    BlockNode,
+    BlockContext,
+)
 
 
 from compressor.exceptions import TemplateSyntaxError, TemplateDoesNotExist
@@ -20,8 +25,9 @@ def handle_extendsnode(extendsnode, context):
     if BLOCK_CONTEXT_KEY not in context.render_context:
         context.render_context[BLOCK_CONTEXT_KEY] = BlockContext()
     block_context = context.render_context[BLOCK_CONTEXT_KEY]
-    blocks = dict((n.name, n) for n in
-                  extendsnode.nodelist.get_nodes_by_type(BlockNode))
+    blocks = dict(
+        (n.name, n) for n in extendsnode.nodelist.get_nodes_by_type(BlockNode)
+    )
     block_context.add_blocks(blocks)
 
     compiled_parent = extendsnode.get_parent(context)
@@ -34,8 +40,7 @@ def handle_extendsnode(extendsnode, context):
                 return handle_extendsnode(node, context)
             break
     # Add blocks of the root template to block context.
-    blocks = dict((n.name, n) for n in
-                  parent_nodelist.get_nodes_by_type(BlockNode))
+    blocks = dict((n.name, n) for n in parent_nodelist.get_nodes_by_type(BlockNode))
     block_context.add_blocks(blocks)
 
     block_stack = []
@@ -48,7 +53,7 @@ def remove_block_nodes(nodelist, block_stack, block_context):
     for node in nodelist:
         if isinstance(node, VariableNode):
             var_name = node.filter_expression.token.strip()
-            if var_name == 'block.super':
+            if var_name == "block.super":
                 if not block_stack:
                     continue
                 node = block_context.get_block(block_stack[-1].name)
@@ -61,14 +66,20 @@ def remove_block_nodes(nodelist, block_stack, block_context):
             # IfNode has nodelist as a @property so we can not modify it
             if isinstance(node, IfNode):
                 node = copy(node)
-                for i, (condition, sub_nodelist) in enumerate(node.conditions_nodelists):
-                    sub_nodelist = remove_block_nodes(sub_nodelist, block_stack, block_context)
+                for i, (condition, sub_nodelist) in enumerate(
+                    node.conditions_nodelists
+                ):
+                    sub_nodelist = remove_block_nodes(
+                        sub_nodelist, block_stack, block_context
+                    )
                     node.conditions_nodelists[i] = (condition, sub_nodelist)
             else:
                 for attr in node.child_nodelists:
                     sub_nodelist = getattr(node, attr, None)
                     if sub_nodelist:
-                        sub_nodelist = remove_block_nodes(sub_nodelist, block_stack, block_context)
+                        sub_nodelist = remove_block_nodes(
+                            sub_nodelist, block_stack, block_context
+                        )
                         node = copy(node)
                         setattr(node, attr, sub_nodelist)
             new_nodelist.append(node)
@@ -135,15 +146,16 @@ class DjangoParser:
                 # and linked issues/PRs for a discussion on the `None) or []` part
                 nodelist += getattr(node, attr, None) or []
         else:
-            nodelist = getattr(node, 'nodelist', [])
+            nodelist = getattr(node, "nodelist", [])
         return nodelist
 
     def walk_nodes(self, node, original=None, context=None):
         if original is None:
             original = node
         for node in self.get_nodelist(node, original, context):
-            if isinstance(node, CompressorNode) \
-                    and node.is_offline_compression_enabled(forced=True):
+            if isinstance(node, CompressorNode) and node.is_offline_compression_enabled(
+                forced=True
+            ):
                 yield node
             else:
                 for node in self.walk_nodes(node, original, context):

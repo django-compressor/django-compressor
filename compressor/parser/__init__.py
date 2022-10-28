@@ -15,7 +15,7 @@ class AutoSelectParser(LazyObject):
     options = (
         # TODO: make lxml.html parser first again
         (html.parser.__name__, HtmlParser),  # fast and part of the Python stdlib
-        ('lxml.html', LxmlParser),  # lxml, extremely fast
+        ("lxml.html", LxmlParser),  # lxml, extremely fast
     )
 
     def __init__(self, content):

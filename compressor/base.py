@@ -10,16 +10,19 @@ from django.utils.functional import cached_property
 
 from compressor.cache import get_hexdigest, get_mtime
 from compressor.conf import settings
-from compressor.exceptions import (CompressorError, UncompressableFileError,
-        FilterDoesNotExist)
+from compressor.exceptions import (
+    CompressorError,
+    UncompressableFileError,
+    FilterDoesNotExist,
+)
 from compressor.filters import CachedCompilerFilter
 from compressor.storage import compressor_file_storage
 from compressor.signals import post_compress
 from compressor.utils import get_class, get_mod_func, staticfiles
 
 # Some constants for nicer handling.
-SOURCE_HUNK, SOURCE_FILE = 'inline', 'file'
-METHOD_INPUT, METHOD_OUTPUT = 'input', 'output'
+SOURCE_HUNK, SOURCE_FILE = "inline", "file"
+METHOD_INPUT, METHOD_OUTPUT = "input", "output"
 
 
 class Compressor:
@@ -30,8 +33,18 @@ class Compressor:
 
     output_mimetypes = {}
 
-    def __init__(self, resource_kind, content=None, output_prefix=None,
-                 context=None, filters=None, log=None, verbosity=1, *args, **kwargs):
+    def __init__(
+        self,
+        resource_kind,
+        content=None,
+        output_prefix=None,
+        context=None,
+        filters=None,
+        log=None,
+        verbosity=1,
+        *args,
+        **kwargs
+    ):
         if filters is None:
             self.filters = settings.COMPRESS_FILTERS[resource_kind]
         else:
@@ -41,7 +54,7 @@ class Compressor:
         else:
             self.output_prefix = output_prefix
         self.content = content or ""  # rendered contents of {% compress %} tag
-        self.output_dir = settings.COMPRESS_OUTPUT_DIR.strip('/')
+        self.output_dir = settings.COMPRESS_OUTPUT_DIR.strip("/")
         self.charset = settings.DEFAULT_CHARSET
         self.split_content = []
         self.context = context or {}
@@ -58,13 +71,15 @@ class Compressor:
             content=self.content,
             context=self.context,
             output_prefix=self.output_prefix,
-            filters=self.filters)
+            filters=self.filters,
+        )
         keywords.update(kwargs)
         return self.__class__(self.resource_kind, **keywords)
 
     @cached_property
     def storage(self):
         from compressor.storage import default_storage
+
         return default_storage
 
     def split_contents(self):
@@ -103,9 +118,11 @@ class Compressor:
         base_url = str(base_url)
 
         if not url.startswith(base_url):
-            raise UncompressableFileError("'%s' isn't accessible via "
-                                          "COMPRESS_URL ('%s') and can't be "
-                                          "compressed" % (url, base_url))
+            raise UncompressableFileError(
+                "'%s' isn't accessible via "
+                "COMPRESS_URL ('%s') and can't be "
+                "compressed" % (url, base_url)
+            )
         basename = url.replace(base_url, "", 1)
         # drop the querystring, which is used for non-compressed cache-busting.
         return basename.split("?", 1)[0]
@@ -127,7 +144,7 @@ class Compressor:
             filename = os.path.split(basename)[1]
             parts.append(os.path.splitext(filename)[0])
         parts.extend([get_hexdigest(content, 12), self.resource_kind])
-        return os.path.join(self.output_dir, self.output_prefix, '.'.join(parts))
+        return os.path.join(self.output_dir, self.output_prefix, ".".join(parts))
 
     def get_filename(self, basename):
         """
@@ -144,50 +161,62 @@ class Compressor:
                 # call path first so remote storages don't make it to exists,
                 # which would cause network I/O
                 if self.log and self.verbosity >= 2:
-                    self.log.write('Looking for \'{}\' in storage\n'.format(basename))
+                    self.log.write("Looking for '{}' in storage\n".format(basename))
                 filename = self.storage.path(basename)
                 if not self.storage.exists(basename):
                     filename = None
             except NotImplementedError:
                 # remote storages don't implement path, access the file locally
                 if self.log and self.verbosity >= 2:
-                    self.log.write('Remote storages don\'t implement path, looking for the file locally\n')
+                    self.log.write(
+                        "Remote storages don't implement path, looking for the file locally\n"
+                    )
                 if compressor_file_storage.exists(basename):
                     filename = compressor_file_storage.path(basename)
         # secondly try to find it with staticfiles
         if not filename and self.finders:
             if self.log and self.verbosity >= 2:
                 if not settings.DEBUG:
-                    self.log.write('\'{}\' was not found in storage, using static finders\n'.format(basename))
+                    self.log.write(
+                        "'{}' was not found in storage, using static finders\n".format(
+                            basename
+                        )
+                    )
                 else:
-                    self.log.write('Using static finders for \'{}\'\n'.format(basename))
+                    self.log.write("Using static finders for '{}'\n".format(basename))
             filename = self.finders.find(url2pathname(basename))
         if filename:
             return filename
         # or just raise an exception as the last resort
         raise UncompressableFileError(
-            "'%s' could not be found in the COMPRESS_ROOT '%s'%s" %
-            (basename, settings.COMPRESS_ROOT,
-             self.finders and " or with staticfiles." or "."))
+            "'%s' could not be found in the COMPRESS_ROOT '%s'%s"
+            % (
+                basename,
+                settings.COMPRESS_ROOT,
+                self.finders and " or with staticfiles." or ".",
+            )
+        )
 
     def get_filecontent(self, filename, charset):
         """
         Reads file contents using given `charset` and returns it as text.
         """
-        if charset == 'utf-8':
+        if charset == "utf-8":
             # Removes BOM
-            charset = 'utf-8-sig'
-        with codecs.open(filename, 'r', charset) as fd:
+            charset = "utf-8-sig"
+        with codecs.open(filename, "r", charset) as fd:
             try:
                 return fd.read()
             except IOError as e:
-                raise UncompressableFileError("IOError while processing "
-                                              "'%s': %s" % (filename, e))
+                raise UncompressableFileError(
+                    "IOError while processing " "'%s': %s" % (filename, e)
+                )
             except UnicodeDecodeError as e:
-                raise UncompressableFileError("UnicodeDecodeError while "
-                                              "processing '%s' with "
-                                              "charset %s: %s" %
-                                              (filename, charset, e))
+                raise UncompressableFileError(
+                    "UnicodeDecodeError while "
+                    "processing '%s' with "
+                    "charset %s: %s" % (filename, charset, e)
+                )
 
     @cached_property
     def parser(self):
@@ -199,14 +228,17 @@ class Compressor:
 
     @cached_property
     def mtimes(self):
-        return [str(get_mtime(value))
-                for kind, value, basename, elem in self.split_contents()
-                if kind == SOURCE_FILE]
+        return [
+            str(get_mtime(value))
+            for kind, value, basename, elem in self.split_contents()
+            if kind == SOURCE_FILE
+        ]
 
     @cached_property
     def cachekey(self):
-        return get_hexdigest(''.join(
-            [self.content] + self.mtimes).encode(self.charset), 12)
+        return get_hexdigest(
+            "".join([self.content] + self.mtimes).encode(self.charset), 12
+        )
 
     def hunks(self, forced=False):
         """
@@ -222,11 +254,11 @@ class Compressor:
             attribs = self.parser.elem_attribs(elem)
             charset = attribs.get("charset", self.charset)
             options = {
-                'method': METHOD_INPUT,
-                'elem': elem,
-                'kind': kind,
-                'basename': basename,
-                'charset': charset,
+                "method": METHOD_INPUT,
+                "elem": elem,
+                "kind": kind,
+                "basename": basename,
+                "charset": charset,
             }
 
             if kind == SOURCE_FILE:
@@ -242,8 +274,7 @@ class Compressor:
                 for filter_cls in self.cached_filters:
                     if filter_cls.run_with_compression_disabled:
                         value = self.filter(value, [filter_cls], **options)
-                yield self.handle_output(kind, value, forced=True,
-                                         basename=basename)
+                yield self.handle_output(kind, value, forced=True, basename=basename)
             else:
                 yield self.parser.elem_str(elem)
 
@@ -264,8 +295,9 @@ class Compressor:
             content.append(hunk)
         return content
 
-    def precompile(self, content, kind=None, elem=None, filename=None,
-                   charset=None, **kwargs):
+    def precompile(
+        self, content, kind=None, elem=None, filename=None, charset=None, **kwargs
+    ):
         """
         Processes file using a pre compiler.
 
@@ -282,31 +314,43 @@ class Compressor:
         if filter_or_command is None:
             if mimetype in self.output_mimetypes:
                 return False, content
-            raise CompressorError("Couldn't find any precompiler in "
-                                  "COMPRESS_PRECOMPILERS setting for "
-                                  "mimetype '%s'." % mimetype)
+            raise CompressorError(
+                "Couldn't find any precompiler in "
+                "COMPRESS_PRECOMPILERS setting for "
+                "mimetype '%s'." % mimetype
+            )
 
         mod_name, cls_name = get_mod_func(filter_or_command)
         try:
             mod = import_module(mod_name)
         except (ImportError, TypeError):
             filter = CachedCompilerFilter(
-                content=content, filter_type=self.resource_kind, filename=filename,
-                charset=charset, command=filter_or_command, mimetype=mimetype)
+                content=content,
+                filter_type=self.resource_kind,
+                filename=filename,
+                charset=charset,
+                command=filter_or_command,
+                mimetype=mimetype,
+            )
             return True, filter.input(**kwargs)
         try:
             precompiler_class = getattr(mod, cls_name)
         except AttributeError:
             raise FilterDoesNotExist('Could not find "%s".' % filter_or_command)
         filter = precompiler_class(
-            content, attrs=attrs, filter_type=self.resource_kind, charset=charset,
-            filename=filename)
+            content,
+            attrs=attrs,
+            filter_type=self.resource_kind,
+            charset=charset,
+            filename=filename,
+        )
         return True, filter.input(**kwargs)
 
     def filter(self, content, filters, method, **kwargs):
         for filter_cls in filters:
             filter_func = getattr(
-                filter_cls(content, filter_type=self.resource_kind), method)
+                filter_cls(content, filter_type=self.resource_kind), method
+            )
             try:
                 if callable(filter_func):
                     content = filter_func(**kwargs)
@@ -314,16 +358,16 @@ class Compressor:
                 pass
         return content
 
-    def output(self, mode='file', forced=False, basename=None):
+    def output(self, mode="file", forced=False, basename=None):
         """
         The general output method, override in subclass if you need to do
         any custom modification. Calls other mode specific methods or simply
         returns the content directly.
         """
-        output = '\n'.join(self.filter_input(forced))
+        output = "\n".join(self.filter_input(forced))
 
         if not output:
-            return ''
+            return ""
 
         if settings.COMPRESS_ENABLED or forced:
             filtered_output = self.filter_output(output)
@@ -337,8 +381,7 @@ class Compressor:
         if callable(output_func):
             return output_func(mode, content, forced, basename)
         # Total failure, raise a general exception
-        raise CompressorError(
-            "Couldn't find output method for mode '%s'" % mode)
+        raise CompressorError("Couldn't find output method for mode '%s'" % mode)
 
     def output_file(self, mode, content, forced=False, basename=None):
         """
@@ -372,19 +415,23 @@ class Compressor:
         """
         # Just in case someone renders the compressor outside
         # the usual template rendering cycle
-        if 'compressed' not in self.context:
-            self.context['compressed'] = {}
+        if "compressed" not in self.context:
+            self.context["compressed"] = {}
 
-        self.context['compressed'].update(context or {})
-        self.context['compressed'].update(self.extra_context)
+        self.context["compressed"].update(context or {})
+        self.context["compressed"].update(self.extra_context)
 
-        if hasattr(self.context, 'flatten'):
+        if hasattr(self.context, "flatten"):
             # Passing Contexts to Template.render is deprecated since Django 1.8.
             final_context = self.context.flatten()
         else:
             final_context = self.context
 
-        post_compress.send(sender=self.__class__, type=self.resource_kind,
-                           mode=mode, context=final_context)
+        post_compress.send(
+            sender=self.__class__,
+            type=self.resource_kind,
+            mode=mode,
+            context=final_context,
+        )
         template_name = self.get_template_name(mode)
         return render_to_string(template_name, context=final_context)

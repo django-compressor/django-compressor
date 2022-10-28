@@ -27,12 +27,12 @@ def render(template_string, context_dict=None, context=None):
 @override_settings(COMPRESS_ENABLED=True)
 class TemplatetagTestCase(TestCase):
     def setUp(self):
-        self.context = {'STATIC_URL': settings.COMPRESS_URL}
+        self.context = {"STATIC_URL": settings.COMPRESS_URL}
 
     def test_empty_tag(self):
         template = """{% load compress %}{% compress js %}{% block js %}
         {% endblock %}{% endcompress %}"""
-        self.assertEqual('', render(template, self.context))
+        self.assertEqual("", render(template, self.context))
 
     def test_css_tag(self):
         template = """{% load compress %}{% compress css %}
@@ -120,7 +120,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}"""
         self.assertRaises(TemplateSyntaxError, render, template, {})
 
-    @override_settings(COMPRESS_DEBUG_TOGGLE='togglecompress')
+    @override_settings(COMPRESS_DEBUG_TOGGLE="togglecompress")
     def test_debug_toggle(self):
         template = """{% load compress %}{% compress js %}
         <script src="{{ STATIC_URL }}js/one.js" type="text/javascript"></script>
@@ -129,7 +129,7 @@ class TemplatetagTestCase(TestCase):
         """
 
         class MockDebugRequest:
-            GET = {settings.COMPRESS_DEBUG_TOGGLE: 'true'}
+            GET = {settings.COMPRESS_DEBUG_TOGGLE: "true"}
 
         context = dict(self.context, request=MockDebugRequest())
         out = """<script src="/static/js/one.js" type="text/javascript"></script>
@@ -146,9 +146,11 @@ class TemplatetagTestCase(TestCase):
         <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
         {% endcompress %}"""
         out_js = '<script>obj={};;obj.value="value";;</script>'
-        out_css = ('<style type="text/css">body{background:#990}'
-                   'p{border:5px solid green}'
-                   'body{color:#fff}</style>')
+        out_css = (
+            '<style type="text/css">body{background:#990}'
+            "p{border:5px solid green}"
+            "body{color:#fff}</style>"
+        )
         self.assertEqual(out_js + out_css, render(template, self.context))
 
     def test_named_compress_tag(self):
@@ -159,12 +161,13 @@ class TemplatetagTestCase(TestCase):
 
         def listener(sender, **kwargs):
             pass
+
         callback = Mock(wraps=listener)
         post_compress.connect(callback)
         render(template)
         args, kwargs = callback.call_args
-        context = kwargs['context']
-        self.assertEqual('foo', context['compressed']['name'])
+        context = kwargs["context"]
+        self.assertEqual("foo", context["compressed"]["name"])
 
     def test_sekizai_only_once(self):
         template = """{% load sekizai_tags %}{% addtoblock "js" %}
@@ -176,22 +179,21 @@ class TemplatetagTestCase(TestCase):
 
 
 class PrecompilerTemplatetagTestCase(TestCase):
-
     def setUp(self):
-        precompiler = os.path.join(test_dir, 'precompiler.py')
+        precompiler = os.path.join(test_dir, "precompiler.py")
         python = sys.executable
 
         override_settings = {
-            'COMPRESS_ENABLED': True,
-            'COMPRESS_PRECOMPILERS': (
-                ('text/coffeescript', '%s %s' % (python, precompiler)),
-                ('text/less', '%s %s' % (python, precompiler)),
-            )
+            "COMPRESS_ENABLED": True,
+            "COMPRESS_PRECOMPILERS": (
+                ("text/coffeescript", "%s %s" % (python, precompiler)),
+                ("text/less", "%s %s" % (python, precompiler)),
+            ),
         }
         self.override_settings = self.settings(**override_settings)
         self.override_settings.__enter__()
 
-        self.context = {'STATIC_URL': settings.COMPRESS_URL}
+        self.context = {"STATIC_URL": settings.COMPRESS_URL}
 
     def tearDown(self):
         self.override_settings.__exit__(None, None, None)
@@ -217,8 +219,11 @@ class PrecompilerTemplatetagTestCase(TestCase):
             <script type="text/coffeescript"># this is a comment.</script>
             <script type="text/javascript"># this too is a comment.</script>
             {% endcompress %}"""
-        out = (script('# this is a comment.\n') + '\n'
-               + script('# this too is a comment.', scripttype="text/javascript"))
+        out = (
+            script("# this is a comment.\n")
+            + "\n"
+            + script("# this too is a comment.", scripttype="text/javascript")
+        )
         self.assertEqual(out, render(template, self.context))
 
     @override_settings(COMPRESS_ENABLED=False)
@@ -251,9 +256,13 @@ class PrecompilerTemplatetagTestCase(TestCase):
         </script>
         {% endcompress %}"""
 
-        out = '\n'.join([script(src="/static/CACHE/js/one.4b3570601b8c.js"),
-                         script(scripttype="", src="/static/js/one.js"),
-                         script(src="/static/CACHE/js/one.8ab93aace8fa.js")])
+        out = "\n".join(
+            [
+                script(src="/static/CACHE/js/one.4b3570601b8c.js"),
+                script(scripttype="", src="/static/js/one.js"),
+                script(src="/static/CACHE/js/one.8ab93aace8fa.js"),
+            ]
+        )
 
         self.assertEqual(out, render(template, self.context))
 
@@ -266,8 +275,12 @@ class PrecompilerTemplatetagTestCase(TestCase):
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/two.css"></link>
         {% endcompress %}"""
 
-        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css">',
-                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css">'])
+        out = "".join(
+            [
+                '<link rel="stylesheet" type="text/css" href="/static/css/one.css">',
+                '<link rel="stylesheet" type="text/css" href="/static/css/two.css">',
+            ]
+        )
 
         self.assertEqual(out, render(template, self.context))
 
@@ -281,9 +294,13 @@ class PrecompilerTemplatetagTestCase(TestCase):
         <link rel="stylesheet" type="text/less" href="{{ STATIC_URL }}css/url/test.css"/>
         {% endcompress %}"""
 
-        out = ''.join(['<link rel="stylesheet" type="text/css" href="/static/css/one.css">',
-                       '<link rel="stylesheet" type="text/css" href="/static/css/two.css">',
-                       '<link rel="stylesheet" href="/static/CACHE/css/test.222f958fb191.css" type="text/css">'])
+        out = "".join(
+            [
+                '<link rel="stylesheet" type="text/css" href="/static/css/one.css">',
+                '<link rel="stylesheet" type="text/css" href="/static/css/two.css">',
+                '<link rel="stylesheet" href="/static/CACHE/css/test.222f958fb191.css" type="text/css">',
+            ]
+        )
         self.assertEqual(out, render(template, self.context))
 
 
@@ -294,9 +311,9 @@ def script(content="", src="", scripttype=""):
     >>> script('#this is a comment', scripttype="text/applescript")
     '<script type="text/applescript">#this is a comment</script>'
     """
-    out_script = '<script '
+    out_script = "<script "
     if scripttype:
         out_script += 'type="%s" ' % scripttype
     if src:
         out_script += 'src="%s" ' % src
-    return out_script[:-1] + '>%s</script>' % content
+    return out_script[:-1] + ">%s</script>" % content

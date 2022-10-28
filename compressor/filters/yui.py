@@ -7,13 +7,13 @@ class YUICompressorFilter(CompilerFilter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.command += ' --type=%s' % self.type
+        self.command += " --type=%s" % self.type
         if self.verbose:
-            self.command += ' --verbose'
+            self.command += " --verbose"
 
 
 class YUICSSFilter(YUICompressorFilter):
-    type = 'css'
+    type = "css"
     options = (
         ("binary", settings.COMPRESS_YUI_BINARY),
         ("args", settings.COMPRESS_YUI_CSS_ARGUMENTS),
@@ -21,7 +21,7 @@ class YUICSSFilter(YUICompressorFilter):
 
 
 class YUIJSFilter(YUICompressorFilter):
-    type = 'js'
+    type = "js"
     options = (
         ("binary", settings.COMPRESS_YUI_BINARY),
         ("args", settings.COMPRESS_YUI_JS_ARGUMENTS),
