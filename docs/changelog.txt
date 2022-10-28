@@ -4,7 +4,9 @@ Changelog
 Unreleased
 ----------
 
-- Drop Python 3.6 support
+- Drop Python 3.6 and 3.7 support
+- Drop Django 2.2 and 3.1 support
+- Drop SlimItFilter
 - Update the `CachedS3Boto3Storage` example storage subclass in "Remote Storages"
   to work properly after the v4.0 change to how duplicate file names are handled
   by `CompressorFileStorage`

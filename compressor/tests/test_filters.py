@@ -2,7 +2,7 @@ import io
 import os
 import sys
 from collections import defaultdict
-from unittest import mock, skipIf
+from unittest import mock
 
 from django.conf import settings
 from django.test import override_settings, TestCase
@@ -15,7 +15,7 @@ from compressor.filters.cleancss import CleanCSSFilter
 from compressor.filters.closure import ClosureCompilerFilter
 from compressor.filters.css_default import CssAbsoluteFilter, CssRelativeFilter
 from compressor.filters.cssmin import CSSCompressorFilter, rCSSMinFilter
-from compressor.filters.jsmin import CalmjsFilter, rJSMinFilter, SlimItFilter
+from compressor.filters.jsmin import CalmjsFilter, rJSMinFilter
 from compressor.filters.template import TemplateFilter
 from compressor.filters.yuglify import YUglifyCSSFilter, YUglifyJSFilter
 from compressor.filters.yui import YUICSSFilter, YUIJSFilter
@@ -245,15 +245,6 @@ class JsMinTestCase(TestCase):
  * Copyright (c) 2009-2014 Django Compressor authors
  */var foo="bar";"""
         self.assertEqual(output, rJSMinFilter(content).output())
-
-
-@skipIf(sys.version_info >= (3, 7), reason="Unsupported in Python 3.7+")
-class SlimItTestCase(TestCase):
-    def test_slimit_filter(self):
-        content = """
-        var foo = "bar";"""
-        output = """var foo="bar";"""
-        self.assertEqual(output, SlimItFilter(content).output())
 
 
 class CalmjsTestCase(TestCase):
