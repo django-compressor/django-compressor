@@ -1,5 +1,3 @@
-import warnings
-
 from django.core.exceptions import ImproperlyConfigured
 
 from compressor.filters import FilterBase, CallbackOutputFilter
@@ -13,22 +11,6 @@ class rJSMinFilter(CallbackOutputFilter):
 
 # This is for backwards compatibility
 JSMinFilter = rJSMinFilter
-
-
-class SlimItFilter(CallbackOutputFilter):
-    dependencies = ["slimit"]
-    callback = "slimit.minify"
-    kwargs = {
-        "mangle": True,
-    }
-
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "SlimItFilter is broken in Python 3.6+ and will be removed in "
-            "django-compressor 3.3.",
-            DeprecationWarning,
-        )
-        super().__init__(*args, **kwargs)
 
 
 class CalmjsFilter(FilterBase):

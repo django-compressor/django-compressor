@@ -13,22 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         versions:
-          - python: 3.7
-            toxenv: py37-2.2.X
-          - python: 3.8
-            toxenv: py38-2.2.X
-          - python: 3.9
-            toxenv: py39-2.2.X
-
-          - python: 3.7
-            toxenv: py37-3.1.X
-          - python: 3.8
-            toxenv: py38-3.1.X
-          - python: 3.9
-            toxenv: py39-3.1.X
-
-          - python: 3.7
-            toxenv: py37-3.2.X
           - python: 3.8
             toxenv: py38-3.2.X
           - python: 3.9
@@ -52,8 +36,8 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.versions.python }}
       - run: |
