@@ -2,7 +2,6 @@ import os
 
 TEST_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "tests")
 
-
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -31,7 +30,6 @@ STATICFILES_FINDERS = [
 
 STATIC_URL = "/static/"
 
-
 STATIC_ROOT = os.path.join(TEST_DIR, "static")
 
 TEMPLATES = [
@@ -56,9 +54,3 @@ TEMPLATES = [
         ],
     },
 ]
-
-SECRET_KEY = "iufoj=mibkpdz*%bob952x(%49rqgv8gg45k36kjcg76&-y5=!"
-
-PASSWORD_HASHERS = ("django.contrib.auth.hashers.UnsaltedMD5PasswordHasher",)
-
-MIDDLEWARE_CLASSES = []
