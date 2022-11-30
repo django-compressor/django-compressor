@@ -556,7 +556,7 @@ Offline settings
     An example to output the manifest into the project's root directory::
 
         # project/settings.py:
-        COMPRESS_STORAGE = 'project.module.PrivateOfflineManifestFileStorage'
+        COMPRESS_OFFLINE_MANIFEST_STORAGE = 'project.module.PrivateOfflineManifestFileStorage'
 
         # project/module.py:
         from compressor.storage import OfflineManifestFileStorage
