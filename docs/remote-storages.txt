@@ -70,8 +70,9 @@ apps can be integrated.
             super().save(name, self.local_storage._open(name))
             return name
 
-#. Set your :attr:`~django.conf.settings.COMPRESS_STORAGE` and STATICFILES_STORAGE_
-   settings to the dotted path of your custom cached storage backend, e.g.
+#. Set your :attr:`~django.conf.settings.COMPRESS_STORAGE`, STATICFILES_STORAGE_
+   and :attr:`~django.conf.settings.COMPRESS_OFFLINE_MANIFEST_STORAGE` settings 
+   to the dotted path of your custom cached storage backend, e.g.
    ``'mysite.storage.CachedS3Boto3Storage'``.
 
 #. To have Django correctly render the URLs to your static files, set the
@@ -85,6 +86,7 @@ In the end it might look like this::
     COMPRESS_ROOT = STATIC_ROOT
     STATICFILES_STORAGE = 'mysite.storage.CachedS3BotoStorage'
     COMPRESS_STORAGE = STATICFILES_STORAGE
+    COMPRESS_OFFLINE_MANIFEST_STORAGE = STATICFILES_STORAGE
     STATIC_URL = 'https://compressor-test.s3.amazonaws.com/'
     COMPRESS_URL = STATIC_URL
 
