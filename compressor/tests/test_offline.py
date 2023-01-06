@@ -55,6 +55,9 @@ class LazyScriptNamePrefixedUrl(str):
     def __unicode__(self):
         return str(self)
 
+    def __hash__(self):
+        return str.__hash__(str(self))
+
     def split(self, *args, **kwargs):
         """
         Override ``.split()`` method to make it work with ``{% static %}``.
