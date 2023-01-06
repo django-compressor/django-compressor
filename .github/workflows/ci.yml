@@ -33,6 +33,8 @@ jobs:
             toxenv: py39-4.1.X
           - python: "3.10"
             toxenv: py310-4.1.X
+          - python: "3.11"
+            toxenv: py311-4.1.X
 
     runs-on: ubuntu-latest
     steps:
