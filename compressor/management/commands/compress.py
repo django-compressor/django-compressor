@@ -37,10 +37,7 @@ offline_manifest_lock = Lock()
 class Command(BaseCommand):
     help = "Compress content outside of the request/response cycle"
 
-    if django.VERSION >= (3, 2):
-        requires_system_checks = []
-    else:
-        requires_system_checks = False
+    requires_system_checks = []
 
     def add_arguments(self, parser):
         parser.add_argument(
