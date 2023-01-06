@@ -1,8 +1,10 @@
 Changelog
 =========
 
-Unreleased
-----------
+v4.2 (2023-01-06)
+-----------------
+
+`Full Changelog <https://github.com/django-compressor/django-compressor/compare/4.1...4.2>`_
 
 - Drop Python 3.6 and 3.7 support
 - Drop Django 2.2 and 3.1 support
@@ -10,6 +12,7 @@ Unreleased
 - Update the `CachedS3Boto3Storage` example storage subclass in "Remote Storages"
   to work properly after the v4.0 change to how duplicate file names are handled
   by `CompressorFileStorage`
+- Update rsmin and jsmin versions
   
 
 v4.1 (2022-08-03)
