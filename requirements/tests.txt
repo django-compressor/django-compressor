@@ -2,7 +2,7 @@ Jinja2==3.1.2
 beautifulsoup4==4.11.1
 brotli==1.0.9
 calmjs==3.4.2
-coverage==6.5.0
+coverage==7.0.5
 csscompressor==0.9.5
 django-sekizai==4.0.0
 flake8==5.0.4
