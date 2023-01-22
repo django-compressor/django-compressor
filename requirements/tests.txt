@@ -5,7 +5,7 @@ calmjs==3.4.2
 coverage==6.5.0
 csscompressor==0.9.5
 django-sekizai==4.0.0
-flake8==5.0.4
+flake8==6.0.0
 html5lib==1.1
 lxml==4.9.1
 rcssmin==1.1.1
