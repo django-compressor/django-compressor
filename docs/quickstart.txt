@@ -40,7 +40,7 @@ Installation
 .. _dependencies:
 
 Optional Dependencies
-------------
+---------------------
 
 - BeautifulSoup_
 

@@ -226,10 +226,12 @@ Backend settings
         A filter that passes the JavaScript code to the `YUI compressor`_.
 
         .. attribute:: COMPRESS_YUI_BINARY
+          :noindex:
 
            The YUI compressor filesystem path.
 
         .. attribute:: COMPRESS_YUI_JS_ARGUMENTS
+          :noindex:
 
            The arguments passed to the compressor.
 
@@ -238,10 +240,12 @@ Backend settings
         A filter that passes the JavaScript code to the `yUglify compressor`_.
 
         .. attribute:: COMPRESS_YUGLIFY_BINARY
+          :noindex:
 
            The yUglify compressor filesystem path.
 
         .. attribute:: COMPRESS_YUGLIFY_JS_ARGUMENTS
+          :noindex:
 
            The arguments passed to the compressor.
 
@@ -250,6 +254,7 @@ Backend settings
         A filter that renders the JavaScript code with Django templating system.
 
         .. attribute:: COMPRESS_TEMPLATE_FILTER_CONTEXT
+          :noindex:
 
            The context to render your JavaScript code with.
 

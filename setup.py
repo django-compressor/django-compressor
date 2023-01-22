@@ -136,10 +136,11 @@ setup(
         "Source": "https://github.com/django-compressor/django-compressor",
     },
     license="MIT",
-    description="Compresses linked and inline JavaScript or CSS into single cached files.",
+    description=(
+        "Compresses linked and inline JavaScript or CSS into single cached files.",
+    ),
     long_description=read("README.rst"),
-    author="Jannis Leidel",
-    author_email="jannis@leidel.info",
+    maintainer="Mathieu Pillard",
     packages=find_packages(),
     package_data=find_package_data(),
     classifiers=[

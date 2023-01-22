@@ -9,7 +9,7 @@ The goal is to explain what the main template tag, {% compress %}, does
 behind the scenes, to help you debug performance problems for instance.
 
 Offline compression
--------------
+-------------------
 
 If offline compression is activated, the {% compress %} tag will try to
 retrieve the compressed version for its nodelist from the offline manifest
