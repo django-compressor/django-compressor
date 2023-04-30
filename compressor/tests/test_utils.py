@@ -8,7 +8,7 @@ import compressor.utils.staticfiles
 from compressor.exceptions import FilterError
 from compressor.utils import get_class
 
-from imp import reload
+from importlib import reload
 
 
 def get_apps_without_staticfiles(apps):
