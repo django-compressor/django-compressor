@@ -36,6 +36,15 @@ jobs:
           - python: "3.11"
             toxenv: py311-4.1.X
 
+          - python: 3.8
+            toxenv: py38-4.2.X
+          - python: 3.9
+            toxenv: py39-4.2.X
+          - python: "3.10"
+            toxenv: py310-4.2.X
+          - python: "3.11"
+            toxenv: py311-4.2.X    
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
