@@ -34,7 +34,7 @@ First step: parsing and file list
 A compressor instance is created, which in turns instantiates the HTML parser.
 The parser is used to determine a file or code hunk list. Each file mtime is
 checked, first in cache and then on disk/storage, and this is used to
-determine an unique cache key.
+determine a unique cache key.
 
 Second step: Checking the "main" cache
 --------------------------------------
