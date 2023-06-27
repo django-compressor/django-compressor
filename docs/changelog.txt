@@ -1,6 +1,14 @@
 Changelog
 =========
 
+v4.4 (2023-06-28)
+-------------------
+
+`Full list of changes from v4.3.1 <https://github.com/django-compressor/django-compressor/compare/4.3.1...4.4>`_
+
+- Officially support Django 4.2
+
+
 v4.3.1 (2023-01-22)
 -------------------
 
