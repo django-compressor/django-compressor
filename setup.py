@@ -164,7 +164,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "django-appconf >= 1.0.3",
-        "rcssmin == 1.1.1",
+        "rcssmin == 1.1.2",
         "rjsmin == 1.2.1",
     ],
 )
