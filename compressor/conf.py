@@ -54,6 +54,8 @@ class CompressorConf(AppConf):
     YUGLIFY_JS_ARGUMENTS = "--terminal"
     CLEAN_CSS_BINARY = "cleancss"
     CLEAN_CSS_ARGUMENTS = ""
+    LIGHTNING_CSS_BINARY = "lightningcss"
+    LIGHTNING_CSS_ARGUMENTS = ""
     DATA_URI_MAX_SIZE = 1024
 
     # the cache backend to use

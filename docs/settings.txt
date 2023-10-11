@@ -170,11 +170,24 @@ Backend settings
 
            The arguments passed to clean-css.
 
+      - ``compressor.filters.lightningcss.LightningCSSFilter``
+
+        A filter that passes the CSS content to the lightningcss_ tool.
+
+        .. attribute:: COMPRESS_LIGHTNING_CSS_BINARY
+
+           The lightningcss binary filesystem path.
+
+        .. attribute:: COMPRESS_LIGHTNING_CSS_ARGUMENTS
+
+           The arguments passed to lightningcss.
+
 
       .. _`data: URIs`: http://en.wikipedia.org/wiki/Data_URI_scheme
       .. _csscompressor: http://pypi.python.org/pypi/csscompressor/
       .. _rCSSmin: http://opensource.perlig.de/rcssmin/
       .. _`clean-css`: https://github.com/GoalSmashers/clean-css/
+      .. _lightningcss: https://github.com/parcel-bundler/lightningcss
 
 
       - ``compressor.filters.template.TemplateFilter``
