@@ -1,6 +1,10 @@
 Changelog
 =========
 
+To be released
+-------------------
+- Officially support Python 3.12
+
 v4.4 (2023-06-28)
 -------------------
 
