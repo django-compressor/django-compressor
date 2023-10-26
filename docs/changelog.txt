@@ -1,6 +1,10 @@
 Changelog
 =========
 
+To be released
+-------------------
+- Officially support Python 3.12 (requires lxml 4.9.3 or higher)
+
 v4.4 (2023-06-28)
 -------------------
 
