@@ -49,6 +49,8 @@ jobs:
             toxenv: py310-5.0.X
           - python: "3.11"
             toxenv: py311-5.0.X
+          - python: "3.12"
+            toxenv: py312-5.0.X
 
     runs-on: ubuntu-latest
     steps:
