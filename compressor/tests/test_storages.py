@@ -2,27 +2,25 @@ import os
 import brotli
 
 from django.core.files.base import ContentFile
-from django.core.files.storage import get_storage_class
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.functional import LazyObject
 
 from compressor import storage
 from compressor.conf import settings
+from compressor.storage import _get_storage_class
 from compressor.tests.test_base import css_tag
 from compressor.tests.test_templatetags import render
 
 
 class GzipStorage(LazyObject):
     def _setup(self):
-        self._wrapped = get_storage_class(
-            "compressor.storage.GzipCompressorFileStorage"
-        )()
+        self._wrapped = _get_storage_class("compressor.storage.GzipCompressorFileStorage")
 
 
 class BrotliStorage(LazyObject):
     def _setup(self):
-        self._wrapped = get_storage_class(
+        self._wrapped = _get_storage_class(
             "compressor.storage.BrotliCompressorFileStorage"
         )()
 

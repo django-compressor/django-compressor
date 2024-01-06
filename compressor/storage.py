@@ -4,10 +4,20 @@ from datetime import datetime
 import time
 from urllib.parse import urljoin
 
-from django.core.files.storage import FileSystemStorage, get_storage_class
+import django
+from django.core.files.storage import FileSystemStorage
 from django.utils.functional import LazyObject, SimpleLazyObject
 
 from compressor.conf import settings
+
+
+def _get_storage_class(backend):
+    if django.VERSION[0] > 4 or (django.VERSION[0] == 4 and django.VERSION[1] > 1):
+        from django.core.files.storage import storages
+        return storages.create_storage({"BACKEND": backend})
+    else:
+        from django.core.files.storage import get_storage_class
+        return get_storage_class(backend)()
 
 
 class CompressorFileStorage(FileSystemStorage):
@@ -48,7 +58,7 @@ class CompressorFileStorage(FileSystemStorage):
 
 
 compressor_file_storage = SimpleLazyObject(
-    lambda: get_storage_class("compressor.storage.CompressorFileStorage")()
+    lambda: _get_storage_class("compressor.storage.CompressorFileStorage")()
 )
 
 
@@ -112,7 +122,7 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
 
 class DefaultStorage(LazyObject):
     def _setup(self):
-        self._wrapped = get_storage_class(settings.COMPRESS_STORAGE)()
+        self._wrapped = _get_storage_class(settings.COMPRESS_STORAGE)()
 
 
 default_storage = DefaultStorage()
@@ -131,7 +141,7 @@ class OfflineManifestFileStorage(CompressorFileStorage):
 
 class DefaultOfflineManifestStorage(LazyObject):
     def _setup(self):
-        self._wrapped = get_storage_class(settings.COMPRESS_OFFLINE_MANIFEST_STORAGE)()
+        self._wrapped = _get_storage_class(settings.COMPRESS_OFFLINE_MANIFEST_STORAGE)()
 
 
 default_offline_manifest_storage = DefaultOfflineManifestStorage()
