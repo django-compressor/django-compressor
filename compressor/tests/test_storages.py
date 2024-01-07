@@ -22,7 +22,7 @@ class BrotliStorage(LazyObject):
     def _setup(self):
         self._wrapped = _get_storage_class(
             "compressor.storage.BrotliCompressorFileStorage"
-        )()
+        )
 
 
 @override_settings(COMPRESS_ENABLED=True)

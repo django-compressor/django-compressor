@@ -58,7 +58,7 @@ class CompressorFileStorage(FileSystemStorage):
 
 
 compressor_file_storage = SimpleLazyObject(
-    lambda: _get_storage_class("compressor.storage.CompressorFileStorage")()
+    lambda: _get_storage_class("compressor.storage.CompressorFileStorage")
 )
 
 
@@ -122,7 +122,7 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
 
 class DefaultStorage(LazyObject):
     def _setup(self):
-        self._wrapped = _get_storage_class(settings.COMPRESS_STORAGE)()
+        self._wrapped = _get_storage_class(settings.COMPRESS_STORAGE)
 
 
 default_storage = DefaultStorage()
@@ -141,7 +141,7 @@ class OfflineManifestFileStorage(CompressorFileStorage):
 
 class DefaultOfflineManifestStorage(LazyObject):
     def _setup(self):
-        self._wrapped = _get_storage_class(settings.COMPRESS_OFFLINE_MANIFEST_STORAGE)()
+        self._wrapped = _get_storage_class(settings.COMPRESS_OFFLINE_MANIFEST_STORAGE)
 
 
 default_offline_manifest_storage = DefaultOfflineManifestStorage()
