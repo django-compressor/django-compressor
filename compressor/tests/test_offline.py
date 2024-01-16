@@ -58,6 +58,12 @@ class LazyScriptNamePrefixedUrl(str):
     def __hash__(self):
         return str.__hash__(str(self))
 
+    def lstrip(self, *args, **kwargs):
+        """
+        Override ``.lstrip()`` method to make it work with ``{% static %}``.
+        """
+        return str(self).lstrip(*args, **kwargs)
+
     def split(self, *args, **kwargs):
         """
         Override ``.split()`` method to make it work with ``{% static %}``.

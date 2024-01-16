@@ -1,13 +1,15 @@
 Jinja2==3.1.2
-beautifulsoup4==4.11.1
+beautifulsoup4==4.12.2
 brotli==1.0.9
 calmjs==3.4.4
 coverage==7.0.5
+calmjs==3.4.4
+coverage==7.2.3
 csscompressor==0.9.5
 django-sekizai==4.0.0
 flake8==6.0.0
 html5lib==1.1
-lxml==4.9.2
+lxml==4.9.3
 rcssmin==1.1.1
 rjsmin==1.2.1
 slimit==0.8.1

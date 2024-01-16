@@ -36,6 +36,22 @@ jobs:
           - python: "3.11"
             toxenv: py311-4.1.X
 
+          - python: 3.8
+            toxenv: py38-4.2.X
+          - python: 3.9
+            toxenv: py39-4.2.X
+          - python: "3.10"
+            toxenv: py310-4.2.X
+          - python: "3.11"
+            toxenv: py311-4.2.X
+
+          - python: "3.10"
+            toxenv: py310-5.0.X
+          - python: "3.11"
+            toxenv: py311-5.0.X
+          - python: "3.12"
+            toxenv: py312-5.0.X
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,7 +59,7 @@ jobs:
         with:
           python-version: ${{ matrix.versions.python }}
       - run: |
-          pip install tox
+          pip install tox setuptools
           python setup.py install_egg_info
       - run: tox -e ${{ matrix.versions.toxenv }}
       - run: |

@@ -2,8 +2,8 @@ import ast
 import codecs
 import os
 import sys
-from distutils.util import convert_path
 from fnmatch import fnmatchcase
+from pathlib import Path
 
 from setuptools import find_packages, setup
 
@@ -84,7 +84,7 @@ def find_package_data(
     """
 
     out = {}
-    stack = [(convert_path(where), "", package, only_in_packages)]
+    stack = [(str(Path(where)), "", package, only_in_packages)]
     while stack:
         where, prefix, package, only_in_packages = stack.pop(0)
         for name in os.listdir(where):
@@ -149,6 +149,8 @@ setup(
         "Framework :: Django :: 3.2",
         "Framework :: Django :: 4.0",
         "Framework :: Django :: 4.1",
+        "Framework :: Django :: 4.2",
+        "Framework :: Django :: 5.0",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
@@ -158,12 +160,13 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Internet :: WWW/HTTP",
     ],
     zip_safe=False,
     install_requires=[
         "django-appconf >= 1.0.3",
-        "rcssmin == 1.1.1",
-        "rjsmin == 1.2.1",
+        "rcssmin == 1.1.2",
+        "rjsmin == 1.2.2",
     ],
 )
