@@ -1,4 +1,4 @@
-Jinja2==3.1.2
+Jinja2==3.1.3
 beautifulsoup4==4.12.2
 brotli==1.0.9
 calmjs==3.4.2
