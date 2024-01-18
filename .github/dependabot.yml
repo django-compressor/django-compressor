@@ -2,6 +2,10 @@ version: 2
 updates:
 - package-ecosystem: pip
   directory: "/requirements"
+  groups:
+       PyPI:
+          patterns:
+            - "*"  # Group all PyPI updates into a single larger pull request
   schedule:
     interval: weekly
   open-pull-requests-limit: 99
