@@ -76,7 +76,7 @@ class LazyScriptNamePrefixedUrl(str):
         In ``django.core.files.storage``, ``FileSystemStorage.url()`` passes
         this object to ``urllib.parse.urljoin``.
 
-        In ``urrlib.parse``, the function that calls ``replace()`` is
+        In ``urllib.parse``, the function that calls ``replace()`` is
         ``_remove_unsafe_bytes_from_url()``.
 
         """
