@@ -44,7 +44,7 @@ Using both Django and Jinja2 templates
 There may be a chance that the Jinja2 parser is used to parse Django templates
 if you have a mixture of Django and Jinja2 templates in the same location(s).
 This should not be a problem since the Jinja2 parser will likely raise a
-template syntax error, causing Compressor to skip the errorneous
+template syntax error, causing Compressor to skip the erroneous
 template safely. (Vice versa for Django parser).
 
 Templates of both engines can be compressed like this:

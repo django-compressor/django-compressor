@@ -34,7 +34,7 @@ class CompressorExtension(compress.CompressorMixin, Extension):
                 parser.stream.current.lineno,
             )
 
-        # For legacy support, allow for a commma but simply ignore it
+        # For legacy support, allow for a comma but simply ignore it
         parser.stream.skip_if("comma")
 
         # Some sane defaults for file output
