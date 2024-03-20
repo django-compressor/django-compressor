@@ -1,13 +1,27 @@
 import gzip
 import os
+from warnings import warn
 from datetime import datetime
 import time
 from urllib.parse import urljoin
 
-from django.core.files.storage import FileSystemStorage, get_storage_class
+from django.core.files.storage import FileSystemStorage, default_storage as django_default_storage
 from django.utils.functional import LazyObject, SimpleLazyObject
 
 from compressor.conf import settings
+
+# Attempt to import storages, if available (Django 4.2+)
+try:
+    from django.core.files.storage import storages
+    from django.core.files.storage.handler import InvalidStorageError
+except ImportError:
+    storages = None
+    InvalidStorageError = KeyError
+
+try:
+    from django.core.files.storage import get_storage_class
+except ImportError:
+    get_storage_class = None
 
 
 class CompressorFileStorage(FileSystemStorage):
@@ -47,9 +61,18 @@ class CompressorFileStorage(FileSystemStorage):
         return filename
 
 
-compressor_file_storage = SimpleLazyObject(
-    lambda: get_storage_class("compressor.storage.CompressorFileStorage")()
-)
+def get_storages():
+    if storages:
+        try:
+            return storages['compress']
+        except InvalidStorageError:
+            pass
+    elif get_storage_class:
+        return get_storage_class('compressor.storage.CompressorFileStorage')()
+    return CompressorFileStorage()
+
+
+compressor_file_storage = SimpleLazyObject(get_storages)
 
 
 class GzipCompressorFileStorage(CompressorFileStorage):
@@ -112,7 +135,19 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
 
 class DefaultStorage(LazyObject):
     def _setup(self):
-        self._wrapped = get_storage_class(settings.COMPRESS_STORAGE)()
+        if hasattr(settings, 'COMPRESS_STORAGE'):
+            warn("The COMPRESS_STORAGE setting is deprecated. Use STORAGES['compress'] instead.", DeprecationWarning)
+        if storages:
+            try:
+                self._wrapped = storages['compress']
+                return
+            except InvalidStorageError:
+                pass
+
+        if get_storage_class and hasattr(settings, 'COMPRESS_STORAGE'):
+            self._wrapped = get_storage_class(settings.COMPRESS_STORAGE)()
+        else:
+            self._wrapped = django_default_storage
 
 
 default_storage = DefaultStorage()
@@ -131,6 +166,15 @@ class OfflineManifestFileStorage(CompressorFileStorage):
 
 class DefaultOfflineManifestStorage(LazyObject):
     def _setup(self):
+        if hasattr(settings, 'COMPRESS_OFFLINE_MANIFEST_STORAGE'):
+            warn("The COMPRESS_OFFLINE_MANIFEST_STORAGE setting is deprecated. Use STORAGES['compress_manifest'] instead.", DeprecationWarning)
+        if storages:
+            try:
+                self._wrapped = storages['compress_manifest']
+                return
+            except InvalidStorageError:
+                pass
+
         self._wrapped = get_storage_class(settings.COMPRESS_OFFLINE_MANIFEST_STORAGE)()
 
 
