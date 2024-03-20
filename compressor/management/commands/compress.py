@@ -77,6 +77,15 @@ class Command(BaseCommand):
             "multiple engines. If not specified, django engine is used.",
             dest="engines",
         )
+        parser.add_argument(
+            "-t",
+            "--threads",
+            default=4,
+            type=int,
+            help="Specifies the number of threads in the thread pool used for"
+            "generation",
+            dest="threads"
+        )
 
     def get_loaders(self):
         template_source_loaders = []
@@ -123,7 +132,7 @@ class Command(BaseCommand):
 
         return parser
 
-    def compress(self, engine, extensions, verbosity, follow_links, log):
+    def compress(self, engine, extensions, verbosity, follow_links, log, threads):
         """
         Searches templates containing 'compress' nodes and compresses them
         "offline" -- outside of the request/response cycle.
@@ -271,8 +280,9 @@ class Command(BaseCommand):
                     for node in nodes:
                         nodes_count += 1
                         template_nodes.setdefault(node, []).append(context)
-
-            pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+            if verbosity >= 2:
+                log.write("Compressing with %d threads\n" % threads)
+            pool = concurrent.futures.ThreadPoolExecutor(max_workers=threads)
             for template, nodes in compressor_nodes.items():
                 template._log = log
                 template._log_verbosity = verbosity
@@ -387,13 +397,14 @@ class Command(BaseCommand):
         follow_links = options.get("follow_links", False)
         extensions = self.handle_extensions(options.get("extensions") or ["html"])
         engines = [e.strip() for e in options.get("engines", [])] or ["django"]
+        threads = options.get('threads')
 
         final_offline_manifest = {}
         final_block_count = 0
         final_results = []
         for engine in engines:
             offline_manifest, block_count, results = self.compress(
-                engine, extensions, verbosity, follow_links, log
+                engine, extensions, verbosity, follow_links, log, threads
             )
             final_results.extend(results)
             final_block_count += block_count
