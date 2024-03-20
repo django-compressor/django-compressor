@@ -16,6 +16,7 @@ from compressor.filters.closure import ClosureCompilerFilter
 from compressor.filters.css_default import CssAbsoluteFilter, CssRelativeFilter
 from compressor.filters.cssmin import CSSCompressorFilter, rCSSMinFilter
 from compressor.filters.jsmin import CalmjsFilter, rJSMinFilter
+from compressor.filters.lightningcss import LightningCSSFilter
 from compressor.filters.template import TemplateFilter
 from compressor.filters.yuglify import YUglifyCSSFilter, YUglifyJSFilter
 from compressor.filters.yui import YUICSSFilter, YUIJSFilter
@@ -618,4 +619,11 @@ class SpecializedFiltersTest(TestCase):
         filter = CleanCSSFilter("")
         self.assertEqual(
             filter.options, (("binary", str("cleancss")), ("args", str("")))
+        )
+
+    def test_lightning_css_filter(self):
+        filter = LightningCSSFilter("")
+        self.assertEqual(
+            filter.options,
+            (("binary", str("lightningcss")), ("args", str(""))),
         )
