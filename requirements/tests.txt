@@ -7,7 +7,7 @@ csscompressor==0.9.5
 django-sekizai==4.1.0
 flake8==7.0.0
 html5lib==1.1
-lxml==5.1.0
+lxml==5.2.0
 rcssmin==1.1.2
 rjsmin==1.2.2
 slimit==0.8.1
