@@ -2,7 +2,7 @@ import os
 import brotli
 
 from django.core.files.base import ContentFile
-from django.core.files.storage import get_storage_class
+from django.core.files.storage import storages
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.functional import LazyObject
@@ -15,16 +15,16 @@ from compressor.tests.test_templatetags import render
 
 class GzipStorage(LazyObject):
     def _setup(self):
-        self._wrapped = get_storage_class(
-            "compressor.storage.GzipCompressorFileStorage"
-        )()
+        self._wrapped = storages.create_storage({
+            "BACKEND": "compressor.storage.GzipCompressorFileStorage"
+        })
 
 
 class BrotliStorage(LazyObject):
     def _setup(self):
-        self._wrapped = get_storage_class(
-            "compressor.storage.BrotliCompressorFileStorage"
-        )()
+        self._wrapped = storages.create_storage({
+            "BACKEND": "compressor.storage.BrotliCompressorFileStorage"
+        })
 
 
 @override_settings(COMPRESS_ENABLED=True)

@@ -16,6 +16,7 @@ class CompressorConf(AppConf):
     # the backend to use when parsing the JavaScript or Stylesheet files
     PARSER = "compressor.parser.AutoSelectParser"
     OUTPUT_DIR = "CACHE"
+    STORAGE_ALIAS = "compressor"
     STORAGE = "compressor.storage.CompressorFileStorage"
 
     COMPRESSORS = dict(
@@ -75,6 +76,7 @@ class CompressorConf(AppConf):
     OFFLINE_CONTEXT = {}
     # The name of the manifest file (e.g. filename.ext)
     OFFLINE_MANIFEST = "manifest.json"
+    OFFLINE_MANIFEST_STORAGE_ALIAS = "compressor-offine"
     OFFLINE_MANIFEST_STORAGE = "compressor.storage.OfflineManifestFileStorage"
     # The Context to be used when TemplateFilter is used
     TEMPLATE_FILTER_CONTEXT = {}
