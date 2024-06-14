@@ -4,6 +4,7 @@ Changelog
 To be released
 -------------------
 - Officially support Python 3.12 (requires lxml 4.9.3 or higher)
+- Drop support for Django versions before 4.2.
 
 v4.4 (2023-06-28)
 -------------------
@@ -40,7 +41,7 @@ v4.2 (2023-01-06)
   to work properly after the v4.0 change to how duplicate file names are handled
   by `CompressorFileStorage`
 - Update rsmin and jsmin versions
-  
+
 
 v4.1 (2022-08-03)
 -----------------
@@ -63,12 +64,12 @@ v4.0 (2022-03-23)
 
 - Fix intermittent No such file or directory errors by changing strategy to
   deal with duplicate filenames in CompressorFileStorage
-  
-  Note: if your project has a custom storage backend following the example of 
+
+  Note: if your project has a custom storage backend following the example of
   `CachedS3Boto3Storage` from the "Remote Storages" documentation, it will need
   to be updated to call `save` instead of `_save` to work properly after this
   change to `CompressorFileStorage`.
-  
+
 - Deprecate SlimItFilter, stop testing it with Python 3.7 or higher
 
 
