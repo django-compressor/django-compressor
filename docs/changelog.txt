@@ -1,10 +1,17 @@
 Changelog
 =========
 
-To be released
--------------------
+v4.5 (To be released)
+---------------------
+
 - Officially support Python 3.12 (requires lxml 4.9.3 or higher)
 - Drop support for Django versions before 4.2.
+- Added support for Django 5.1
+- Added new ``COMPRESS_STORAGE_ALIAS`` and ``COMPRESS_OFFLINE_MANIFEST_STORAGE_ALIAS``
+  settings. These point to keys in Django's ``storages`` handler. If set by the
+  user, Compressor will use these storages, or otherwise will set a default
+  storage, given by ``COMPRESS_STORAGE`` and
+  ``COMPRESS_OFFLINE_MANIFEST_STORAGE`` respectively on first access.
 
 v4.4 (2023-06-28)
 -------------------

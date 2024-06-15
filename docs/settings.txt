@@ -370,6 +370,17 @@ Backend settings
       create ``*.br`` files of each of the compressed files. It is using
       the maximum level of compression (11) so compression speed will be low.
 
+.. attribute:: COMPRESS_STORAGE_ALIAS
+
+    :Default: ``'compressor'``
+
+    The alias into Django's ``STORAGES`` setting that will be used to save
+    compressed files.
+
+    If directly set by the user in ``STORAGES``, Compressor will use this
+    storage, otherwise it otherwise will set a default storage, given by
+    ``COMPRESS_STORAGE``.
+
 .. attribute:: COMPRESS_PARSER
 
     :Default: ``'compressor.parser.AutoSelectParser'``
@@ -569,3 +580,14 @@ Offline settings
         class PrivateOfflineManifestFileStorage(OfflineManifestFileStorage):
             def __init__(self, *args, **kwargs):
                 super().__init__(settings.BASE_DIR, None, *args, **kwargs)
+
+.. attribute:: COMPRESS_OFFLINE_MANIFEST_STORAGE_ALIAS
+
+    :Default: ``'compressor-offine'``
+
+    The alias into Django's ``STORAGES`` setting that will be used to save
+    compressed files.
+
+    If directly set by the user in ``STORAGES``, Compressor will use this
+    storage, otherwise it otherwise will set a default storage, given by
+    ``COMPRESS_OFFLINE_MANIFEST_STORAGE``.
