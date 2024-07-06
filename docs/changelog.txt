@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v4.5.1 (2024-07-06)
+-------------------
+
+- Fixed an error in v4.5 when using remote storages not defining a ``path()`` method.
+
 v4.5 (2024-05-17)
 -----------------
 

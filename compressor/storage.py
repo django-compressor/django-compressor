@@ -10,10 +10,10 @@ from django.utils.functional import LazyObject, SimpleLazyObject
 from compressor.conf import settings
 
 
-def get_storage(
-    alias=settings.COMPRESS_STORAGE_ALIAS,
-    storage_class=settings.COMPRESS_STORAGE
-):
+def get_storage(alias=None, storage_class=None):
+    alias = alias or settings.COMPRESS_STORAGE_ALIAS
+    storage_class = storage_class or settings.COMPRESS_STORAGE
+
     try:
         return storages[alias]
     except InvalidStorageError:
@@ -61,7 +61,9 @@ class CompressorFileStorage(FileSystemStorage):
 
 
 compressor_file_storage = SimpleLazyObject(
-    lambda: get_storage()
+    lambda: storages.create_storage(
+        {"BACKEND": "compressor.storage.CompressorFileStorage"}
+    )
 )
 
 
