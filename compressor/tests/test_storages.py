@@ -120,9 +120,16 @@ class CompressorFileNameTestCase(TestCase):
         instance of CompressorFileStorage. This must not be dependent on
         project settings.
         """
+        old_default_storage = storage.default_storage
+        storage.default_storage = storage.DefaultStorage()
+
         css = (
             '<link rel="stylesheet" href="/static/css/one.css" type="text/css" />'
         )
         compressor = CssCompressor("css", css)
-        # Remote storage would raise NotImplementedError is fallback is unsuccessful.
-        compressor.get_filename("css/one.css")
+        try:
+            # Remote storage would raise NotImplementedError if fallback is
+            # unsuccessful.
+            compressor.get_filename("css/one.css")
+        finally:
+            storage.default_storage = old_default_storage
