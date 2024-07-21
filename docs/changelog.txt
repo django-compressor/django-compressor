@@ -1,8 +1,10 @@
 Changelog
 =========
 
-v4.5.1 (2024-07-06)
+v4.5.1 (2024-07-22)
 -------------------
+
+`Full list of changes from v4.5 <https://github.com/django-compressor/django-compressor/compare/4.5...4.5.1>`_
 
 - Fixed an error in v4.5 when using remote storages not defining a ``path()`` method.
 
