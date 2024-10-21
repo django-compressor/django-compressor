@@ -165,6 +165,6 @@ setup(
         "Django >= 4.2",
         "django-appconf >= 1.0.3",
         "rcssmin == 1.1.3",
-        "rjsmin == 1.2.2",
+        "rjsmin == 1.2.3",
     ],
 )
