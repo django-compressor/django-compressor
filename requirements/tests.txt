@@ -8,6 +8,6 @@ django-sekizai==4.1.0
 flake8==7.1.1
 html5lib==1.1
 lxml==5.2.2
-rcssmin==1.1.2
+rcssmin==1.1.3
 rjsmin==1.2.2
 slimit==0.8.1
