@@ -160,7 +160,7 @@ setup(
         "Topic :: Internet :: WWW/HTTP",
     ],
     zip_safe=False,
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     install_requires=[
         "Django >= 4.2",
         "django-appconf >= 1.0.3",

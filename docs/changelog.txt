@@ -1,6 +1,12 @@
 Changelog
 =========
 
+UNRELEASED
+----------
+
+- Drop support for EOL Python 3.8.
+
+
 v4.5.1 (2024-07-22)
 -------------------
 
