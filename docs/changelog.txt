@@ -5,7 +5,7 @@ UNRELEASED
 ----------
 
 - Drop support for EOL Python 3.8.
-
+- Officially support Django 5.2
 
 v4.5.1 (2024-07-22)
 -------------------
