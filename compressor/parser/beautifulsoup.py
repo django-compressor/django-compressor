@@ -10,7 +10,9 @@ class BeautifulSoupParser(ParserBase):
         try:
             from bs4 import BeautifulSoup
 
-            self.soup = BeautifulSoup(self.content, "html.parser")
+            # Disable multi_valued_attributes
+            # http://www.crummy.com/software/BeautifulSoup/bs4/doc/#multi-valued-attributes
+            self.soup = BeautifulSoup(self.content, "html.parser", multi_valued_attributes={})
         except ImportError as err:
             raise ImproperlyConfigured("Error while importing BeautifulSoup: %s" % err)
 
@@ -21,13 +23,7 @@ class BeautifulSoupParser(ParserBase):
         return self.soup.find_all("script")
 
     def elem_attribs(self, elem):
-        attrs = dict(elem.attrs)
-        # hack around changed behaviour in bs4, it returns lists now instead of one string, see
-        # http://www.crummy.com/software/BeautifulSoup/bs4/doc/#multi-valued-attributes
-        for key, value in attrs.items():
-            if type(value) is list:
-                attrs[key] = " ".join(value)
-        return attrs
+        return elem.attrs
 
     def elem_content(self, elem):
         return elem.string
