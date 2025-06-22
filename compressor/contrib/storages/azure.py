@@ -16,6 +16,8 @@ except ImportError:
     except ImportError:
         from StringIO import StringIO
 
+from compressor.contrib.storages.utils import create_content_copy
+
 
 class CachedAzureStorage(AzureStorage):
     """
@@ -27,16 +29,8 @@ class CachedAzureStorage(AzureStorage):
             "compressor.storage.CompressorFileStorage")() 
 
     def save(self, name, content):
-        # Save a copy of the original content in case it gets modified
-        content_copy = content
-        if hasattr(content, 'file'):
-            # Create a new file-like object to avoid the original being closed or modified
-            if hasattr(content.file, 'seek'):
-                content.file.seek(0)
-                file_content = content.file.read()
-                content_copy = File(StringIO(file_content))
-                # Reset pointer of original content
-                content.file.seek(0)
+        # Create a safe copy of the content that preserves the original file position
+        content_copy = create_content_copy(content)
 
         # Save to Azure
         name = super(CachedAzureStorage, self).save(name, content)
