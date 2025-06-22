@@ -1,1 +1,0 @@
-# Django Compressor contrib modules
