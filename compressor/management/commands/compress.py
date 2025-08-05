@@ -32,6 +32,8 @@ from compressor.exceptions import (
 from compressor.utils import get_mod_func
 
 offline_manifest_lock = Lock()
+node_locks_lock = Lock()
+node_locks = defaultdict(Lock)
 
 
 class Command(BaseCommand):
@@ -328,8 +330,14 @@ class Command(BaseCommand):
 
                     offline_manifest[key] = None
 
+                node_id = id(node)
+
+                with node_locks_lock:
+                    node_lock = node_locks[node_id]
+
                 try:
-                    result = parser.render_node(template, context, node)
+                    with node_lock:
+                        result = parser.render_node(template, context, node)
                 except Exception as e:
                     errors.append(
                         CommandError(
@@ -339,6 +347,9 @@ class Command(BaseCommand):
                     )
                     del offline_manifest[key]
                     return
+                finally:
+                    with node_locks_lock:
+                        node_locks.pop(node_id, None)
                 result = result.replace(
                     settings.COMPRESS_URL, settings.COMPRESS_URL_PLACEHOLDER
                 )
