@@ -942,3 +942,111 @@ class OfflineCompressTestCaseWithLazyStringAlikeUrls(
 
                 self.assertEqual(actual_result, expected_result)
                 self.assertIn(str(settings.COMPRESS_URL), actual_result)
+
+import threading
+import time
+import types
+
+from django.template import Context
+from django.test import TestCase, override_settings
+
+
+@override_settings(COMPRESS_URL="/static/", COMPRESS_URL_PLACEHOLDER="__STATIC__")
+class OfflineCompressPerNodeLockingTestCase(TestCase):
+    """
+    Validates that the per-node lock prevents concurrent render of the same node,
+    but does allow concurrent rendering of different nodes.
+    """
+
+    class DummyNode():
+        def __init__(self, rendered):
+            self.rendered = rendered
+
+    def _make_parser(self, active, max_active, active_lock):
+        def process_template(template, context):
+            return True
+
+        def process_node(template, context, node):
+            return True
+
+        def render_nodelist(template, context, node):
+            return "nodelist-rendered " + node.rendered
+
+        def render_node(template, context, node):
+            with active_lock:
+                # keep track of how many concurrent "render_node"
+                # methods are called (by Command._compress_template)
+                active[0] += 1
+                if active[0] > max_active[0]:
+                    max_active[0] = active[0]
+            try:
+                # time.sleep(1) to pretend that it takes 1 second to render
+                # the node (and allows the unit tests to exercise the
+                # waiting for one the node rendering before doing the same
+                # one again)
+                time.sleep(1)
+                return node.rendered
+            finally:
+                with active_lock:
+                    active[0] -= 1
+
+        return types.SimpleNamespace(render_nodelist=render_nodelist, process_template=process_template, process_node=process_node, render_node=render_node)
+
+    def _call_compress_template(self, nodes, parser, offline_manifest, errors):
+        from compressor.management.commands.compress import Command
+
+        class DummyTemplate:
+            template_name = "dummy.html"
+
+        template = DummyTemplate()
+        Command._compress_template(offline_manifest, nodes, parser, template, errors)
+
+    def _assert_concurrency(self, nodes_1, nodes_2, expected_max_active):
+        # Shared state to measure concurrency
+        active = [0]      # current in-flight renders
+        max_active = [0]  # max observed concurrent renders
+        active_lock = threading.Lock()
+
+        parser_1 = self._make_parser(active, max_active, active_lock)
+        parser_2 = self._make_parser(active, max_active, active_lock)
+
+        offline_manifest_1, offline_manifest_2 = {}, {}
+        errors_1, errors_2 = [], []
+
+        thread_1 = threading.Thread(
+            target=self._call_compress_template,
+            args=(nodes_1, parser_1, offline_manifest_1, errors_1),
+        )
+        thread_2 = threading.Thread(
+            target=self._call_compress_template,
+            args=(nodes_2, parser_2, offline_manifest_2, errors_2),
+        )
+
+        thread_1.start()
+        thread_2.start()
+
+        thread_1.join()
+        thread_2.join()
+
+        self.assertFalse(thread_1.is_alive())
+        self.assertFalse(thread_2.is_alive())
+
+        self.assertEqual(max_active[0], expected_max_active)
+
+        self.assertFalse(errors_1)
+        self.assertFalse(errors_2)
+
+    def test_same_node_is_not_rendered_concurrently(self):
+        shared_node = OfflineCompressPerNodeLockingTestCase.DummyNode("node")
+        nodes = {shared_node: [Context({})]}
+
+        self._assert_concurrency(nodes, nodes, expected_max_active=1)
+
+    def test_different_nodes_are_render_concurrently(self):
+        node_1 = OfflineCompressPerNodeLockingTestCase.DummyNode("node-1")
+        node_2 = OfflineCompressPerNodeLockingTestCase.DummyNode("node-2")
+
+        nodes_1 = {node_1: [Context({})]}
+        nodes_2 = {node_2: [Context({})]}
+
+        self._assert_concurrency(nodes_1, nodes_2, expected_max_active=2)
