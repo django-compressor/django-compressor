@@ -3,13 +3,14 @@ import io
 import os
 from contextlib import contextmanager
 from importlib import import_module
+import threading
 from unittest import SkipTest
 from unittest.mock import patch
+
 
 from django.conf import settings
 from django.core.management import call_command, CommandError
 from django.template import Context, Origin, Template
-from django.test import override_settings, TestCase
 from django.urls import get_script_prefix, set_script_prefix
 
 from compressor.cache import flush_offline_manifest, get_offline_manifest
@@ -17,6 +18,12 @@ from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
 from compressor.storage import default_offline_manifest_storage
 from compressor.utils import get_mod_func
+
+
+import time
+import types
+
+from django.test import TestCase, override_settings
 
 
 def offline_context_generator():
@@ -942,13 +949,6 @@ class OfflineCompressTestCaseWithLazyStringAlikeUrls(
 
                 self.assertEqual(actual_result, expected_result)
                 self.assertIn(str(settings.COMPRESS_URL), actual_result)
-
-import threading
-import time
-import types
-
-from django.template import Context
-from django.test import TestCase, override_settings
 
 
 @override_settings(COMPRESS_URL="/static/", COMPRESS_URL_PLACEHOLDER="__STATIC__")
