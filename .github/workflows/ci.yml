@@ -51,7 +51,6 @@ jobs:
           python-version: ${{ matrix.versions.python }}
       - run: |
           pip install tox setuptools
-          python setup.py install_egg_info
       - run: tox -e ${{ matrix.versions.toxenv }}
       - run: |
           pip install codecov

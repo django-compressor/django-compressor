@@ -1,0 +1,47 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [ "setuptools>=77.0.3" ]
+
+[project]
+name = "django_compressor"
+description = "Compresses linked and inline JavaScript or CSS into single cached files."
+readme = "README.rst"
+license = "MIT"
+maintainers = [
+  { name = "Mathieu Pillard" },
+]
+requires-python = ">=3.10"
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Framework :: Django",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.0",
+  "Framework :: Django :: 5.1",
+  "Framework :: Django :: 5.2",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Internet :: WWW/HTTP",
+]
+dynamic = [ "version" ]
+dependencies = [
+  "django>=4.2",
+  "django-appconf>=1.0.3",
+  "rcssmin>=1.2.1",
+  "rjsmin>=1.2.4",
+]
+
+urls.Homepage = "https://django-compressor.readthedocs.io/en/latest/"
+urls.Source = "https://github.com/django-compressor/django-compressor"
+
+[tool.setuptools.dynamic]
+version = { attr = "compressor.__version__" }
+
+[tool.setuptools.packages.find]
+include = [ "compressor*" ]
