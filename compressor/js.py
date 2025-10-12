@@ -10,8 +10,21 @@ class JsCompressor(Compressor):
         if self.split_content:
             return self.split_content
         self.extra_nodes = []
+        self.module_nodes = []  # Store original module nodes separately
+
         for elem in self.parser.js_elems():
             attribs = self.parser.elem_attribs(elem)
+            script_type = attribs.get("type")
+            is_module = script_type == "module"
+            is_importmap = script_type == "importmap"
+
+            # For module and importmap scripts, we'll skip compression and keep them as-is
+            if is_module or is_importmap:
+                # Store the original element string to emit it as-is later
+                self.module_nodes.append(self.parser.elem_str(elem))
+                continue
+
+            # For non-module scripts, proceed with normal compression
             if "src" in attribs:
                 basename = self.get_basename(attribs["src"])
                 filename = self.get_filename(basename)
@@ -42,12 +55,23 @@ class JsCompressor(Compressor):
             or kwargs.get("forced", False)
         ):
             self.split_contents()
-            if hasattr(self, "extra_nodes"):
-                ret = []
+            ret = []
+
+            # Add module scripts as-is without compression
+            if hasattr(self, "module_nodes") and self.module_nodes:
+                ret.extend(self.module_nodes)
+
+            # If we have non-module scripts, compress them
+            if hasattr(self, "extra_nodes") and self.extra_nodes:
                 for extra, subnode in self.extra_nodes:
                     subnode.extra_context.update({"extra": extra})
                     ret.append(subnode.output(*args, **kwargs))
-                return "\n".join(ret)
+
+            # If no content to return, use the standard output method
+            if not ret:
+                return super().output(*args, **kwargs)
+
+            return "\n".join(ret)
         return super().output(*args, **kwargs)
 
     def filter_input(self, forced=False):
