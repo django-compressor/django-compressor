@@ -50,7 +50,7 @@ jobs:
         with:
           python-version: ${{ matrix.versions.python }}
       - run: |
-          pip install tox setuptools
+          pip install tox
       - run: tox -e ${{ matrix.versions.toxenv }}
       - run: |
           pip install codecov
