@@ -143,6 +143,7 @@ setup(
     maintainer="Mathieu Pillard",
     packages=find_packages(),
     package_data=find_package_data(),
+    include_package_data=True,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Framework :: Django",
