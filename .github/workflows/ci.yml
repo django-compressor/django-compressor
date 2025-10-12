@@ -13,8 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         versions:
-          - python: 3.9
-            toxenv: py39-4.2.X
           - python: "3.10"
             toxenv: py310-4.2.X
           - python: "3.11"
