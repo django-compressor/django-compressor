@@ -12,7 +12,7 @@ class BeautifulSoupParser(ParserBase):
 
             # Disable multi_valued_attributes
             # http://www.crummy.com/software/BeautifulSoup/bs4/doc/#multi-valued-attributes
-            self.soup = BeautifulSoup(self.content, "html.parser", multi_valued_attributes={})
+            self.soup = BeautifulSoup(self.content, "html.parser", multi_valued_attributes=None)
         except ImportError as err:
             raise ImproperlyConfigured("Error while importing BeautifulSoup: %s" % err)
 
