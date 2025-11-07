@@ -1,6 +1,6 @@
 Jinja2==3.1.6
 beautifulsoup4>=4.13
-brotli==1.1.0
+brotli==1.2.0
 calmjs==3.4.4
 coverage==7.9.1
 csscompressor==0.9.5
