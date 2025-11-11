@@ -478,6 +478,7 @@ class JSWithParensTestCase(SimpleTestCase):
 class CacheTestCase(SimpleTestCase):
     def setUp(self):
         cachemod._cachekey_func = None
+        cachemod._cachekey_func_accepts_kwargs = None
 
     def test_get_cachekey_basic(self):
         self.assertEqual(get_cachekey("foo"), "django_compressor.foo")
@@ -495,6 +496,12 @@ class CacheTestCase(SimpleTestCase):
             get_precompiler_cachekey("asdf", "asdf")
         except TypeError:
             self.fail("get_precompiler_cachekey raised TypeError unexpectedly")
+
+    def test_legacy_cachekey_without_kwargs(self):
+        cachemod._cachekey_func = None
+        cachemod._cachekey_func_accepts_kwargs = None
+        self.assertEqual(get_cachekey("foo"), "django_compressor.foo")
+        self.assertEqual(get_cachekey("bar", request=None), "django_compressor.bar")
 
 
 class CompressorInDebugModeTestCase(SimpleTestCase):

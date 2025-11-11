@@ -1,12 +1,13 @@
 import os
 import sys
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.template import Context, Template, TemplateSyntaxError
 from django.test import override_settings, TestCase
 from sekizai.context import SekizaiContext
 
+from compressor.cache import get_templatetag_cachekey
 from compressor.signals import post_compress
 from compressor.tests.test_base import css_tag, test_dir
 
@@ -176,6 +177,24 @@ class TemplatetagTestCase(TestCase):
         """
         out = '<script src="/static/CACHE/js/output.ffc39dec05fd.js"></script>'
         self.assertEqual(out, render(template, self.context, SekizaiContext))
+
+    def test_request_passed_to_cache_key_function(self):
+        template = """{% load compress %}{% compress css %}
+<link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
+{% endcompress %}"""
+
+        class MockRequest:
+            def get_host(self):
+                return "testdomain.com"
+
+        request = MockRequest()
+        context_dict = dict(self.context, request=request)
+
+        with patch('compressor.templatetags.compress.get_templatetag_cachekey', wraps=get_templatetag_cachekey) as mock_cachekey:
+            render(template, context_dict)
+            mock_cachekey.assert_called()
+            call_args = mock_cachekey.call_args
+            self.assertEqual(call_args.kwargs.get('request'), request)
 
 
 class PrecompilerTemplatetagTestCase(TestCase):

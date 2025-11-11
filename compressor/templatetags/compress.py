@@ -88,12 +88,12 @@ class CompressorMixin:
                 "is the original content:\n\n%s" % (key, original_content)
             )
 
-    def render_cached(self, compressor, kind, mode):
+    def render_cached(self, compressor, kind, mode, request=None):
         """
         If enabled checks the cache for the given compressor's cache key
         and return a tuple of cache key and output
         """
-        cache_key = get_templatetag_cachekey(compressor, mode, kind)
+        cache_key = get_templatetag_cachekey(compressor, mode, kind, request=request)
         cache_content = cache_get(cache_key)
         return cache_key, cache_content
 
@@ -119,8 +119,9 @@ class CompressorMixin:
 
         # Check cache
         cache_key = None
+        request = context.get("request")
         if settings.COMPRESS_ENABLED and not forced:
-            cache_key, cache_content = self.render_cached(compressor, kind, mode)
+            cache_key, cache_content = self.render_cached(compressor, kind, mode, request=request)
             if cache_content is not None:
                 return cache_content
 

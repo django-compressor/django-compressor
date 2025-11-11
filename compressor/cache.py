@@ -1,5 +1,6 @@
 import json
 import hashlib
+import inspect
 import os
 import socket
 import time
@@ -15,6 +16,7 @@ from compressor.storage import default_offline_manifest_storage
 from compressor.utils import get_mod_func
 
 _cachekey_func = None
+_cachekey_func_accepts_kwargs = None
 
 
 def get_hexdigest(plaintext, length=None):
@@ -33,17 +35,32 @@ def socket_cachekey(key):
 
 
 def get_cachekey(*args, **kwargs):
-    global _cachekey_func
+    global _cachekey_func, _cachekey_func_accepts_kwargs
     if _cachekey_func is None:
         try:
             mod_name, func_name = get_mod_func(settings.COMPRESS_CACHE_KEY_FUNCTION)
             _cachekey_func = getattr(import_module(mod_name), func_name)
+            # Check if function accepts **kwargs for backward compatibility.
+            # Historically, this function accepted **kwargs but never passed any,
+            # so existing custom cache key functions may not have **kwargs in their signature.
+            # Now we pass request=... when available, so we need to check compatibility.
+            sig = inspect.signature(_cachekey_func)
+            _cachekey_func_accepts_kwargs = any(
+                p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()
+            )
         except (AttributeError, ImportError, TypeError) as e:
             raise ImportError(
                 "Couldn't import cache key function %s: %s"
                 % (settings.COMPRESS_CACHE_KEY_FUNCTION, e)
             )
-    return _cachekey_func(*args, **kwargs)
+
+    # Backward compatibility: only pass kwargs if the function accepts them.
+    # This allows legacy cache key functions like `def my_cachekey(key):` to continue
+    # working even though we now pass `request=...` when available.
+    if _cachekey_func_accepts_kwargs:
+        return _cachekey_func(*args, **kwargs)
+    else:
+        return _cachekey_func(*args)
 
 
 def get_mtime_cachekey(filename):
@@ -96,8 +113,8 @@ def write_offline_manifest(manifest):
     flush_offline_manifest()
 
 
-def get_templatetag_cachekey(compressor, mode, kind):
-    return get_cachekey("templatetag.%s.%s.%s" % (compressor.cachekey, mode, kind))
+def get_templatetag_cachekey(compressor, mode, kind, request=None):
+    return get_cachekey("templatetag.%s.%s.%s" % (compressor.cachekey, mode, kind), request=request)
 
 
 def get_mtime(filename):
