@@ -7,8 +7,6 @@ from django.template import Context, Template, TemplateSyntaxError
 from django.test import override_settings, TestCase
 from sekizai.context import SekizaiContext
 
-from compressor.css import CssCompressor
-from compressor.js import JsCompressor
 from compressor.signals import post_compress
 from compressor.tests.test_base import css_tag, test_dir
 
@@ -24,12 +22,6 @@ def render(template_string, context_dict=None, context=None):
     c = context(context_dict)
     t = Template(template_string)
     return t.render(c).strip()
-
-
-def build_integrity(compressor):
-    output = "\n".join(compressor.filter_input())
-    output = compressor.filter_output(output)
-    return compressor.get_integrity(output)
 
 
 @override_settings(COMPRESS_ENABLED=True)
@@ -58,13 +50,7 @@ class TemplatetagTestCase(TestCase):
 <style type="text/css">p { border:5px solid green;}</style>
 <link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
 {% endcompress %}"""
-        content = """
-<link rel="stylesheet" href="/static/css/one.css" type="text/css">
-<style type="text/css">p { border:5px solid green;}</style>
-<link rel="stylesheet" href="/static/css/two.css" type="text/css">
-"""
-        compressor = CssCompressor("css", content)
-        integrity = build_integrity(compressor)
+        integrity = "sha256-YAZ06h09pqD2ViCVxfABwuZI/Vk0RUtxIpsMaCMa02o="
         out = css_tag(
             "/static/CACHE/css/output.600674ea1d3d.css", integrity=integrity
         )
@@ -130,12 +116,7 @@ class TemplatetagTestCase(TestCase):
         <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
         """
-        content = """
-        <script src="/static/js/one.js" type="text/javascript"></script>
-        <script type="text/javascript">obj.value = "value";</script>
-        """
-        compressor = JsCompressor("js", content)
-        integrity = build_integrity(compressor)
+        integrity = "sha256-ig/tNsMXlrFDkIJOINzQEKGmLfIi/ZTnHDsAefw97Go="
         out = (
             '<script src="/static/CACHE/js/output.8a0fed36c317.js"'
             ' integrity="%s"></script>' % integrity

@@ -1,3 +1,5 @@
+import base64
+import hashlib
 import os
 import re
 import sys
@@ -222,6 +224,18 @@ class CompressorTestCase(SimpleTestCase):
         out = "body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }"
         hunks = "\n".join([h for h in self.css_node.hunks()])
         self.assertEqual(out, hunks)
+
+    @override_settings(COMPRESS_SRI_HASHES=("sha256", "sha384"))
+    def test_integrity_hashes(self):
+        content = "body{color:#fff}"
+        expected_sha256 = base64.b64encode(
+            hashlib.sha256(content.encode("utf-8")).digest()
+        ).decode("ascii")
+        expected_sha384 = base64.b64encode(
+            hashlib.sha384(content.encode("utf-8")).digest()
+        ).decode("ascii")
+        expected = "sha256-%s sha384-%s" % (expected_sha256, expected_sha384)
+        self.assertEqual(expected, self.css_node.get_integrity(content))
 
     def test_css_output_with_bom_input(self):
         out = "body { background:#990; }\n.compress-test {color: red;}"
