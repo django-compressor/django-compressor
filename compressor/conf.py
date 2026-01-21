@@ -57,6 +57,12 @@ class CompressorConf(AppConf):
     CLEAN_CSS_ARGUMENTS = ""
     DATA_URI_MAX_SIZE = 1024
 
+    # Subresource Integrity (SRI) settings for compiled assets.
+    # Example: COMPRESS_SRI_HASHES = ("sha256", "sha384")
+    SRI_HASHES = ()
+    # Example: COMPRESS_SRI_CROSSORIGIN = "anonymous"
+    SRI_CROSSORIGIN = None
+
     # the cache backend to use
     CACHE_BACKEND = None
     # the dotted path to the function that creates the cache key
@@ -147,3 +153,29 @@ class CompressorConf(AppConf):
                 "missing commas."
             )
         return value
+
+    def configure_sri_hashes(self, value):
+        if not value:
+            return ()
+        if isinstance(value, str):
+            value = [value]
+        if not isinstance(value, (list, tuple)):
+            raise ImproperlyConfigured(
+                "The COMPRESS_SRI_HASHES setting must be a list, tuple, or string."
+            )
+        allowed = {"sha256", "sha384", "sha512"}
+        normalized = []
+        for algo in value:
+            algo = str(algo).lower()
+            if algo not in allowed:
+                raise ImproperlyConfigured(
+                    "The COMPRESS_SRI_HASHES setting only supports %s."
+                    % ", ".join(sorted(allowed))
+                )
+            normalized.append(algo)
+        return tuple(normalized)
+
+    def configure_sri_crossorigin(self, value):
+        if value in (None, ""):
+            return None
+        return str(value)

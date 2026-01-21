@@ -1,1 +1,1 @@
-<link rel="preload" href="{{ compressed.url }}" as="style" />
+<link rel="preload" href="{{ compressed.url }}" as="style"{% if compressed.integrity %} integrity="{{ compressed.integrity }}"{% endif %}{% if compressed.crossorigin %} crossorigin="{{ compressed.crossorigin }}"{% endif %} />

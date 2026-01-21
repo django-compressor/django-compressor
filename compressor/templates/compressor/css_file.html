@@ -1,1 +1,1 @@
-<link rel="stylesheet" href="{{ compressed.url }}" type="text/css"{% if compressed.media %} media="{{ compressed.media }}"{% endif %}>
+<link rel="stylesheet" href="{{ compressed.url }}" type="text/css"{% if compressed.media %} media="{{ compressed.media }}"{% endif %}{% if compressed.integrity %} integrity="{{ compressed.integrity }}"{% endif %}{% if compressed.crossorigin %} crossorigin="{{ compressed.crossorigin }}"{% endif %}>
