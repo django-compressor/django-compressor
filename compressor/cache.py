@@ -97,7 +97,12 @@ def write_offline_manifest(manifest):
 
 
 def get_templatetag_cachekey(compressor, mode, kind):
-    return get_cachekey("templatetag.%s.%s.%s" % (compressor.cachekey, mode, kind))
+    sri_hashes = ",".join(settings.COMPRESS_SRI_HASHES or ())
+    crossorigin = settings.COMPRESS_SRI_CROSSORIGIN or ""
+    return get_cachekey(
+        "templatetag.%s.%s.%s.%s.%s"
+        % (compressor.cachekey, mode, kind, sri_hashes, crossorigin)
+    )
 
 
 def get_mtime(filename):
