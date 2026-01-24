@@ -239,7 +239,13 @@ class Compressor:
     @cached_property
     def cachekey(self):
         return get_hexdigest(
-            "".join([self.content] + self.mtimes).encode(self.charset), 12
+            "".join(
+                [self.content]
+                + self.mtimes
+                + list(settings.COMPRESS_SRI_HASHES)
+                + [settings.COMPRESS_SRI_CROSSORIGIN or ""]
+            ).encode(self.charset),
+            12,
         )
 
     def hunks(self, forced=False):
