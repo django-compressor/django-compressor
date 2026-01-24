@@ -32,3 +32,29 @@ class ConfTestCase(SimpleTestCase):
         conf = create_conf()
         self.assertEqual(conf.FILTERS["css"], ["ham"])
         self.assertEqual(conf.FILTERS["js"], ["spam"])
+
+    def test_sri_hashes_defaults(self):
+        conf = create_conf()
+        self.assertEqual(conf.SRI_HASHES, ())
+
+    @override_settings(COMPRESS_SRI_HASHES=("sha256", "SHA384"))
+    def test_sri_hashes_normalized(self):
+        conf = create_conf()
+        self.assertEqual(conf.SRI_HASHES, ("sha256", "sha384"))
+
+    @override_settings(COMPRESS_SRI_HASHES="sha512")
+    def test_sri_hashes_string(self):
+        conf = create_conf()
+        self.assertEqual(conf.SRI_HASHES, ("sha512",))
+
+    @override_settings(COMPRESS_SRI_HASHES=("md5",))
+    def test_sri_hashes_invalid(self):
+        with self.assertRaisesMessage(
+            Exception, "COMPRESS_SRI_HASHES setting only supports"
+        ):
+            create_conf()
+
+    @override_settings(COMPRESS_SRI_CROSSORIGIN="anonymous")
+    def test_sri_crossorigin(self):
+        conf = create_conf()
+        self.assertEqual(conf.SRI_CROSSORIGIN, "anonymous")

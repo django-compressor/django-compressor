@@ -62,6 +62,26 @@ Result:
 
         <link rel="preload" href="/static/CACHE/js/d01466eb4fc6.js" as="script" />
 
+Subresource Integrity (SRI) can be enabled for compiled file outputs:
+
+    .. code-block:: django
+
+        # settings.py
+        COMPRESS_SRI_HASHES = ("sha384",)
+        COMPRESS_SRI_CROSSORIGIN = "anonymous"
+
+    .. code-block:: django
+
+        {% compress js %}
+        <script src="/static/js/one.js" type="text/javascript" charset="utf-8"></script>
+        {% endcompress %}
+
+Result:
+
+    .. code-block:: django
+
+        <script src="/static/CACHE/js/output.f7c661b7a124.js" integrity="sha384-..." crossorigin="anonymous"></script>
+
 
 Specifying a ``block_name`` will change the output filename. It can also be
 accessed in the :ref:`post_compress signal <signals>` in the ``context`` parameter.

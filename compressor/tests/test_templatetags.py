@@ -43,6 +43,19 @@ class TemplatetagTestCase(TestCase):
         out = css_tag("/static/CACHE/css/output.600674ea1d3d.css")
         self.assertEqual(out, render(template, self.context))
 
+    @override_settings(COMPRESS_SRI_HASHES=("sha256",))
+    def test_css_tag_with_integrity(self):
+        template = """{% load compress %}{% compress css %}
+<link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
+<style type="text/css">p { border:5px solid green;}</style>
+<link rel="stylesheet" href="{{ STATIC_URL }}css/two.css" type="text/css">
+{% endcompress %}"""
+        integrity = "sha256-YAZ06h09pqD2ViCVxfABwuZI/Vk0RUtxIpsMaCMa02o="
+        out = css_tag(
+            "/static/CACHE/css/output.600674ea1d3d.css", integrity=integrity
+        )
+        self.assertEqual(out, render(template, self.context))
+
     def test_css_tag_with_block(self):
         template = """{% load compress %}{% compress css file block_name %}
 <link rel="stylesheet" href="{{ STATIC_URL }}css/one.css" type="text/css">
@@ -94,6 +107,20 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         out = '<script src="/static/CACHE/js/output.8a0fed36c317.js"></script>'
+        self.assertEqual(out, render(template, self.context))
+
+    @override_settings(COMPRESS_SRI_HASHES=("sha256",))
+    def test_js_tag_with_integrity(self):
+        template = """{% load compress %}{% compress js %}
+        <script src="{{ STATIC_URL }}js/one.js" type="text/javascript"></script>
+        <script type="text/javascript">obj.value = "value";</script>
+        {% endcompress %}
+        """
+        integrity = "sha256-ig/tNsMXlrFDkIJOINzQEKGmLfIi/ZTnHDsAefw97Go="
+        out = (
+            '<script src="/static/CACHE/js/output.8a0fed36c317.js"'
+            ' integrity="%s"></script>' % integrity
+        )
         self.assertEqual(out, render(template, self.context))
 
     def test_nonascii_js_tag(self):

@@ -64,6 +64,31 @@ Base settings
     Controls the directory inside :attr:`~django.conf.settings.COMPRESS_ROOT`
     that compressed files will be written to.
 
+.. attribute:: COMPRESS_SRI_HASHES
+
+    :Default: ``()``
+
+    An iterable of hash algorithm names to include as Subresource Integrity (SRI)
+    values on compiled ``<script>`` and ``<link rel="stylesheet">`` tags.
+    Supported values are ``"sha256"``, ``"sha384"``, and ``"sha512"``. When empty,
+    SRI attributes are not added.
+
+    Example::
+
+        COMPRESS_SRI_HASHES = ("sha384",)
+
+    Example with multiple hashes::
+
+        COMPRESS_SRI_HASHES = ("sha256", "sha384", "sha512")
+
+.. attribute:: COMPRESS_SRI_CROSSORIGIN
+
+    :Default: ``None``
+
+    Optional ``crossorigin`` attribute value to include alongside SRI hashes.
+    Common values are ``"anonymous"`` or ``"use-credentials"``. When unset, the
+    attribute is omitted.
+
 Backend settings
 ----------------
 

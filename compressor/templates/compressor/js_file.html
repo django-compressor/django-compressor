@@ -1,1 +1,1 @@
-<script src="{{ compressed.url }}"{{ compressed.extra }}></script>
+<script src="{{ compressed.url }}"{% if compressed.integrity %} integrity="{{ compressed.integrity }}"{% endif %}{% if compressed.crossorigin %} crossorigin="{{ compressed.crossorigin }}"{% endif %}{{ compressed.extra }}></script>

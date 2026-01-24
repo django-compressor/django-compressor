@@ -1,5 +1,7 @@
 import os
 import codecs
+import base64
+import hashlib
 from importlib import import_module
 from urllib.request import url2pathname
 
@@ -237,7 +239,13 @@ class Compressor:
     @cached_property
     def cachekey(self):
         return get_hexdigest(
-            "".join([self.content] + self.mtimes).encode(self.charset), 12
+            "".join(
+                [self.content]
+                + self.mtimes
+                + list(settings.COMPRESS_SRI_HASHES)
+                + [settings.COMPRESS_SRI_CROSSORIGIN or ""]
+            ).encode(self.charset),
+            12,
         )
 
     def hunks(self, forced=False):
@@ -392,7 +400,14 @@ class Compressor:
         if not self.storage.exists(new_filepath) or forced:
             self.storage.save(new_filepath, ContentFile(content.encode(self.charset)))
         url = mark_safe(self.storage.url(new_filepath))
-        return self.render_output(mode, {"url": url})
+        context = {"url": url}
+        integrity = self.get_integrity(content)
+        if integrity:
+            context["integrity"] = integrity
+            crossorigin = settings.COMPRESS_SRI_CROSSORIGIN
+            if crossorigin:
+                context["crossorigin"] = crossorigin
+        return self.render_output(mode, context)
 
     def output_inline(self, mode, content, forced=False, basename=None):
         """
@@ -435,3 +450,18 @@ class Compressor:
         )
         template_name = self.get_template_name(mode)
         return render_to_string(template_name, context=final_context)
+
+    def get_integrity(self, content):
+        """
+        Returns the Subresource Integrity (SRI) string for the given content.
+        """
+        hashes = settings.COMPRESS_SRI_HASHES
+        if not hashes:
+            return ""
+        content_bytes = content.encode(self.charset)
+        integrity_parts = []
+        for algo in hashes:
+            digest = hashlib.new(algo, content_bytes).digest()
+            encoded = base64.b64encode(digest).decode("ascii")
+            integrity_parts.append("%s-%s" % (algo, encoded))
+        return " ".join(integrity_parts)
