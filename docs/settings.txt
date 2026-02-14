@@ -608,7 +608,7 @@ Offline settings
 
 .. attribute:: COMPRESS_OFFLINE_MANIFEST_STORAGE_ALIAS
 
-    :Default: ``'compressor-offine'``
+    :Default: ``'compressor-offline'``
 
     The alias into Django's ``STORAGES`` setting that will be used to save
     compressed files.
