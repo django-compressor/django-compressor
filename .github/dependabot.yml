@@ -8,8 +8,12 @@ updates:
             - "*"  # Group all PyPI updates into a single larger pull request
   schedule:
     interval: weekly
+  cooldown:
+    default-days: 7
   open-pull-requests-limit: 99
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
     interval: weekly
+  cooldown:
+    default-days: 7
