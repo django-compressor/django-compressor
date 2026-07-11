@@ -14,20 +14,6 @@ jobs:
       matrix:
         versions:
           - python: "3.10"
-            toxenv: py310-4.2.X
-          - python: "3.11"
-            toxenv: py311-4.2.X
-
-          - python: "3.10"
-            toxenv: py310-5.1.X
-          - python: "3.11"
-            toxenv: py311-5.1.X
-          - python: "3.12"
-            toxenv: py312-5.1.X
-          - python: "3.13"
-            toxenv: py313-5.1.X
-
-          - python: "3.10"
             toxenv: py310-5.2.X
           - python: "3.11"
             toxenv: py311-5.2.X
