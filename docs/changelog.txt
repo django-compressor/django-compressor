@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+- Add support for Django 6.1.
+- Drop support for Django versions before 5.2.
+
 v4.6 (2025-11-10)
 -----------------
 
