@@ -97,8 +97,6 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
     File system storage that stores brotli files in addition to the usual files.
     """
 
-    chunk_size = 1024
-
     def save(self, filename, content):
         filename = super().save(filename, content)
         orig_path = self.path(filename)
@@ -106,14 +104,9 @@ class BrotliCompressorFileStorage(CompressorFileStorage):
 
         import brotli
 
-        br_compressor = brotli.Compressor()
         with open(orig_path, "rb") as f_in, open(compressed_path, "wb") as f_out:
-            for f_in_data in iter(lambda: f_in.read(self.chunk_size), b""):
-                compressed_data = br_compressor.process(f_in_data)
-                if not compressed_data:
-                    compressed_data = br_compressor.flush()
-                f_out.write(compressed_data)
-            f_out.write(br_compressor.finish())
+            f_out.write(brotli.compress(f_in.read()))
+
         # Ensure the file timestamps match.
         # os.stat() returns nanosecond resolution on Linux, but os.utime()
         # only sets microsecond resolution.  Set times on both files to
