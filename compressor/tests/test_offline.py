@@ -16,7 +16,7 @@ from django.urls import get_script_prefix, set_script_prefix
 from compressor.cache import flush_offline_manifest, get_offline_manifest
 from compressor.exceptions import OfflineGenerationError
 from compressor.management.commands.compress import Command as CompressCommand
-from compressor.storage import default_offline_manifest_storage
+from compressor.storage import default_offline_manifest_storage, default_storage
 from compressor.utils import get_mod_func
 
 
@@ -440,6 +440,24 @@ class OfflineCompressConditionTestCase(OfflineTestCaseMixin, TestCase):
             "condition": "red",
         }
     }
+
+
+class OfflineCompressElifTestCase(OfflineTestCaseMixin, TestCase):
+    engines = ("jinja2",)
+    templates_dir = "test_elif"
+    expected_hash = "a3275743dc69"
+    additional_test_settings = {
+        "COMPRESS_OFFLINE_CONTEXT": {
+            "condition": False,
+            "other_condition": False,
+        }
+    }
+
+    def test_generated_javascript(self):
+        self._test_offline(engine="jinja2")
+        filename = "CACHE/js/output.%s.js" % self.expected_hash
+        with default_storage.open(filename) as output:
+            self.assertEqual(output.read(), b'alert("red");;')
 
 
 class OfflineCompressTemplateTagTestCase(OfflineTestCaseMixin, TestCase):
