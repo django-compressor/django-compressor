@@ -65,36 +65,20 @@ Limitations
 
 Jinja2 templates location
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-IMPORTANT: For Compressor to discover the templates for offline compression,
-there must be a template loader that implements the ``get_template_sources``
-method, and is in the ``TEMPLATE_LOADERS`` setting.
+For offline compression with ``--engine jinja2``,
+``COMPRESS_JINJA2_GET_ENVIRONMENT`` must return the Jinja2 environment used to
+render your templates. Its loader must support ``list_templates()`` and
+``get_source()`` so Compressor can discover and read the templates. For example,
+when configuring Jinja2 through Django's
+:attr:`TEMPLATES <django.conf.settings.TEMPLATES>` setting, provide
+a Jinja2 environment with a loader for the template directories you want to
+process. The default Jinja2 environment returned by Compressor is the one
+configured for Django's ``jinja2`` template backend.
 
-If you're using Jinja2, you're likely to have a Jinja2 template loader in the
-``TEMPLATE_LOADERS`` setting, otherwise Django won't know how to load Jinja2
-templates.
-
-By default, if you don't override the ``TEMPLATE_LOADERS`` setting,
-it will include the app directories loader that searches for templates under
-the ``templates`` directory in each app. If the app directories loader is in use
-and your Jinja2 templates are in the ``<app>/templates`` directories,
-Compressor will be able to find the Jinja2 templates.
-
-However, if you have Jinja2 templates in other location(s), you could include
-the filesystem loader (``django.template.loaders.filesystem.Loader``) in the
-``TEMPLATE_LOADERS`` setting and specify the custom location in the
-``TEMPLATE_DIRS`` setting.
-
-Using your custom loader
-^^^^^^^^^^^^^^^^^^^^^^^^
-You should configure ``TEMPLATE_LOADERS`` as such::
-
-    TEMPLATE_LOADERS = (
-        'your_app.Loader',
-        ... other loaders (optional) ...
-    )
-
-You could implement the `get_template_sources` method in your loader or make
-use of the Django's builtin loaders to report the Jinja2 template location(s).
+If you use a custom Jinja2 environment, set
+``COMPRESS_JINJA2_GET_ENVIRONMENT`` to a callable that returns that environment.
+The environment's loader determines which templates are discovered; Django's
+``TEMPLATE_LOADERS`` setting does not configure Jinja2 template discovery.
 
 
 
