@@ -1,0 +1,10 @@
+{% spaceless %}
+{% if condition %}
+    first branch
+{% elif other_condition %}
+    second branch
+{% elif True %}
+    {% compress js %}
+        <script type="text/javascript">alert("red");</script>
+    {% endcompress %}
+{% endif %}{% endspaceless %}
