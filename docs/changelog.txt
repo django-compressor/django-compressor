@@ -136,6 +136,10 @@ v3.0 (2021-12-12)
 - Fix various deprecation warnings
 - Add ability to pass a logger to various classes & methods
 - Removed deprecated ``COMPRESS_JS_FILTERS`` and ``COMPRESS_CSS_FILTERS`` settings
+- ``COMPRESS_FILTERS`` now replaces the entire default mapping instead of
+  combining custom entries with the defaults. When overriding it, include both
+  ``css`` and ``js`` if your templates compress both resource kinds. Use an empty
+  list to disable filters for a resource kind.
 - Fix offline compression race condition, which could result in incomplete manifest
 
 v2.4.1 (2021-04-17)
