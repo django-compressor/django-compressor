@@ -170,8 +170,9 @@ To use offline compression, enable the :attr:`django.conf.settings.COMPRESS_OFFL
 setting and then run the ``compress`` management command to compress your assets
 and update the offline cache.
 
-The command parses all templates that can be found with the template
-loader (as specified in the TEMPLATE_LOADERS_ setting) and looks for
+For Django templates, the command parses templates found by the configured
+loaders (configured through Django's
+:attr:`TEMPLATES <django.conf.settings.TEMPLATES>` setting) and looks for
 ``{% compress %}`` blocks. It then will use the context as defined in
 :attr:`django.conf.settings.COMPRESS_OFFLINE_CONTEXT` to render its
 content. So if you use any variables inside the ``{% compress %}`` blocks,
@@ -199,8 +200,6 @@ The result of running the ``compress`` management command will be cached
 in a file called ``manifest.json`` using the :attr:`configured storage
 <django.conf.settings.COMPRESS_STORAGE>` to be able to be transferred from your development
 computer to the server easily.
-
-.. _TEMPLATE_LOADERS: http://docs.djangoproject.com/en/stable/ref/settings/#template-loaders
 
 .. _signals:
 
