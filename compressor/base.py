@@ -1,5 +1,4 @@
 import os
-import codecs
 import base64
 import hashlib
 from importlib import import_module
@@ -206,7 +205,7 @@ class Compressor:
         if charset == "utf-8":
             # Removes BOM
             charset = "utf-8-sig"
-        with codecs.open(filename, "r", charset) as fd:
+        with open(filename, "r", encoding=charset) as fd:
             try:
                 return fd.read()
             except IOError as e:
