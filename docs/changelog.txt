@@ -1,11 +1,18 @@
 Changelog
 =========
 
-Unreleased
-----------
+v4.7 (2025-11-12)
+-----------------
 
+`Full list of changes from v4.6 <https://github.com/django-compressor/django-compressor/compare/4.6...4.7>`_
+
+- Drop Python 3.10 (EOL), Add Python 3.15
 - Add support for Django 6.1.
 - Drop support for Django versions before 5.2.
+- Replace deprecated codecs.open with builtin open
+- Discover compress blocks inside Jinja2 elif branches
+- Update BrotliCompressorFileStorage to compress each file in one go
+- Add Subresource Integrity (SRI) support for compressed assets
 
 v4.6 (2025-11-10)
 -----------------
