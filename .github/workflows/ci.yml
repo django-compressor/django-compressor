@@ -13,8 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         versions:
-          - python: "3.10"
-            toxenv: py310-5.2.X
           - python: "3.11"
             toxenv: py311-5.2.X
           - python: "3.12"
@@ -37,6 +35,8 @@ jobs:
             toxenv: py313-6.1.X
           - python: "3.14"
             toxenv: py314-6.1.X
+          - python: "3.15"
+            toxenv: py315-6.1.X
 
     runs-on: ubuntu-latest
     steps:
