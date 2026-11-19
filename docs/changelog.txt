@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v4.7 (2025-11-12)
+v4.7 (2026-11-12)
 -----------------
 
 `Full list of changes from v4.6 <https://github.com/django-compressor/django-compressor/compare/4.6...4.7>`_
