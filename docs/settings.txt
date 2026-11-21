@@ -102,6 +102,24 @@ Backend settings
     The value is a list of filters to apply in the given order
     for that resource.
 
+    Setting ``COMPRESS_FILTERS`` replaces the entire default mapping; it does
+    not merge your entries with the defaults. Include a key for each resource
+    kind you compress, even if you only want to customize the filters for one
+    kind. For example, to disable CSS minification while keeping URL rewriting
+    and the default JavaScript minifier::
+
+        COMPRESS_FILTERS = {
+            "css": ["compressor.filters.css_default.CssAbsoluteFilter"],
+            "js": ["compressor.filters.jsmin.rJSMinFilter"],
+        }
+
+    To disable all filters for a resource kind, set its value to an empty list
+    rather than omitting the key.
+
+    .. versionchanged:: 3.0
+
+        Custom mappings are no longer combined with the default filters.
+
     This library currently includes filters for CSS and Javascript.
 
     - CSS Filters
