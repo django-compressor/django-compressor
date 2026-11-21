@@ -479,8 +479,19 @@ Caching settings
 
     An iterable of precompiler mimetypes as defined in :attr:`~django.conf.settings.COMPRESS_PRECOMPILERS`
     for which the compiler output can be cached based solely on the contents
-    of the input file. This lets Django Compressor avoid recompiling unchanged
-    files. Caching is appropriate for compilers such as CoffeeScript where files
+    of the input file. This setting provides caching for command-line
+    precompilers. Class-based precompilers are invoked directly: adding their
+    mimetype here does not automatically cache their output. They are
+    responsible for their own caching.
+
+    This is separate from caching the rendered ``{% compress %}`` output.
+    When :attr:`~django.conf.settings.COMPRESS_ENABLED` is ``False``, matching
+    files are still precompiled, but the rendered-output cache is not used.
+    A class-based precompiler without its own cache can therefore run again
+    on each request.
+
+    Command-line precompilers can therefore avoid recompiling unchanged files.
+    Caching is appropriate for compilers such as CoffeeScript where files
     are compiled one-to-one, but not for compilers such as SASS that have an
     ``import`` mechanism for including one file from another. If caching is enabled
     for such a compiler, Django Compressor will not know to recompile files when a file
