@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 
 from compressor.conf import settings
@@ -183,3 +183,63 @@ class TestJinja2CompressorExtension(TestCase):
         out = '<link rel="stylesheet" href="/static/CACHE/css/output.e3b0c44298fc.css" type="text/css">'
         context = {"STATIC_URL": settings.COMPRESS_URL}
         self.assertEqual(out, template.render(context))
+
+
+@override_settings(COMPRESS_ENABLED=True, COMPRESS_DEBUG_TOGGLE="nocompress")
+class TestJinja2DebugToggle(TestCase):
+    def setUp(self):
+        from jinja2 import Environment
+
+        from compressor.contrib.jinja2ext import CompressorExtension
+
+        self.env = Environment(extensions=[CompressorExtension])
+        self.context = {"STATIC_URL": settings.COMPRESS_URL}
+        self.tag_body = (
+            '<script src="{{ STATIC_URL }}js/one.js"></script>\n'
+            '<script>obj.value = "value";</script>'
+        )
+        self.original_content = self.tag_body.replace("{{ STATIC_URL }}", "/static/")
+        self.template_string = "{% compress js %}" + self.tag_body + "{% endcompress %}"
+        self.template = self.env.from_string(self.template_string)
+        self.compressed_content = (
+            '<script src="/static/CACHE/js/output.8a0fed36c317.js"></script>'
+        )
+
+    def test_debug_toggle(self):
+        # Populate the cache before bypassing it for a debug request.
+        self.assertEqual(self.compressed_content, self.template.render(self.context))
+        request = RequestFactory().get("/", {"unrelated": "true"})
+        context = dict(self.context, request=request)
+        self.assertEqual(self.compressed_content, self.template.render(context))
+
+        for value in ("", "false"):
+            with self.subTest(value=value):
+                context["request"] = RequestFactory().get("/", {"nocompress": value})
+                self.assertEqual(self.original_content, self.template.render(context))
+
+        self.assertEqual(self.compressed_content, self.template.render(self.context))
+
+    @override_settings(COMPRESS_DEBUG_TOGGLE=None)
+    def test_debug_toggle_disabled(self):
+        request = RequestFactory().get("/", {"nocompress": "true"})
+        context = dict(self.context, request=request)
+        self.assertEqual(self.compressed_content, self.template.render(context))
+
+    @override_settings(COMPRESS_OFFLINE=True)
+    def test_debug_toggle_bypasses_offline_manifest(self):
+        request = RequestFactory().get("/", {"nocompress": "true"})
+        context = dict(self.context, request=request)
+        self.assertEqual(self.original_content, self.template.render(context))
+
+    @override_settings(COMPRESS_OFFLINE=True)
+    def test_offline_generation_ignores_debug_toggle(self):
+        from compressor.offline.jinja2 import Jinja2Parser
+
+        parser = Jinja2Parser("utf-8", self.env)
+        template = self.env.parse(self.template_string)
+        node = next(parser.walk_nodes(template))
+        request = RequestFactory().get("/", {"nocompress": "true"})
+        context = dict(self.context, request=request)
+        self.assertEqual(
+            self.compressed_content, parser.render_node(template, context, node)
+        )

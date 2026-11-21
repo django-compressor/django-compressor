@@ -504,8 +504,10 @@ Caching settings
 
     .. note::
 
-        This only works for pages that are rendered using the RequestContext_
-        and the ``django.core.context_processors.request`` context processor.
+        The template context must contain the request as ``request``. For
+        Django templates, use RequestContext_ and the
+        ``django.template.context_processors.request`` context processor.
+        For Jinja2 templates, pass ``request`` to ``Template.render()``.
 
     .. _RequestContext: http://docs.djangoproject.com/en/dev/ref/templates/api/#django.template.RequestContext
 
