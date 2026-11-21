@@ -8,7 +8,14 @@ from appconf import AppConf
 
 class CompressorConf(AppConf):
     # Main switch
-    ENABLED = not settings.DEBUG
+    ENABLED = getattr(settings, 'DEBUG', False)
+
+    @property
+    def ENABLED(self):
+        try:
+            return not settings.DEBUG
+        except ImproperlyConfigured:
+            return True
     # Allows changing verbosity from the settings.
     VERBOSE = False
     # GET variable that disables compressor e.g. "nocompress"
