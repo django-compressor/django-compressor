@@ -1,4 +1,4 @@
-from jinja2 import nodes
+from jinja2 import nodes, pass_context
 from jinja2.ext import Extension
 from jinja2.exceptions import TemplateSyntaxError
 
@@ -79,7 +79,10 @@ class CompressorExtension(compress.CompressorMixin, Extension):
     def _compress_forced(self, kind, mode, name, caller):
         return self._compress(kind, mode, name, caller, True)
 
-    def _compress_normal(self, kind, mode, name, caller):
+    @pass_context
+    def _compress_normal(self, context, kind, mode, name, caller):
+        if self.debug_mode(context):
+            return caller()
         return self._compress(kind, mode, name, caller, False)
 
     def _compress(self, kind, mode, name, caller, forced):
