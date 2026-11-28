@@ -1,6 +1,7 @@
 import os
 import sys
-from unittest.mock import Mock
+from tempfile import TemporaryDirectory
+from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.template import Context, Template, TemplateSyntaxError
@@ -8,6 +9,7 @@ from django.test import override_settings, TestCase
 from sekizai.context import SekizaiContext
 
 from compressor.signals import post_compress
+from compressor.storage import CompressorFileStorage
 from compressor.tests.test_base import css_tag, test_dir
 
 
@@ -42,6 +44,19 @@ class TemplatetagTestCase(TestCase):
 {% endcompress %}"""
         out = css_tag("/static/CACHE/css/output.600674ea1d3d.css")
         self.assertEqual(out, render(template, self.context))
+
+    def test_cached_output_uses_current_output_dir(self):
+        template = """{% load compress %}{% compress js %}
+        <script>console.log("output dir regression");</script>
+        {% endcompress %}"""
+        with TemporaryDirectory() as root, patch(
+            "compressor.storage.default_storage",
+            CompressorFileStorage(location=root),
+        ):
+            with self.settings(COMPRESS_OUTPUT_DIR="old-output-dir"):
+                self.assertIn("/static/old-output-dir/js/", render(template))
+            with self.settings(COMPRESS_OUTPUT_DIR="new-output-dir"):
+                self.assertIn("/static/new-output-dir/js/", render(template))
 
     @override_settings(COMPRESS_SRI_HASHES=("sha256",))
     def test_css_tag_with_integrity(self):
