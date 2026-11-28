@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+- Include the output directory in the template tag cache key so changing
+  ``COMPRESS_OUTPUT_DIR`` does not keep serving URLs for the old directory.
+
 v4.7 (2026-11-12)
 -----------------
 
