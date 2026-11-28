@@ -75,10 +75,10 @@ def get_offline_manifest():
     global _offline_manifest
     if _offline_manifest is None:
         filename = settings.COMPRESS_OFFLINE_MANIFEST
-        if default_offline_manifest_storage.exists(filename):
+        try:
             with default_offline_manifest_storage.open(filename) as fp:
                 _offline_manifest = json.loads(fp.read().decode("utf8"))
-        else:
+        except FileNotFoundError:
             _offline_manifest = {}
     return _offline_manifest
 

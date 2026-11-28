@@ -23,7 +23,7 @@ from compressor.utils import get_mod_func
 import time
 import types
 
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 
 
 def offline_context_generator():
@@ -33,6 +33,17 @@ def offline_context_generator():
 
 def static_url_context_generator():
     yield {"STATIC_URL": settings.STATIC_URL}
+
+
+class OfflineManifestTestCase(SimpleTestCase):
+    @patch("compressor.cache._offline_manifest", None)
+    @patch("compressor.cache.default_offline_manifest_storage")
+    def test_load_manifest_when_storage_reports_file_missing(self, manifest_storage):
+        manifest_storage.exists.return_value = False
+        manifest_storage.open.return_value = io.BytesIO(b'{"key": "value"}')
+
+        self.assertEqual(get_offline_manifest(), {"key": "value"})
+        manifest_storage.open.assert_called_once_with(settings.COMPRESS_OFFLINE_MANIFEST)
 
 
 class LazyScriptNamePrefixedUrl(str):
