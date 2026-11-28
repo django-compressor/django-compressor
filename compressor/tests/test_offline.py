@@ -379,6 +379,17 @@ class OfflineCompressSkipDuplicatesTestCase(OfflineTestCaseMixin, TestCase):
         self.assertEqual(rendered_template, self._render_result(result * 2, ""))
 
 
+class OfflineCompressOutputModesTestCase(OfflineTestCaseMixin, TestCase):
+    templates_dir = "test_output_modes"
+
+    def _test_offline(self, engine, verbosity=0):
+        count, _ = CompressCommand().handle_inner(engines=[engine], verbosity=verbosity)
+        self.assertEqual(2, count)
+        rendered = self._render_template(engine)
+        self.assertEqual(1, rendered.count('<link rel="preload"'))
+        self.assertEqual(1, rendered.count('<script src='))
+
+
 class SuperMixin:
     # Block.super not supported for Jinja2 yet.
     engines = ("django",)
@@ -1008,7 +1019,7 @@ class OfflineCompressPerNodeLockingTestCase(TestCase):
                 with active_lock:
                     active[0] -= 1
 
-        return types.SimpleNamespace(render_nodelist=render_nodelist, process_template=process_template, process_node=process_node, render_node=render_node)
+        return types.SimpleNamespace(render_nodelist=render_nodelist, process_template=process_template, process_node=process_node, render_node=render_node, get_node_mode=lambda node: "file")
 
     def _call_compress_template(self, nodes, parser, offline_manifest, errors):
         from compressor.management.commands.compress import Command

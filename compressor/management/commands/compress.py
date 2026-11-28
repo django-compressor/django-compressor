@@ -130,8 +130,8 @@ class Command(BaseCommand):
         Searches templates containing 'compress' nodes and compresses them
         "offline" -- outside of the request/response cycle.
 
-        The result is cached with a cache-key derived from the content of the
-        compress nodes (not the content of the possibly linked files!).
+        The result is cached with a cache-key derived from the output mode and
+        the content of the compress nodes (not the linked files themselves).
         """
 
         if not self.get_loaders():
@@ -318,7 +318,7 @@ class Command(BaseCommand):
 
                 parser.process_node(template, context, node)
                 rendered = parser.render_nodelist(template, context, node)
-                key = get_offline_hexdigest(rendered)
+                key = get_offline_hexdigest(rendered, parser.get_node_mode(node))
 
                 # Atomically check if the key exists in offline manifest.
                 # If it doesn't, set a placeholder key (None). This is to prevent

@@ -105,6 +105,9 @@ class Jinja2Parser:
     def render_nodelist(self, template, context, node):
         return self._render_nodes(template, context, node.body)
 
+    def get_node_mode(self, node):
+        return node.call.args[1].value
+
     def render_node(self, template, context, node):
         return self._render_nodes(template, context, [node])
 

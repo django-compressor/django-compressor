@@ -123,6 +123,9 @@ class DjangoParser:
         context.template = template
         return node.nodelist.render(context)
 
+    def get_node_mode(self, node):
+        return node.mode
+
     def render_node(self, template, context, node):
         return node.render(context, forced=True)
 
