@@ -50,18 +50,19 @@ def get_mtime_cachekey(filename):
     return get_cachekey("mtime.%s" % get_hexdigest(filename))
 
 
-def get_offline_hexdigest(render_template_string):
-    return get_hexdigest(
-        # Make the hexdigest determination independent of STATIC_URL
-        render_template_string.replace(
-            # Cast ``settings.STATIC_URL`` to a string to allow it to be
-            # a string-alike object to e.g. add ``SCRIPT_NAME`` WSGI param
-            # as a *path prefix* to the output URL.
-            # See https://code.djangoproject.com/ticket/25598.
-            str(settings.STATIC_URL),
-            "",
-        )
+def get_offline_hexdigest(render_template_string, mode="file"):
+    # Make the hexdigest determination independent of STATIC_URL
+    content = render_template_string.replace(
+        # Cast ``settings.STATIC_URL`` to a string to allow it to be
+        # a string-alike object to e.g. add ``SCRIPT_NAME`` WSGI param
+        # as a *path prefix* to the output URL.
+        # See https://code.djangoproject.com/ticket/25598.
+        str(settings.STATIC_URL),
+        "",
     )
+    if mode != "file":
+        content = "%s\0%s" % (mode, content)
+    return get_hexdigest(content)
 
 
 def get_offline_cachekey(source):

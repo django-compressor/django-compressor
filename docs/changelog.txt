@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+- Distinguish output modes in the offline manifest so a preload block does not
+  replace a script block with the same contents. If you use inline or preload
+  blocks with offline compression, regenerate the manifest with
+  ``python manage.py compress`` when upgrading.
+
 v4.7 (2026-11-12)
 -----------------
 
